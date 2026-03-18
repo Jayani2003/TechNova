@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import HeroSection from './components/Herosection';
 import Footer from './components/Footer';
 import Why_us from './components/Why_us';
+import Home_reviews from './components/home_reviews';
 
 
 
@@ -17,6 +18,7 @@ export default function App() {
       <main className='p-8 text-center'>
         <h1 className="text-3xl font-bold text-slate-900">Welcome to Lanka Wheels</h1>
       </main>
+      <Home_reviews />
       <Footer />
     </div>
   );

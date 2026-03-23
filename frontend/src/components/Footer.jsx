@@ -23,14 +23,16 @@ const Footer = () => {
                 <div className="space-y-6">
                     <div className="flex flex-col">
                         <span className="text-3xl font-serif font-bold text-white tracking-wider uppercase">CEYLON</span>
-                        <span className="text-[#4ade80] font-medium italic text-lg leading-tight -mt-1">Best Tours</span>
+                        {/* Updated to #00b0a5 */}
+                        <span className="text-[#00b0a5] font-medium italic text-lg leading-tight -mt-1">Best Tours</span>
                     </div>
-                    <p className="text-sm leading-relaxed text-gray-500 italic border-l border-[#4ade80]/30 pl-4">
+                    {/* Border updated to brand teal opacity */}
+                    <p className="text-sm leading-relaxed text-gray-500 italic border-l border-[#00b0a5]/30 pl-4">
                         "Explore the paradise island with unmatched elegance. From luxury sedans to rugged SUVs, we move your dreams."
                     </p>
                     <div className="flex gap-4">
                         {[Facebook, Instagram, Twitter, Youtube].map((Icon, i) => (
-                            <a key={i} href="#" className="!text-gray-500 hover:!text-[#07913a] transition-colors duration-300">
+                            <a key={i} href="#" className="!text-gray-500 hover:!text-[#00b0a5] transition-colors duration-300">
                                 <Icon size={18} />
                             </a>
                         ))}
@@ -49,9 +51,10 @@ const Footer = () => {
                                     href="#"
                                     className="!text-white hover:!text-white visited:!text-white flex items-center group text-sm transition-colors duration-300"
                                 >
+                                    {/* Icon color updated */}
                                     <ChevronRight
                                         size={14}
-                                        className="mr-2 text-[#4ade80] opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all"
+                                        className="mr-2 text-[#00b0a5] opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all"
                                     />
                                     {item}
                                 </a>
@@ -67,7 +70,7 @@ const Footer = () => {
                         {['About Us', 'Contact Us', 'Privacy Policy', 'Terms of Service', 'FAQ'].map((item) => (
                             <li key={item}>
                                 <a href="#" className="!text-white hover:!text-white visited:!text-white flex items-center group text-sm transition-colors">
-                                    <ChevronRight size={14} className="mr-2 text-[#4ade80] opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all" />
+                                    <ChevronRight size={14} className="mr-2 text-[#00b0a5] opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all" />
                                     {item}
                                 </a>
                             </li>
@@ -80,18 +83,19 @@ const Footer = () => {
                     <h4 className="text-white font-semibold mb-6 text-sm uppercase tracking-widest">Get In Touch</h4>
                     <div className="space-y-4 text-sm">
                         <div className="flex items-start gap-3">
-                            <MapPin className="text-[#4ade80] shrink-0" size={18} />
+                            <MapPin className="text-[#00b0a5] shrink-0" size={18} />
                             <p className="text-white">No 45, Galle Road, Colombo 03, Sri Lanka</p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Phone className="text-[#4ade80] shrink-0" size={18} />
+                            <Phone className="text-[#00b0a5] shrink-0" size={18} />
                             <p className="text-white">+94 11 234 5678</p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Mail className="text-[#4ade80] shrink-0" size={18} />
+                            <Mail className="text-[#00b0a5] shrink-0" size={18} />
                             <p className="text-white">info@ceylonbesttours.lk</p>
                         </div>
-                        <div className="pt-4 flex items-center gap-2 text-[#4ade80]/80 font-semibold">
+                        {/* Bottom Shield updated */}
+                        <div className="pt-4 flex items-center gap-2 text-[#00b0a5]/80 font-semibold">
                             <ShieldCheck size={18} />
                             <span className="text-[10px] uppercase tracking-tighter text-gray-500">SLTDA Registered Agency</span>
                         </div>
@@ -105,7 +109,6 @@ const Footer = () => {
                     <p className="text-[10px] text-gray-600 uppercase tracking-widest">
                         © {currentYear} Ceylon Best Tours. Created by TechNova Team.
                     </p>
-                    
                 </div>
             </div>
         </footer>

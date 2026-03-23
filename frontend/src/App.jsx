@@ -3,18 +3,31 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { Routes, Route } from 'react-router-dom';
 
+import Login from "./components/pages/Shared/Login";
+import Register from "./components/pages/Shared/Register";
 
-import Home from "./components/pages/Home/Home";
-import About from "./components/pages/About/About";
-import Contact from "./components/pages/Contact/Contact";
-import Gallery from "./components/pages/Gallery/Gallery";
-import Reviews from "./components/pages/Reviews/Reviews";
-import VehicleCategory from "./components/pages/VehicleCategory/VehicleCategory";
+import Home from "./components/pages/User/Home/Home";
+import About from "./components/pages/User/About/About";
+import Contact from "./components/pages/User/Contact/Contact";
+import Gallery from "./components/pages/User/Gallery/Gallery";
+import Reviews from "./components/pages/User/Reviews/Reviews";
+import VehicleCategory from "./components/pages/User/VehicleCategory/VehicleCategory";
+import Customized from "./components/pages/User/TourBooking/Customized/Customized";
+import Package from "./components/pages/User/TourBooking/Package/Package";
+import PointToPoint from "./components/pages/User/TourBooking/PointToPoint/PointToPoint";
 
 
-import Customized from "./components/pages/TourBooking/Customized/Customized";
-import Package from "./components/pages/TourBooking/Package/Package";
-import PointToPoint from "./components/pages/TourBooking/PointToPoint/PointToPoint";
+import AddPointToPoint from "./components/pages/Admin/AddPointToPoint/AddPointToPoint";
+import ApproveBookings from "./components/pages/Admin/ApproveBookings/ApproveBookings";
+import ApproveReviews from "./components/pages/Admin/ApproveReviews/ApproveReviews";
+import Customers from "./components/pages/Admin/Customers/Customer";
+import Dashboard from "./components/pages/Admin/Dashboard/Dashboard";
+import FleetManagement from "./components/pages/Admin/FleetManagement/FleetManagement";
+import Messages from "./components/pages/Admin/Messages/Messages";
+import SeasonalPricing from "./components/pages/Admin/SeasonalPricing/SeasonalPricing";
+import TourPackages from "./components/pages/Admin/TourPackages/TourPackages";
+
+
 
 
 export default function App() {
@@ -26,6 +39,10 @@ export default function App() {
       <Navbar />
 
        <Routes>
+      <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
@@ -37,6 +54,18 @@ export default function App() {
         <Route path="/tour/customized" element={<Customized />} />
         <Route path="/tour/package" element={<Package />} />
         <Route path="/tour/point" element={<PointToPoint />} />
+
+
+        <Route path="/admin/dashboard" element={<Dashboard />} />
+        <Route path="/admin/add-point-to-point" element={<AddPointToPoint />} />
+        <Route path="/admin/approve-bookings" element={<ApproveBookings />} />
+        <Route path="/admin/approve-reviews" element={<ApproveReviews />} />
+        <Route path="/admin/customers" element={<Customers />} />
+        <Route path="/admin/fleet-management" element={<FleetManagement />} />
+        <Route path="/admin/messages" element={<Messages />} />
+        <Route path="/admin/seasonal-pricing" element={<SeasonalPricing />} />
+        <Route path="/admin/tour-packages" element={<TourPackages />} />
+        
       </Routes>
 
       <Footer />

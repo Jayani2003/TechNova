@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   // Navigation mapping for easier management
-  const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Vehicle Category', path: '/vehicles' },
-    { name: 'Reviews', path: '/reviews' },
-    { name: 'About Us', path: '/about' },
-    { name: 'Contact Us', path: '/contact' },
-    { name: 'Gallery', path: '/gallery' },
-  ];
+const navLinks = [
+  { name: 'Home', path: '/' },
+  { name: 'Vehicle Category', path: '/vehicle' }, // ✅ fixed
+  { name: 'Reviews', path: '/reviews' },
+  { name: 'About Us', path: '/about' },
+  { name: 'Contact Us', path: '/contact' },
+  { name: 'Gallery', path: '/gallery' },
+];
 
   return (
     <nav className="flex items-center justify-between px-10 py-5 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm w-full sticky top-0 z-[100]">
@@ -50,15 +50,15 @@ const Navbar = () => {
                           group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:scale-100 
                           transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-50">
             <div className="flex flex-col">
-              <Link to="/booking/point-to-point" className="px-5 py-3 text-base text-[#00b0a5] hover:bg-[#00b0a5]/10 transition-all duration-300 flex justify-between items-center group/item">
+              <Link to="/tour/point" className="px-5 py-3 text-base text-[#00b0a5] hover:bg-[#00b0a5]/10 transition-all duration-300 flex justify-between items-center group/item">
                 Point-to-Point
                 <span className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300">→</span>
               </Link>
-              <Link to="/booking/package-tours" className="px-5 py-3 text-base text-[#00b0a5] hover:bg-[#00b0a5]/10 transition-all duration-300 flex justify-between items-center group/item">
+              <Link to="/tour/package" className="px-5 py-3 text-base text-[#00b0a5] hover:bg-[#00b0a5]/10 transition-all duration-300 flex justify-between items-center group/item">
                 Package Tours
                 <span className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300">→</span>
               </Link>
-              <Link to="/booking/customized-tours" className="px-5 py-3 text-base text-[#00b0a5] hover:bg-[#00b0a5]/10 transition-all duration-300 flex justify-between items-center group/item">
+              <Link to="/tour/customized" className="px-5 py-3 text-base text-[#00b0a5] hover:bg-[#00b0a5]/10 transition-all duration-300 flex justify-between items-center group/item">
                 Customized Tours
                 <span className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300">→</span>
               </Link>

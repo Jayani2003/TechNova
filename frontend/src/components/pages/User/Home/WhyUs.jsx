@@ -18,7 +18,7 @@ export default function FeaturesSection() {
   const brandColor = "#00b0a5";
 
   return (
-    <section className="py-24 bg-white">
+    <section className="py-10 bg-white">
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Header */}

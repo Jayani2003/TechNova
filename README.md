@@ -1,102 +1,247 @@
+# Tourism Tour & Vehicle Booking System
 
-# Ceylon Best Tours – Tour Vehicle Booking Web Application
+## Project Information
+This project is developed as part of the ICT3183 – Group Project module at University of Ruhuna.
 
-## Repository Description
-
-**Real-world tour vehicle booking web application for a local client**
+- Degree: Bachelor of ICT  
+- Year: 3rd Year – 1st Semester  
+- Project Type: Real-World ICT Group Project  
 
 ---
 
 ## Client Information
-
-* **Business Name:** Ceylon Best Tours
-* **Contact Person:** Mr. Dilshan
-* **Business Type:** Local tourism & tour vehicle service
-
-The business provides **tour vehicles with drivers** for tourists visiting different destinations in Sri Lanka.
+- **Business Name:** Ceylon Best Tours  
+- **Contact Person:** Mr. Dilshan  
+- **Business Type:** Local tourism & tour vehicle service  
 
 ---
 
-## Project Team
+## Project Team – TechNova
 
-* **Group Name:** TechNova
-* **Team Size:** 4 Members
-* **Project Type:** University Real-World ICT Group Project
+| Name | Registration Number |
+|------|--------------------|
+| R.P.J.M. Ruvanpathirana | TG/2022/1351 |
+| G.R.K.M.T. Rathnayaka | TG/2022/1380 |
+| W.K.G. Rajapaksha | TG/2022/1382 |
+| W.M.A.K. Keshali | TG/2022/1419 |
 
 ---
 
 ## Project Overview
+This is a web-based tourism tour & vehicle booking system developed for Ceylon Best Tours.
 
-This project is a **web-based tour vehicle booking system** developed for *Ceylon Best Tours*.
-The system allows tourists to **plan and book trips easily**, while enabling the business owner to **manage bookings, packages, costs, and reports digitally**.
-
-The system supports:
-
-1. **Custom trip planning** (user-defined trips)
-2. **Pre-defined tour packages**
-
-Vehicles are provided **with drivers**, but the driver is **not a system user**.
-All costs and expenses are **calculated automatically during booking**.
-
----
-
-## User Roles
-
-The system has **two main user roles**:
-
-### Customer (Tourist)
-
-* Register & log in
-* Plan **custom trips** (number of days, destinations, adults, children)
-* Book **pre-defined tour packages**
-* View booking history
-* View total trip cost before confirmation
-
-### Admin
-
-* Log in securely
-* Manage customers
-* Create, update, and delete tour packages
-* Manage vehicles and pricing
-* View all bookings (custom & package)
-* View system-generated expenses and income
-* Generate reports (bookings, revenue, profit)
-
----
-
-## Expense Handling (Updated Design)
-
-* Expenses are **automatically generated at booking time**
-* No separate driver expense entry (fuel, parking, etc.)
-* Trip cost includes:
-
-  * vehicle cost
-  * driver service
-  * distance / duration factors
-* This simplifies the system and improves automation
+The system allows:
+- Tourists to plan and book trips  
+- Business owners to manage bookings, vehicles, pricing, and reports  
 
 ---
 
 ## Key Features
 
-* Role-based authentication (Admin & Customer)
-* Custom trip planner with automatic cost calculation
-* Tour package booking system
-* Vehicle-with-driver concept
-* Admin dashboard with reports
-* Responsive and user-friendly UI
-* Secure data handling
+### Customer (Tourist)
+- Register & login  
+- Plan custom trips (days, destinations, adults, children)  
+- Book pre-defined tour packages  
+- View booking history  
+- View total trip cost before confirmation  
+
+### Admin
+- Secure login  
+- Manage customers  
+- Create, update, delete tour packages  
+- Manage vehicles & pricing  
+- View all bookings  
+- View expenses & income  
+- Generate reports  
+
+---
+
+## Expense Handling
+Expenses are automatically calculated during booking.
+
+No manual driver expense entry required.
+
+**Cost Includes:**
+- Vehicle cost  
+- Driver service  
+- Distance / duration  
+
+---
+
+## Technologies Used
+
+- Frontend: React  
+- Backend: Node.js  
+- Database: MySQL  
+- API Testing: Postman  
+
+---
+
+## Installation & Setup Guide
+
+### Prerequisites
+- Node.js  
+- MySQL  
+- Git  
+
+---
+
+### Clone Repository
+```bash
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
+```
+
+---
+
+### Backend Setup
+```bash
+cd backend
+npm install
+```
+
+Create `.env` file:
+
+```env
+PORT=5000
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=tourism_db
+JWT_SECRET=your_secret
+```
+
+Run backend:
+
+```bash
+npm start
+```
+
+---
+
+### Database Setup
+
+```sql
+CREATE DATABASE tourism_db;
+```
+
+(Optional)
+
+```bash
+mysql -u root -p tourism_db < database.sql
+```
+
+---
+
+### Frontend Setup
+```bash
+cd frontend
+npm install
+npm start
+```
+
+---
+
+## Run System
+
+- Backend → http://localhost:5000  
+- Frontend → http://localhost:3000  
+
+---
+
+## Project Structure
+
+```
+tourism-booking-system/
+├── frontend/
+├── backend/
+├── database/
+└── README.md
+```
+
+---
+
+## API Documentation
+
+### Auth
+- POST `/api/auth/register`  
+- POST `/api/auth/login`  
+
+### Customer
+- GET `/api/customer/profile`  
+- GET `/api/customer/bookings`  
+
+### Packages
+- GET `/api/packages`  
+- POST `/api/packages`  
+- PUT `/api/packages/:id`  
+- DELETE `/api/packages/:id`  
+
+### Bookings
+- POST `/api/bookings/custom`  
+- POST `/api/bookings/package`  
+- GET `/api/bookings`  
+
+### Vehicles
+- GET `/api/vehicles`  
+- POST `/api/vehicles`  
+- PUT `/api/vehicles/:id`  
+- DELETE `/api/vehicles/:id`  
+
+---
+
+## Database Design
+
+Tables:
+- users  
+- packages  
+- vehicles  
+- bookings  
+- booking_details  
+
+---
+
+## System Architecture
+
+```
+React (Frontend)
+      ↓
+Node.js API
+      ↓
+MySQL Database
+```
+
+---
+
+## Cost Calculation
+
+Total Cost =  
+Vehicle Cost (distance × price_per_km) +  
+Driver Cost (daily rate × days)
+
+---
+
+## Security
+
+- JWT Authentication  
+- Password hashing  
+- Role-based access  
+
+---
+
+## Testing
+
+- Postman  
+- Manual testing  
 
 ---
 
 ## Academic Purpose
 
-This project is developed as part of a **Bachelor of ICT Degree** to:
-
-* work with a real client
-* analyze real-world requirements
-* design and develop a full-stack web application
-* demonstrate teamwork, version control, and project management skills
+- Work with real client  
+- Apply software engineering concepts  
+- Develop full-stack system  
+- Practice teamwork & GitHub  
 
 ---
 
@@ -106,3 +251,19 @@ We thank **Mr. Dilshan** of *Ceylon Best Tours* for providing real-world require
 
 ---
 
+## Future Improvements
+
+- Online payments  
+- Google Maps integration  
+- Mobile app  
+- Reviews & ratings  
+
+---
+
+## Version Control
+
+- GitHub repository used  
+- Branches:
+  - main  
+  - dev  
+  - feature branches  

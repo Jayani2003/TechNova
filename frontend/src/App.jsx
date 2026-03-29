@@ -11,7 +11,11 @@ import About from "./components/pages/User/About/About";
 import Contact from "./components/pages/User/Contact/Contact";
 import Gallery from "./components/pages/User/Gallery/Gallery";
 import Reviews from "./components/pages/User/Reviews/Reviews";
+
 import VehicleCategory from "./components/pages/User/VehicleCategory/VehicleCategory";
+
+import TourBooking from "./components/pages/User/TourBooking/Tours/TourBooking";
+
 import Customized from "./components/pages/User/TourBooking/Customized/Customized";
 import Package from "./components/pages/User/TourBooking/Package/Package";
 import PointToPoint from "./components/pages/User/TourBooking/PointToPoint/PointToPoint";
@@ -38,8 +42,8 @@ export default function App() {
     <div className="min-h-screen w-screen max-w-none bg-slate-50 ">
       <Navbar />
 
-       <Routes>
-      <Route path="/login" element={<Login />} />
+      <Routes>
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
 
@@ -48,12 +52,14 @@ export default function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/reviews" element={<Reviews />} />
-        <Route path="/vehicle" element={<VehicleCategory />} />
+        <Route path="/vehicle-category" element={<VehicleCategory />} />
+
+        <Route path="/tour-booking" element={<TourBooking />} />
 
         
-        <Route path="/tour/customized" element={<Customized />} />
-        <Route path="/tour/package" element={<Package />} />
-        <Route path="/tour/point" element={<PointToPoint />} />
+        <Route path="/tour-booking/package" element={<Package />} />
+        <Route path="/tour-booking/customized" element={<Customized />} />
+        <Route path="/tour-booking/point" element={<PointToPoint />} />
 
 
         <Route path="/admin/dashboard" element={<Dashboard />} />

@@ -10,6 +10,7 @@ const navLinks = [
   { name: 'About Us', path: '/about' },
   { name: 'Contact Us', path: '/contact' },
   { name: 'Gallery', path: '/gallery' },
+  { name: 'Tour Booking', path: '/tourbooking' },
 ];
 
   return (

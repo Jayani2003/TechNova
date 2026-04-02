@@ -3,34 +3,34 @@ import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   // Navigation mapping for easier management
-const navLinks = [
-  { name: 'Home', path: '/' },
-  { name: 'Vehicle Category', path: '/vehicle' }, // ✅ fixed
-  { name: 'Reviews', path: '/reviews' },
-  { name: 'About Us', path: '/about' },
-  { name: 'Contact Us', path: '/contact' },
-  { name: 'Gallery', path: '/gallery' },
-  { name: 'Tour Booking', path: '/tourbooking' },
-];
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'Vehicle Category', path: '/vehicle' }, // ✅ fixed
+    { name: 'Reviews', path: '/reviews' },
+    { name: 'About Us', path: '/about' },
+    { name: 'Contact Us', path: '/contact' },
+    { name: 'Gallery', path: '/gallery' },
+    // { name: 'Tour Booking', path: '/tourbooking' },
+  ];
 
   return (
     <nav className="flex items-center justify-between px-10 py-5 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm w-full sticky top-0 z-[100]">
-      
+
       {/* Logo Section */}
       <Link to="/" className="flex items-center group cursor-pointer">
-        <img 
-          src="/src/assets/logo4.png" 
-          alt="Lanka Wheels Logo" 
-          className="h-15 w-auto object-contain transition-transform duration-700 group-hover:scale-105" 
+        <img
+          src="/src/assets/logo4.png"
+          alt="Lanka Wheels Logo"
+          className="h-15 w-auto object-contain transition-transform duration-700 group-hover:scale-105"
         />
       </Link>
 
       {/* Navigation Links */}
       <div className="hidden lg:flex items-center gap-10">
         {navLinks.map((link) => (
-          <Link 
+          <Link
             key={link.name}
-            to={link.path} 
+            to={link.path}
             className="relative text-[#00b0a5] font-bold text-base tracking-wide group"
           >
             {link.name}
@@ -38,10 +38,12 @@ const navLinks = [
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#00b0a5] transition-all duration-300 group-hover:w-full"></span>
           </Link>
         ))}
-        
+
         {/* Dropdown Menu - Updated to #00b0a5 */}
         <div className="relative group flex items-center gap-1.5 text-[#00b0a5] cursor-pointer">
+          <Link to="/tour-booking">
           <span className="font-semibold text-base tracking-wide">Tour Booking</span>
+          </Link>
           <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-500 ease-in-out" />
           <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#00b0a5] transition-all duration-300 group-hover:w-full"></span>
 
@@ -76,7 +78,7 @@ const navLinks = [
         {/* Subtle Shine Effect */}
         <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]"></span>
       </Link>
-      
+
     </nav>
   );
 };

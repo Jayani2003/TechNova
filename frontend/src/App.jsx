@@ -11,7 +11,6 @@ import About from "./components/pages/User/About/About";
 import Contact from "./components/pages/User/Contact/Contact";
 import Gallery from "./components/pages/User/Gallery/Gallery";
 import Reviews from "./components/pages/User/Reviews/Reviews";
-
 import VehicleCategory from "./components/pages/User/VehicleCategory/VehicleCategory";
 
 import TourBooking from "./components/pages/User/TourBooking/Tours/TourBooking";
@@ -55,7 +54,6 @@ export default function App() {
         <Route path="/vehicle-category" element={<VehicleCategory />} />
 
         <Route path="/tour-booking" element={<TourBooking />} />
-
         
         <Route path="/tour-booking/package" element={<Package />} />
         <Route path="/tour-booking/customized" element={<Customized />} />

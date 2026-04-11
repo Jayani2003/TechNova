@@ -76,14 +76,6 @@ CREATE TABLE package (
     image_url   VARCHAR(255)
 );
 
-CREATE TABLE package_place (
-    id         INT AUTO_INCREMENT PRIMARY KEY,
-    package_id INT NOT NULL,
-    place_id   INT NOT NULL,
-    day_number INT NOT NULL,
-    FOREIGN KEY (package_id) REFERENCES package(package_id),
-    FOREIGN KEY (place_id)   REFERENCES place(place_id)
-);
 
 CREATE TABLE booking (
     booking_id     INT AUTO_INCREMENT PRIMARY KEY,
@@ -193,6 +185,17 @@ CREATE TABLE gallery (
     gallery_id  INT AUTO_INCREMENT PRIMARY KEY,
     image_url   VARCHAR(255) NOT NULL,
     description TEXT
+);
+
+CREATE TABLE contact_inquiry (
+    inquiry_id   INT AUTO_INCREMENT PRIMARY KEY,
+    sender_name  VARCHAR(100) NOT NULL,
+    sender_email VARCHAR(100) NOT NULL,
+    sender_phone VARCHAR(20),
+    subject      VARCHAR(100),
+    message      TEXT NOT NULL,
+    is_read      BOOLEAN DEFAULT FALSE,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE chat_topic (

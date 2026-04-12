@@ -1,5 +1,9 @@
+import PackageTour from './PackageTour';
+
 function Package() {
-	return <section>Package tour booking page</section>;
+	return (
+		<PackageTour />
+	)
 }
 
 export default Package;

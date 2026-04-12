@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import {
   MapPin,
   Phone,
@@ -9,119 +10,112 @@ import {
 } from "lucide-react";
 import { FaTripadvisor } from "react-icons/fa";
 
+const InfoItem = ({ href, target, icon, title, lines, delay }) => (
+  <motion.a
+    href={href}
+    target={target}
+    rel={target === "_blank" ? "noopener noreferrer" : undefined}
+    initial={{ opacity: 0, x: 20 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ duration: 0.4, delay }}
+    className="flex items-start gap-3 hover:bg-slate-50 p-2 rounded-xl transition-colors"
+  >
+    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#00b0a520" }}>
+      <span style={{ color: "#00b0a5" }}>{icon}</span>
+    </div>
+    <div>
+      <p className="font-bold text-slate-800 text-sm tracking-tight">{title}</p>
+      {lines.map((line, i) => (
+        <p key={i} className="text-sm text-slate-500 mt-0.5">{line}</p>
+      ))}
+    </div>
+  </motion.a>
+);
+
 const ContactInfo = () => (
   <div className="space-y-4">
     {/* ── Get In Touch Card ── */}
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
-      <h2 className="text-lg font-bold text-slate-800">Get in touch</h2>
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-2"
+    >
+      <div className="mb-4">
+        <span className="inline-block px-3 py-1 mb-2 text-xs font-semibold tracking-widest text-white uppercase rounded-full" style={{ backgroundColor: "#00b0a5" }}>
+          Contact
+        </span>
+        <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">Get in Touch</h2>
+      </div>
 
-      {/* Location */}
-      <a
+      <InfoItem
         href="https://share.google/xOzAOaynrrGNRAfcD"
         target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-start gap-3 hover:bg-slate-50 p-2 rounded-xl transition-colors"
-      >
-        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-          <MapPin className="w-5 h-5 text-blue-600" />
-        </div>
-        <div>
-          <p className="font-semibold text-slate-800 text-sm">Our location</p>
-          <p className="text-sm text-slate-500 mt-0.5">
-            No.214, Kirinda Hospital Road,
-            <br />
-            Kirinda, Tissamaharama, Sri Lanka.
-          </p>
-        </div>
-      </a>
-
-      {/* Phone */}
-      <a
-        href="tel:+94112345678"
-        className="flex items-start gap-3 hover:bg-slate-50 p-2 rounded-xl transition-colors"
-      >
-        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-          <Phone className="w-5 h-5 text-blue-600" />
-        </div>
-        <div>
-          <p className="font-semibold text-slate-800 text-sm">Phone</p>
-          <p className="text-sm text-slate-500 mt-0.5">+94 77 861 9582</p>
-        </div>
-      </a>
-
-      {/* WhatsApp */}
-      <a
+        icon={<MapPin className="w-5 h-5" />}
+        title="Our Location"
+        lines={["No.214, Kirinda Hospital Road,", "Kirinda, Tissamaharama, Sri Lanka."]}
+        delay={0.1}
+      />
+      <InfoItem
+        href="tel:+94778619582"
+        icon={<Phone className="w-5 h-5" />}
+        title="Phone"
+        lines={["+94 77 861 9582"]}
+        delay={0.2}
+      />
+      <InfoItem
         href="https://wa.me/94778619582?text=Hello%20Ceylon%20Best%20Tours%2C%20I%20would%20like%20to%20inquire%20about%20your%20services"
         target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-start gap-3 hover:bg-slate-50 p-2 rounded-xl transition-colors"
-      >
-        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-          <MessageCircle className="w-5 h-5 text-green-600" />
-        </div>
-        <div>
-          {/* <p className="text-sm text-slate-500 mt-2">
-            WhatsApp: +94 77 861 9582
-          </p> */}
-          <p className="font-semibold text-slate-800 text-sm">WhatsApp</p>
-          <p className="text-sm text-slate-500 mt-0.5">+94 77 861 9582</p>
-        </div>
-      </a>
-
-      {/* Email */}
-      <div className="flex items-start gap-3 p-2">
-        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-          <Mail className="w-5 h-5 text-blue-600" />
-        </div>
-        <div>
-          <p className="font-semibold text-slate-800 text-sm">Email</p>
-          <a
-            href="mailto:info@lankawheels.com"
-            className="text-sm text-slate-500 hover:text-blue-600 transition-colors block mt-0.5"
-          >
-            ceylonbesttours05@gmail.com
-          </a>
-          {/* <a
-            href="mailto:bookings@lankawheels.com"
-            className="text-sm text-slate-500 hover:text-blue-600 transition-colors block"
-          >
-            Bookings: bookings@lankawheels.com
-          </a> */}
-        </div>
-      </div>
-
-      {/* Business Hours */}
-      <div className="flex items-start gap-3 p-2">
-        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-          <Clock className="w-5 h-5 text-blue-600" />
-        </div>
-        <div>
-          <p className="font-semibold text-slate-800 text-sm">Business hours</p>
-          <p className="text-sm text-slate-500 mt-0.5">
-            24/7 Monday - Sunday
-          </p>
-        </div>
-      </div>
-    </div>
+        icon={<MessageCircle className="w-5 h-5" />}
+        title="WhatsApp"
+        lines={["+94 77 861 9582"]}
+        delay={0.3}
+      />
+      <InfoItem
+        href="mailto:ceylonbesttours05@gmail.com"
+        icon={<Mail className="w-5 h-5" />}
+        title="Email"
+        lines={["ceylonbesttours05@gmail.com"]}
+        delay={0.4}
+      />
+      <InfoItem
+        icon={<Clock className="w-5 h-5" />}
+        title="Business Hours"
+        lines={["24/7 Monday - Sunday"]}
+        delay={0.5}
+      />
+    </motion.div>
 
     {/* ── Emergency Assistance Card ── */}
-    <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6">
-      <h3 className="font-bold text-slate-800 mb-1">Emergency Assistance</h3>
-      <p className="text-sm text-slate-600 mb-3">
-        24/7 roadside assistance for all our customers.
-      </p>
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+      className="rounded-2xl border p-6"
+      style={{ backgroundColor: "#00b0a510", borderColor: "#00b0a530" }}
+    >
+      <h3 className="font-extrabold text-slate-800 tracking-tight mb-1">Emergency Assistance</h3>
+      <p className="text-sm text-slate-600 mb-3">24/7 roadside assistance for all our customers.</p>
       <a
-        href="tel:+94779998888"
-        className="flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 transition-colors"
+        href="tel:+94778619582"
+        className="flex items-center gap-2 font-semibold transition-colors"
+        style={{ color: "#00b0a5" }}
+        onMouseEnter={e => e.currentTarget.style.color = "#009a90"}
+        onMouseLeave={e => e.currentTarget.style.color = "#00b0a5"}
       >
         <Phone className="w-5 h-5" />
         +94 77 861 9582
       </a>
-    </div>
+    </motion.div>
 
     {/* ── Follow Us Card ── */}
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-      <h3 className="font-bold text-slate-800 mb-3">Follow us</h3>
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, delay: 0.3 }}
+      className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6"
+    >
+      <h3 className="font-extrabold text-slate-800 tracking-tight mb-4">Follow Us</h3>
       <div className="flex gap-3">
         <a
           href="https://www.facebook.com/ceylonbesttours"
@@ -141,17 +135,20 @@ const ContactInfo = () => (
         >
           <Instagram className="w-5 h-5" />
         </a>
-                <a
+        <a
           href="https://www.tripadvisor.com/Attraction_Review-g1102395-d16926335-Reviews-Ceylon_Best_Tours_Taxi_Service-Tissamaharama_Southern_Province.html"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Find us on TripAdvisor"
-          className="w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors"
+          className="w-10 h-10 text-white rounded-full flex items-center justify-center transition-colors"
+          style={{ backgroundColor: "#00b0a5" }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = "#009a90"}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = "#00b0a5"}
         >
-          <FaTripadvisor className="w-5 h-5" />
+          <FaTripadvisor size={20} />
         </a>
       </div>
-    </div>
+    </motion.div>
   </div>
 );
 

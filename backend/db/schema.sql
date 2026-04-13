@@ -76,6 +76,14 @@ CREATE TABLE package (
     image_url   VARCHAR(255)
 );
 
+CREATE TABLE package_place (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    package_id INT NOT NULL,
+    place_id   INT NOT NULL,
+    day_number INT NOT NULL,
+    FOREIGN KEY (package_id) REFERENCES package(package_id),
+    FOREIGN KEY (place_id)   REFERENCES place(place_id)
+);
 
 CREATE TABLE booking (
     booking_id     INT AUTO_INCREMENT PRIMARY KEY,

@@ -17,12 +17,11 @@ function Login() {
 		if (email === 'admin@ceylone.com') {
 			login({ role: 'admin', email, name: 'Admin User' });
 			navigate('/admin/admin-dashboard');
-		} else {
-			// Extract first name from email as a nice placeholder
-			const extractedName = email.split('@')[0].replace(/[^a-zA-Z]/g, '');
-			const firstName = extractedName ? extractedName.charAt(0).toUpperCase() + extractedName.slice(1) : 'Standard User';
-			login({ role: 'standard', email, name: firstName });
+		} else if (email === 'abcd@gmail.com' && password === '1234') {
+			login({ role: 'standard', email, name: 'User' });
 			navigate('/');
+		} else {
+			alert('Invalid email or password. Please try again.');
 		}
 	};
 

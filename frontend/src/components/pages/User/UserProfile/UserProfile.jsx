@@ -204,49 +204,254 @@ function UserProfile() {
     </motion.div>
   );
 
-  const PaymentsTab = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -15 }}
-      transition={{ duration: 0.3 }}
-      className="p-8 sm:p-10 h-full flex flex-col pt-16"
-    >
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Payment Methods</h2>
-        <p className="text-slate-500">Manage your saved cards and payment history.</p>
-      </div>
-      <div className="flex-1 flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
-         <div className="w-20 h-20 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-6">
-          <CardIcon size={40} />
-        </div>
-        <h3 className="text-xl font-semibold text-slate-800 mb-2">Secure Payments Area</h3>
-        <p className="text-slate-500 max-w-sm">Placeholder for payment methods and billing history integration.</p>
-      </div>
-    </motion.div>
-  );
+const PaymentsTab = () => {
+    const [savedCards, setSavedCards] = useState([
+      { id: 1, name: 'John Doe', last4: '4242', expiry: '12/25' },
+    ]);
+    const [isAddingCard, setIsAddingCard] = useState(false);
+    const [newCard, setNewCard] = useState({ name: '', number: '', expiry: '', cvv: '' });
 
-  const SecurityTab = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -15 }}
-      transition={{ duration: 0.3 }}
-      className="p-8 sm:p-10 h-full flex flex-col pt-16"
-    >
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Security & Privacy</h2>
-        <p className="text-slate-500">Update your password and secure your account.</p>
-      </div>
-      <div className="flex-1 flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
-        <div className="w-20 h-20 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-6">
-          <Lock size={40} />
+    const handleAddCard = (e) => {
+      e.preventDefault();
+      if (!newCard.number || newCard.number.length < 4) return;
+      
+      setSavedCards([...savedCards, {
+        id: Date.now(),
+        name: newCard.name,
+        last4: newCard.number.substring(newCard.number.length - 4),
+        expiry: newCard.expiry
+      }]);
+      setIsAddingCard(false);
+      setNewCard({ name: '', number: '', expiry: '', cvv: '' });
+    };
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -15 }}
+        transition={{ duration: 0.3 }}
+        className="p-8 sm:p-10 h-full flex flex-col"
+      >
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-1">Payment Methods</h2>
+            <p className="text-slate-500 text-sm">Manage your saved cards and payment history.</p>
+          </div>
+          {!isAddingCard && (
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsAddingCard(true)}
+              className="flex items-center gap-2 bg-[#00b0a5] hover:bg-[#009b91] text-white px-5 py-2.5 rounded-full font-semibold shadow-md shadow-[#00b0a5]/20 transition-all text-sm cursor-pointer"
+            >
+              + Add New Card
+            </motion.button>
+          )}
         </div>
-        <h3 className="text-xl font-semibold text-slate-800 mb-2">Change Password Setup</h3>
-        <p className="text-slate-500 max-w-sm">Placeholder for changing passwords and reviewing account login activity.</p>
-      </div>
-    </motion.div>
-  );
+
+        {isAddingCard ? (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8"
+          >
+            <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+              <CardIcon className="w-5 h-5 text-[#00b0a5]"/> Add Credit Card
+            </h3>
+            <form onSubmit={handleAddCard} className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Cardholder Name</label>
+                <input 
+                  type="text" required placeholder="E.g. John Doe"
+                  value={newCard.name} onChange={(e) => setNewCard({...newCard, name: e.target.value})}
+                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Card Number</label>
+                <input 
+                  type="text" required placeholder="0000 0000 0000 0000" maxLength="19"
+                  value={newCard.number} onChange={(e) => setNewCard({...newCard, number: e.target.value})}
+                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none tracking-widest font-mono"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Expiry Date</label>
+                  <input 
+                    type="text" required placeholder="MM/YY" maxLength="5"
+                    value={newCard.expiry} onChange={(e) => setNewCard({...newCard, expiry: e.target.value})}
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">CVV</label>
+                  <input 
+                    type="password" required placeholder="123" maxLength="4"
+                    value={newCard.cvv} onChange={(e) => setNewCard({...newCard, cvv: e.target.value})}
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none font-mono"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => setIsAddingCard(false)} className="flex-1 px-4 py-3 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
+                  Cancel
+                </button>
+                <button type="submit" className="flex-1 px-4 py-3 bg-[#00b0a5] text-white font-semibold rounded-xl hover:bg-[#009b91] shadow-md shadow-[#00b0a5]/20 transition-all cursor-pointer">
+                  Save Card
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        ) : (
+          <div className="space-y-4">
+            {savedCards.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
+                <div className="w-16 h-16 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-4">
+                  <CardIcon size={32} />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-1">No saved cards</h3>
+                <p className="text-sm text-slate-500">Add a credit or debit card to make future bookings faster.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {savedCards.map(card => (
+                  <motion.div 
+                    key={card.id}
+                    className="flex items-center justify-between p-5 rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-5">
+                      <div className="hidden sm:flex w-12 h-8 bg-slate-100 rounded border border-slate-200 items-center justify-center">
+                        <CardIcon className="w-5 h-5 text-slate-500" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-800 tracking-wide">
+                          •••• •••• •••• {card.last4}
+                        </p>
+                        <p className="text-sm text-slate-500 mt-0.5">
+                          {card.name} <span className="mx-2">•</span> Expires {card.expiry}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <button 
+                      onClick={() => setSavedCards(savedCards.filter(c => c.id !== card.id))}
+                      className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+                      title="Remove Card"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </motion.div>
+    );
+  };
+
+  const SecurityTab = () => {
+    const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
+    const [message, setMessage] = useState({ type: '', text: '' });
+
+    const handlePasswordChange = (e) => {
+      e.preventDefault();
+      if (passwords.new !== passwords.confirm) {
+        setMessage({ type: 'error', text: 'New passwords do not match.' });
+        return;
+      }
+      if (passwords.new.length < 5) {
+        setMessage({ type: 'error', text: 'Password must be at least 6 characters long.' });
+        return;
+      }
+      // Simulate backend update
+      setMessage({ type: 'success', text: 'Password successfully updated!' });
+      setPasswords({ current: '', new: '', confirm: '' });
+      
+      // Clear success message after 4 seconds
+      setTimeout(() => setMessage({ type: '', text: '' }), 4000);
+    };
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -15 }}
+        transition={{ duration: 0.3 }}
+        className="p-8 sm:p-10 h-full flex flex-col"
+      >
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Security & Privacy</h2>
+          <p className="text-slate-500">Update your password to keep your account secure.</p>
+        </div>
+        
+        <div className="flex-1 max-w-2xl">
+          <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8">
+            <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+              <Lock className="w-5 h-5 text-[#00b0a5]"/> Change Password
+            </h3>
+            
+            {message.text && (
+              <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 border ${
+                message.type === 'error' ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'
+              }`}>
+                {message.type === 'success' ? (
+                  <Check className="w-5 h-5 text-green-500 mt-0.5 min-w-fit" />
+                ) : (
+                  <svg className="w-5 h-5 text-red-500 mt-0.5 min-w-fit" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+                <p className={`text-sm font-medium ${message.type === 'error' ? 'text-red-800' : 'text-green-800'}`}>
+                  {message.text}
+                </p>
+              </div>
+            )}
+
+            <form onSubmit={handlePasswordChange} className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Current Password</label>
+                <input 
+                  type="password" required placeholder="••••••••"
+                  value={passwords.current} onChange={(e) => setPasswords({...passwords, current: e.target.value})}
+                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none transition-all"
+                />
+              </div>
+              
+              <div className="pt-2">
+                <label className="block text-sm font-semibold text-slate-700 mb-1">New Password</label>
+                <input 
+                  type="password" required placeholder="••••••••"
+                  value={passwords.new} onChange={(e) => setPasswords({...passwords, new: e.target.value})}
+                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none transition-all"
+                />
+                <p className="text-xs text-slate-500 mt-2">Make sure it's at least 6 characters long.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Confirm New Password</label>
+                <input 
+                  type="password" required placeholder="••••••••"
+                  value={passwords.confirm} onChange={(e) => setPasswords({...passwords, confirm: e.target.value})}
+                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none transition-all"
+                />
+              </div>
+              
+              <div className="pt-4">
+                <button type="submit" className="px-6 py-3 bg-[#00b0a5] text-white font-semibold rounded-xl hover:bg-[#009b91] shadow-md shadow-[#00b0a5]/20 transition-all cursor-pointer">
+                  Update Password
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
 
 
   return (

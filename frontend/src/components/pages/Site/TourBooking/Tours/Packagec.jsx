@@ -9,7 +9,7 @@ const Packagec = () => {
         <img src="https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&fit=crop&q=80&w=800" alt="Tour Packages" className="w-full h-80 object-cover" />
       </div>
       <div className="space-y-6">
-        <h2 className="text-4xl font-bold text-[#005f73]">Curated Packages</h2>
+        <h2 className="text-4xl font-bold text-[#005f73]">Tour Packages</h2>
         <p className="text-gray-600 text-lg">
           Choose from our expertly crafted itineraries. From the Hill Country mist to the 
           Golden Beaches, our fixed packages offer the best value with a dedicated driver.

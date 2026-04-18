@@ -8,7 +8,18 @@ import {
   Instagram,
   MessageCircle,
 } from "lucide-react";
-import { FaTripadvisor } from "react-icons/fa";
+
+const TripadvisorIcon = ({ size = 20 }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    aria-hidden="true"
+    fill="currentColor"
+  >
+    <path d="M12 4.5c-1.35 0-2.6.36-3.66.98L6.56 4.2 5.3 5.44l1.48 1.48A6.98 6.98 0 0 0 4 12c0 3.87 3.13 7 7 7s7-3.13 7-7c0-1.67-.58-3.2-1.54-4.4l1.44-1.44-1.26-1.25-1.76 1.76A6.97 6.97 0 0 0 12 4.5Zm-3.5 5.1a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8Zm7 0a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8Zm-3.5-.9c.83 0 1.6.23 2.26.63l.88-.88.9.9-.87.87c.4.67.63 1.44.63 2.27 0 2.48-2.02 4.5-4.5 4.5s-4.5-2.02-4.5-4.5 2.02-4.5 4.5-4.5Zm0 1.8a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 0 0 0-5.4Z" />
+  </svg>
+);
 
 const InfoItem = ({ href, target, icon, title, lines, delay }) => (
   <motion.a
@@ -145,7 +156,7 @@ const ContactInfo = () => (
           onMouseEnter={e => e.currentTarget.style.backgroundColor = "#009a90"}
           onMouseLeave={e => e.currentTarget.style.backgroundColor = "#00b0a5"}
         >
-          <FaTripadvisor size={20} />
+          <TripadvisorIcon size={20} />
         </a>
       </div>
     </motion.div>

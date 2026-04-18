@@ -63,4 +63,3 @@ const PackageTour = () => {
 };
 
 export default PackageTour;
-

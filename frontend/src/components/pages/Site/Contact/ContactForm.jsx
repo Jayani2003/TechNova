@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import { Send, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { AuthContext } from "../../../../context/AuthContext";
+import { useMessages } from "../../../../context/MessagesContext.jsx";
 import { useNavigate } from "react-router";
 
 // ─── Success Screen ───────────────────────────────────────────────────────────
@@ -35,7 +36,7 @@ const SuccessScreen = ({ user, navigate }) => (
       </button>
       {user && (
         <button
-          onClick={() => navigate("/user/dashboard")}
+          onClick={() => navigate("/user/profile")}
           className="border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-colors"
         >
           View Inbox
@@ -48,6 +49,7 @@ const SuccessScreen = ({ user, navigate }) => (
 // ─── Contact Form ─────────────────────────────────────────────────────────────
 const ContactForm = () => {
   const { user } = useContext(AuthContext);
+  const { addMessage } = useMessages();
   const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
 
@@ -65,7 +67,14 @@ const ContactForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: wire up to backend or MessagesContext later
+    addMessage({
+      customerId: user?.email || `guest${Date.now()}`,
+      customerName: formData.name,
+      customerEmail: formData.email,
+      customerPhone: formData.phone,
+      subject: formData.subject,
+      message: formData.message,
+    });
     setSubmitted(true);
   };
 

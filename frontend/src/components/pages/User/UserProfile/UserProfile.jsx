@@ -1,13 +1,20 @@
 import React, { useContext, useState } from 'react';
 import { AuthContext } from '../../../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router';
 import { 
   Camera, Mail, User as UserIcon, Phone, MapPin, Globe, Hash, 
-  Edit3, Check, LayoutDashboard, CreditCard, Shield, CalendarDays, Lock, CreditCard as CardIcon
+  Edit3, Check, LayoutDashboard, CreditCard, Shield, CalendarDays, Lock, 
+  CreditCard as CardIcon, MessageCircle
 } from 'lucide-react';
+import MyMessageList from '../MyMessages/MyMessageList';
+import MyMessageThread from '../MyMessages/MyMessageThread';
+import MyMessageEmpty from '../MyMessages/MyMessageEmpty';
+import { useMessages } from '../../../../context/MessagesContext.jsx';
 
 function UserProfile() {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   
   // Tab State
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -56,6 +63,7 @@ function UserProfile() {
   const navTabs = [
     { id: 'dashboard', label: 'My Dashboard', icon: LayoutDashboard },
     { id: 'bookings', label: 'My Bookings', icon: CalendarDays },
+    { id: 'messages', label: 'My Messages', icon: MessageCircle },
     { id: 'payments', label: 'Payments', icon: CreditCard },
     { id: 'security', label: 'Security', icon: Shield },
   ];
@@ -203,6 +211,52 @@ function UserProfile() {
       </div>
     </motion.div>
   );
+
+// adding messages tab
+  const MessagesTab = () => {
+    const { messages, addReply } = useMessages();
+    const [selectedId, setSelectedId] = useState(null);
+ 
+    const userMessages = messages.filter((m) => m.customerId === user?.email);
+    const selectedMessage = userMessages.find((m) => m.id === selectedId) || null;
+ 
+    const handleSendFollowUp = (messageId, text) => {
+      addReply(messageId, {
+        from: 'customer',
+        fromName: user?.name || user?.email,
+        message: text,
+      });
+    };
+ 
+    return (
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }}
+        className="p-8 sm:p-10 h-full flex flex-col">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-slate-900 mb-1">My Messages</h2>
+          <p className="text-slate-500 text-sm">View your conversations with support.</p>
+        </div>
+ 
+        {userMessages.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
+            <MyMessageEmpty navigate={navigate} />
+          </div>
+        ) : (
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
+            <MyMessageList
+              messages={userMessages}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+            />
+            <MyMessageThread
+              message={selectedMessage}
+              onSendFollowUp={handleSendFollowUp}
+            />
+          </div>
+        )}
+      </motion.div>
+    );
+  };
 
 const PaymentsTab = () => {
     const [savedCards, setSavedCards] = useState([
@@ -492,6 +546,7 @@ const PaymentsTab = () => {
           <AnimatePresence mode="wait">
             {activeTab === 'dashboard' && <DashboardTab key="dashboard" />}
             {activeTab === 'bookings' && <BookingsTab key="bookings" />}
+            {activeTab === 'messages' && <MessagesTab key="messages" />}
             {activeTab === 'payments' && <PaymentsTab key="payments" />}
             {activeTab === 'security' && <SecurityTab key="security" />}
           </AnimatePresence>
@@ -502,4 +557,4 @@ const PaymentsTab = () => {
   );
 }
 
-export default UserProfile;
+export default UserProfile;

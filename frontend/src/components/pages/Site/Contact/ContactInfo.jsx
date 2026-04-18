@@ -149,7 +149,8 @@ const ContactInfo = () => (
           onMouseEnter={e => e.currentTarget.style.backgroundColor = "#009a90"}
           onMouseLeave={e => e.currentTarget.style.backgroundColor = "#00b0a5"}
         >
-          <TripadvisorIcon size={20} />
+          <FaTripadvisor size={20} />
+          
         </a>
       </div>
     </motion.div>

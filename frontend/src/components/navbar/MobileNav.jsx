@@ -11,14 +11,13 @@ const MobileNav = () => {
     <div className="lg:hidden">
 
       {/* Toggle */}
-      <button onClick={() => setOpen(!open)}>
+      <button onClick={() => { setOpen(!open); setActiveDropdown(null); } }>
         {open ? <X size={28} /> : <Menu size={28} />}
       </button>
 
       {/* Menu */}
-      <div className={`absolute top-16 left-0 w-full bg-white shadow-md transition-all duration-500 ${
-        open ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
-      }`}>
+      <div className={`absolute top-16 left-0 w-full bg-white shadow-md transition-all duration-500 ${open ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+        }`}>
 
         <div className="p-5 space-y-4">
 
@@ -35,8 +34,8 @@ const MobileNav = () => {
                 }
               >
                 <Link to={link.path} className="text-[#00b0a5] hover:text-[#188c85] font-semibold">
-  {link.name}
-</Link>
+                  {link.name}
+                </Link>
                 {link.children && <span>▼</span>}
               </div>
 

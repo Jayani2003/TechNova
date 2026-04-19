@@ -109,7 +109,7 @@ const BookingPassengersStep = ({ data, onChange }) => {
                       Baby Seat Required
                     </p>
                     <p className="text-xs text-slate-400">
-                      Tick if any child needs a baby/booster seat
+                      Tick if any child needs a baby seat
                     </p>
                   </div>
                 </label>

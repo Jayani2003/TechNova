@@ -63,7 +63,7 @@ const P2PReviewStep = ({ data }) => (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
       <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Contact</p>
       <ReviewRow icon={Phone} label="Name" value={data.customerName} />
-      <ReviewRow icon={Phone} label="Phone" value={data.customerPhone} />
+      <ReviewRow icon={Phone} label="Phone" value={data.customerPhone || "—"} />
       {data.notes && <ReviewRow icon={FileText} label="Additional Notes" value={data.notes} />}
     </div>
 

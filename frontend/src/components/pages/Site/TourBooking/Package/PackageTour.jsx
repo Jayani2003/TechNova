@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Hero from './Hero';
 import TourCard from './TourCard';
 
@@ -32,6 +32,11 @@ const tourData = [
 ];
 
 const PackageTour = () => {
+  const [expandedId, setExpandedId] = useState(null);
+
+  const handleToggle = (id) => {
+    setExpandedId(prev => prev === id ? null : id);
+  }; 
   return (
     <div className="bg-gray-50 min-h-screen">
       <Hero />
@@ -42,9 +47,14 @@ const PackageTour = () => {
           <div className="w-24 h-1 bg-[#ee9b00] mx-auto mt-4"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start"> {/* 👈 add items-start */}
           {tourData.map(tour => (
-            <TourCard key={tour.id} tour={tour} />
+            <TourCard
+              key={tour.id}
+              tour={tour}
+              isExpanded={expandedId === tour.id}
+              onToggle={() => handleToggle(tour.id)}
+            />
           ))}
         </div>
       </main>

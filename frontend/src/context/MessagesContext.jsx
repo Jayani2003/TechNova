@@ -1,18 +1,20 @@
-import { createContext, useContext, useState } from "react";
-
+import { createContext, useContext, useState, useEffect } from "react";
+ 
 const MessagesContext = createContext();
-
+ 
+const STORAGE_KEY = "lankawheels_messages";
+ 
 // Initial seed data so the admin panel isn't empty on first load
 const initialMessages = [
   {
     id: "msg001",
-    customerId: "user1",
+    customerId: "john@example.com",
     customerName: "John Smith",
     customerEmail: "john@example.com",
     customerPhone: "",
     subject: "Question about rental rates",
     message: "Hi, I would like to know the rental rates for a week-long trip around Sri Lanka.",
-    status: "replied",         // "new" | "read" | "replied"
+    status: "replied",
     readByAdmin: true,
     createdAt: "2026-03-05",
     replies: [
@@ -40,10 +42,35 @@ const initialMessages = [
     ],
   },
 ];
-
+ 
+// ── Load from localStorage or fall back to seed data ──────────────────────────
+const loadMessages = () => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch (e) {
+    console.error("Failed to load messages from localStorage:", e);
+  }
+  return initialMessages;
+};
+ 
+// ── Save to localStorage ───────────────────────────────────────────────────────
+const saveMessages = (messages) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  } catch (e) {
+    console.error("Failed to save messages to localStorage:", e);
+  }
+};
+ 
 export const MessagesProvider = ({ children }) => {
-  const [messages, setMessages] = useState(initialMessages);
-
+  const [messages, setMessages] = useState(loadMessages);
+ 
+  // ── Sync to localStorage whenever messages change ──
+  useEffect(() => {
+    saveMessages(messages);
+  }, [messages]);
+ 
   // ── Called from ContactForm when a customer submits a message ──
   const addMessage = ({ customerId, customerName, customerEmail, customerPhone, subject, message }) => {
     const newMessage = {
@@ -67,18 +94,17 @@ export const MessagesProvider = ({ children }) => {
         },
       ],
     };
-
     setMessages((prev) => [newMessage, ...prev]);
   };
-
-  // ── Called from AdminDashboard when admin sends a reply ──
+ 
+  // ── Called when admin or customer sends a reply ──
   const addReply = (messageId, { from, fromName, message }) => {
     setMessages((prev) =>
       prev.map((msg) =>
         msg.id === messageId
           ? {
               ...msg,
-              status: "replied",
+              status: from === "admin" ? "replied" : "new",
               replies: [
                 ...msg.replies,
                 {
@@ -94,7 +120,7 @@ export const MessagesProvider = ({ children }) => {
       )
     );
   };
-
+ 
   // ── Called from AdminDashboard to update message status ──
   const updateMessageStatus = (messageId, status) => {
     setMessages((prev) =>
@@ -103,20 +129,22 @@ export const MessagesProvider = ({ children }) => {
       )
     );
   };
-
+ 
   // ── Called from AdminDashboard to mark a message as read ──
   const markMessageAsReadByAdmin = (messageId) => {
     setMessages((prev) =>
       prev.map((msg) =>
-        msg.id === messageId ? { ...msg, readByAdmin: true, status: msg.status === "new" ? "read" : msg.status } : msg
+        msg.id === messageId
+          ? { ...msg, readByAdmin: true, status: msg.status === "new" ? "read" : msg.status }
+          : msg
       )
     );
   };
-
+ 
   // ── Returns count of unread messages for admin badge ──
   const getAdminNotificationCount = () =>
     messages.filter((msg) => !msg.readByAdmin).length;
-
+ 
   return (
     <MessagesContext.Provider
       value={{
@@ -132,7 +160,7 @@ export const MessagesProvider = ({ children }) => {
     </MessagesContext.Provider>
   );
 };
-
+ 
 export const useMessages = () => {
   const context = useContext(MessagesContext);
   if (!context) {
@@ -140,3 +168,4 @@ export const useMessages = () => {
   }
   return context;
 };
+ 

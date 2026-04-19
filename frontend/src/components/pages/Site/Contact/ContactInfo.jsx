@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import {
   MapPin,
@@ -8,7 +9,10 @@ import {
   Instagram,
   MessageCircle,
 } from "lucide-react";
-import { FaTripadvisor } from "react-icons/fa";
+
+
+
+import {FaTripadvisor} from "react-icons/fa" ;
 
 const InfoItem = ({ href, target, icon, title, lines, delay }) => (
   <motion.a
@@ -146,6 +150,7 @@ const ContactInfo = () => (
           onMouseLeave={e => e.currentTarget.style.backgroundColor = "#00b0a5"}
         >
           <FaTripadvisor size={20} />
+          
         </a>
       </div>
     </motion.div>
@@ -153,3 +158,4 @@ const ContactInfo = () => (
 );
 
 export default ContactInfo;
+

@@ -1,6 +1,5 @@
 import { Phone, FileText, ChevronDown } from "lucide-react";
-import { useState } from "react";
-
+ 
 const COUNTRY_CODES = [
   { code: "+94", country: "🇱🇰 LK" },
   { code: "+1", country: "🇺🇸 US" },
@@ -23,20 +22,34 @@ const COUNTRY_CODES = [
   { code: "+47", country: "🇳🇴 NO" },
   { code: "+41", country: "🇨🇭 CH" },
 ];
-
+ 
 const inputClass =
   "w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20";
-
+ 
 const BookingNotesStep = ({ data, onChange }) => {
-  const [countryCode, setCountryCode] = useState("+94");
-  const [phoneNumber, setPhoneNumber] = useState("");
-
-  const handlePhoneChange = (code, number) => {
-    setCountryCode(code);
-    setPhoneNumber(number);
-    onChange("customerPhone", `${code} ${number}`);
+  // Parse country code and number from data.customerPhone
+  const getCountryCode = () => {
+    if (!data.customerPhone) return "+94";
+    const parts = data.customerPhone.split(" ");
+    const found = COUNTRY_CODES.find((c) => c.code === parts[0]);
+    return found ? parts[0] : "+94";
   };
-
+ 
+  const getPhoneNumber = () => {
+    if (!data.customerPhone) return "";
+    const parts = data.customerPhone.split(" ");
+    const found = COUNTRY_CODES.find((c) => c.code === parts[0]);
+    return found ? parts.slice(1).join(" ") : data.customerPhone;
+  };
+ 
+  const handleCountryChange = (code) => {
+    onChange("customerPhone", `${code} ${getPhoneNumber()}`);
+  };
+ 
+  const handleNumberChange = (number) => {
+    onChange("customerPhone", `${getCountryCode()} ${number}`);
+  };
+ 
   return (
     <div className="space-y-6">
       {/* ── Contact Details ── */}
@@ -47,7 +60,7 @@ const BookingNotesStep = ({ data, onChange }) => {
         <p className="text-sm text-slate-500 mb-4">
           We'll use this to reach you about your booking.
         </p>
-
+ 
         <div className="space-y-4">
           {/* Full Name */}
           <div>
@@ -62,7 +75,7 @@ const BookingNotesStep = ({ data, onChange }) => {
               className={inputClass}
             />
           </div>
-
+ 
           {/* Phone with country code */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">
@@ -72,9 +85,9 @@ const BookingNotesStep = ({ data, onChange }) => {
               {/* Country code dropdown */}
               <div className="relative">
                 <select
-                  value={countryCode}
-                  onChange={(e) => handlePhoneChange(e.target.value, phoneNumber)}
-                  className="appearance-none pl-3 pr-8 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20 cursor-pointer min-w-[100px]"
+                  value={getCountryCode()}
+                  onChange={(e) => handleCountryChange(e.target.value)}
+                  className="appearance-none pl-3 pr-8 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20 cursor-pointer min-w-[110px]"
                 >
                   {COUNTRY_CODES.map((c) => (
                     <option key={c.code} value={c.code}>
@@ -84,12 +97,12 @@ const BookingNotesStep = ({ data, onChange }) => {
                 </select>
                 <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               </div>
-
+ 
               {/* Phone number */}
               <input
                 type="tel"
-                value={phoneNumber}
-                onChange={(e) => handlePhoneChange(countryCode, e.target.value)}
+                value={getPhoneNumber()}
+                onChange={(e) => handleNumberChange(e.target.value)}
                 placeholder="77 123 4567"
                 className={`${inputClass} flex-1`}
               />
@@ -100,7 +113,7 @@ const BookingNotesStep = ({ data, onChange }) => {
           </div>
         </div>
       </div>
-
+ 
       {/* ── Additional Notes ── */}
       <div>
         <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
@@ -142,5 +155,6 @@ const BookingNotesStep = ({ data, onChange }) => {
     </div>
   );
 };
-
+ 
 export default BookingNotesStep;
+ 

@@ -11,6 +11,8 @@ import MyMessageList from '../MyMessages/MyMessageList';
 import MyMessageThread from '../MyMessages/MyMessageThread';
 import MyMessageEmpty from '../MyMessages/MyMessageEmpty';
 import { useMessages } from '../../../../context/MessagesContext.jsx';
+import { useBookings } from '../../../../context/BookingsContext.jsx';
+import MyBookings from '../MyBookings/MyBookings';
 
 function UserProfile() {
   const { user } = useContext(AuthContext);
@@ -190,27 +192,8 @@ function UserProfile() {
     </motion.div>
   );
 
-  const BookingsTab = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -15 }}
-      transition={{ duration: 0.3 }}
-      className="p-8 sm:p-10 h-full flex flex-col pt-16"
-    >
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">My Bookings</h2>
-        <p className="text-slate-500">View and manage all your past and upcoming tours.</p>
-      </div>
-      <div className="flex-1 flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
-        <div className="w-20 h-20 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-6">
-          <CalendarDays size={40} />
-        </div>
-        <h3 className="text-xl font-semibold text-slate-800 mb-2">No bookings yet</h3>
-        <p className="text-slate-500 max-w-sm">We'll show your tour itinerary and booking history here once you make a reservation.</p>
-      </div>
-    </motion.div>
-  );
+// Bookings Tab 
+const BookingsTab = () => <MyBookings userEmail={user?.email} />;
 
 // adding messages tab
   const MessagesTab = () => {

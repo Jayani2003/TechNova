@@ -8,9 +8,9 @@ const VehicleDisplay = ({ vehicles, categoryTitle }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="max-w-7xl mx-auto px-6 py-16 bg-white rounded-[3rem] shadow-xl shadow-slate-200/50 border border-slate-100"
+      className="max-w-5xl mx-auto px-6 py-4 bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100"
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-5 gap-4">
         <div>
           <h2 className="text-4xl font-black text-slate-900 tracking-tight">
             Available <span className="text-[#00b0a5]">{categoryTitle}</span>
@@ -39,10 +39,7 @@ const VehicleDisplay = ({ vehicles, categoryTitle }) => {
                   alt={vehicle.name} 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                 />
-                <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-1 rounded-full shadow-lg">
-                  <span className="text-sm font-black text-slate-900">${vehicle.price}</span>
-                  <span className="text-[10px] text-slate-500 uppercase ml-1">/ day</span>
-                </div>
+                
               </div>
               
               <h3 className="text-2xl font-bold text-slate-900 mb-2 group-hover:text-[#00b0a5] transition-colors">
@@ -58,9 +55,7 @@ const VehicleDisplay = ({ vehicles, categoryTitle }) => {
                  </div>
               </div>
 
-              <button className="w-full py-4 rounded-2xl bg-slate-900 text-white font-bold hover:bg-[#00b0a5] transition-all shadow-lg shadow-slate-200 hover:shadow-[#00b0a5]/30">
-                Book This Model
-              </button>
+              
             </motion.div>
           ))}
         </div>

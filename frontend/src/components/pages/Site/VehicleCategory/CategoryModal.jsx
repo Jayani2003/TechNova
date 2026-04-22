@@ -20,13 +20,7 @@ const CategoryModal = ({ selected, onClose }) => {
         className="bg-white rounded-[2.5rem] max-w-xl w-full p-8 md:p-12 shadow-2xl relative border border-white/20"
         onClick={(e) => e.stopPropagation()}
       >
-        <button 
-          onClick={onClose}
-          className="absolute top-8 right-8 text-slate-300 hover:text-slate-900 transition-colors text-2xl"
-        >
-          ✕
-        </button>
-
+        
         <div className="text-6xl mb-6">{selected.icon}</div>
         <h2 className="text-4xl font-black text-slate-900 mb-2 tracking-tight">
           {selected.title}

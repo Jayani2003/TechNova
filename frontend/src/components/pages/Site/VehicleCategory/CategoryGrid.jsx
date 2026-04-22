@@ -1,7 +1,7 @@
 import React from 'react';
 import CategoryCard from './CategoryCard';
 
-const CategoryGrid = ({ data, onSelect }) => {
+const CategoryGrid = ({ data, onSelect, onBookNow }) => {
   return (
     <section className="max-w-7xl mx-auto px-6 py-20">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -10,7 +10,8 @@ const CategoryGrid = ({ data, onSelect }) => {
             key={cat.id} 
             cat={cat} 
             index={index} 
-            onSelect={onSelect} 
+            onSelect={onSelect}
+            onBookNow={onBookNow}
           />
         ))}
       </div>

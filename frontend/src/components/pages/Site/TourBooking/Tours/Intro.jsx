@@ -1,26 +1,39 @@
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const slides = [
   {
+    id: 0,
+    tag: "Premium Travel Services",
+    headlineWhite: "Discover",
+    headlineTeal: "Sri Lanka.",
+    sub: "Curated journeys across the pearl of the Indian Ocean.",
+    image: "https://images.unsplash.com/photo-1646894232861-a0ad84f1ad5d?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    isIntro: true,
+  },
+  {
     id: 1,
     tag: "Package Tours",
-    headline: "Golden Triangle",
+    headlineWhite: "Golden",
+    headlineTeal: "Triangle.",
     sub: "Ancient temples, misty highlands & sun-drenched shores — curated journeys through Sri Lanka's most iconic destinations.",
-    image: "https://images.unsplash.com/photo-1594822779091-7726437c5ac1?q=80&w=1355&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: "https://plus.unsplash.com/premium_photo-1730145749791-28fc538d7203?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
   {
     id: 2,
     tag: "Customized Tours",
-    headline: "Your Perfect Journey",
+    headlineWhite: "Your Perfect",
+    headlineTeal: "Journey.",
     sub: "Tell us your dream — we craft a bespoke itinerary with hidden gems, private experiences & expert local guides.",
-    image: "https://images.unsplash.com/photo-1579989197111-928f586796a3?q=80&w=1168&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: "https://images.unsplash.com/photo-1566299597203-225f611b865f?q=80&w=2155&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
   {
     id: 3,
     tag: "Point to Point",
-    headline: "Seamless Transfers",
+    headlineWhite: "Seamless",
+    headlineTeal: "Transfers.",
     sub: "Premium air-conditioned vehicles and professional drivers ensure you arrive at every destination in comfort.",
-    image: "https://images.unsplash.com/photo-1665849050332-8d5d7e59afb6?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
 ];
 
@@ -28,7 +41,6 @@ const SLIDE_DURATION = 5000;
 
 export default function Intro() {
   const [current, setCurrent] = useState(0);
-  const [fading, setFading] = useState(false);
   const [progress, setProgress] = useState(0);
   const startTimeRef = useRef(Date.now());
   const animatingRef = useRef(false);
@@ -36,14 +48,12 @@ export default function Intro() {
   const goTo = (idx) => {
     if (idx === current || animatingRef.current) return;
     animatingRef.current = true;
-    setFading(true);
     setTimeout(() => {
       setCurrent(idx);
       setProgress(0);
       startTimeRef.current = Date.now();
-      setFading(false);
       animatingRef.current = false;
-    }, 700);
+    }, 600);
   };
 
   useEffect(() => {
@@ -62,321 +72,110 @@ export default function Intro() {
   const slide = slides[current];
 
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+    <section className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-black">
 
-        .intro-root * { box-sizing: border-box; margin: 0; padding: 0; }
-        .intro-root { font-family: 'DM Sans', sans-serif; }
+      {/* Single AnimatePresence — image + content fade together as one unit */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`slide-${current}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          className="absolute inset-0"
+        >
+          {/* Background image with ken-burns */}
+          <motion.img
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 10, repeat: Infinity, repeatType: "reverse" }}
+            src={slide.image}
+            className="absolute w-full h-full object-cover"
+            alt=""
+          />
 
-        /* ─── STATIC INTRO ─── */
-        .intro-static {
-          background: #090909;
-          color: white;
-          padding: 32px 7vw 28px;
-          position: relative;
-          overflow: hidden;
-        }
-        .intro-static::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, rgba(0, 176, 165, 0.08) 0%, rgba(0, 176, 165, 0.18) 100%);
-          pointer-events: none;
-        }
+          {/* Overlay — to-black/50 prevents white bleed-through */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/50" />
 
-        .intro-brand {
-          display: flex;
-          align-items: baseline;
-          gap: 12px;
-          margin-bottom: 14px;
-        }
-        .intro-brand-name {
-          font-family: 'Playfair Display', serif;
-          font-size: clamp(1.5rem, 3vw, 2.1rem);
-          font-weight: 700;
-          color: white;
-          line-height: 1;
-        }
-        .intro-brand-name span { color: #00b0a5; }
-        .intro-brand-divider {
-          width: 1px; height: 22px;
-          background: rgba(255,255,255,0.2);
-          align-self: center;
-        }
-        .intro-brand-est {
-          font-size: 10px; font-weight: 500;
-          letter-spacing: 0.18em; text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.46);
-        }
+          {/* Content inside same wrapper — fades together with image */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="relative z-10 text-center px-4">
+              <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
+                {slide.tag}
+              </span>
 
-        .intro-body {
-          display: flex;
-          align-items: center;
-          gap: 32px;
-          flex-wrap: wrap;
-        }
+              <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight">
+                {slide.headlineWhite}{" "}
+                <span className="text-[#00b0a5]">{slide.headlineTeal}</span>
+              </h1>
 
-        .intro-tagline {
-          font-family: 'Playfair Display', serif;
-          font-size: clamp(0.92rem, 1.6vw, 1.1rem);
-          font-weight: 400;
-          line-height: 1.65;
-          color: rgba(255,255,255,0.72);
-          flex: 1;
-          min-width: 220px;
-        }
-        .intro-tagline em { font-style: italic; color: #00b0a5; }
+              <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light mb-6">
+                {slide.sub}
+              </p>
 
-        .intro-pills {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          align-items: center;
-          flex-shrink: 0;
-        }
-        .intro-pill {
-          padding: 6px 16px;
-          background: rgba(0, 176, 165, 0.15);
-          border: 1px solid rgba(0, 176, 165, 0.35);
-          border-radius: 100px;
-          font-size: 12px; font-weight: 500; color: #00b0a5;
-          white-space: nowrap; cursor: pointer;
-          transition: background 0.2s, border-color 0.2s, transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s;
-        }
-        .intro-pill:hover {
-          background: rgba(0, 176, 165, 0.28);
-          border-color: rgba(0, 176, 165, 0.65);
-          transform: scale(1.04);
-          box-shadow: 0 3px 12px rgba(0, 176, 165, 0.18);
-        }
-
-        .intro-rule {
-          margin-top: 24px; height: 1px;
-          background: linear-gradient(to right, rgba(0, 176, 165, 0.65), rgba(255,255,255,0.04) 55%, transparent);
-          
-        }
-
-        /* ─── SLIDER ─── */
-        .slider-root {
-          position: relative;
-          height: 70vh;
-          overflow: hidden;
-          background: #002827;
-        }
-
-        .slide-layer {
-          position: absolute;
-          inset: 0;
-          transition: opacity 0.7s ease;
-        }
-        .slide-layer.visible { opacity: 1; z-index: 1; }
-        .slide-layer.hidden  { opacity: 0; z-index: 0; }
-
-        .slide-layer-img {
-          position: absolute;
-          inset: 0;
-          background-size: cover;
-          background-position: center;
-          animation: kbZoom 8s ease-out both;
-        }
-        @keyframes kbZoom {
-          from { transform: scale(1.06); }
-          to   { transform: scale(1.0); }
-        }
-
-        .slide-layer-overlay {
-          position: absolute;
-          inset: 0;
-          background:
-            linear-gradient(to right, rgba(0,18,25,0.82) 0%, rgba(0,18,25,0.40) 55%, rgba(0,18,25,0.10) 100%),
-            linear-gradient(to top,   rgba(0,18,25,0.60) 0%, transparent 45%);
-        }
-
-        .slide-content {
-          position: absolute;
-          inset: 0;
-          z-index: 5;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          padding: 0 7vw;
-          max-width: 660px;
-        }
-
-       .slide-tag {
-  display: inline-block;
-  font-size: 10.5px; font-weight: 600;
-  letter-spacing: 0.2em; text-transform: uppercase;
-  padding: 5px 14px;
-  border: 1px solid rgba(0, 176, 165, 0.45);
-  border-radius: 100px;
-  color: #00b0a5;
-  margin-bottom: 18px;
-  width: fit-content;
-  background: rgba(0, 176, 165, 0.07);
-  animation: sUp 0.55s 0.05s both;
-}
-        .slide-headline {
-          font-family: 'Playfair Display', serif;
-          font-size: clamp(2.2rem, 5.5vw, 4rem);
-          font-weight: 700;
-          line-height: 1.1;
-          color: white;
-          margin-bottom: 14px;
-          animation: sUp 0.55s 0.14s both;
-        }
-        .slide-sub {
-  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
-  font-weight: 300;
-  line-height: 1.78;
-  color: rgba(255,255,255,0.72);
-  max-width: 460px;
-  animation: sUp 0.55s 0.24s both;
-}
-        @keyframes sUp {
-          from { opacity: 0; transform: translateY(18px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-
-.slide-counter {
-  position: absolute;
-  bottom: 32px; left: 7vw;
-  z-index: 10;
-  font-size: 13px; font-weight: 400;
-  color: rgba(5, 208, 194, 0.82);
-  letter-spacing: 0.06em;
-  font-family: 'Playfair Display', serif;
-}
-        .slide-counter strong { color: white; font-size: 20px; font-weight: 600; }
-
-        .slider-nav {
-          position: absolute;
-          bottom: 28px; right: 7vw;
-          z-index: 10;
-          display: flex; align-items: center; gap: 18px;
-        }
-        .nav-tracks { display: flex; gap: 6px; align-items: center; }
-        .nav-track-btn {
-          background: none; border: none; cursor: pointer;
-          padding: 6px 0; display: flex; align-items: center;
-        }
-        .nav-track {
-  width: 30px; height: 2px;
-  background: rgba(0, 176, 165, 0.2);
-  border-radius: 2px; overflow: hidden;
-  transition: width 0.3s;
-}
-        .nav-track-btn.active .nav-track { width: 46px; }
-.nav-track-fill {
-  height: 100%; background: #00b0a5;
-  border-radius: 2px; transition: width 0.03s linear;
-}
-.nav-arrows { display: flex; gap: 8px; }
-.nav-arrow {
-  width: 40px; height: 40px; border-radius: 50%;
-  border: 1px solid rgba(0, 176, 165, 0.3);
-  background: rgba(0, 176, 165, 0.08);
-  backdrop-filter: blur(6px);
-  color: white; font-size: 15px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.2s, border-color 0.2s;
-}
-.nav-arrow:hover { background: rgba(0, 176, 165, 0.22); border-color: rgba(0, 176, 165, 0.65); }
-
-        @media (max-width: 680px) {
-          .intro-body { flex-direction: column; align-items: flex-start; gap: 16px; }
-        }
-      `}</style>
-
-      <div className="intro-root">
-
-        {/* ── STATIC INTRO ── */}
-        <div className="intro-static">
-          <div className="intro-brand">
-            <div className="intro-brand-name">Ceylon <span>Best</span> Tours</div>
-            <div className="intro-brand-divider" />
-            <div className="intro-brand-est">Sri Lanka · Est. 2010</div>
-          </div>
-
-          <div className="intro-body">
-            <p className="intro-tagline">
-              Experience the <em>soul of Sri Lanka</em>. We provide premium vehicles
-              and expert drivers to guide you through breathtaking landscapes —
-              across our three signature journey categories.
-            </p>
-            <div className="intro-pills">
-              <span className="intro-pill">Package Tours</span>
-              <span className="intro-pill">Customized Tours</span>
-              <span className="intro-pill">Point to Point</span>
+              {/* Pills only on intro slide */}
+              {slide.isIntro && (
+                <div className="flex flex-wrap justify-center gap-2">
+                  {["Package Tours", "Customized Tours", "Point to Point"].map((label) => (
+                    <span
+                      key={label}
+                      className="px-4 py-1 rounded-full text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5]/20 border border-[#00b0a5]/50 cursor-pointer hover:bg-[#00b0a5]/40 hover:border-[#00b0a5] transition-all duration-200"
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
+        </motion.div>
+      </AnimatePresence>
 
-          <div className="intro-rule" />
-        </div>
+      {/* Counter — outside AnimatePresence so it stays fixed during transitions */}
+      {/* <div className="absolute bottom-8 left-[7vw] z-10 text-white/60 text-sm tracking-wide font-light">
+        <span className="text-white text-2xl font-extrabold">0{current + 1}</span>
+        {" "}/ 0{slides.length}
+      </div> */}
 
-        {/* ── SLIDER — 70vh ── */}
-        <div className="slider-root">
-
-          {slides.map((s, i) => (
-            <div
-              key={s.id}
-              className={`slide-layer ${i === current && !fading ? "visible" : "hidden"}`}
+      {/* Nav: tracks + arrows — outside AnimatePresence so they stay fixed */}
+      <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-10 flex items-center gap-5">
+        <div className="flex items-center gap-2">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              className="py-1.5 flex items-center focus:outline-none"
             >
-              <div
-                className="slide-layer-img"
-                style={{ backgroundImage: `url(${s.image})` }}
-              />
-              <div className="slide-layer-overlay" />
-            </div>
+              <div className={`h-0.5 rounded-full overflow-hidden bg-[#00b0a5]/20 transition-all duration-300 ${i === current ? "w-12" : "w-8"}`}>
+                <div
+                  className="h-full bg-[#00b0a5] rounded-full transition-[width] duration-[30ms] ease-linear"
+                  style={{
+                    width: i === current ? `${progress}%` : i < current ? "100%" : "0%",
+                  }}
+                />
+              </div>
+            </button>
           ))}
-
-          <div className="slide-content" key={`content-${current}`}>
-            <div className="slide-tag">{slide.tag}</div>
-            <h2 className="slide-headline">{slide.headline}</h2>
-            <p className="slide-sub">{slide.sub}</p>
-          </div>
-
-          <div className="slide-counter">
-            <strong>0{current + 1}</strong>&nbsp;/&nbsp;0{slides.length}
-          </div>
-
-          <div className="slider-nav">
-            <div className="nav-tracks">
-              {slides.map((_, i) => (
-                <button
-                  key={i}
-                  className={`nav-track-btn ${i === current ? "active" : ""}`}
-                  onClick={() => goTo(i)}
-                  aria-label={`Go to slide ${i + 1}`}
-                >
-                  <div className="nav-track">
-                    <div
-                      className="nav-track-fill"
-                      style={{
-                        width: i === current ? `${progress}%` : i < current ? "100%" : "0%",
-                      }}
-                    />
-                  </div>
-                </button>
-              ))}
-            </div>
-            <div className="nav-arrows">
-              <button
-                className="nav-arrow"
-                onClick={() => goTo((current - 1 + slides.length) % slides.length)}
-                aria-label="Previous slide"
-              >←</button>
-              <button
-                className="nav-arrow"
-                onClick={() => goTo((current + 1) % slides.length)}
-                aria-label="Next slide"
-              >→</button>
-            </div>
-          </div>
-
         </div>
+
+        {/* <div className="flex gap-2">
+          {[
+            { label: "Previous", icon: "←", fn: () => goTo((current - 1 + slides.length) % slides.length) },
+            { label: "Next",     icon: "→", fn: () => goTo((current + 1) % slides.length) },
+          ].map(({ label, icon, fn }) => (
+            <button
+              key={label}
+              onClick={fn}
+              aria-label={label}
+              className="w-10 h-10 rounded-full border border-[#00b0a5]/30 bg-[#00b0a5]/10 backdrop-blur-sm text-white text-base flex items-center justify-center hover:bg-[#00b0a5]/25 hover:border-[#00b0a5]/60 transition-all duration-200"
+            >
+              {icon}
+            </button>
+          ))}
+        </div> */}
       </div>
-    </>
+
+    </section>
   );
 }

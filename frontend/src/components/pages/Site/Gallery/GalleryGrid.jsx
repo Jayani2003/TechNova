@@ -4,7 +4,7 @@ import GalleryCard from "./GalleryCard";
 import DetailModal from "./DetailModal";
 import FilterBar from "./FilterBar"; // Nested inside the Grid section
 
-const categories = ["All", "Vehicles", "Destinations", "Tours", "Experiences"];
+const categories = ["All", "Vehicles","Traveler Photos", "Packages Photos"];
 
 const images = [
   {
@@ -41,6 +41,8 @@ const images = [
   },
 ];
 
+// ... imports
+
 export default function GalleryGrid() {
   const [active, setActive] = useState("All");
   const [search, setSearch] = useState("");
@@ -53,23 +55,25 @@ export default function GalleryGrid() {
 
   return (
     <>
-      <FilterBar 
-        active={active} 
-        setActive={setActive} 
-        setSearch={setSearch} 
-        categories={categories} 
-      />
+      <FilterBar active={active} setActive={setActive} setSearch={setSearch} categories={categories} />
       
-      <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <AnimatePresence mode="popLayout">
-          {filtered.map((item, index) => (
-            <GalleryCard key={item.id} item={item} index={index} onClick={setSelected} />
+      {/* Reduced motion on the container itself */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <AnimatePresence>
+          {filtered.map((item) => (
+            <GalleryCard 
+              key={item.id} 
+              item={item} 
+              onClick={setSelected} 
+            />
           ))}
         </AnimatePresence>
-      </motion.div>
+      </div>
 
       <AnimatePresence>
-        {selected && <DetailModal selected={selected} setSelected={setSelected} />}
+        {selected && (
+          <DetailModal selected={selected} setSelected={setSelected} />
+        )}
       </AnimatePresence>
     </>
   );

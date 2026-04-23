@@ -21,7 +21,7 @@ import Customized from "./components/pages/Site/TourBooking/Customized/Customize
 import Package from "./components/pages/Site/TourBooking/Package/Package";
 import PointToPoint from "./components/pages/Site/TourBooking/PointToPoint/PointToPoint";
 
-//user dashbourd
+//user dashboard
 import MyBookings from "./components/pages/User/MyBookings/MyBookings";
 import MyReviews from "./components/pages/User/MyReviews/MyReviews";
 import UserProfile from "./components/pages/User/UserProfile/UserProfile";  
@@ -29,7 +29,7 @@ import UserDashboard from "./components/pages/User/UserDashboard/UserDashboard";
 import MyMessages from "./components/pages/User/MyMessages/MyMessages";
 
 
-//admin dashbourd
+//admin dashboard
 import AdminLayout       from "./components/pages/Admin/AdminDashboard/AdminLayout";
 import AdminDashboard    from "./components/pages/Admin/AdminDashboard/AdminDashboard";
 import AddPointToPoint   from "./components/pages/Admin/AddPointToPoint/AddPointToPoint";

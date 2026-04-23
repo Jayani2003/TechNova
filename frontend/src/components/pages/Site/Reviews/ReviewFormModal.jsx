@@ -80,7 +80,7 @@ const AuthGate = ({ onClose }) => (
           </svg>
         </Link>
         <Link
-          to="/signup?redirect=/reviews&action=review"
+          to="/register?redirect=/reviews&action=review"
           className="rvm-signup-btn"
           onClick={onClose}
         >
@@ -92,7 +92,7 @@ const AuthGate = ({ onClose }) => (
 );
 
 // ── Modal shell ──────────────────────────────────────────────
-const ReviewFormModal = ({ isOpen, isLoggedIn, onClose, onSubmit }) => (
+const ReviewFormModal = ({ isOpen, isLoggedIn, reviewableTours, onClose, onSubmit }) => (
   <>
     <style>{`
       .rvm-backdrop {
@@ -178,7 +178,7 @@ const ReviewFormModal = ({ isOpen, isLoggedIn, onClose, onSubmit }) => (
             {/* Body */}
             <div className="rvm-body">
               {isLoggedIn
-                ? <ReviewForm onSubmit={onSubmit} onCancel={onClose} />
+                ? <ReviewForm reviewableTours={reviewableTours} onSubmit={onSubmit} onCancel={onClose} />
                 : <AuthGate onClose={onClose} />
               }
             </div>

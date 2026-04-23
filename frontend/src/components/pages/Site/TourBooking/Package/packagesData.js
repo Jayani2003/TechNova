@@ -17,6 +17,17 @@ export const PACKAGE_TYPES = [
 
 export const PACKAGE_DAYS = [7, 14, 21, 28];
 
+const STORAGE_KEY = 'sl_admin_packages';
+
+const loadPackages = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : packages;
+  } catch {
+    return packages;
+  }
+};
+
 export const packages = [
 
   // ── BEACH SIDE ─────────────────────────────────────────────
@@ -73,7 +84,7 @@ export const packages = [
     days: 21,
     title: 'Complete Coastal Journey',
     description: 'The ultimate beach odyssey circling the entire island coastline with handpicked stops at every gem.',
-    image: 'https://images.unsplash.com/photo-1526481280693-3bfa7568e0f3?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1527073620320-77635188c627?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     highlights: ['Full island loop', 'Deep sea fishing', 'Coral reef diving', 'Luxury beach stays'],
     destinations: [
       { name: 'Colombo', days: 1, description: 'Arrival and city introduction.', image: 'https://images.unsplash.com/photo-1571734982700-09da72d9c7c3?auto=format&fit=crop&q=80&w=600' },
@@ -95,7 +106,7 @@ export const packages = [
     days: 7,
     title: 'Misty Mountains Retreat',
     description: 'Rolling tea plantations, misty peaks and colonial hill stations in the heart of the island.',
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&q=80&w=800',
     highlights: ['Tea factory tours', 'Train journey', 'Waterfall hikes', 'Colonial architecture'],
     destinations: [
       { name: 'Colombo', days: 1, description: 'Arrival and transfer to the highlands.', image: 'https://images.unsplash.com/photo-1571734982700-09da72d9c7c3?auto=format&fit=crop&q=80&w=600' },
@@ -110,7 +121,7 @@ export const packages = [
     days: 7,
     title: 'Tea Trail Classic',
     description: 'An intimate journey through Ceylon\'s finest tea estates with exclusive planter bungalow stays.',
-    image: 'https://images.unsplash.com/photo-1586105251261-72a756497a11?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&q=80&w=800',
     highlights: ['Planter bungalow stays', 'Tea tasting', 'Estate walks', 'Sunrise hikes'],
     destinations: [
       { name: 'Kandy', days: 2, description: 'Cultural capital and gateway to the hill country.', image: 'https://images.unsplash.com/photo-1601462904263-f2fa0c851cb9?auto=format&fit=crop&q=80&w=600' },
@@ -124,7 +135,7 @@ export const packages = [
     days: 14,
     title: 'Highlands & Heritage',
     description: 'From ancient rock fortresses to misty tea valleys — a full exploration of Sri Lanka\'s interior.',
-    image: 'https://images.unsplash.com/photo-1601462904263-f2fa0c851cb9?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&q=80&w=800',
     highlights: ['Sigiriya Rock', 'Tea estates', 'Scenic train', 'Ancient temples'],
     destinations: [
       { name: 'Colombo', days: 1, description: 'Arrival and city tour.', image: 'https://images.unsplash.com/photo-1571734982700-09da72d9c7c3?auto=format&fit=crop&q=80&w=600' },
@@ -193,7 +204,7 @@ export const packages = [
     days: 14,
     title: 'Big Five Sri Lanka',
     description: 'Track all of Sri Lanka\'s iconic wildlife including leopard, elephant, sloth bear, blue whale and crocodile.',
-    image: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&q=80&w=800',
     highlights: ['All major parks', 'Leopard tracking', 'Bird watching', 'Marine wildlife'],
     destinations: [
       { name: 'Colombo', days: 1, description: 'Arrival.', image: 'https://images.unsplash.com/photo-1571734982700-09da72d9c7c3?auto=format&fit=crop&q=80&w=600' },
@@ -213,7 +224,7 @@ export const packages = [
     days: 7,
     title: 'Ancient Kingdom Trail',
     description: 'Journey through 2,500 years of Sri Lankan history across the UNESCO Cultural Triangle.',
-    image: 'https://images.unsplash.com/photo-1580674285054-bed31e145f59?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&q=80&w=800',
     highlights: ['UNESCO sites', 'Ancient temples', 'Rock art', 'Royal palaces'],
     destinations: [
       { name: 'Colombo', days: 1, description: 'Arrival and colonial architecture tour.', image: 'https://images.unsplash.com/photo-1571734982700-09da72d9c7c3?auto=format&fit=crop&q=80&w=600' },
@@ -228,7 +239,7 @@ export const packages = [
     days: 14,
     title: 'Full Cultural Triangle',
     description: 'The complete immersion into Sri Lanka\'s ancient civilisations, sacred sites and living traditions.',
-    image: 'https://images.unsplash.com/photo-1601462904263-f2fa0c851cb9?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&q=80&w=800',
     highlights: ['6 UNESCO sites', 'Traditional crafts', 'Temple festivals', 'Cultural performances'],
     destinations: [
       { name: 'Colombo', days: 1, description: 'Arrival, Gangaramaya Temple and National Museum.', image: 'https://images.unsplash.com/photo-1571734982700-09da72d9c7c3?auto=format&fit=crop&q=80&w=600' },
@@ -263,7 +274,7 @@ export const packages = [
     days: 14,
     title: 'Ultimate Adventure Circuit',
     description: 'Two weeks of non-stop action — the most thrilling experiences Sri Lanka has to offer.',
-    image: 'https://images.unsplash.com/photo-1455729552865-3658a5d39692?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&q=80&w=800',
     highlights: ['Rafting', 'Hiking', 'Surfing', 'Diving', 'Cycling'],
     destinations: [
       { name: 'Colombo', days: 1, description: 'Arrival.', image: 'https://images.unsplash.com/photo-1571734982700-09da72d9c7c3?auto=format&fit=crop&q=80&w=600' },
@@ -309,14 +320,14 @@ export const packages = [
 ];
 
 // ── Helper: get unique types from data (auto-updates when new packages added) ──
-export const getTypes = () => [...new Set(packages.map(p => p.type))];
+export const getTypes = () => [...new Set(loadPackages().map(p => p.type))];
 
 // ── Helper: get unique day options from data ──
-export const getDays  = () => [...new Set(packages.map(p => p.days))].sort((a,b) => a - b);
+export const getDays  = () => [...new Set(loadPackages().map(p => p.days))].sort((a,b) => a - b);
 
 // ── Helper: filter packages ──
 export const filterPackages = (type = 'All', days = 'All') =>
-  packages.filter(p =>
+  loadPackages().filter(p =>
     (type === 'All' || p.type === type) &&
     (days === 'All' || p.days === Number(days))
   );

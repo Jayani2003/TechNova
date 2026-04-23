@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import authBg from '../../../assets/auth-bg.png';
@@ -10,7 +10,11 @@ function Login() {
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { login } = useContext(AuthContext);
+	const params = new URLSearchParams(location.search);
+	const redirectPath = params.get('redirect');
+	const safeRedirect = redirectPath && redirectPath.startsWith('/') ? redirectPath : null;
 
 	const handleLogin = (e) => {
 		e.preventDefault();
@@ -19,7 +23,7 @@ function Login() {
 			navigate('/admin/admin-dashboard');
 		} else if (email === 'abcd@gmail.com' && password === '1234') {
 			login({ role: 'standard', email, name: 'User' });
-			navigate('/');
+			navigate(safeRedirect || '/');
 		} else {
 			alert('Invalid email or password. Please try again.');
 		}

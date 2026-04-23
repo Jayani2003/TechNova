@@ -151,6 +151,14 @@ const ReviewCard = ({ review, index = 0 }) => {
         .rvc-date {
           font-size: 11px; font-weight: 400; color: #7a9a9a;
         }
+        .rvc-driver {
+          margin-top: 8px;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: #3a5a5a;
+        }
         /* Stars + title */
         .rvc-rating { display: flex; flex-direction: column; gap: 6px; }
         .rvc-title {
@@ -209,6 +217,9 @@ const ReviewCard = ({ review, index = 0 }) => {
               <span className="rvc-dot" />
               <span className="rvc-date">{formatDate(review.datePublished)}</span>
             </div>
+            {review.driverName && (
+              <div className="rvc-driver">Driver: {review.driverName}</div>
+            )}
           </div>
         </div>
 

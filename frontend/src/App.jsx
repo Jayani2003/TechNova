@@ -30,7 +30,7 @@ import MyMessages from "./components/pages/User/MyMessages/MyMessages";
 //admin dashbourd
 import AddPointToPoint from "./components/pages/Admin/AddPointToPoint/AddPointToPoint";
 import ApproveBookings from "./components/pages/Admin/ApproveBookings/ApproveBookings";
-import ApproveReviews from "./components/pages/Admin/ApproveReviews/ApproveReviews";
+
 import Customers from "./components/pages/Admin/Customers/Customer";
 import AdminDashboard from "./components/pages/Admin/AdminDashboard/AdminDashboard";
 import FleetManagement from "./components/pages/Admin/FleetManagement/FleetManagement";
@@ -79,7 +79,7 @@ export default function App() {
         <Route path="/admin/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/admin/add-point-to-point" element={<AddPointToPoint />} />
         <Route path="/admin/approve-bookings" element={<ApproveBookings />} />
-        <Route path="/admin/approve-reviews" element={<ApproveReviews />} />
+        
         <Route path="/admin/customers" element={<Customers />} />
         <Route path="/admin/fleet-management" element={<FleetManagement />} />
         <Route path="/admin/messages" element={<Messages />} />

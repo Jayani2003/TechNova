@@ -1,69 +1,54 @@
 import React from 'react';
 
-const GalleryTable = ({ items, onEdit, onDelete }) => {
+const GalleryTable = ({ items, onEdit, onDelete, dark = false }) => {
   return (
-    <section className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mt-10">
-      <div className="p-7 border-b border-slate-100 flex items-center justify-between">
-        <h3 className="text-xl font-bold text-slate-900 tracking-tight">Active Gallery Items</h3>
-        <span className="text-sm font-medium text-slate-500">{items.length} total photos</span>
+    <div className={`rounded-3xl overflow-hidden h-full border ${dark ? 'bg-slate-800/60 border-white/8' : 'bg-white border-transparent shadow-xl'}`}>
+      <div className={`p-8 border-b ${dark ? 'border-white/8' : 'border-slate-50'}`}>
+        <h3 className={`text-xl font-black ${dark ? 'text-slate-100' : 'text-slate-900'}`}>Active Gallery Items</h3>
       </div>
       
       <div className="overflow-x-auto">
         <table className="w-full text-left">
-          <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+          <thead className={`text-[10px] font-black uppercase tracking-widest border-b ${dark ? 'text-slate-500 border-white/8' : 'text-slate-400 border-slate-50'}`}>
             <tr>
-              <th className="px-7 py-5 font-semibold">Photo</th>
-              <th className="px-7 py-5 font-semibold">Category</th>
-              <th className="px-7 py-5 font-semibold">Description</th>
-              <th className="px-7 py-5 font-semibold text-right">Actions</th>
+              <th className="px-8 py-4">Thumbnail</th>
+              <th className="px-4 py-4">Category</th>
+              <th className="px-4 py-4">Description</th>
+              <th className="px-8 py-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
-            {items.map((item, index) => (
-              <tr key={item.id} className="hover:bg-slate-50/50 transition-all duration-150">
-                <td className="px-7 py-5">
-                  <div className="w-24 h-16 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 shadow-inner">
-                    <img src={item.url || 'https://via.placeholder.com/150'} alt={item.category} className="w-full h-full object-cover" />
+          <tbody className={dark ? 'divide-y divide-white/8' : 'divide-y divide-slate-50'}>
+            {items.map((item) => (
+              <tr key={item.id} className={`transition-colors ${dark ? 'hover:bg-white/5' : 'hover:bg-slate-50/50'}`}>
+                <td className="px-8 py-4">
+                  <div className={`w-12 h-12 rounded-lg overflow-hidden border ${dark ? 'border-white/10' : 'border-slate-100'}`}>
+                    <img src={item.url} alt="" className="w-full h-full object-cover" />
                   </div>
                 </td>
-                <td className="px-7 py-5">
-                  <span className={`inline-block text-xs font-semibold px-3 py-1.5 rounded-full ${item.category === 'VEHICLE' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-green-50 text-green-700 border border-green-200'}`}>
+                <td className="px-4 py-4">
+                  <span className={`px-2 py-1 rounded text-[9px] font-black tracking-tight border ${
+                    item.category === 'VEHICLE'
+                      ? dark ? 'bg-indigo-500/20 text-indigo-200 border-indigo-400/40' : 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                      : dark ? 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40' : 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                  }`}>
                     {item.category}
                   </span>
                 </td>
-                <td className="px-7 py-5 text-slate-600 text-sm leading-relaxed max-w-sm">
-                  {item.description.length > 80 ? item.description.substring(0, 80) + '...' : item.description}
+                <td className={`px-4 py-4 text-[11px] font-bold leading-tight max-w-[150px] ${dark ? 'text-slate-300' : 'text-slate-500'}`}>
+                  {item.description}
                 </td>
-                <td className="px-7 py-5">
-                  <div className="flex justify-end gap-2.5">
-                    <button 
-                      onClick={() => onEdit(item)}
-                      className="text-slate-500 hover:text-blue-700 bg-slate-100 hover:bg-blue-50 p-2.5 rounded-lg text-sm transition-all"
-                      title="Edit item"
-                    >
-                      ✎ {/* Using a symbol, replace with an icon if needed */}
-                    </button>
-                    <button 
-                      onClick={() => onDelete(item.id)}
-                      className="text-slate-500 hover:text-red-700 bg-slate-100 hover:bg-red-50 p-2.5 rounded-lg text-sm transition-all"
-                      title="Delete item"
-                    >
-                      ✕ {/* Using a symbol, replace with an icon if needed */}
-                    </button>
+                <td className="px-8 py-4 text-right">
+                  <div className="flex justify-end gap-3 font-bold text-[11px]">
+                    <button onClick={() => onEdit(item)} className={dark ? 'text-[#00b0a5] hover:underline' : 'text-blue-600 hover:underline'}>Edit</button>
+                    <button onClick={() => onDelete(item.id)} className={dark ? 'text-red-400 hover:underline' : 'text-red-500 hover:underline'}>Delete</button>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {items.length === 0 && (
-            <div className="text-center py-16 text-slate-500 bg-slate-50/50">
-                <p className="font-semibold text-2xl mb-2">¯\_(ツ)_/¯</p>
-                <p>No gallery items found. Try adding one above.</p>
-            </div>
-        )}
       </div>
-    </section>
+    </div>
   );
 };
 

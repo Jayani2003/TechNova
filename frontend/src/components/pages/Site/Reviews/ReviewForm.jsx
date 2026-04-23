@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import { getReviewableTours } from './reviewsData';
 
 const MAX_IMAGES = 5;
 
@@ -31,19 +30,20 @@ const StarPicker = ({ value, onChange }) => {
 
 const STAR_LABELS = { 1: 'Poor', 2: 'Fair', 3: 'Good', 4: 'Very Good', 5: 'Excellent' };
 
-const ReviewForm = ({ onSubmit, onCancel }) => {
-  const reviewableTours = getReviewableTours();
+const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
     tourId:  reviewableTours[0]?.id || '',
     stars:   0,
+    driverName: '',
     title:   '',
     comment: '',
   });
   const [images,    setImages]    = useState([]);   // { file, preview }
   const [submitted, setSubmitted] = useState(false);
   const [errors,    setErrors]    = useState({});
+  const [submitting, setSubmitting] = useState(false);
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
@@ -71,14 +71,19 @@ const ReviewForm = ({ onSubmit, onCancel }) => {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return;
-    onSubmit({ ...form, images });
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      const ok = await onSubmit({ ...form, images });
+      if (ok !== false) setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleClear = () => {
-    setForm({ tourId: reviewableTours[0]?.id || '', stars: 0, title: '', comment: '' });
+    setForm({ tourId: reviewableTours[0]?.id || '', stars: 0, driverName: '', title: '', comment: '' });
     setImages([]);
     setErrors({});
   };
@@ -155,7 +160,6 @@ const ReviewForm = ({ onSubmit, onCancel }) => {
         }
 
         /* Select */
-        /*
         .rvf-select {
           padding: 12px 16px; border-radius: 10px;
           border: 1.5px solid rgba(0,176,165,0.25);
@@ -167,7 +171,6 @@ const ReviewForm = ({ onSubmit, onCancel }) => {
         }
         .rvf-select:focus { border-color: #00b0a5; background: #fff; }
         .rvf-select.error { border-color: #cc3344; }
-        */
 
         /* Input */
         .rvf-input {
@@ -271,7 +274,7 @@ const ReviewForm = ({ onSubmit, onCancel }) => {
       <div className="rvf-wrap">
 
         {/* Tour selector */}
-        {/* <div className="rvf-field">
+        <div className="rvf-field">
           <label className="rvf-label">Select Your Tour</label>
           <select
             className={`rvf-select ${errors.tourId ? 'error' : ''}`}
@@ -285,7 +288,7 @@ const ReviewForm = ({ onSubmit, onCancel }) => {
             ))}
           </select>
           {errors.tourId && <span className="rvf-error">{errors.tourId}</span>}
-        </div> */}
+        </div>
 
         {/* Stars */}
         <div className="rvf-field">
@@ -298,6 +301,19 @@ const ReviewForm = ({ onSubmit, onCancel }) => {
         </div>
 
         <div className="rvf-rule" />
+
+        {/* Driver name */}
+        <div className="rvf-field">
+          <label className="rvf-label">Driver Name</label>
+          <input
+            type="text"
+            className="rvf-input"
+            placeholder="Type your driver's name (optional)"
+            value={form.driverName}
+            maxLength={100}
+            onChange={e => set('driverName', e.target.value)}
+          />
+        </div>
 
         {/* Title */}
         <div className="rvf-field">
@@ -361,11 +377,11 @@ const ReviewForm = ({ onSubmit, onCancel }) => {
 
         {/* Actions */}
         <div className="rvf-actions">
-          <button className="rvf-submit" onClick={handleSubmit}>
+          <button className="rvf-submit" onClick={handleSubmit} disabled={submitting}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M2 8l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            Submit Review
+            {submitting ? 'Submitting...' : 'Submit Review'}
           </button>
           <button className="rvf-clear" onClick={handleClear} title="Clear form">
             Clear

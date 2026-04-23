@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Hero       from "./Hero";
 import PackageFilters    from "./PackageFilters";
 import PackageGrid       from "./PackageGrid";
@@ -9,11 +9,26 @@ const Package = () => {
   const [activeType, setActiveType] = useState('All');
   const [activeDays, setActiveDays] = useState('All');
   const [selectedPkg, setSelectedPkg] = useState(null);
+  const [dataVersion, setDataVersion] = useState(0);
+
+  useEffect(() => {
+    const handlePackagesChanged = () => {
+      setDataVersion((version) => version + 1);
+    };
+
+    window.addEventListener('sl-admin-packages-changed', handlePackagesChanged);
+    window.addEventListener('storage', handlePackagesChanged);
+
+    return () => {
+      window.removeEventListener('sl-admin-packages-changed', handlePackagesChanged);
+      window.removeEventListener('storage', handlePackagesChanged);
+    };
+  }, []);
 
   // Re-filters automatically whenever data or filters change
   const filtered = useMemo(
     () => filterPackages(activeType, activeDays),
-    [activeType, activeDays]
+    [activeType, activeDays, dataVersion]
   );
 
   const handleTypeChange = (type) => {

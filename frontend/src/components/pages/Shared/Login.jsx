@@ -14,7 +14,7 @@ function Login() {
 
 	const handleLogin = (e) => {
 		e.preventDefault();
-		if (email === 'admin@ceylone.com') {
+		if (email === 'admin@ceylon.com' && password === '1234') {
 			login({ role: 'admin', email, name: 'Admin User' });
 			navigate('/admin/admin-dashboard');
 		} else if (email === 'abcd@gmail.com' && password === '1234') {

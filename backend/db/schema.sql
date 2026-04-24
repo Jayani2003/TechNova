@@ -192,8 +192,11 @@ CREATE TABLE review_image (
 
 CREATE TABLE gallery (
     gallery_id  INT AUTO_INCREMENT PRIMARY KEY,
-    image_url   VARCHAR(255) NOT NULL,
-    description TEXT
+    title VARCHAR(100) NOT NULL,
+    category ENUM('Vehicles', 'Traveler Photos', 'Packages Photos') NOT NULL,
+    image_url VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE contact_inquiry (

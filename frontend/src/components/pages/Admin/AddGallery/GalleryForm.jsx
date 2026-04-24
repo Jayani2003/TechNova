@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Upload } from 'lucide-react';
 
 const GalleryForm = ({ editingItem, onSubmit, onCancel, dark = false }) => {
-  const initialState = { category: 'VEHICLE', description: '', url: '' };
+  const initialState = { title: '', category: 'VEHICLE', description: '', url: '' };
   const [formData, setFormData] = useState(initialState);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (editingItem) {
       setFormData({ 
+        title: editingItem.title || '',
         category: editingItem.category, 
         description: editingItem.description, 
         url: editingItem.url 
@@ -80,18 +81,33 @@ const GalleryForm = ({ editingItem, onSubmit, onCancel, dark = false }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className={`text-sm font-bold ${dark ? 'text-slate-300' : 'text-slate-800'}`}>Category</label>
-            <select 
-              className={`w-full border-2 rounded-xl px-4 py-2.5 text-sm font-medium outline-none ${dark ? 'border-slate-700 bg-slate-900 text-slate-100 focus:border-[#00b0a5]' : 'border-slate-100 focus:border-blue-400'}`}
-              value={formData.category}
-              onChange={(e) => setFormData({...formData, category: e.target.value})}
-            >
-              <option value="VEHICLE">VEHICLE</option>
-              <option value="TRAVEL PHOTOS">TRAVEL PHOTOS</option>
-              <option value="PACKAGE PHOTOS">PACKAGE PHOTOS</option>
-            </select>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className={`text-sm font-bold ${dark ? 'text-slate-300' : 'text-slate-800'}`}>Title</label>
+              <input
+                type="text"
+                className={`w-full border-2 rounded-xl px-4 py-2.5 text-sm font-medium outline-none ${dark ? 'border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500 focus:border-[#00b0a5]' : 'border-slate-100 focus:border-blue-400'}`}
+                placeholder="Enter image title..."
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className={`text-sm font-bold ${dark ? 'text-slate-300' : 'text-slate-800'}`}>Category</label>
+              <select 
+                className={`w-full border-2 rounded-xl px-4 py-2.5 text-sm font-medium outline-none ${dark ? 'border-slate-700 bg-slate-900 text-slate-100 focus:border-[#00b0a5]' : 'border-slate-100 focus:border-blue-400'}`}
+                value={formData.category}
+                onChange={(e) => setFormData({...formData, category: e.target.value})}
+              >
+                <option value="VEHICLE">VEHICLE</option>
+                <option value="TRAVEL PHOTOS">TRAVEL PHOTOS</option>
+                <option value="PACKAGE PHOTOS">PACKAGE PHOTOS</option>
+              </select>
+            </div>
           </div>
+
+          
 
           <div className="space-y-2">
             <label className={`text-sm font-bold ${dark ? 'text-slate-300' : 'text-slate-800'}`}>Description</label>
@@ -102,6 +118,7 @@ const GalleryForm = ({ editingItem, onSubmit, onCancel, dark = false }) => {
               onChange={(e) => setFormData({...formData, description: e.target.value})}
             />
           </div>
+          
         </div>
 
         <div className="flex gap-3">

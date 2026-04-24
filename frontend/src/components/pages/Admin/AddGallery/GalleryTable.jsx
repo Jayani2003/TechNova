@@ -12,6 +12,7 @@ const GalleryTable = ({ items, onEdit, onDelete, dark = false }) => {
           <thead className={`text-[10px] font-black uppercase tracking-widest border-b ${dark ? 'text-slate-500 border-white/8' : 'text-slate-400 border-slate-50'}`}>
             <tr>
               <th className="px-8 py-4">Thumbnail</th>
+              <th className="px-4 py-4">Title</th>
               <th className="px-4 py-4">Category</th>
               <th className="px-4 py-4">Description</th>
               <th className="px-8 py-4 text-right">Actions</th>
@@ -24,6 +25,9 @@ const GalleryTable = ({ items, onEdit, onDelete, dark = false }) => {
                   <div className={`w-12 h-12 rounded-lg overflow-hidden border ${dark ? 'border-white/10' : 'border-slate-100'}`}>
                     <img src={item.url} alt="" className="w-full h-full object-cover" />
                   </div>
+                </td>
+                <td className={`px-4 py-4 text-[11px] font-bold leading-tight max-w-[140px] ${dark ? 'text-slate-200' : 'text-slate-700'}`}>
+                  {item.title?.trim() || 'Untitled'}
                 </td>
                 <td className="px-4 py-4">
                   <span className={`px-2 py-1 rounded text-[9px] font-black tracking-tight border ${

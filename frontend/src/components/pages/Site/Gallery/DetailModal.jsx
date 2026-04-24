@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { Compass } from "lucide-react";
 
 const DetailModal = ({ selected, setSelected }) => (
   <div className="fixed inset-0 flex items-center justify-center z-[100] px-4">
@@ -21,10 +20,6 @@ const DetailModal = ({ selected, setSelected }) => (
       <div className="w-full md:w-1/2 p-10 flex flex-col justify-center">
         <span className="text-[#00b0a5] font-bold text-sm uppercase tracking-widest mb-2">{selected.category}</span>
         <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">{selected.title}</h2>
-        <div className="flex items-center gap-2 text-slate-500 mb-6">
-          <Compass size={18} className="text-[#00b0a5]" />
-          <span className="font-medium">{selected.location}, Sri Lanka</span>
-        </div>
         <p className="text-slate-600 leading-relaxed mb-8 text-lg">{selected.desc}</p>
       </div>
     </motion.div>

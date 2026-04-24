@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { MapPin, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const GalleryCard = ({ item, onClick }) => (
   <motion.div
@@ -18,10 +18,6 @@ const GalleryCard = ({ item, onClick }) => (
     </div>
     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity" />
     <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-      <div className="flex items-center gap-2 mb-1 text-[#00b0a5]">
-        <MapPin size={12} />
-        <span className="text-[10px] font-bold uppercase tracking-widest">{item.location}</span>
-      </div>
       <h3 className="text-xl font-bold leading-tight">{item.title}</h3>
     </div>
   </motion.div>

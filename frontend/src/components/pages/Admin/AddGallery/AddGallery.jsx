@@ -7,7 +7,7 @@ const AddGallery = () => {
   const dark = useOutletContext()?.dark ?? false;
 
   const [items, setItems] = useState([
-    { id: 1, category: 'VEHICLE', description: 'A sleek, cherry red classic sports car...', url: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400' },
+    { id: 1, title: 'Classic Sports Car', category: 'VEHICLE', description: 'A sleek, cherry red classic sports car...', url: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400' },
   ]);
   const [editingItem, setEditingItem] = useState(null);
   

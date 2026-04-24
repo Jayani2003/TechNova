@@ -9,11 +9,11 @@ const FilterBar = ({ active, setActive, setSearch, categories }) => (
           <input
             type="text"
             placeholder="Search your destination..."
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#00b0a5]/20 focus:border-[#00b0a5]"
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#00b0a5]/20 focus:border-[#00b0a5] gap-3"
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="flex flex-wrap justify-center gap-2">
+        <div className="flex flex-wrap justify-center gap-3">
           {categories.map((cat) => (
             <button
               key={cat}

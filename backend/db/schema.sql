@@ -176,6 +176,7 @@ CREATE TABLE review (
     booking_id  INT NOT NULL UNIQUE,
     rating      INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
     driver_name VARCHAR(100),
+    title       VARCHAR(150),
     feedback    TEXT,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customer(customer_id),

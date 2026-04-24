@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import AdminPackageDeleteModal from "./AdminPackageDeleteModal";
 import AdminPackageFilters from "./AdminPackageFilters";
 import AdminPackageFormModal from "./AdminPackageFormModal";
@@ -7,6 +8,7 @@ import AdminPackageTable from "./AdminPackageTable";
 import { adminFilter, packageStore } from './adminPackagesData';
 
 function TourPackages() {
+	const dark = useOutletContext()?.dark ?? false;
 	const [packages, setPackages] = useState([]);
 	const [search, setSearch] = useState('');
 	const [activeType, setActiveType] = useState('All');
@@ -60,12 +62,14 @@ function TourPackages() {
 	};
 
 	return (
-		<>
+		<div className={dark ? 'min-h-screen bg-[#020617]' : 'min-h-screen bg-[#f8fafc]'}>
 		<AdminPackageHero
+			dark={dark}
 			total={packages.length}
 			onAddNew={handleAddNew}
 		/>
 		<AdminPackageFilters
+			dark={dark}
 			search={search}
 			onSearch={setSearch}
 			activeType={activeType}
@@ -77,11 +81,13 @@ function TourPackages() {
 			onReset={handleResetFilters}
 		/>
 		<AdminPackageTable
+			dark={dark}
 			packages={filteredPackages}
 			onEdit={handleEdit}
 			onDelete={setDeletingPackage}
 		/>
 		<AdminPackageFormModal
+			dark={dark}
 			isOpen={isFormOpen}
 			pkg={editingPackage}
 			onSave={handleSave}
@@ -91,15 +97,12 @@ function TourPackages() {
 			}}
 		/>
 		<AdminPackageDeleteModal
+			dark={dark}
 			pkg={deletingPackage}
 			onConfirm={handleDeleteConfirm}
 			onCancel={() => setDeletingPackage(null)}
 		/>
-		
-		
-		
-		
-		</>
+		</div>
 	);
 }
 

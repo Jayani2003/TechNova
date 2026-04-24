@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PACKAGE_TYPES, PACKAGE_DAYS, emptyPackage } from './adminPackagesData';
 
 // ── Small field components ───────────────────────────────────
-const Field = ({ label, error, children }) => (
+const Field = ({ label, error, children, dark = false }) => (
   <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
-    <label style={{ fontSize:'9px', fontWeight:800, letterSpacing:'0.2em', textTransform:'uppercase', color:'#5a8080' }}>
+    <label style={{ fontSize:'9px', fontWeight:800, letterSpacing:'0.2em', textTransform:'uppercase', color: dark ? '#94a3b8' : '#5a8080' }}>
       {label}
     </label>
     {children}
@@ -13,25 +13,25 @@ const Field = ({ label, error, children }) => (
   </div>
 );
 
-const inputStyle = (error) => ({
+const inputStyle = (error, dark = false) => ({
   padding: '10px 14px', borderRadius: '9px',
-  border: `1.5px solid ${error ? '#cc3344' : 'rgba(0,176,165,0.22)'}`,
-  background: '#f7fffe', color: '#0d2b2b',
+  border: `1.5px solid ${error ? '#cc3344' : dark ? 'rgba(255,255,255,0.14)' : 'rgba(0,176,165,0.22)'}`,
+  background: dark ? '#0b1220' : '#f7fffe', color: dark ? '#e2e8f0' : '#0d2b2b',
   fontSize: '13.5px', fontWeight: 400,
   outline: 'none', fontFamily: 'inherit',
   transition: 'border-color 0.2s ease',
   width: '100%', boxSizing: 'border-box',
 });
 
-const taStyle = (error) => ({
-  ...inputStyle(error),
+const taStyle = (error, dark = false) => ({
+  ...inputStyle(error, dark),
   resize: 'vertical', minHeight: '80px', lineHeight: 1.7, fontWeight: 300,
 });
 
 // ── Destination row ──────────────────────────────────────────
-const DestRow = ({ dest, index, onChange, onRemove, canRemove }) => (
+const DestRow = ({ dest, index, onChange, onRemove, canRemove, dark = false }) => (
   <div style={{
-    background: '#f7fffe', border: '1px solid rgba(0,176,165,0.15)',
+    background: dark ? '#0b1220' : '#f7fffe', border: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,176,165,0.15)',
     borderRadius: '12px', padding: '16px', display:'flex', flexDirection:'column', gap:'10px',
   }}>
     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
@@ -51,8 +51,8 @@ const DestRow = ({ dest, index, onChange, onRemove, canRemove }) => (
       )}
     </div>
     <div style={{ display:'grid', gridTemplateColumns:'1fr auto', gap:'10px' }}>
-      <input
-        style={inputStyle(false)}
+        <input
+          style={inputStyle(false, dark)}
         placeholder="Destination name"
         value={dest.name}
         onChange={e => onChange(index, 'name', e.target.value)}
@@ -60,21 +60,21 @@ const DestRow = ({ dest, index, onChange, onRemove, canRemove }) => (
       <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
         <input
           type="number" min="1" max="30"
-          style={{ ...inputStyle(false), width:'60px', textAlign:'center' }}
+          style={{ ...inputStyle(false, dark), width:'60px', textAlign:'center' }}
           value={dest.days}
           onChange={e => onChange(index, 'days', Number(e.target.value))}
         />
-        <span style={{ fontSize:'11px', color:'#7a9a9a', whiteSpace:'nowrap', fontWeight:600 }}>days</span>
+        <span style={{ fontSize:'11px', color: dark ? '#94a3b8' : '#7a9a9a', whiteSpace:'nowrap', fontWeight:600 }}>days</span>
       </div>
     </div>
     <textarea
-      style={taStyle(false)}
+      style={taStyle(false, dark)}
       placeholder="Short description of this destination…"
       value={dest.description}
       onChange={e => onChange(index, 'description', e.target.value)}
     />
     <input
-      style={inputStyle(false)}
+      style={inputStyle(false, dark)}
       placeholder="Image URL for this destination"
       value={dest.image}
       onChange={e => onChange(index, 'image', e.target.value)}
@@ -86,7 +86,7 @@ const DestRow = ({ dest, index, onChange, onRemove, canRemove }) => (
 );
 
 // ── Main form modal ──────────────────────────────────────────
-const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
+const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false }) => {
   const isEdit = !!pkg?.id;
   const [form,   setForm]   = useState(emptyPackage());
   const [errors, setErrors] = useState({});
@@ -153,6 +153,11 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
           box-shadow: 0 40px 80px rgba(0,60,50,0.25);
           overflow: hidden;
         }
+        .apfm-modal.dark {
+          background: #0f172a;
+          border: 1px solid rgba(255,255,255,0.12);
+          box-shadow: 0 40px 80px rgba(0,0,0,0.45);
+        }
         /* Teal top strip */
         .apfm-strip {
           height: 3px;
@@ -171,6 +176,7 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
           color: #0d2b2b; letter-spacing: -0.03em;
           margin-top: 4px;
         }
+        .apfm-modal.dark .apfm-header-title { color: #e2e8f0; }
         .apfm-close {
           width: 34px; height: 34px; border-radius: 50%;
           background: rgba(0,176,165,0.08);
@@ -180,6 +186,11 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
           flex-shrink: 0; transition: all 0.2s ease;
         }
         .apfm-close:hover { background: rgba(0,176,165,0.15); }
+        .apfm-modal.dark .apfm-close {
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.12);
+          color: #cbd5e1;
+        }
 
         .apfm-rule { height: 1px; margin: 18px 28px 0; background: linear-gradient(90deg, rgba(0,176,165,0.2), transparent); }
 
@@ -196,6 +207,7 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
           color: #7a9a9a; margin-top: 6px;
           display: flex; align-items: center; gap: 10px;
         }
+        .apfm-modal.dark .apfm-section { color: #94a3b8; }
         .apfm-section::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,rgba(0,176,165,0.15),transparent); }
 
         /* Select */
@@ -210,6 +222,12 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
         }
         .apfm-select:focus { border-color: #00b0a5; background: #fff; }
         .apfm-select.error { border-color: #cc3344; }
+        .apfm-modal.dark .apfm-select {
+          background: #0b1220;
+          border-color: rgba(255,255,255,0.14);
+          color: #e2e8f0;
+        }
+        .apfm-modal.dark .apfm-select:focus { background: #0f172a; }
 
         /* Highlight row */
         .apfm-hl-row { display: flex; gap: 8px; align-items: center; }
@@ -221,6 +239,12 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
           transition: border-color 0.2s;
         }
         .apfm-hl-input:focus { border-color: #00b0a5; background: #fff; }
+        .apfm-modal.dark .apfm-hl-input {
+          background: #0b1220;
+          border-color: rgba(255,255,255,0.14);
+          color: #e2e8f0;
+        }
+        .apfm-modal.dark .apfm-hl-input:focus { background: #0f172a; }
         .apfm-hl-remove {
           width: 28px; height: 28px; border-radius: '50%';
           background: rgba(204,51,68,0.07); border: 1px solid rgba(204,51,68,0.18);
@@ -242,6 +266,11 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
           transition: all 0.2s ease;
         }
         .apfm-add-btn:hover { background: rgba(0,176,165,0.09); border-color: #00b0a5; }
+        .apfm-modal.dark .apfm-add-btn {
+          background: rgba(15,23,42,0.7);
+          border-color: rgba(255,255,255,0.2);
+          color: #2dd4bf;
+        }
 
         /* Footer */
         .apfm-footer {
@@ -249,6 +278,7 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
           padding: 20px 28px 24px;
           border-top: 1px solid rgba(0,176,165,0.1);
         }
+        .apfm-modal.dark .apfm-footer { border-top: 1px solid rgba(255,255,255,0.1); }
         .apfm-save {
           flex: 1; padding: 13px; border-radius: 10px;
           background: #00b0a5; border: none; color: #fff;
@@ -268,6 +298,10 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
           cursor: pointer; transition: all 0.2s ease;
         }
         .apfm-cancel:hover { border-color: #00b0a5; color: #00b0a5; }
+        .apfm-modal.dark .apfm-cancel {
+          border-color: rgba(255,255,255,0.16);
+          color: #cbd5e1;
+        }
 
         /* 2-col grid */
         .apfm-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -282,7 +316,7 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
             onClick={onClose}
           >
             <motion.div
-              className="apfm-modal"
+              className={`apfm-modal ${dark ? 'dark' : ''}`}
               initial={{ opacity: 0, y: 40, scale: 0.97 }}
               animate={{ opacity: 1, y: 0,  scale: 1 }}
               exit={{ opacity: 0, y: 40, scale: 0.97 }}
@@ -307,18 +341,18 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
                 {/* Basic info */}
                 <div className="apfm-section">Basic Information</div>
 
-                <Field label="Package Title *" error={errors.title}>
+                <Field label="Package Title *" error={errors.title} dark={dark}>
                   <input
-                    style={inputStyle(errors.title)}
+                    style={inputStyle(errors.title, dark)}
                     placeholder="e.g. Golden Coast Escape"
                     value={form.title}
                     onChange={e => set('title', e.target.value)}
                   />
                 </Field>
 
-                <Field label="Description *" error={errors.description}>
+                <Field label="Description *" error={errors.description} dark={dark}>
                   <textarea
-                    style={taStyle(errors.description)}
+                    style={taStyle(errors.description, dark)}
                     placeholder="A short compelling description of the package…"
                     value={form.description}
                     onChange={e => set('description', e.target.value)}
@@ -326,7 +360,7 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
                 </Field>
 
                 <div className="apfm-2col">
-                  <Field label="Package Type *" error={errors.type}>
+                  <Field label="Package Type *" error={errors.type} dark={dark}>
                     <select
                       className={`apfm-select ${errors.type ? 'error' : ''}`}
                       value={form.type}
@@ -336,7 +370,7 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
                     </select>
                   </Field>
 
-                  <Field label="Duration (Days) *" error={errors.days}>
+                  <Field label="Duration (Days) *" error={errors.days} dark={dark}>
                     <select
                       className={`apfm-select ${errors.days ? 'error' : ''}`}
                       value={form.days}
@@ -347,9 +381,9 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
                   </Field>
                 </div>
 
-                <Field label="Cover Image URL *" error={errors.image}>
+                <Field label="Cover Image URL *" error={errors.image} dark={dark}>
                   <input
-                    style={inputStyle(errors.image)}
+                    style={inputStyle(errors.image, dark)}
                     placeholder="https://images.unsplash.com/…"
                     value={form.image}
                     onChange={e => set('image', e.target.value)}
@@ -394,6 +428,7 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose }) => {
                     onChange={setDest}
                     onRemove={removeDest}
                     canRemove={form.destinations.length > 1}
+                    dark={dark}
                   />
                 ))}
                 <button className="apfm-add-btn" onClick={addDest}>

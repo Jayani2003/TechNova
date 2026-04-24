@@ -10,6 +10,7 @@ const TYPE_ICONS = {
 };
 
 const AdminPackageFilters = ({
+  dark = false,
   search, onSearch,
   activeType, onTypeChange,
   activeDays, onDaysChange,
@@ -28,6 +29,11 @@ const AdminPackageFilters = ({
           border-bottom: 1px solid rgba(0,176,165,0.1);
           position: sticky; top: 0; z-index: 40;
           box-shadow: 0 4px 20px rgba(0,60,50,0.05);
+        }
+        .apf-wrap.dark {
+          background: rgba(15,23,42,0.95);
+          border-bottom: 1px solid rgba(255,255,255,0.08);
+          box-shadow: 0 12px 28px rgba(0,0,0,0.35);
         }
         .apf-inner {
           max-width: 1280px; margin: 0 auto;
@@ -49,6 +55,7 @@ const AdminPackageFilters = ({
           position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
           color: #7a9a9a; pointer-events: none;
         }
+        .apf-wrap.dark .apf-search-icon { color: #94a3b8; }
         .apf-search {
           width: 100%; padding: 10px 14px 10px 40px;
           border-radius: 10px;
@@ -60,6 +67,16 @@ const AdminPackageFilters = ({
         }
         .apf-search:focus { border-color: #00b0a5; background: #fff; }
         .apf-search::placeholder { color: #9ab8b5; }
+        .apf-wrap.dark .apf-search {
+          background: rgba(2,6,23,0.8);
+          border-color: rgba(255,255,255,0.14);
+          color: #e2e8f0;
+        }
+        .apf-wrap.dark .apf-search:focus {
+          border-color: #00b0a5;
+          background: #0f172a;
+        }
+        .apf-wrap.dark .apf-search::placeholder { color: #64748b; }
 
         /* Count */
         .apf-count {
@@ -68,6 +85,8 @@ const AdminPackageFilters = ({
           color: #5a8080; white-space: nowrap;
         }
         .apf-count b { font-size: 17px; font-weight: 800; color: #0d2b2b; letter-spacing: -0.02em; }
+        .apf-wrap.dark .apf-count { color: #94a3b8; }
+        .apf-wrap.dark .apf-count b { color: #e2e8f0; }
 
         /* Reset */
         .apf-reset {
@@ -91,6 +110,7 @@ const AdminPackageFilters = ({
           letter-spacing: 0.22em; text-transform: uppercase;
           color: #7a9a9a; flex-shrink: 0; min-width: 58px;
         }
+        .apf-wrap.dark .apf-label { color: #94a3b8; }
 
         /* Type pills */
         .apf-pill {
@@ -101,6 +121,11 @@ const AdminPackageFilters = ({
           background: transparent; color: #4a7070;
           cursor: pointer;
           transition: all 0.18s cubic-bezier(0.22,1,0.36,1);
+        }
+        .apf-wrap.dark .apf-pill {
+          border-color: rgba(255,255,255,0.14);
+          color: #cbd5e1;
+          background: rgba(15,23,42,0.6);
         }
         .apf-pill:hover { border-color: #00b0a5; color: #00b0a5; background: rgba(0,176,165,0.05); }
         .apf-pill.active {
@@ -119,6 +144,11 @@ const AdminPackageFilters = ({
           cursor: pointer;
           transition: all 0.18s cubic-bezier(0.22,1,0.36,1);
         }
+        .apf-wrap.dark .apf-day {
+          border-color: rgba(255,255,255,0.14);
+          color: #cbd5e1;
+          background: rgba(15,23,42,0.6);
+        }
         .apf-day:hover { border-color: #00b0a5; color: #00b0a5; background: rgba(0,176,165,0.05); }
         .apf-day.active {
           background: linear-gradient(135deg, #00b0a5, #009e94);
@@ -127,7 +157,7 @@ const AdminPackageFilters = ({
         }
       `}</style>
 
-      <div className="apf-wrap">
+      <div className={`apf-wrap ${dark ? 'dark' : ''}`}>
         <div className="apf-inner">
 
           {/* Top: search + count + reset */}

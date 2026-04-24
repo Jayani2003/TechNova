@@ -12,7 +12,7 @@ const TYPE_ICONS = {
   'Cultural Heritage': '🏛️', 'Adventure': '🧗', 'Wellness & Ayurveda': '🌿',
 };
 
-const AdminPackageTable = ({ packages, onEdit, onDelete }) => {
+const AdminPackageTable = ({ packages, onEdit, onDelete, dark = false }) => {
   if (packages.length === 0) {
     return (
       <div style={{
@@ -20,10 +20,10 @@ const AdminPackageTable = ({ packages, onEdit, onDelete }) => {
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px',
       }}>
         <div style={{ fontSize: '44px' }}>📦</div>
-        <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0d2b2b', letterSpacing: '-0.02em' }}>
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: dark ? '#e2e8f0' : '#0d2b2b', letterSpacing: '-0.02em' }}>
           No packages match your filters
         </h3>
-        <p style={{ fontSize: '14px', fontWeight: 300, color: '#5a8080' }}>
+        <p style={{ fontSize: '14px', fontWeight: 300, color: dark ? '#94a3b8' : '#5a8080' }}>
           Try adjusting your search or filters, or add a new package.
         </p>
       </div>
@@ -37,6 +37,7 @@ const AdminPackageTable = ({ packages, onEdit, onDelete }) => {
           max-width: 1280px; margin: 0 auto;
           padding: 32px 40px 80px;
         }
+        .apt-wrap.dark { color: #cbd5e1; }
         @media(max-width:768px){ .apt-wrap { padding: 20px 16px 60px; } }
 
         /* Section heading */
@@ -46,6 +47,7 @@ const AdminPackageTable = ({ packages, onEdit, onDelete }) => {
           color: #5a8080; margin-bottom: 20px;
           display: flex; align-items: center; gap: 10px;
         }
+        .apt-wrap.dark .apt-heading { color: #94a3b8; }
         .apt-heading::after {
           content: ''; flex: 1; height: 1px;
           background: linear-gradient(90deg, rgba(0,176,165,0.2), transparent);
@@ -59,6 +61,11 @@ const AdminPackageTable = ({ packages, onEdit, onDelete }) => {
           overflow: hidden;
           box-shadow: 0 4px 24px rgba(0,60,50,0.06);
         }
+        .apt-wrap.dark .apt-card {
+          background: rgba(15,23,42,0.85);
+          border: 1px solid rgba(255,255,255,0.08);
+          box-shadow: 0 16px 30px rgba(0,0,0,0.35);
+        }
 
         /* Table */
         .apt-table {
@@ -68,6 +75,10 @@ const AdminPackageTable = ({ packages, onEdit, onDelete }) => {
           background: #f7fffe;
           border-bottom: 1px solid rgba(0,176,165,0.1);
         }
+        .apt-wrap.dark .apt-table thead tr {
+          background: rgba(2,6,23,0.8);
+          border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
         .apt-th {
           padding: 14px 18px;
           text-align: left;
@@ -75,6 +86,7 @@ const AdminPackageTable = ({ packages, onEdit, onDelete }) => {
           letter-spacing: 0.2em; text-transform: uppercase;
           color: #7a9a9a; white-space: nowrap;
         }
+        .apt-wrap.dark .apt-th { color: #94a3b8; }
         .apt-th:last-child { text-align: right; }
 
         .apt-row {
@@ -83,12 +95,17 @@ const AdminPackageTable = ({ packages, onEdit, onDelete }) => {
         }
         .apt-row:last-child { border-bottom: none; }
         .apt-row:hover { background: #f7fffe; }
+        .apt-wrap.dark .apt-row {
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .apt-wrap.dark .apt-row:hover { background: rgba(255,255,255,0.04); }
 
         .apt-td {
           padding: 16px 18px;
           vertical-align: middle;
           font-size: 13.5px; font-weight: 400; color: #3a5a5a;
         }
+        .apt-wrap.dark .apt-td { color: #cbd5e1; }
 
         /* Package identity cell */
         .apt-pkg-cell { display: flex; align-items: center; gap: 14px; }
@@ -109,10 +126,12 @@ const AdminPackageTable = ({ packages, onEdit, onDelete }) => {
           color: #0d2b2b; letter-spacing: -0.02em;
           line-height: 1.2; margin-bottom: 3px;
         }
+        .apt-wrap.dark .apt-pkg-title { color: #e2e8f0; }
         .apt-pkg-id {
           font-size: 10px; font-weight: 400; color: #9ab8b5;
           font-family: monospace; letter-spacing: 0.02em;
         }
+        .apt-wrap.dark .apt-pkg-id { color: #64748b; }
 
         /* Type badge */
         .apt-type-badge {
@@ -136,12 +155,14 @@ const AdminPackageTable = ({ packages, onEdit, onDelete }) => {
         .apt-dest-count {
           font-size: 12px; font-weight: 600; color: #5a8080;
         }
+        .apt-wrap.dark .apt-dest-count { color: #cbd5e1; }
         .apt-dest-names {
           font-size: 11px; font-weight: 300; color: #9ab8b5;
           margin-top: 2px;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
           max-width: 180px;
         }
+        .apt-wrap.dark .apt-dest-names { color: #94a3b8; }
 
         /* Actions */
         .apt-actions { display: flex; gap: 8px; justify-content: flex-end; }
@@ -177,7 +198,7 @@ const AdminPackageTable = ({ packages, onEdit, onDelete }) => {
         }
       `}</style>
 
-      <div className="apt-wrap">
+      <div className={`apt-wrap ${dark ? 'dark' : ''}`}>
         <div className="apt-heading">All Packages</div>
         <div className="apt-card">
           <table className="apt-table">

@@ -1,47 +1,98 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import GalleryForm from './GalleryForm';
 import GalleryTable from './GalleryTable';
 
 const AddGallery = () => {
   const dark = useOutletContext()?.dark ?? false;
-
-  const [items, setItems] = useState([
-    { id: 1, title: 'Classic Sports Car', category: 'VEHICLE', description: 'A sleek, cherry red classic sports car...', url: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400' },
-  ]);
+  const [items, setItems] = useState([]);
   const [editingItem, setEditingItem] = useState(null);
-  
-
   const [notification, setNotification] = useState({
     show: false,
     message: '',
     type: 'success'
   });
 
+  // 1. Load data from backend on component mount
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const fetchItems = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/gallery');
+      const data = await response.json();
+      setItems(data);
+    } catch (error) {
+      console.error("Error fetching gallery:", error);
+    }
+  };
+
   const triggerNotification = (message, type = 'success') => {
     setNotification({ show: true, message, type });
     setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 3000);
   };
 
-  const handleSubmit = (formData) => {
-    if (!editingItem) {
-      const isDuplicate = items.some(
-        (item) => item.description.toLowerCase().trim() === formData.description.toLowerCase().trim()
-      );
-
-      if (isDuplicate) {
-        triggerNotification("This item already exists in the gallery. Please use a different description.", "error");
-        return;
-      }
+  // 2. Handle Create and Update
+  const handleSubmit = async (formData) => {
+    // We use FormData to handle the physical image file
+    const data = new FormData();
+    data.append('title', formData.title);
+    data.append('category', formData.category);
+    data.append('description', formData.description);
+    
+    // Ensure 'image' matches the key your backend Multer middleware expects
+    if (formData.file) {
+      data.append('image', formData.file);
     }
 
-    if (editingItem) {
-      setItems(items.map(item => item.id === editingItem.id ? { ...item, ...formData } : item));
+    try {
+      const url = editingItem 
+        ? `http://localhost:5000/api/gallery/${editingItem.id}` 
+        : 'http://localhost:5000/api/gallery';
+      
+      const method = editingItem ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method: method,
+        body: data, // No JSON.stringify for FormData
+      });
+
+      if (!response.ok) throw new Error('Failed to save item');
+
+      const savedItem = await response.json();
+
+      if (editingItem) {
+        setItems(items.map(item => item.id === editingItem.id ? savedItem : item));
+        triggerNotification("Changes applied successfully!", "success");
+      } else {
+        setItems([savedItem, ...items]);
+        triggerNotification("New image published to Cloudinary!", "success");
+      }
       setEditingItem(null);
-      triggerNotification("Changes applied successfully!", "success");
-    } else {
-      setItems([{ ...formData, id: Date.now() }, ...items]);
-      triggerNotification("New image published successfully!", "success");
+    } catch (error) {
+      console.error("Submit error:", error);
+      triggerNotification("Error connecting to server", "error");
+    }
+  };
+
+  // 3. Handle Delete
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/gallery/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setItems(items.filter(i => i.id !== id));
+        triggerNotification("Item removed successfully", "success");
+      } else {
+        throw new Error('Delete failed');
+      }
+    } catch (error) {
+      triggerNotification("Could not delete item", "error");
     }
   };
 
@@ -57,10 +108,7 @@ const AddGallery = () => {
               ${notification.type === 'success' ? 'bg-[#22c55e]' : 'bg-[#ef4444]'}`}>
               {notification.type === 'success' ? '✓' : '!'}
             </div>
-
-            <span className="text-sm font-bold tracking-tight">
-              {notification.message}
-            </span>
+            <span className="text-sm font-bold tracking-tight">{notification.message}</span>
           </div>
         )}
 
@@ -78,10 +126,7 @@ const AddGallery = () => {
             dark={dark}
             items={items}
             onEdit={setEditingItem}
-            onDelete={(id) => {
-              setItems(items.filter(i => i.id !== id));
-              triggerNotification("Item removed successfully", "success");
-            }}
+            onDelete={handleDelete}
           />
         </div>
       </div>

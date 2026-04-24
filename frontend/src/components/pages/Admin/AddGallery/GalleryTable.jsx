@@ -31,7 +31,7 @@ const GalleryTable = ({ items, onEdit, onDelete, dark = false }) => {
                 </td>
                 <td className="px-4 py-4">
                   <span className={`px-2 py-1 rounded text-[9px] font-black tracking-tight border ${
-                    item.category === 'VEHICLE'
+                    item.category === 'Vehicles'
                       ? dark ? 'bg-indigo-500/20 text-indigo-200 border-indigo-400/40' : 'bg-indigo-100 text-indigo-700 border-indigo-200'
                       : dark ? 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40' : 'bg-emerald-100 text-emerald-700 border-emerald-200'
                   }`}>

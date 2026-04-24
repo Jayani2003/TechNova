@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Upload } from 'lucide-react';
 
 const GalleryForm = ({ editingItem, onSubmit, onCancel, dark = false }) => {
-  const initialState = { title: '', category: 'VEHICLE', description: '', url: '' };
+  const initialState = { title: '', category: 'Vehicles', description: '', url: '', file: null };
   const [formData, setFormData] = useState(initialState);
   const fileInputRef = useRef(null);
 
@@ -10,9 +10,10 @@ const GalleryForm = ({ editingItem, onSubmit, onCancel, dark = false }) => {
     if (editingItem) {
       setFormData({ 
         title: editingItem.title || '',
-        category: editingItem.category, 
+        category: editingItem.category || 'Vehicles', 
         description: editingItem.description, 
-        url: editingItem.url 
+        url: editingItem.url || editingItem.image_url || '',
+        file: null 
       });
     } else {
       setFormData(initialState);
@@ -24,7 +25,7 @@ const GalleryForm = ({ editingItem, onSubmit, onCancel, dark = false }) => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData({ ...formData, url: reader.result });
+        setFormData((current) => ({ ...current, url: reader.result, file }));
       };
       reader.readAsDataURL(file);
     }
@@ -100,9 +101,9 @@ const GalleryForm = ({ editingItem, onSubmit, onCancel, dark = false }) => {
                 value={formData.category}
                 onChange={(e) => setFormData({...formData, category: e.target.value})}
               >
-                <option value="VEHICLE">VEHICLE</option>
-                <option value="TRAVEL PHOTOS">TRAVEL PHOTOS</option>
-                <option value="PACKAGE PHOTOS">PACKAGE PHOTOS</option>
+                <option value="Vehicles">Vehicles</option>
+                <option value="Traveler Photos">Traveler Photos</option>
+                <option value="Packages Photos">Packages Photos</option>
               </select>
             </div>
           </div>

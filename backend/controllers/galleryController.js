@@ -17,7 +17,15 @@ exports.addGalleryItem = async (req, res) => {
             return res.status(400).json({ error: 'Image file is required.' });
         }
 
-        const image_url = req.file.path;
+        // Multer Cloudinary storage can put the uploaded URL in different fields
+        // depending on versions. Prefer `path`, then `url`, `secure_url`, `location`, `filename`.
+        const image_url = req.file.path || req.file.url || req.file.secure_url || req.file.location || req.file.filename || null;
+
+        if (!image_url) {
+            // Log the whole file object to help debugging when uploads succeed but no URL is present
+            // (visible in server console)
+            console.warn('Uploaded file did not contain a recognizable URL:', req.file);
+        }
 
         const sql = "INSERT INTO gallery (title, category, image_url, description) VALUES (?, ?, ?, ?)";
         const [result] = await db.execute(sql, [title, category, image_url, description]);
@@ -50,7 +58,13 @@ exports.updateGalleryItem = async (req, res) => {
             return res.status(404).json({ error: 'Gallery item not found.' });
         }
 
-        const image_url = req.file ? req.file.path : existingRows[0].image_url;
+        const image_url = req.file
+            ? (req.file.path || req.file.url || req.file.secure_url || req.file.location || req.file.filename || null)
+            : existingRows[0].image_url;
+
+        if (req.file && !image_url) {
+            console.warn('Updated file did not contain a recognizable URL:', req.file);
+        }
 
         await db.execute(
             'UPDATE gallery SET title = ?, category = ?, image_url = ?, description = ? WHERE gallery_id = ?',

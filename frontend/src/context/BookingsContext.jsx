@@ -1,10 +1,8 @@
+// context/BookingsContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 
 const BookingsContext = createContext();
-
 const STORAGE_KEY = "ceylon_bookings";
-
-const initialBookings = [];
 
 const loadBookings = () => {
   try {
@@ -13,7 +11,7 @@ const loadBookings = () => {
   } catch (e) {
     console.error("Failed to load bookings from localStorage:", e);
   }
-  return initialBookings;
+  return [];
 };
 
 export const BookingsProvider = ({ children }) => {
@@ -33,6 +31,7 @@ export const BookingsProvider = ({ children }) => {
       id: `BK${Date.now()}`,
       status: "PENDING",
       quotedPrice: null,
+      assignedVehicle: null,   // added: admin assigns vehicle when quoting
       vehicleId: null,
       createdAt: new Date().toISOString().split("T")[0],
       ...bookingData,
@@ -41,7 +40,7 @@ export const BookingsProvider = ({ children }) => {
     return newBooking;
   };
 
-  // ── Accept a quoted price ──────────────────────────────────────────────────
+  // ── Customer: accept quoted price ──────────────────────────────────────────
   const acceptQuote = (bookingId) => {
     setBookings((prev) =>
       prev.map((b) =>
@@ -50,7 +49,7 @@ export const BookingsProvider = ({ children }) => {
     );
   };
 
-  // ── Reject a quoted price ──────────────────────────────────────────────────
+  // ── Customer: reject quoted price ──────────────────────────────────────────
   const rejectQuote = (bookingId) => {
     setBookings((prev) =>
       prev.map((b) =>
@@ -59,12 +58,26 @@ export const BookingsProvider = ({ children }) => {
     );
   };
 
-  // ── Admin: set quoted price ────────────────────────────────────────────────
-  const setQuotedPrice = (bookingId, price) => {
+  // ── Customer or Admin: cancel booking ─────────────────────────────────────
+  const cancelBooking = (bookingId) => {
+    setBookings((prev) =>
+      prev.map((b) =>
+        b.id === bookingId ? { ...b, status: "CANCELLED" } : b
+      )
+    );
+  };
+
+  // ── Admin: set quoted price AND assign vehicle ─────────────────────────────
+  const setQuotedPrice = (bookingId, price, vehicleInfo = null) => {
     setBookings((prev) =>
       prev.map((b) =>
         b.id === bookingId
-          ? { ...b, status: "QUOTED", quotedPrice: price }
+          ? {
+              ...b,
+              status: "QUOTED",
+              quotedPrice: price,
+              assignedVehicle: vehicleInfo,  // { name, plateNumber, type }
+            }
           : b
       )
     );
@@ -86,7 +99,7 @@ export const BookingsProvider = ({ children }) => {
   // ── Get all bookings (admin) ───────────────────────────────────────────────
   const getAllBookings = () => bookings;
 
-  // ── Get pending bookings count (admin badge) ───────────────────────────────
+  // ── Get pending count (for admin badge) ────────────────────────────────────
   const getPendingCount = () =>
     bookings.filter((b) => b.status === "PENDING").length;
 
@@ -97,6 +110,7 @@ export const BookingsProvider = ({ children }) => {
         addBooking,
         acceptQuote,
         rejectQuote,
+        cancelBooking,
         setQuotedPrice,
         updateBookingStatus,
         getCustomerBookings,
@@ -111,8 +125,6 @@ export const BookingsProvider = ({ children }) => {
 
 export const useBookings = () => {
   const context = useContext(BookingsContext);
-  if (!context) {
-    throw new Error("useBookings must be used within a BookingsProvider");
-  }
+  if (!context) throw new Error("useBookings must be used within a BookingsProvider");
   return context;
 };

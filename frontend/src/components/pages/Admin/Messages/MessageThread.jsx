@@ -26,7 +26,7 @@ const MessageThread = ({ message, getStatusColor, onReply }) => {
     if (!replyText.trim()) return;
     onReply(message.id, {
       from: "admin",
-      fromName: "Lanka Wheels Support",
+      fromName: "Ceylon Best Tours",
       message: replyText,
     });
     setReplyText("");

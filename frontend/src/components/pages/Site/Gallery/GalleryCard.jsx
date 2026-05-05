@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
 
 const GalleryCard = ({ item, onClick }) => (
   <motion.div
@@ -7,9 +6,9 @@ const GalleryCard = ({ item, onClick }) => (
     layoutId={`card-${item.id}`}
     whileHover={{ y: -5 }}
     onClick={() => onClick(item)}
-    className="group relative bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 border border-slate-100 cursor-pointer"
+    className="group relative h-80 bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 border border-slate-100 cursor-pointer"
   >
-    <div className="aspect-[4/5] overflow-hidden">
+    <div className="h-full overflow-hidden">
       <img 
         src={item.img} 
         className="w-full h-full object-cover" 

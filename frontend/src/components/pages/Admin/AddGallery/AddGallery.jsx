@@ -112,9 +112,12 @@ const AddGallery = () => {
           </div>
         )}
 
-        <h1 className={`text-4xl font-black mb-10 tracking-tight ${dark ? 'text-slate-100' : 'text-slate-800'}`}>Manage Media Gallery</h1>
+        <div className={`mb-8 p-8 rounded-3xl border ${dark ? 'bg-gradient-to-br from-slate-800/60 to-slate-900/40 border-white/8' : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100/50'}`}>
+          <h1 className={`text-4xl font-black tracking-tight mb-2 ${dark ? 'text-slate-100' : 'text-slate-800'}`}>Manage Media Gallery</h1>
+          <p className={`text-sm font-medium ${dark ? 'text-slate-400' : 'text-slate-600'}`}>Upload and manage gallery images for your tours and packages</p>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="space-y-10">
           <GalleryForm
             dark={dark}
             editingItem={editingItem}

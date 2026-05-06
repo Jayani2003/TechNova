@@ -1,4 +1,43 @@
+const cloudinary = require('cloudinary').v2;
 const db = require('../db/connection');
+
+const extractCloudinaryPublicId = (imageUrl) => {
+    if (!imageUrl || typeof imageUrl !== 'string') {
+        return null;
+    }
+
+    const uploadMarker = '/upload/';
+    const uploadIndex = imageUrl.indexOf(uploadMarker);
+    if (uploadIndex !== -1) {
+        const uploadPath = imageUrl.slice(uploadIndex + uploadMarker.length).split('?')[0];
+        const pathWithoutVersion = uploadPath.replace(/^v\d+\//, '');
+        return decodeURIComponent(pathWithoutVersion.replace(/\.[^.]+$/, ''));
+    }
+
+    const lastSegment = imageUrl.split('/').pop();
+    if (!lastSegment) {
+        return null;
+    }
+
+    return decodeURIComponent(lastSegment.split('?')[0].replace(/\.[^.]+$/, ''));
+};
+
+const deleteCloudinaryImage = async (imageUrl) => {
+    const publicId = extractCloudinaryPublicId(imageUrl);
+
+    if (!publicId) {
+        return;
+    }
+
+    try {
+        await cloudinary.uploader.destroy(publicId, {
+            resource_type: 'image',
+            invalidate: true,
+        });
+    } catch (error) {
+        console.warn(`Failed to delete Cloudinary image ${publicId}:`, error.message);
+    }
+};
 
 const mapGalleryRow = (row) => ({
 	id: row.gallery_id,
@@ -82,11 +121,15 @@ exports.deleteGalleryItem = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const [result] = await db.execute('DELETE FROM gallery WHERE gallery_id = ?', [id]);
+		const [existingRows] = await db.execute('SELECT * FROM gallery WHERE gallery_id = ?', [id]);
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Gallery item not found.' });
-        }
+		if (existingRows.length === 0) {
+			return res.status(404).json({ error: 'Gallery item not found.' });
+		}
+
+		await deleteCloudinaryImage(existingRows[0].image_url);
+
+        const [result] = await db.execute('DELETE FROM gallery WHERE gallery_id = ?', [id]);
 
         res.status(204).send();
     } catch (error) {

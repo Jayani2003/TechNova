@@ -1,19 +1,14 @@
+// components/pages/User/MyBookings/MyBookingDetail.jsx
 import { motion } from "framer-motion";
 import { ArrowLeft, MapPin, Calendar, Users, Car, Phone, FileText, Clock, Baby, Briefcase, Check, X } from "lucide-react";
 import { STATUS_STYLES, TOUR_TYPE_LABEL } from "./MyBookingCard";
 import { useBookings } from "../../../../context/BookingsContext.jsx";
- 
+
 const VEHICLE_LABELS = {
-  mini_car:   "Mini Car",
-  normal_car: "Normal Car",
-  sedan_car:  "Sedan Car",
-  mpv:        "MPV",
-  suv:        "SUV",
-  mini_van:   "Mini Van",
-  van:        "Van",
-  large_van:  "Large Van",
+  mini_car: "Mini Car", normal_car: "Normal Car", sedan_car: "Sedan Car",
+  mpv: "MPV", suv: "SUV", mini_van: "Mini Van", van: "Van", large_van: "Large Van",
 };
- 
+
 const DetailRow = ({ icon: Icon, label, value }) =>
   value !== undefined && value !== "" && value !== null ? (
     <div className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
@@ -26,23 +21,23 @@ const DetailRow = ({ icon: Icon, label, value }) =>
       </div>
     </div>
   ) : null;
- 
-const Section = ({ title, children }) => (
-  <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-4">
-    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{title}</p>
+
+const Section = ({ title, children, accent }) => (
+  <div className={`bg-white rounded-2xl border shadow-sm p-5 mb-4 ${accent ? "border-[#00b0a5]/20" : "border-slate-100"}`}>
+    <p className={`text-xs font-bold uppercase tracking-wider mb-2 ${accent ? "text-[#00b0a5]" : "text-slate-400"}`}>{title}</p>
     {children}
   </div>
 );
- 
+
 const MyBookingDetail = ({ booking, onBack }) => {
-  const { acceptQuote, rejectQuote } = useBookings();
- 
-  const statusSteps = [
-    "PENDING", "QUOTED", "ACCEPTED", "CONFIRMED",
-    "TOUR_STARTED", "COMPLETED", "CLOSED",
-  ];
+  const { acceptQuote, rejectQuote, cancelBooking } = useBookings();
+
+  const statusSteps = ["PENDING", "QUOTED", "ACCEPTED", "CONFIRMED", "TOUR_STARTED", "COMPLETED", "CLOSED"];
   const currentStepIndex = statusSteps.indexOf(booking.status);
- 
+
+  // Customer can cancel from ACCEPTED or CONFIRMED
+  const canCancel = ["ACCEPTED", "CONFIRMED"].includes(booking.status);
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 30 }}
@@ -53,36 +48,30 @@ const MyBookingDetail = ({ booking, onBack }) => {
     >
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={onBack}
-          className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors cursor-pointer"
-        >
+        <button onClick={onBack} className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors cursor-pointer">
           <ArrowLeft className="w-4 h-4 text-slate-600" />
         </button>
         <div className="flex-1">
           <h2 className="text-lg font-bold text-slate-800">{booking.id}</h2>
-          <p className="text-xs text-slate-500">{TOUR_TYPE_LABEL[booking.tourType]}</p>
+          <p className="text-xs text-slate-500">{TOUR_TYPE_LABEL[booking.tourType] || booking.tourType}</p>
         </div>
         <span className={`text-xs px-3 py-1.5 rounded-full font-bold ${STATUS_STYLES[booking.status] || "bg-slate-100 text-slate-600"}`}>
-          {booking.status}
+          {booking.status.replace("_", " ")}
         </span>
       </div>
- 
-      <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-        {/* Status Timeline */}
+
+      <div className="flex-1 overflow-y-auto space-y-0 pr-1">
+
+        {/* Status timeline */}
         <Section title="Booking Progress">
           <div className="flex items-center gap-1 flex-wrap">
             {statusSteps.map((step, i) => {
-              const isDone = i <= currentStepIndex;
+              const isDone    = i <= currentStepIndex;
               const isCurrent = i === currentStepIndex;
               return (
                 <div key={step} className="flex items-center gap-1">
                   <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold transition-all ${
-                    isCurrent
-                      ? "bg-[#00b0a5] text-white"
-                      : isDone
-                      ? "bg-[#00b0a5]/20 text-[#00b0a5]"
-                      : "bg-slate-100 text-slate-400"
+                    isCurrent ? "bg-[#00b0a5] text-white" : isDone ? "bg-[#00b0a5]/20 text-[#00b0a5]" : "bg-slate-100 text-slate-400"
                   }`}>
                     {isDone && !isCurrent && <Check className="w-2.5 h-2.5" />}
                     {step.replace("_", " ")}
@@ -94,86 +83,129 @@ const MyBookingDetail = ({ booking, onBack }) => {
               );
             })}
           </div>
-        </Section>
- 
-        {/* Quote Action */}
-        {booking.status === "QUOTED" && (
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
-            <p className="text-sm font-bold text-slate-800 mb-1">Price Quote Received!</p>
-            <p className="text-2xl font-bold text-[#00b0a5] mb-3">${booking.quotedPrice}</p>
-            <p className="text-xs text-slate-500 mb-4">
-              Please accept or reject this quote to proceed with your booking.
+          {booking.status === "CANCELLED" && (
+            <p className="mt-3 text-xs text-red-500 font-semibold bg-red-50 rounded-xl px-3 py-2">
+              ❌ This booking has been cancelled.
             </p>
+          )}
+          {booking.status === "REJECTED" && (
+            <p className="mt-3 text-xs text-red-500 font-semibold bg-red-50 rounded-xl px-3 py-2">
+              ❌ You rejected this quote. Feel free to submit a new booking.
+            </p>
+          )}
+        </Section>
+
+        {/* ── QUOTED — accept or reject ── */}
+        {booking.status === "QUOTED" && (
+          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-4">
+            <p className="text-sm font-bold text-slate-800 mb-1">🎉 Price Quote Received!</p>
+            <p className="text-2xl font-bold text-[#00b0a5] mb-1">${booking.quotedPrice}</p>
+
+            {/* Show assigned vehicle to customer */}
+            {booking.assignedVehicle && (
+              <div className="bg-white rounded-xl border border-blue-100 px-4 py-3 mb-3">
+                <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Your Assigned Vehicle</p>
+                <p className="text-sm font-bold text-slate-800">
+                  🚗 {booking.assignedVehicle.name}
+                </p>
+                <p className="text-xs text-slate-500 font-mono mt-0.5">
+                  {booking.assignedVehicle.plateNumber} · {booking.assignedVehicle.type}
+                </p>
+              </div>
+            )}
+
+            <p className="text-xs text-slate-500 mb-4">Accept to proceed, or reject to cancel this booking.</p>
             <div className="flex gap-3">
-              <button
-                onClick={() => acceptQuote(booking.id)}
-                className="flex-1 flex items-center justify-center gap-2 bg-[#00b0a5] text-white py-2.5 rounded-xl font-semibold hover:bg-[#009b91] transition-colors cursor-pointer"
-              >
+              <button onClick={() => acceptQuote(booking.id)}
+                className="flex-1 flex items-center justify-center gap-2 bg-[#00b0a5] text-white py-2.5 rounded-xl font-semibold hover:bg-[#009b91] transition-colors cursor-pointer">
                 <Check className="w-4 h-4" /> Accept Quote
               </button>
-              <button
-                onClick={() => rejectQuote(booking.id)}
-                className="flex-1 flex items-center justify-center gap-2 border border-red-200 text-red-600 py-2.5 rounded-xl font-semibold hover:bg-red-50 transition-colors cursor-pointer"
-              >
+              <button onClick={() => rejectQuote(booking.id)}
+                className="flex-1 flex items-center justify-center gap-2 border border-red-200 text-red-600 py-2.5 rounded-xl font-semibold hover:bg-red-50 transition-colors cursor-pointer">
                 <X className="w-4 h-4" /> Reject
               </button>
             </div>
           </div>
         )}
- 
-        {/* Trip Details */}
+
+        {/* ── CONFIRMED — show vehicle info ── */}
+        {["CONFIRMED", "TOUR_STARTED", "COMPLETED", "CLOSED"].includes(booking.status) && booking.assignedVehicle && (
+          <Section title="Your Assigned Vehicle" accent>
+            <div className="flex items-center gap-3 mt-1">
+              <div className="w-10 h-10 bg-[#00b0a5]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Car className="w-5 h-5 text-[#00b0a5]" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-800">{booking.assignedVehicle.name}</p>
+                <p className="text-xs text-slate-500 font-mono">{booking.assignedVehicle.plateNumber} · {booking.assignedVehicle.type}</p>
+              </div>
+              <div className="ml-auto text-right">
+                <p className="text-xs text-slate-400">Price Paid</p>
+                <p className="text-lg font-extrabold text-[#00b0a5]">${booking.quotedPrice}</p>
+              </div>
+            </div>
+          </Section>
+        )}
+
+        {/* ── CANCEL button (customer) ── */}
+        {canCancel && (
+          <div className="mb-4 bg-red-50 border border-red-100 rounded-2xl p-4">
+            <p className="text-xs text-slate-500 mb-3">
+              Need to cancel? You can cancel this booking. Please note cancellation policies may apply.
+            </p>
+            <button
+              onClick={() => cancelBooking(booking.id)}
+              className="flex items-center gap-2 border border-red-300 text-red-600 bg-white px-5 py-2.5 rounded-xl font-semibold hover:bg-red-50 transition-colors cursor-pointer text-sm"
+            >
+              <X className="w-4 h-4" /> Cancel This Booking
+            </button>
+          </div>
+        )}
+
+        {/* Trip details */}
         <Section title="Trip Details">
           {booking.tourType === "P2P" && (
             <>
-              <DetailRow icon={MapPin} label="Pickup Location" value={booking.startLocation} />
-              <DetailRow icon={MapPin} label="Drop-off Location" value={booking.endLocation} />
+              <DetailRow icon={MapPin} label="Pickup Location"   value={booking.startLocation || booking.pickupLocation} />
+              <DetailRow icon={MapPin} label="Drop-off Location" value={booking.endLocation || booking.dropoffLocation} />
             </>
           )}
-          <DetailRow icon={Calendar} label="Start Date" value={booking.startDate} />
-          <DetailRow icon={Calendar} label="End Date" value={booking.endDate} />
-          <DetailRow icon={Clock} label="Pickup Time" value={booking.pickupTime} />
-          <DetailRow icon={Calendar} label="Total Days" value={booking.totalDays ? `${booking.totalDays} day(s)` : null} />
+          <DetailRow icon={Calendar} label="Start Date"   value={booking.startDate} />
+          <DetailRow icon={Calendar} label="End Date"     value={booking.endDate} />
+          <DetailRow icon={Clock}    label="Pickup Time"  value={booking.pickupTime} />
+          <DetailRow icon={Calendar} label="Total Days"   value={booking.totalDays ? `${booking.totalDays} day(s)` : null} />
         </Section>
- 
+
         {/* Passengers */}
         <Section title="Passengers & Vehicle">
-          <DetailRow icon={Users} label="Adults" value={booking.noOfAdults ? `${booking.noOfAdults} adult(s)` : null} />
+          <DetailRow icon={Users}    label="Adults"    value={booking.noOfAdults ? `${booking.noOfAdults} adult(s)` : null} />
           {booking.noOfChildren > 0 && (
             <DetailRow icon={Users} label="Children" value={`${booking.noOfChildren} child(ren) — Ages: ${booking.agesOfChildren || "not specified"}`} />
           )}
-          {booking.babySeatNeeded && (
-            <DetailRow icon={Baby} label="Baby Seat" value="Required" />
-          )}
-          <DetailRow
-            icon={Briefcase}
-            label="Luggage"
-            value={
-              (booking.smallLuggages !== undefined || booking.largeLuggages !== undefined)
-                ? `${booking.smallLuggages || 0} small, ${booking.largeLuggages || 0} large`
-                : booking.noOfLuggages
-                ? `${booking.noOfLuggages} piece(s)`
-                : null
-            }
-          />
-          <DetailRow icon={Car} label="Vehicle Category" value={VEHICLE_LABELS[booking.categoryId] || booking.categoryId} />
+          {booking.babySeatNeeded && <DetailRow icon={Baby} label="Baby Seat" value="Required" />}
+          <DetailRow icon={Briefcase} label="Luggage"
+            value={(booking.smallLuggages !== undefined || booking.largeLuggages !== undefined)
+              ? `${booking.smallLuggages || 0} small, ${booking.largeLuggages || 0} large`
+              : booking.noOfLuggages ? `${booking.noOfLuggages} piece(s)` : null} />
+          <DetailRow icon={Car} label="Requested Category" value={VEHICLE_LABELS[booking.categoryId] || booking.categoryId} />
         </Section>
- 
+
         {/* Contact */}
         <Section title="Contact Details">
-          <DetailRow icon={Phone} label="Name" value={booking.customerName} />
-          <DetailRow icon={Phone} label="Phone" value={booking.customerPhone} />
+          <DetailRow icon={Phone}    label="Name"  value={booking.customerName} />
+          <DetailRow icon={Phone}    label="Phone" value={booking.customerPhone} />
           {booking.notes && <DetailRow icon={FileText} label="Notes" value={booking.notes} />}
         </Section>
- 
-        {/* Submitted */}
+
+        {/* Booking info */}
         <Section title="Booking Info">
-          <DetailRow icon={Calendar} label="Submitted On" value={booking.createdAt} />
-          <DetailRow icon={FileText} label="Booking Reference" value={booking.id} />
+          <DetailRow icon={Calendar}  label="Submitted On"        value={booking.createdAt} />
+          <DetailRow icon={FileText}  label="Booking Reference"   value={booking.id} />
         </Section>
+
       </div>
     </motion.div>
   );
 };
- 
+
 export default MyBookingDetail;
- 

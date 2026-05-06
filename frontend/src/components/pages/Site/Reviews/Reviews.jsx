@@ -7,6 +7,7 @@ import ReviewStats      from './ReviewStats';
 import ReviewGrid       from './ReviewGrid';
 import ReviewFormModal  from './ReviewFormModal';
 import { mockReviews }  from './reviewsData';
+import { getCountryFlag } from './countryFlags';
 import {
   fetchPublishedReviews,
   fetchReviewableTours,
@@ -131,7 +132,7 @@ const Reviews = () => {
       user: {
         name: user?.name || 'You',
         country: user?.country || 'Sri Lanka',
-        countryFlag: '🏳️',
+        countryFlag: getCountryFlag(user?.country),
         avatar: null,
       },
       tourTitle:     selectedTour?.packageTitle || 'Tour Booking',
@@ -164,6 +165,8 @@ const Reviews = () => {
       const tours = user?.email ? await fetchReviewableTours(user.email) : [];
       setServerReviewableTours(tours);
       setModalOpen(false);
+      // Notify other parts of the app that reviews updated
+      try { window.dispatchEvent(new Event('reviews:updated')); } catch (e) { /* ignore */ }
       return true;
     } catch (e) {
       console.error('Review submit failed:', e);
@@ -174,6 +177,7 @@ const Reviews = () => {
         return next;
       });
       setModalOpen(false);
+      try { window.dispatchEvent(new Event('reviews:updated')); } catch (err) { /* ignore */ }
       return true;
     }
   };

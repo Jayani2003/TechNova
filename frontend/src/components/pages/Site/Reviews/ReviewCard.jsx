@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDate } from './reviewsData';
+import { getCountryFlag } from './countryFlags';
 
 
 
@@ -213,7 +214,7 @@ const ReviewCard = ({ review, index = 0 }) => {
           <div className="rvc-user-info">
             <div className="rvc-name">{review.user.name}</div>
             <div className="rvc-meta">
-              <span className="rvc-country">{review.user.countryFlag} {review.user.country}</span>
+              <span className="rvc-country">{getCountryFlag(review.user.country || review.user.countryFlag)} {review.user.country}</span>
               <span className="rvc-dot" />
               <span className="rvc-date">{formatDate(review.datePublished)}</span>
             </div>

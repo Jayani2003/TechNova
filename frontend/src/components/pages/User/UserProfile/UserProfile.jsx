@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router';
 import { 
   Camera, Mail, User as UserIcon, Phone, MapPin, Globe, Hash, 
   Edit3, Check, LayoutDashboard, CreditCard, Shield, CalendarDays, Lock, 
-  CreditCard as CardIcon, MessageCircle
+  CreditCard as CardIcon, MessageCircle, Star
 } from 'lucide-react';
 import MyMessageList from '../MyMessages/MyMessageList';
 import MyMessageThread from '../MyMessages/MyMessageThread';
@@ -13,6 +13,8 @@ import MyMessageEmpty from '../MyMessages/MyMessageEmpty';
 import { useMessages } from '../../../../context/MessagesContext.jsx';
 import { useBookings } from '../../../../context/BookingsContext.jsx';
 import MyBookings from '../MyBookings/MyBookings';
+import MyReviews from '../MyReviews/MyReviews';
+
 
 function UserProfile() {
   const { user } = useContext(AuthContext);
@@ -65,12 +67,25 @@ function UserProfile() {
   const navTabs = [
     { id: 'dashboard', label: 'My Dashboard', icon: LayoutDashboard },
     { id: 'bookings', label: 'My Bookings', icon: CalendarDays },
+    { id: 'reviews', label: 'My Reviews', icon: Star },
     { id: 'messages', label: 'My Messages', icon: MessageCircle },
     { id: 'payments', label: 'Payments', icon: CreditCard },
     { id: 'security', label: 'Security', icon: Shield },
   ];
 
   // ================= TABS COMPONENTS =================
+
+  const ReviewsTab = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.3 }}
+      className="h-full"
+    >
+      <MyReviews isEmbedded={true} />
+    </motion.div>
+  );
 
   const DashboardTab = () => (
     <motion.div
@@ -529,6 +544,7 @@ const PaymentsTab = () => {
           <AnimatePresence mode="wait">
             {activeTab === 'dashboard' && <DashboardTab key="dashboard" />}
             {activeTab === 'bookings' && <BookingsTab key="bookings" />}
+            {activeTab === 'reviews' && <ReviewsTab key="reviews" />}
             {activeTab === 'messages' && <MessagesTab key="messages" />}
             {activeTab === 'payments' && <PaymentsTab key="payments" />}
             {activeTab === 'security' && <SecurityTab key="security" />}

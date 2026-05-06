@@ -19,7 +19,7 @@ const ReviewHero = ({ onAddReview, isLoggedIn }) => (
         transition={{ duration: 0.8 }}
       >
         <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
-          Verified Traveller Experiences
+          Amazing Traveller Experiences
         </span>
         <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 tracking-tight">
           Guest <span className="text-[#00b0a5]">Reviews.</span>

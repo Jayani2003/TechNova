@@ -9,19 +9,33 @@ const SORT_OPTIONS = [
 ];
 
 const STAR_FILTERS = ['All', '5', '4', '3', '2', '1'];
+const BOOKING_TYPE_FILTERS = ['All', 'Package Tour', 'Customised Tours', 'Point to Point Tours'];
+
+const normalizeBookingType = (tourType = '') => {
+  const value = String(tourType).toLowerCase();
+  if (value.includes('custom')) return 'Customised Tours';
+  if (value === 'p2p' || value.includes('point')) return 'Point to Point Tours';
+  if (value.includes('package')) return 'Package Tour';
+  if (value.includes('beach') || value.includes('hill') || value.includes('safari')) return 'Package Tour';
+  return 'Package Tour';
+};
 
 const ReviewGrid = ({ reviews }) => {
   const [sort,       setSort]       = useState('newest');
   const [starFilter, setStarFilter] = useState('All');
+  const [bookingTypeFilter, setBookingTypeFilter] = useState('All');
 
   const processed = useMemo(() => {
     let list = [...reviews];
     if (starFilter !== 'All') list = list.filter(r => r.stars === Number(starFilter));
+    if (bookingTypeFilter !== 'All') {
+      list = list.filter(r => normalizeBookingType(r.tourType) === bookingTypeFilter);
+    }
     if (sort === 'newest')  list.sort((a, b) => new Date(b.datePublished) - new Date(a.datePublished));
     if (sort === 'highest') list.sort((a, b) => b.stars - a.stars);
     if (sort === 'lowest')  list.sort((a, b) => a.stars - b.stars);
     return list;
-  }, [reviews, sort, starFilter]);
+  }, [reviews, sort, starFilter, bookingTypeFilter]);
 
   return (
     <>
@@ -121,6 +135,17 @@ const ReviewGrid = ({ reviews }) => {
               onClick={() => setStarFilter(s)}
             >
               {s === 'All' ? 'All' : `${'★'.repeat(Number(s))} ${s}`}
+            </button>
+          ))}
+          
+          <span className="rvg-toolbar-label">Booking Type</span>
+          {BOOKING_TYPE_FILTERS.map(type => (
+            <button
+              key={type}
+              className={`rvg-star-btn ${bookingTypeFilter === type ? 'active' : ''}`}
+              onClick={() => setBookingTypeFilter(type)}
+            >
+              {type}
             </button>
           ))}
           <span className="rvg-count"><span>{processed.length}</span> reviews</span>

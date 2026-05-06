@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const MAX_IMAGES = 5;
 
@@ -45,7 +45,17 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
   const [errors,    setErrors]    = useState({});
   const [submitting, setSubmitting] = useState(false);
 
+  // Auto-select tour based on reviewableTours
+  useEffect(() => {
+    if (reviewableTours.length > 0 && !form.tourId) {
+      setForm(f => ({ ...f, tourId: reviewableTours[0].id }));
+    }
+  }, [reviewableTours]);
+
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
+
+  // Get selected tour details
+  const selectedTour = reviewableTours.find(t => t.id === form.tourId);
 
   const handleImages = (e) => {
     const files = Array.from(e.target.files);
@@ -275,18 +285,38 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
 
         {/* Tour selector */}
         <div className="rvf-field">
-          <label className="rvf-label">Select Your Tour</label>
-          <select
-            className={`rvf-select ${errors.tourId ? 'error' : ''}`}
-            value={form.tourId}
-            onChange={e => set('tourId', e.target.value)}
-          >
-            {reviewableTours.map(t => (
-              <option key={t.id} value={t.id}>
-                {t.packageTitle} ({t.packageType}) — Completed {t.completedDate}
-              </option>
-            ))}
-          </select>
+          <label className="rvf-label">Your Completed Tour</label>
+          {selectedTour ? (
+            <div style={{
+              padding: '14px 16px',
+              borderRadius: '10px',
+              border: '1.5px solid rgba(0,176,165,0.25)',
+              background: '#f7fffe',
+              color: '#0d2b2b',
+              fontSize: '14px',
+              fontWeight: 500,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
+            }}>
+              <strong>{selectedTour.packageTitle}</strong>
+              <span style={{ fontSize: '12px', color: '#5a8080', fontWeight: 400 }}>
+                {selectedTour.packageType} • Completed {selectedTour.completedDate}
+              </span>
+            </div>
+          ) : (
+            <div style={{
+              padding: '14px 16px',
+              borderRadius: '10px',
+              border: '1.5px solid rgba(0,176,165,0.25)',
+              background: '#f7fffe',
+              color: '#7a9a9a',
+              fontSize: '14px',
+              fontWeight: 400,
+            }}>
+              Loading tour information...
+            </div>
+          )}
           {errors.tourId && <span className="rvf-error">{errors.tourId}</span>}
         </div>
 

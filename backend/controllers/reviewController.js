@@ -1,5 +1,62 @@
 const pool = require('../db/connection');
 
+// Minimal server-side mapping of country names to flag emojis.
+const COUNTRY_FLAGS = {
+  'Sri Lanka': '🇱🇰',
+  'Pakistan': '🇵🇰',
+  'Bangladesh': '🇧🇩',
+  'Nepal': '🇳🇵',
+  'United States': '🇺🇸',
+  'United Kingdom': '🇬🇧',
+  'Canada': '🇨🇦',
+  'Australia': '🇦🇺',
+  'India': '🇮🇳',
+  'Japan': '🇯🇵',
+  'Germany': '🇩🇪',
+  'France': '🇫🇷',
+  'Brazil': '🇧🇷',
+  'Netherlands': '🇳🇱',
+  'Italy': '🇮🇹',
+  'Spain': '🇪🇸',
+  'Mexico': '🇲🇽',
+  'China': '🇨🇳',
+  'South Africa': '🇿🇦',
+  'New Zealand': '🇳🇿',
+  'Thailand': '🇹🇭',
+  'Vietnam': '🇻🇳',
+  'Philippines': '🇵🇭',
+  'Indonesia': '🇮🇩',
+  'Malaysia': '🇲🇾',
+  'Singapore': '🇸🇬',
+  'Hong Kong': '🇭🇰',
+  'South Korea': '🇰🇷',
+  'UAE': '🇦🇪',
+  'Saudi Arabia': '🇸🇦',
+  'Turkey': '🇹🇷',
+  'Greece': '🇬🇷',
+  'Ireland': '🇮🇪',
+  'Switzerland': '🇨🇭',
+  'Sweden': '🇸🇪',
+  'Norway': '🇳🇴',
+  'Denmark': '🇩🇰',
+  'Belgium': '🇧🇪',
+  'Austria': '🇦🇹',
+  'Poland': '🇵🇱',
+  'Portugal': '🇵🇹',
+  'Israel': '🇮🇱',
+  'Russia': '🇷🇺',
+  'Ukraine': '🇺🇦',
+  'Argentina': '🇦🇷',
+  'Chile': '🇨🇱',
+  'Colombia': '🇨🇴',
+};
+
+const getCountryFlag = (country) => {
+  if (!country) return '🌍';
+  const key = String(country).trim();
+  return COUNTRY_FLAGS[key] || '🌍';
+};
+
 const normalizeImageUrls = (value) => {
   if (!value) return [];
   if (Array.isArray(value)) return value.filter(Boolean);
@@ -48,7 +105,7 @@ const getPublishedReviews = async (_req, res) => {
       user: {
         name: row.customer_name,
         country: row.customer_country || 'Sri Lanka',
-        countryFlag: '🏳️',
+        countryFlag: getCountryFlag(row.customer_country),
         avatar: null,
       },
       tourTitle: row.tour_title || 'Tour Booking',

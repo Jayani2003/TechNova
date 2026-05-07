@@ -14,8 +14,21 @@ const packageRoutes = require('./routes/packageRoutes');
 const app = express();
 const PORT = Number(process.env.PORT || 5000);
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
- 
-app.use(cors({ origin: FRONTEND_ORIGIN }));
+const ALLOWED_ORIGINS = [
+  FRONTEND_ORIGIN,
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS blocked origin: ${origin}`));
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '2mb' }));
  
 // ── Health ────────────────────────────────────────────────────────────────────

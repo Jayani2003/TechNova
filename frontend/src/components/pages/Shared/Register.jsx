@@ -238,9 +238,14 @@ function Register() {
               type="submit"
               className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-slate-900 dark:bg-[#00b0a5] hover:bg-slate-800 dark:hover:bg-[#008f86] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00b0a5] transition-all cursor-pointer mt-4"
             >
-              Sign Up
+              {loading ? 'Creating account...' : 'Create Account'}
               <ArrowRight className="ml-2 h-5 w-5" />
             </motion.button>
+            {error && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {error}
+              </div>
+            )}
           </form>
 
           <p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">

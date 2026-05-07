@@ -1,0 +1,465 @@
+const db = require('../db/connection');
+const cloudinary = require('cloudinary').v2;
+
+const PACKAGE_TYPE_LABEL_TO_ENUM = {
+  'Beach Side': 'BEACH SIDE',
+  'Hill Country': 'HILL COUNTRY',
+  'Safari': 'SAFARI',
+  'Cultural Heritage': 'CULTURAL HERITAGE',
+  'Adventure': 'ADVENTURE',
+  'Wellness & Ayurveda': 'WELLNESS & AYURVEDA',
+};
+
+const PACKAGE_TYPE_ENUM_TO_LABEL = Object.entries(PACKAGE_TYPE_LABEL_TO_ENUM)
+  .reduce((acc, [label, enumValue]) => {
+    acc[enumValue] = label;
+    return acc;
+  }, {});
+
+const toPackageTypeEnum = (value) => {
+  if (value == null) return null;
+  const raw = String(value).trim();
+  if (PACKAGE_TYPE_LABEL_TO_ENUM[raw]) return PACKAGE_TYPE_LABEL_TO_ENUM[raw];
+
+  const normalized = raw.toUpperCase().replace(/\s+/g, ' ');
+  return PACKAGE_TYPE_ENUM_TO_LABEL[normalized] ? normalized : null;
+};
+
+const toPackageTypeLabel = (value) => {
+  if (value == null) return null;
+  const normalized = String(value).trim().toUpperCase().replace(/\s+/g, ' ');
+  return PACKAGE_TYPE_ENUM_TO_LABEL[normalized] || value;
+};
+
+let packageSchemaCache = null;
+const PACKAGE_TYPE_META_PREFIX = '[[PKG_TYPE:';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const getPackageSchemaMeta = async () => {
+  if (packageSchemaCache) return packageSchemaCache;
+
+  const [columns] = await db.execute('SHOW COLUMNS FROM package');
+  const byName = columns.reduce((acc, col) => {
+    acc[col.Field] = col;
+    return acc;
+  }, {});
+
+  packageSchemaCache = {
+    hasType: Boolean(byName.type),
+    hasDays: Boolean(byName.days),
+    daysType: byName.days ? String(byName.days.Type || '').toLowerCase() : '',
+    hasImageUrl: Boolean(byName.image_url),
+    hasDescription: Boolean(byName.description),
+  };
+
+  return packageSchemaCache;
+};
+
+const encodeDescriptionWithTypeMeta = (description, typeLabel) => {
+  const safeDescription = description || '';
+  const typeEnum = toPackageTypeEnum(typeLabel);
+  if (!typeEnum) return safeDescription;
+  return `${PACKAGE_TYPE_META_PREFIX}${typeEnum}]]\n${safeDescription}`;
+};
+
+const decodeDescriptionWithTypeMeta = (description) => {
+  const text = description || '';
+  if (!text.startsWith(PACKAGE_TYPE_META_PREFIX)) {
+    return { type: null, description: text };
+  }
+
+  const endIndex = text.indexOf(']]');
+  if (endIndex === -1) {
+    return { type: null, description: text };
+  }
+
+  const typeEnum = text.slice(PACKAGE_TYPE_META_PREFIX.length, endIndex);
+  const remainder = text.slice(endIndex + 2).replace(/^\n/, '');
+  return {
+    type: toPackageTypeLabel(typeEnum),
+    description: remainder,
+  };
+};
+
+const toPackageDaysLabel = (value) => {
+  if (value == null) return null;
+  const normalized = String(value).trim().toUpperCase();
+  if (normalized.endsWith('DAYS')) return normalized;
+  const number = Number(value);
+  if (Number.isNaN(number) || number <= 0) return null;
+  return `${number} DAYS`;
+};
+
+const toPackageDaysNumber = (value) => {
+  if (value == null) return null;
+  const match = String(value).match(/(\d+)/);
+  return match ? Number(match[1]) : Number(value) || null;
+};
+
+const uploadBufferToCloudinary = (file, folder) => new Promise((resolve) => {
+  if (!file) {
+    console.debug(`[Cloudinary] No file provided for folder: ${folder}`);
+    return resolve(null);
+  }
+
+  const existingUrl = file.path || file.url || file.secure_url || file.location || file.filename || null;
+  if (!file.buffer) {
+    console.debug(`[Cloudinary] File has no buffer, using existing URL: ${existingUrl}`);
+    return resolve(existingUrl);
+  }
+
+  const hasCloudinaryConfig = Boolean(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
+  if (!hasCloudinaryConfig) {
+    console.warn(`[Cloudinary] Config missing (CLOUD_NAME, API_KEY, API_SECRET). Skipping upload for ${folder}.`);
+    return resolve(null);
+  }
+
+  console.debug(`[Cloudinary] Starting upload to folder: ${folder}, file size: ${file.buffer.length} bytes, originalname: ${file.originalname}`);
+
+  const uploadStream = cloudinary.uploader.upload_stream(
+    {
+      folder,
+      resource_type: 'auto',
+      use_filename: true,
+      unique_filename: true,
+    },
+    (error, result) => {
+      if (error) {
+        console.error(`[Cloudinary] Upload failed for ${folder}:`, error.message || error);
+        return resolve(null);
+      }
+      const url = result?.secure_url || result?.url || result?.path || null;
+      console.debug(`[Cloudinary] Upload successful for ${folder}: ${url}`);
+      resolve(url);
+    }
+  );
+
+  uploadStream.on('error', (err) => {
+    console.error(`[Cloudinary] Stream error for ${folder}:`, err.message || err);
+    resolve(null);
+  });
+
+  uploadStream.end(file.buffer);
+});
+
+exports.createPackage = async (req, res) => {
+  /*
+    Expects multipart/form-data with fields:
+      - title, type, days, description
+      - destinations: JSON stringified array of { name, description, dayNumber, activities: [{name,phone,description}] }
+    Files:
+      - packageImage (single)
+      - destImages (array) matching destinations order
+  */
+  try {
+    const { title, type, days, description } = req.body;
+    if (!title || !type || !days) {
+      return res.status(400).json({ error: 'title, type and days are required.' });
+    }
+
+    const packageType = toPackageTypeEnum(type);
+    if (!packageType) {
+      return res.status(400).json({ error: 'type must be a valid package type.' });
+    }
+
+    const schemaMeta = await getPackageSchemaMeta();
+
+    const packageDaysLabel = toPackageDaysLabel(days);
+    if (!packageDaysLabel) {
+      return res.status(400).json({ error: 'days must be a valid duration value.' });
+    }
+
+    // determine DB insert value and coerce to appropriate type
+    let packageDaysValue = schemaMeta.daysType.includes('enum')
+      ? packageDaysLabel
+      : toPackageDaysNumber(packageDaysLabel);
+
+    // defensive coercion: ensure numeric DB column receives a Number
+    if (!schemaMeta.daysType.includes('enum')) {
+      if (packageDaysValue == null || Number.isNaN(Number(packageDaysValue))) {
+        return res.status(400).json({ error: 'days could not be converted to a number for DB insertion.' });
+      }
+      packageDaysValue = Number(packageDaysValue);
+    }
+
+    // debug log to help diagnose truncation errors
+    console.debug('createPackage days input ->', { raw: days, label: packageDaysLabel, value: packageDaysValue, daysType: schemaMeta.daysType });
+
+    let destinations = [];
+    try {
+      destinations = req.body.destinations ? JSON.parse(req.body.destinations) : [];
+      if (!Array.isArray(destinations)) destinations = [];
+    } catch (e) {
+      return res.status(400).json({ error: 'destinations must be a JSON array.' });
+    }
+
+    const packageImageFile = req.files && req.files.packageImage && req.files.packageImage[0];
+    const packageImage = await uploadBufferToCloudinary(packageImageFile, 'package_uploads');
+    const destFiles = req.files && req.files.destImages ? req.files.destImages : [];
+
+    const conn = await db.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      const insertColumns = ['title'];
+      const insertValues = [title];
+
+      if (schemaMeta.hasType) {
+        insertColumns.push('type');
+        insertValues.push(packageType);
+      }
+      if (schemaMeta.hasDays) {
+        insertColumns.push('days');
+        insertValues.push(packageDaysValue);
+      }
+      const storedDescription = schemaMeta.hasType
+        ? (description || null)
+        : encodeDescriptionWithTypeMeta(description || '', type);
+
+      if (schemaMeta.hasDescription) {
+        insertColumns.push('description');
+        insertValues.push(storedDescription || null);
+      }
+      if (schemaMeta.hasImageUrl) {
+        insertColumns.push('image_url');
+        insertValues.push(packageImage);
+      }
+
+      const insertPkgSql = `INSERT INTO package (${insertColumns.join(', ')}) VALUES (${insertColumns.map(() => '?').join(', ')})`;
+      console.debug('INSERT statement:', insertPkgSql);
+      console.debug('INSERT values:', insertValues);
+      const [pkgResult] = await conn.execute(insertPkgSql, insertValues);
+      const packageId = pkgResult.insertId;
+
+      for (let i = 0; i < destinations.length; i++) {
+        const dest = destinations[i] || {};
+        const destImage = await uploadBufferToCloudinary(destFiles[i], 'package_uploads') || dest.image || null;
+
+        const placeSql = `INSERT INTO place (place_name, image_url, description) VALUES (?, ?, ?)`;
+        const [placeRes] = await conn.execute(placeSql, [dest.name || null, destImage, dest.description || null]);
+        const placeId = placeRes.insertId;
+
+        const dayNumber = dest.dayNumber || (i + 1);
+        await conn.execute(`INSERT INTO package_place (package_id, place_id, day_number) VALUES (?, ?, ?)`, [packageId, placeId, dayNumber]);
+
+        // activities array for this destination
+        const activities = Array.isArray(dest.activities) ? dest.activities : [];
+        for (const act of activities) {
+          if (!act.name) continue;
+          const [actRes] = await conn.execute(`INSERT INTO activity (activity_name, phone, description) VALUES (?, ?, ?)`, [act.name, act.phone || null, act.description || null]);
+          const activityId = actRes.insertId;
+          await conn.execute(`INSERT INTO place_activity (place_id, activity_id) VALUES (?, ?)`, [placeId, activityId]);
+        }
+      }
+
+      await conn.commit();
+
+      res.status(201).json({
+        package_id: packageId,
+        title,
+        type: schemaMeta.hasType ? toPackageTypeLabel(packageType) : type,
+        days: toPackageDaysNumber(packageDaysLabel),
+        description: description || null,
+        image_url: packageImage,
+      });
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
+  } catch (error) {
+    console.error('createPackage failed:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.listAdminPackages = async (req, res) => {
+  try {
+    const schemaMeta = await getPackageSchemaMeta();
+    const [packages] = await db.execute(`
+      SELECT
+        p.package_id,
+        p.title,
+        ${schemaMeta.hasType ? 'p.type' : 'NULL AS type'},
+        ${schemaMeta.hasDays ? 'p.days' : 'NULL AS days'},
+        ${schemaMeta.hasDescription ? 'p.description' : 'NULL AS description'},
+        ${schemaMeta.hasImageUrl ? 'p.image_url' : 'NULL AS image_url'}
+      FROM package p
+      ORDER BY p.package_id DESC
+    `);
+
+    const packageIds = packages.map(p => p.package_id);
+    let destinationsByPackage = {};
+
+    if (packageIds.length > 0) {
+      const [places] = await db.execute(`
+        SELECT pp.package_id, pl.place_id, pl.place_name, pl.image_url, pl.description, pp.day_number
+        FROM package_place pp
+        INNER JOIN place pl ON pl.place_id = pp.place_id
+        WHERE pp.package_id IN (${packageIds.join(',')})
+        ORDER BY pp.package_id, pp.day_number ASC, pp.id ASC
+      `);
+
+      destinationsByPackage = places.reduce((acc, item) => {
+        if (!acc[item.package_id]) acc[item.package_id] = [];
+        acc[item.package_id].push({
+          id: item.place_id,
+          name: item.place_name,
+          description: item.description,
+          image: item.image_url,
+          days: item.day_number,
+        });
+        return acc;
+      }, {});
+    }
+
+    res.json(packages.map(r => {
+      const decoded = schemaMeta.hasType
+        ? { type: toPackageTypeLabel(r.type), description: r.description }
+        : decodeDescriptionWithTypeMeta(r.description);
+
+      return ({
+      id: r.package_id,
+      title: r.title,
+      type: decoded.type,
+      days: toPackageDaysNumber(r.days),
+      description: decoded.description,
+      image_url: r.image_url,
+      destinations: destinationsByPackage[r.package_id] || [],
+      places_count: (destinationsByPackage[r.package_id] || []).length,
+      });
+    }));
+  } catch (error) {
+    console.error('listAdminPackages failed:', error);
+    res.status(500).json({ error: 'Failed to load packages.' });
+  }
+};
+
+exports.listPublicPackages = async (req, res) => {
+  try {
+    const schemaMeta = await getPackageSchemaMeta();
+    const [packages] = await db.execute(`
+      SELECT
+        package_id,
+        title,
+        ${schemaMeta.hasType ? 'type' : 'NULL AS type'},
+        ${schemaMeta.hasDays ? 'days' : 'NULL AS days'},
+        ${schemaMeta.hasDescription ? 'description' : 'NULL AS description'},
+        ${schemaMeta.hasImageUrl ? 'image_url' : 'NULL AS image_url'}
+      FROM package
+      ORDER BY package_id DESC
+    `);
+    // For performance, load up to first 3 destinations per package
+    const pkgIds = packages.map(p => p.package_id);
+    let placesByPkg = {};
+    if (pkgIds.length > 0) {
+      const [places] = await db.execute(
+        `SELECT pp.package_id, pl.place_name, pl.image_url, pp.day_number
+         FROM package_place pp
+         INNER JOIN place pl ON pl.place_id = pp.place_id
+         WHERE pp.package_id IN (${pkgIds.join(',')})
+         ORDER BY pp.package_id, pp.day_number ASC`
+      );
+      placesByPkg = places.reduce((acc, p) => {
+        acc[p.package_id] = acc[p.package_id] || [];
+        if (acc[p.package_id].length < 3) acc[p.package_id].push({ name: p.place_name, image: p.image_url, dayNumber: p.day_number });
+        return acc;
+      }, {});
+    }
+
+    const result = packages.map(p => {
+      const decoded = schemaMeta.hasType
+        ? { type: toPackageTypeLabel(p.type), description: p.description }
+        : decodeDescriptionWithTypeMeta(p.description);
+
+      return ({
+      id: p.package_id,
+      title: p.title,
+      type: decoded.type,
+      days: toPackageDaysNumber(p.days),
+      description: decoded.description,
+      image: p.image_url,
+      highlights: [],
+      destinations: placesByPkg[p.package_id] || [],
+      });
+    });
+    res.json(result);
+  } catch (error) {
+    console.error('listPublicPackages failed:', error);
+    res.status(500).json({ error: 'Failed to load packages.' });
+  }
+};
+
+exports.getPackageDetail = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const schemaMeta = await getPackageSchemaMeta();
+    const [[pkgRow]] = await db.execute(`
+      SELECT
+        package_id,
+        title,
+        ${schemaMeta.hasType ? 'type' : 'NULL AS type'},
+        ${schemaMeta.hasDays ? 'days' : 'NULL AS days'},
+        ${schemaMeta.hasDescription ? 'description' : 'NULL AS description'},
+        ${schemaMeta.hasImageUrl ? 'image_url' : 'NULL AS image_url'}
+      FROM package
+      WHERE package_id = ?
+    `, [id]);
+    if (!pkgRow) return res.status(404).json({ error: 'Package not found.' });
+
+    const [places] = await db.execute(
+      `SELECT pl.place_id, pl.place_name, pl.image_url, pl.description, pp.day_number
+       FROM package_place pp
+       INNER JOIN place pl ON pl.place_id = pp.place_id
+       WHERE pp.package_id = ?
+       ORDER BY pp.day_number ASC`,
+      [id]
+    );
+
+    // load activities per place
+    const [activities] = await db.execute(
+      `SELECT pa.place_id, a.activity_id, a.activity_name, a.phone, a.description
+       FROM place_activity pa
+       INNER JOIN activity a ON a.activity_id = pa.activity_id
+       WHERE pa.place_id IN (${places.map(p=>p.place_id).join(',') || '0'})`
+    );
+
+    const activitiesByPlace = activities.reduce((acc, a) => {
+      if (!acc[a.place_id]) acc[a.place_id] = [];
+      acc[a.place_id].push({ id: a.activity_id, name: a.activity_name, phone: a.phone, description: a.description });
+      return acc;
+    }, {});
+
+    const detailedPlaces = places.map(p => ({
+      id: p.place_id,
+      name: p.place_name,
+      image: p.image_url,
+      description: p.description,
+      dayNumber: p.day_number,
+      activities: activitiesByPlace[p.place_id] || []
+    }));
+
+    const decoded = schemaMeta.hasType
+      ? { type: toPackageTypeLabel(pkgRow.type), description: pkgRow.description }
+      : decodeDescriptionWithTypeMeta(pkgRow.description);
+
+    res.json({
+      id: pkgRow.package_id,
+      title: pkgRow.title,
+      type: decoded.type,
+      days: toPackageDaysNumber(pkgRow.days),
+      description: decoded.description,
+      image: pkgRow.image_url,
+      destinations: detailedPlaces,
+    });
+  } catch (error) {
+    console.error('getPackageDetail failed:', error);
+    res.status(500).json({ error: 'Failed to load package.' });
+  }
+};

@@ -12,6 +12,8 @@ const TYPE_ICONS = {
 
 const PackageDetailModal = ({ pkg, onClose }) => {
   if (!pkg) return null;
+  const destinations = Array.isArray(pkg.destinations) ? pkg.destinations : [];
+  const highlights = Array.isArray(pkg.highlights) ? pkg.highlights : [];
 
   return (
     <>
@@ -156,7 +158,41 @@ const PackageDetailModal = ({ pkg, onClose }) => {
         }
         .pdm-dest-desc {
           font-size: 12px; font-weight: 300;
-          color: #5a8080; line-height: 1.6;
+          color: #5a8080; line-height: 1.6; margin-bottom: 12px;
+        }
+
+        /* Activities */
+        .pdm-activities {
+          border-top: 1px solid rgba(0,176,165,0.12);
+          padding: 12px 0 0 0;
+          margin-top: 12px;
+        }
+        .pdm-activities-label {
+          font-size: 9px; font-weight: 700;
+          letter-spacing: 0.15em; text-transform: uppercase;
+          color: #00b0a5; margin-bottom: 8px;
+          display: block;
+        }
+        .pdm-activity-item {
+          margin-bottom: 10px; padding-bottom: 10px;
+          border-bottom: 1px solid rgba(0,176,165,0.08);
+        }
+        .pdm-activity-item:last-child {
+          margin-bottom: 0;
+          padding-bottom: 0;
+          border-bottom: none;
+        }
+        .pdm-activity-name {
+          font-size: 12px; font-weight: 700;
+          color: #0d2b2b; margin-bottom: 2px;
+        }
+        .pdm-activity-phone {
+          font-size: 10px; color: #7a9a9a;
+          margin-bottom: 4px; display: flex; gap: 4px; align-items: center;
+        }
+        .pdm-activity-desc {
+          font-size: 11px; font-weight: 300;
+          color: #5a8080; line-height: 1.5;
         }
 
         /* CTA */
@@ -214,7 +250,7 @@ const PackageDetailModal = ({ pkg, onClose }) => {
                 </div>
                 <div className="pdm-title">{pkg.title}</div>
                 <div className="pdm-days-badge">
-                  📅 {pkg.days} Days · {pkg.destinations.length} Destinations
+                  📅 {pkg.days} Days · {destinations.length} Destinations
                 </div>
               </div>
             </div>
@@ -225,7 +261,7 @@ const PackageDetailModal = ({ pkg, onClose }) => {
 
               {/* Highlights */}
               <div className="pdm-highlights">
-                {pkg.highlights.map(h => (
+                {highlights.map(h => (
                   <span key={h} className="pdm-hl">✦ {h}</span>
                 ))}
               </div>
@@ -233,22 +269,45 @@ const PackageDetailModal = ({ pkg, onClose }) => {
               {/* Destinations */}
               <div className="pdm-section-heading">Destinations & Itinerary</div>
               <div className="pdm-dest-grid">
-                {pkg.destinations.map((dest, i) => (
-                  <div key={i} className="pdm-dest-card">
-                    <div className="pdm-dest-img">
-                      <img src={dest.image} alt={dest.name} />
-                      <div className="pdm-dest-img-overlay" />
-                      <span className="pdm-dest-days">{dest.days} {dest.days === 1 ? 'day' : 'days'}</span>
-                    </div>
-                    <div className="pdm-dest-info">
-                      <div className="pdm-dest-name">
-                        <span style={{color:'#00b0a5', marginRight:'6px'}}>{i + 1}.</span>
-                        {dest.name}
+                {destinations.map((dest, i) => {
+                  const activities = Array.isArray(dest.activities) ? dest.activities : [];
+                  return (
+                    <div key={i} className="pdm-dest-card">
+                      <div className="pdm-dest-img">
+                        <img src={dest.image} alt={dest.name} />
+                        <div className="pdm-dest-img-overlay" />
+                        <span className="pdm-dest-days">{dest.days} {dest.days === 1 ? 'day' : 'days'}</span>
                       </div>
-                      <div className="pdm-dest-desc">{dest.description}</div>
+                      <div className="pdm-dest-info">
+                        <div className="pdm-dest-name">
+                          <span style={{color:'#00b0a5', marginRight:'6px'}}>{i + 1}.</span>
+                          {dest.name}
+                        </div>
+                        <div className="pdm-dest-desc">{dest.description}</div>
+
+                        {/* Activities */}
+                        {activities.length > 0 && (
+                          <div className="pdm-activities">
+                            <span className="pdm-activities-label">📍 Activities</span>
+                            {activities.map((act, ai) => (
+                              <div key={ai} className="pdm-activity-item">
+                                <div className="pdm-activity-name">{act.name}</div>
+                                {act.phone && (
+                                  <div className="pdm-activity-phone">
+                                    <span>📞</span> {act.phone}
+                                  </div>
+                                )}
+                                {act.description && (
+                                  <div className="pdm-activity-desc">{act.description}</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* CTA */}

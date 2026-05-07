@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const galleryRoutes = require('./routers/galleryRoutes');
 const reviewRoutes = require('./routers/reviewRoutes');
+const packageRoutes = require('./routers/packageRoutes');
 
 const app = express();
 const PORT = Number(process.env.PORT || 5000);
@@ -22,6 +23,7 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/packages', packageRoutes);
 
 app.use((err, _req, res, _next) => {
 	console.error('Unhandled server error:', err);

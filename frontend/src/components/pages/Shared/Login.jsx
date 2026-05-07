@@ -37,20 +37,9 @@ function Login() {
 		setLoading(true);
  
 		try {
-			const isAdminPath = location.pathname.toLowerCase().includes('admin');
+			const user = await login(email, password);
  
-			let user;
-			if (isAdminPath) {
-				user = await login(email, password, 'admin');
-			} else {
-				try {
-					user = await login(email, password, 'customer');
-				} catch {
-					user = await login(email, password, 'admin');
-				}
-			}
- 
-			if (user.role === 'SUPER_ADMIN' || user.role === 'STAFF') {
+			if (user.role === 'ADMIN') {
 				navigate('/admin/admin-dashboard');
 			} else {
 				navigate(safeRedirect || '/');

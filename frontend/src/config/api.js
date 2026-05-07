@@ -21,5 +21,6 @@ export const api = {
 };
  
 export const buildApiUrl = (path) => {
-  return `http://localhost:5000${path}`;
+  // Backend routes are mounted under /api (e.g. /api/gallery)
+  return `http://localhost:5000/api${path}`;
 };

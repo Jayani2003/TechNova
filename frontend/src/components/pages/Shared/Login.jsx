@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
 import authBg from '../../../assets/auth-bg.png';
 import { AuthContext } from '../../../context/AuthContext';
 
@@ -9,6 +9,8 @@ function Login() {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
+	const [error, setError]               = useState('');
+	const [loading, setLoading]           = useState(false);
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { login } = useContext(AuthContext);
@@ -16,7 +18,7 @@ function Login() {
 	const redirectPath = params.get('redirect');
 	const safeRedirect = redirectPath && redirectPath.startsWith('/') ? redirectPath : null;
 
-	const handleLogin = (e) => {
+	{/*const handleLogin = (e) => {
 		e.preventDefault();
 		if (email === 'admin@ceylon.com' && password === '1234') {
 			login({ role: 'admin', email, name: 'Admin User' });
@@ -27,7 +29,40 @@ function Login() {
 		} else {
 			alert('Invalid email or password. Please try again.');
 		}
+	};*/}
+
+		const handleLogin = async (e) => {
+		e.preventDefault();
+		setError('');
+		setLoading(true);
+ 
+		try {
+			const isAdminPath = location.pathname.toLowerCase().includes('admin');
+ 
+			let user;
+			if (isAdminPath) {
+				user = await login(email, password, 'admin');
+			} else {
+				try {
+					user = await login(email, password, 'customer');
+				} catch {
+					user = await login(email, password, 'admin');
+				}
+			}
+ 
+			if (user.role === 'SUPER_ADMIN' || user.role === 'STAFF') {
+				navigate('/admin/admin-dashboard');
+			} else {
+				navigate(safeRedirect || '/');
+			}
+ 
+		} catch (err) {
+			setError(err.message || 'Invalid email or password. Please try again.');
+		} finally {
+			setLoading(false);
+		}
 	};
+
 
 	return (
 		<div className="flex min-h-screen w-full bg-slate-50 dark:bg-[#1a1a1a]">

@@ -7,6 +7,10 @@ const reviewRoutes  = require('./routes/reviewRoutes');
 const authRoutes    = require('./routes/authRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
  
+
+
+const packageRoutes = require('./routes/packageRoutes');
+
 const app = express();
 const PORT = Number(process.env.PORT || 5000);
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
@@ -29,6 +33,10 @@ app.use('/api/gallery',  galleryRoutes);
 app.use('/api/reviews',  reviewRoutes);
  
 // ── Global error handler ──────────────────────────────────────────────────────
+
+
+app.use('/api/packages', packageRoutes);
+
 app.use((err, _req, res, _next) => {
   console.error('Unhandled server error:', err);
   if (err.code === 'ER_DUP_ENTRY')

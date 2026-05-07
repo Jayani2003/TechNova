@@ -55,7 +55,6 @@ CREATE TABLE place (
 CREATE TABLE activity (
     activity_id   INT AUTO_INCREMENT PRIMARY KEY,
     activity_name VARCHAR(100) NOT NULL,
-    image_url     VARCHAR(255),
     phone         VARCHAR(20),
     description   TEXT
 );
@@ -71,7 +70,8 @@ CREATE TABLE place_activity (
 CREATE TABLE package (
     package_id  INT AUTO_INCREMENT PRIMARY KEY,
     title       VARCHAR(150) NOT NULL,
-    days        INT NOT NULL,
+    type        ENUM('ADVENTURE','CULTURAL HERITAGE','WELLNESS & AYURVEDA','BEACH SIDE','HILL COUNTRY','SAFARI') NOT NULL,
+    days        ENUM ('7 DAYS','14 DAYS','21 DAYS','28 DAYS') NOT NULL,
     description TEXT,
     image_url   VARCHAR(255)
 );

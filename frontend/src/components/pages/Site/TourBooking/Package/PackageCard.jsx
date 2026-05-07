@@ -32,7 +32,9 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
   }, []);
 
   const accentColor = TYPE_COLORS[pkg.type] || '#00b0a5';
-  const topDests = pkg.destinations.slice(0, 3);
+  const destinations = Array.isArray(pkg.destinations) ? pkg.destinations : [];
+  const highlights = Array.isArray(pkg.highlights) ? pkg.highlights : [];
+  const topDests = destinations.slice(0, 3);
 
   return (
     <>
@@ -214,8 +216,8 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
             {topDests.map(d => (
               <span key={d.name} className="pkc-dest-chip">{d.name}</span>
             ))}
-            {pkg.destinations.length > 3 && (
-              <span className="pkc-dest-more">+{pkg.destinations.length - 3} more</span>
+            {destinations.length > 3 && (
+              <span className="pkc-dest-more">+{destinations.length - 3} more</span>
             )}
           </div>
         </div>
@@ -226,7 +228,7 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
           <div className="pkc-desc">{pkg.description}</div>
 
           <div className="pkc-highlights">
-            {pkg.highlights.slice(0, 3).map(h => (
+            {highlights.slice(0, 3).map(h => (
               <span key={h} className="pkc-hl">✦ {h}</span>
             ))}
           </div>

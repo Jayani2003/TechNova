@@ -3,10 +3,10 @@ const db = require('../db/connection');
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const mapBooking = (row) => ({
   id:             row.booking_id,
-  customerId:     row.customer_id,
+  userId:         row.user_id,
   customerName:   row.customer_name,
   customerPhone:  row.customer_phone,
-  customerEmail:  row.customer_email || null,
+  customerEmail:  row.email || null,
   tourType:       row.tour_type,
   categoryId:     row.category_id,
   categoryName:   row.category_name || null,
@@ -69,7 +69,7 @@ const createP2PBooking = async (req, res) => {
   try {
     const [result] = await db.execute(
       `INSERT INTO booking
-        (customer_id, customer_name, customer_phone,
+        (user_id, customer_name, customer_phone,
          tour_type, category_id,
          start_date, end_date, start_location, end_location,
          total_days, days_required,
@@ -112,11 +112,11 @@ const createP2PBooking = async (req, res) => {
 const getMyBookings = async (req, res) => {
   try {
     const [rows] = await db.execute(
-      `SELECT b.*, c.email AS customer_email, vc.category_name
+      `SELECT b.*, u.email, vc.category_name
        FROM booking b
-       JOIN customer c ON c.customer_id = b.customer_id
+       JOIN user u ON u.user_id = b.user_id
        LEFT JOIN vehicle_category vc ON vc.category_id = b.category_id
-       WHERE b.customer_id = ?
+       WHERE b.user_id = ?
        ORDER BY b.booking_date DESC, b.booking_id DESC`,
       [req.user.id]
     );
@@ -131,10 +131,10 @@ const getMyBookings = async (req, res) => {
 const getAllBookings = async (req, res) => {
   try {
     const [rows] = await db.execute(
-      `SELECT b.*, c.email AS customer_email, vc.category_name,
+      `SELECT b.*, u.email, vc.category_name,
               v.vehicle_number, v.name AS vehicle_name
        FROM booking b
-       JOIN customer c ON c.customer_id = b.customer_id
+       JOIN user u ON u.user_id = b.user_id
        LEFT JOIN vehicle_category vc ON vc.category_id = b.category_id
        LEFT JOIN vehicle v ON v.vehicle_id = b.vehicle_id
        ORDER BY b.booking_date DESC, b.booking_id DESC`

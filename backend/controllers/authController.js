@@ -12,38 +12,28 @@ const signToken = (payload) =>
  
 // ── POST /api/auth/login ──────────────────────────────────────────────────────
 const login = async (req, res) => {
-  const { email, password, role = 'customer' } = req.body;
+  const { email, password } = req.body;
  
   if (!email || !password)
     return res.status(400).json({ message: 'Email and password are required.' });
  
   try {
-    let user, idField;
- 
-    if (role === 'admin') {
-      const [rows] = await db.execute(
-        'SELECT * FROM admin WHERE email = ? LIMIT 1', [email]);
-      user = rows[0];
-      idField = 'admin_id';
-    } else {
-      const [rows] = await db.execute(
-        'SELECT * FROM customer WHERE email = ? LIMIT 1', [email]);
-      user = rows[0];
-      idField = 'customer_id';
-    }
+    const [rows] = await db.execute(
+      'SELECT * FROM user WHERE email = ? LIMIT 1', [email]);
+    const user = rows[0];
  
     if (!user)
       return res.status(401).json({ message: 'Invalid email or password.' });
  
-    const match = await bcrypt.compare(password, user.password);
+    const match = await bcrypt.compare(password, user.password_hash);
     if (!match)
       return res.status(401).json({ message: 'Invalid email or password.' });
  
     const payload = {
-      id:    user[idField],
+      id:    user.user_id,
       email: user.email,
       name:  user.name,
-      role:  role === 'admin' ? user.role : 'CUSTOMER',
+      role:  user.role,
     };
  
     const token = signToken(payload);
@@ -64,14 +54,14 @@ const register = async (req, res) => {
  
   try {
     const [existing] = await db.execute(
-      'SELECT customer_id FROM customer WHERE email = ? LIMIT 1', [email]);
+      'SELECT user_id FROM user WHERE email = ? LIMIT 1', [email]);
     if (existing.length)
       return res.status(409).json({ message: 'An account with this email already exists.' });
  
     const hash = await bcrypt.hash(password, 10);
     const [result] = await db.execute(
-      'INSERT INTO customer (name, email, password, country) VALUES (?, ?, ?, ?)',
-      [name, email, hash, country]);
+      'INSERT INTO user (name, email, password_hash, country, role) VALUES (?, ?, ?, ?, ?)',
+      [name, email, hash, country, 'CUSTOMER']);
  
     const payload = { id: result.insertId, email, name, role: 'CUSTOMER' };
     const token = signToken(payload);

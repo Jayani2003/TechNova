@@ -189,7 +189,7 @@ const STATUS_TIMESTAMP = {
 const updateStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-  const isAdmin = ['SUPER_ADMIN', 'STAFF'].includes(req.user?.role);
+  const isAdmin = ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(req.user?.role);
   const allowed = isAdmin ? ALLOWED_TRANSITIONS.ADMIN : ALLOWED_TRANSITIONS.CUSTOMER;
  
   if (!allowed.includes(status))

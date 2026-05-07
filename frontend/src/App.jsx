@@ -2,8 +2,8 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 import Navbar from './components/Navbar/Navbar';
-//import profileIcon from './components/ProfileIcon';
 import Footer from './components/Footer';
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 
 
 import Login from "./components/pages/Shared/Login";
@@ -63,7 +63,7 @@ export default function App() {
           AdminLayout provides its own sticky banner + tab nav.
           No site Navbar or Footer rendered here.
       ════════════════════════════════════════════════════════ */}
-      <Route path="/admin" element={<AdminLayout />}>
+      <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminLayout /></ProtectedRoute>}>
         <Route path="admin-dashboard"    element={<AdminDashboard />} />
         <Route path="add-point-to-point" element={<AddPointToPoint />} />
         <Route path="approve-bookings"   element={<ApproveBookings />} />
@@ -95,11 +95,11 @@ export default function App() {
       <Route path="/tour-booking/customized" element={<SiteLayout><Customized /></SiteLayout>} />
       <Route path="/tour-booking/point"    element={<SiteLayout><PointToPoint /></SiteLayout>} />
 
-      <Route path="/user/dashboard"   element={<SiteLayout><UserDashboard /></SiteLayout>} />
-      <Route path="/user/my-bookings" element={<SiteLayout><MyBookings /></SiteLayout>} />
-      <Route path="/user/my-reviews"  element={<SiteLayout><MyReviews /></SiteLayout>} />
-      <Route path="/user/profile"     element={<SiteLayout><UserProfile /></SiteLayout>} />
-      <Route path="/user/messages"    element={<SiteLayout><MyMessages /></SiteLayout>} />
+      <Route path="/user/dashboard"   element={<ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN']}><SiteLayout><UserDashboard /></SiteLayout></ProtectedRoute>} />
+      <Route path="/user/my-bookings" element={<ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN']}><SiteLayout><MyBookings /></SiteLayout></ProtectedRoute>} />
+      <Route path="/user/my-reviews"  element={<ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN']}><SiteLayout><MyReviews /></SiteLayout></ProtectedRoute>} />
+      <Route path="/user/profile"     element={<ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN']}><SiteLayout><UserProfile /></SiteLayout></ProtectedRoute>} />
+      <Route path="/user/messages"    element={<ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN']}><SiteLayout><MyMessages /></SiteLayout></ProtectedRoute>} />
 
     </Routes>
   );

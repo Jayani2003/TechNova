@@ -4,6 +4,7 @@ import React, { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import DesktopNav from './DesktopNav';
 import MobileNav from './MobileNav';
+import logo from '../../assets/logo4.png';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -19,7 +20,7 @@ const Navbar = () => {
 
       {/* Logo */}
       <Link to="/">
-        <img src="/src/assets/logo4.png" className="h-12" />
+        <img src={logo} className="h-12" />
       </Link>
 
       {/* Desktop */}

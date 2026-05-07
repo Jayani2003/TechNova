@@ -78,10 +78,10 @@ const getPublishedReviews = async (_req, res) => {
         r.tour_type,
         r.verified,
         r.created_at,
-        c.name AS customer_name,
-        c.country AS customer_country
+        u.name AS customer_name,
+        u.country AS customer_country
       FROM review r
-      INNER JOIN customer c ON c.customer_id = r.customer_id
+      INNER JOIN user u ON u.user_id = r.user_id
       ORDER BY r.created_at DESC
       `
     );
@@ -142,11 +142,11 @@ const getReviewableTours = async (req, res) => {
         b.completed_at,
         p.title AS package_title
       FROM booking b
-      INNER JOIN customer c ON c.customer_id = b.customer_id
+      INNER JOIN user u ON u.user_id = b.user_id
       LEFT JOIN booking_package bp ON bp.booking_id = b.booking_id
       LEFT JOIN package p ON p.package_id = bp.package_id
       LEFT JOIN review r ON r.booking_id = b.booking_id
-      WHERE c.email = ?
+      WHERE u.email = ?
         AND b.booking_status = 'COMPLETED'
         AND r.review_id IS NULL
       ORDER BY COALESCE(b.completed_at, b.booking_date) DESC
@@ -195,10 +195,10 @@ const createReview = async (req, res) => {
 
     const [bookingRows] = await conn.query(
       `
-      SELECT b.booking_id, b.customer_id, b.booking_status
+      SELECT b.booking_id, b.user_id, b.booking_status
       FROM booking b
-      INNER JOIN customer c ON c.customer_id = b.customer_id
-      WHERE b.booking_id = ? AND c.email = ?
+      INNER JOIN user u ON u.user_id = b.user_id
+      WHERE b.booking_id = ? AND u.email = ?
       LIMIT 1
       `,
       [bookingId, customerEmail]
@@ -227,7 +227,7 @@ const createReview = async (req, res) => {
     const [insertReview] = await conn.query(
       `
       INSERT INTO review (
-        customer_id,
+        user_id,
         booking_id,
         rating,
         driver_name,
@@ -239,7 +239,7 @@ const createReview = async (req, res) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
-        booking.customer_id,
+        booking.user_id,
         bookingId,
         stars,
         driverName || null,

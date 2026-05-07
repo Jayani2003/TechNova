@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ email, password, role }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || 'Login failed.');
     _saveSession(data.token, data.user);
     return data.user;
@@ -51,7 +51,7 @@ export function AuthProvider({ children }) {
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ name, email, password }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || 'Registration failed.');
     _saveSession(data.token, data.user);
     return data.user;

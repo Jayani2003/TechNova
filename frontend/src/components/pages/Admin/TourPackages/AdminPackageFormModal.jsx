@@ -75,13 +75,60 @@ const DestRow = ({ dest, index, onChange, onRemove, canRemove, dark = false }) =
     />
     <input
       style={inputStyle(false, dark)}
-      placeholder="Image URL for this destination"
+      placeholder="Image URL for this destination or choose file"
       value={dest.image}
       onChange={e => onChange(index, 'image', e.target.value)}
     />
+    <input
+      type="file"
+      accept="image/*"
+      style={{ marginTop: '8px' }}
+      onChange={e => onChange(index, 'imageFile', e.target.files[0])}
+    />
     {dest.image && (
-      <img src={dest.image} alt="" style={{ height:'80px', borderRadius:'8px', objectFit:'cover', width:'100%' }} onError={e => e.target.style.display='none'} />
+      <img src={dest.image} alt="" style={{ height:'80px', borderRadius:'8px', objectFit:'cover', width:'100%', marginTop:'6px' }} onError={e => e.target.style.display='none'} />
     )}
+    {dest.imageFile && (
+      <div style={{ marginTop: '6px', fontSize: '12px', color: '#5a8080' }}>{dest.imageFile.name}</div>
+    )}
+    <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {(dest.activities || []).map((a, ai) => (
+        <div key={ai} style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: 8 }}>
+          <input
+            style={inputStyle(false, dark)}
+            placeholder="Activity name"
+            value={a.name}
+            onChange={e => {
+              const next = (dest.activities || []).map((act, idx) => idx === ai ? { ...act, name: e.target.value } : act);
+              onChange(index, 'activities', next);
+            }}
+          />
+          <input
+            style={{ ...inputStyle(false, dark), width: '120px' }}
+            placeholder="Phone"
+            value={a.phone}
+            onChange={e => {
+              const next = (dest.activities || []).map((act, idx) => idx === ai ? { ...act, phone: e.target.value } : act);
+              onChange(index, 'activities', next);
+            }}
+          />
+          <textarea
+            style={{ ...taStyle(false, dark), gridColumn: '1 / -1' }}
+            placeholder="Activity description"
+            value={a.description}
+            onChange={e => {
+              const next = (dest.activities || []).map((act, idx) => idx === ai ? { ...act, description: e.target.value } : act);
+              onChange(index, 'activities', next);
+            }}
+          />
+        </div>
+      ))}
+      <button
+        className="apfm-add-btn"
+        onClick={() => onChange(index, 'activities', [...(dest.activities || []), { name: '', phone: '', description: '' }])}
+        type="button"
+      >Add Activity</button>
+    </div>
   </div>
 );
 
@@ -112,7 +159,7 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false }) =
     const dests = form.destinations.map((d, idx) => idx === i ? { ...d, [key]: val } : d);
     set('destinations', dests);
   };
-  const addDest = () => set('destinations', [...form.destinations, { name:'', days:1, description:'', image:'' }]);
+  const addDest = () => set('destinations', [...form.destinations, { name:'', days:1, description:'', image:'', imageFile:null, activities:[] }]);
   const removeDest = (i) => set('destinations', form.destinations.filter((_, idx) => idx !== i));
 
   const validate = () => {
@@ -121,7 +168,8 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false }) =
     if (!form.description.trim()) e.description = 'Description is required.';
     if (!form.type)               e.type        = 'Type is required.';
     if (!form.days)               e.days        = 'Duration is required.';
-    if (!form.image.trim())       e.image       = 'Cover image URL is required.';
+      // require either image URL or uploaded file
+      if (!form.image.trim() && !form.packageImageFile) e.image = 'Cover image is required (URL or file).';
     if (form.destinations.length === 0) e.destinations = 'Add at least one destination.';
     if (form.destinations.some(d => !d.name.trim())) e.destinations = 'All destination names are required.';
     setErrors(e);
@@ -130,11 +178,14 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false }) =
 
   const handleSave = () => {
     if (!validate()) return;
-    onSave({
-      ...form,
-      highlights:   form.highlights.filter(h => h.trim()),
-      destinations: form.destinations,
-    });
+      // prepare payload including files
+      const payload = {
+        ...form,
+        highlights: form.highlights.filter(h => h.trim()),
+        destinations: form.destinations.map(d => ({ ...d })),
+        packageImageFile: form.packageImageFile || null,
+      };
+      onSave(payload);
   };
 
   return (
@@ -388,8 +439,12 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false }) =
                     value={form.image}
                     onChange={e => set('image', e.target.value)}
                   />
+                  <input type="file" accept="image/*" style={{ marginTop: 8 }} onChange={e => set('packageImageFile', e.target.files[0])} />
                   {form.image && (
                     <img src={form.image} alt="" style={{ height:'100px', borderRadius:'10px', objectFit:'cover', width:'100%', marginTop:'4px' }} onError={e => e.target.style.display='none'} />
+                  )}
+                  {form.packageImageFile && (
+                    <div style={{ marginTop: 6, fontSize: 12, color: '#5a8080' }}>{form.packageImageFile.name}</div>
                   )}
                 </Field>
 

@@ -1,24 +1,21 @@
 CREATE DATABASE tours;
 USE tours;
 
-CREATE TABLE customer (
-    customer_id   INT AUTO_INCREMENT PRIMARY KEY,
-    name          VARCHAR(100) NOT NULL,
-    email         VARCHAR(100) UNIQUE NOT NULL,
-    country       VARCHAR(100) NOT NULL,
-    password      VARCHAR(255) NULL,
-    auth_provider ENUM('LOCAL','GOOGLE','FACEBOOK') DEFAULT 'LOCAL',
-    provider_id   VARCHAR(255) NULL,
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE user (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
 
-CREATE TABLE admin (
-    admin_id   INT AUTO_INCREMENT PRIMARY KEY,
-    name       VARCHAR(100) NOT NULL,
-    email      VARCHAR(100) UNIQUE NOT NULL,
-    password   VARCHAR(255) NOT NULL,
-    role       ENUM('SUPER_ADMIN','STAFF') NOT NULL DEFAULT 'STAFF',
-    phone      VARCHAR(20),
+    role ENUM('ADMIN','CUSTOMER') NOT NULL DEFAULT 'CUSTOMER',
+
+    country VARCHAR(100),
+
+    auth_provider ENUM('LOCAL','GOOGLE','FACEBOOK') DEFAULT 'LOCAL',
+    provider_id VARCHAR(255),
+
+    status ENUM('ACTIVE','BLOCKED') DEFAULT 'ACTIVE',
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -87,7 +84,7 @@ CREATE TABLE package_place (
 
 CREATE TABLE booking (
     booking_id     INT AUTO_INCREMENT PRIMARY KEY,
-    customer_id    INT NOT NULL,
+    user_id    INT NOT NULL,
     customer_name  VARCHAR(100) NOT NULL,
     customer_phone VARCHAR(20) NOT NULL,
     tour_type      ENUM('P2P','PACKAGE','CUSTOM') NOT NULL,
@@ -136,7 +133,7 @@ CREATE TABLE booking (
     completed_at    TIMESTAMP NULL,
     closed_at       TIMESTAMP NULL,
 
-    FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
     FOREIGN KEY (category_id) REFERENCES vehicle_category(category_id),
     FOREIGN KEY (vehicle_id)  REFERENCES vehicle(vehicle_id)
 );
@@ -160,26 +157,27 @@ CREATE TABLE booking_custom (
 CREATE TABLE payment (
     payment_id     INT AUTO_INCREMENT PRIMARY KEY,
     booking_id     INT NOT NULL,
+
     installment    ENUM('DEPOSIT','FINAL','FULL') NOT NULL,
     amount         DECIMAL(10,2) NOT NULL,
     payment_method ENUM('CASH','BANK_TRANSFER') NOT NULL,
     received_date  DATE NOT NULL,
     recorded_by    INT NOT NULL,
     notes          TEXT,
-    FOREIGN KEY (booking_id)  REFERENCES booking(booking_id),
-    FOREIGN KEY (recorded_by) REFERENCES admin(admin_id)
+    FOREIGN KEY (booking_id) REFERENCES booking(booking_id),
+    FOREIGN KEY (recorded_by) REFERENCES user(user_id)
 );
 
 CREATE TABLE review (
     review_id   INT AUTO_INCREMENT PRIMARY KEY,
-    customer_id INT NOT NULL,
+    user_id INT NOT NULL,
     booking_id  INT NOT NULL UNIQUE,
     rating      INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
     driver_name VARCHAR(100),
     title       VARCHAR(150),
     feedback    TEXT,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
     FOREIGN KEY (booking_id)  REFERENCES booking(booking_id)
 );
 
@@ -212,17 +210,18 @@ CREATE TABLE contact_inquiry (
 
 CREATE TABLE chat_topic (
     topic_id    INT AUTO_INCREMENT PRIMARY KEY,
-    customer_id INT NOT NULL,
+    user_id INT NOT NULL,
     subject     VARCHAR(100),
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customer(customer_id)
+    FOREIGN KEY (user_id) REFERENCES user(user_id)
 );
 
 CREATE TABLE chat_message (
     message_id INT AUTO_INCREMENT PRIMARY KEY,
     topic_id   INT NOT NULL,
-    sender     ENUM('CUSTOMER','ADMIN') NOT NULL,
+    sender_id INT NOT NULL,
     message    TEXT NOT NULL,
     sent_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (topic_id) REFERENCES chat_topic(topic_id)
+    FOREIGN KEY (topic_id) REFERENCES chat_topic(topic_id),
+    FOREIGN KEY (sender_id) REFERENCES user(user_id)
 );

@@ -6,11 +6,11 @@ const HeroSection = () => {
   const [currentImage, setCurrentImage] = useState(0);
 
   const images = [
-    "/src/assets/mirissa.jpg",
-    "/src/assets/beach.jpg",
-    "/src/assets/buddah.jpg",
-    "/src/assets/town.jpg",
-    "/src/assets/templeoftheTooth.jpg",
+    "https://images.unsplash.com/photo-1546708973-b339540b5162?q=80&w=800",
+    "https://images.unsplash.com/photo-1586611292717-f828b1ad740b?q=80&w=800",
+    "https://images.unsplash.com/photo-1524230507669-5ff97982bb5e?q=80&w=800",
+    "https://images.unsplash.com/photo-1516690561799-46d8f74f9abf?q=80&w=800",
+    "https://images.unsplash.com/photo-1620619767323-b95a89183081?q=80&w=800",
   ];
 
   const handleMouseMove = (e) => {

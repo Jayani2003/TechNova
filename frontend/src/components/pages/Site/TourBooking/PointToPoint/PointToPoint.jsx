@@ -1,9 +1,9 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Send, Lock, MapPin, CheckCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Send, Lock, CheckCircle, AlertCircle } from "lucide-react";
 import { AuthContext } from "../../../../../context/AuthContext";
-import { useBookings } from "../../../../../context/BookingsContext.jsx";
+import { submitP2PBooking } from "../../../../../services/bookingService";
 import P2PHeader from "./P2PHeader";
 import BookingStepIndicator from "../Booking/BookingStepIndicator";
 import P2PTripStep from "./P2PTripStep";
@@ -11,30 +11,30 @@ import BookingPassengersStep from "../Booking/BookingPassengersStep";
 import BookingNotesStep from "../Booking/BookingNotesStep";
 import P2PReviewStep from "./P2PReviewStep";
 import P2PSidePanel from "./P2PSidePanel";
-
+ 
 const STEPS = ["Trip Details", "Passengers", "More Info", "Review"];
-
+ 
 const initialData = {
-  tourType: "P2P",
-  startLocation: "",
-  endLocation: "",
-  startDate: "",
-  endDate: "",
-  pickupTime: "",
-  totalDays: 0,
-  daysRequired: 0,
-  noOfAdults: 1,
-  noOfChildren: 0,
+  tourType:       "P2P",
+  startLocation:  "",
+  endLocation:    "",
+  startDate:      "",
+  endDate:        "",
+  pickupTime:     "",
+  totalDays:      0,
+  daysRequired:   0,
+  noOfAdults:     1,
+  noOfChildren:   0,
   agesOfChildren: "",
   babySeatNeeded: false,
-  smallLuggages: 0,
-  largeLuggages: 0,
-  categoryId: "",
-  customerName: "",
-  customerPhone: "",
-  notes: "",
+  smallLuggages:  0,
+  largeLuggages:  0,
+  categoryId:     "",
+  customerName:   "",
+  customerPhone:  "",
+  notes:          "",
 };
-
+ 
 // ─── Guest Guard ──────────────────────────────────────────────────────────────
 const GuestGuard = ({ navigate }) => (
   <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
@@ -67,9 +67,9 @@ const GuestGuard = ({ navigate }) => (
     </motion.div>
   </div>
 );
-
+ 
 // ─── Success Screen ───────────────────────────────────────────────────────────
-const SuccessScreen = ({ bookingId, navigate }) => (
+const SuccessScreen = ({ bookingRef, navigate }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -83,11 +83,11 @@ const SuccessScreen = ({ bookingId, navigate }) => (
       Booking Submitted!
     </h2>
     <p className="text-slate-500 text-sm mb-2">Your booking reference is:</p>
-    <p className="text-lg font-bold text-[#00b0a5] mb-8">{bookingId}</p>
+    <p className="text-lg font-bold text-[#00b0a5] mb-8">{bookingRef}</p>
     <div className="bg-slate-50 rounded-2xl p-5 mb-6 text-left space-y-2">
       {[
-        "Your booking is now PENDING",
-        "Our team will review and send a price quote within 24 hours",
+        "Your booking is now PENDING review",
+        "Our team will send a price quote within 24 hours",
         "You can track your booking status from your profile",
       ].map((s, i) => (
         <div key={i} className="flex items-start gap-2 text-sm text-slate-600">
@@ -104,8 +104,8 @@ const SuccessScreen = ({ bookingId, navigate }) => (
     </button>
   </motion.div>
 );
-
-// ─── Validation ───────────────────────────────────────────────────────────────
+ 
+// ─── Step Validation ──────────────────────────────────────────────────────────
 const validateStep = (step, data) => {
   switch (step) {
     case 0: return data.startLocation.trim() && data.endLocation.trim() && data.startDate && data.endDate && data.pickupTime;
@@ -115,41 +115,54 @@ const validateStep = (step, data) => {
     default: return false;
   }
 };
-
+ 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const PointToPoint = () => {
   const { user } = useContext(AuthContext);
-  const { addBooking } = useBookings();
-  const navigate = useNavigate();
-
+  const navigate  = useNavigate();
+ 
   const [currentStep, setCurrentStep] = useState(0);
-  const [data, setData] = useState(initialData);
-  const [submitted, setSubmitted] = useState(false);
-  const [bookingId, setBookingId] = useState("");
-
+  const [data, setData]               = useState(initialData);
+  const [submitted, setSubmitted]     = useState(false);
+  const [bookingRef, setBookingRef]   = useState("");
+  const [submitting, setSubmitting]   = useState(false);
+  const [error, setError]             = useState("");
+ 
   if (!user) return <GuestGuard navigate={navigate} />;
-
+ 
   const handleChange = (field, value) => setData((prev) => ({ ...prev, [field]: value }));
-  const handleNext = () => { if (validateStep(currentStep, data)) setCurrentStep((s) => s + 1); };
-  const handleBack = () => setCurrentStep((s) => s - 1);
-
-  const handleSubmit = () => {
-    const booking = addBooking({ ...data, customerEmail: user.email, tourType: "P2P" });
-    setBookingId(booking.id);
-    setSubmitted(true);
+  const handleNext   = () => { if (validateStep(currentStep, data)) setCurrentStep((s) => s + 1); };
+  const handleBack   = () => { setError(""); setCurrentStep((s) => s - 1); };
+ 
+  // ── Submit to real backend ──────────────────────────────────────────────────
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setError("");
+    try {
+      const result = await submitP2PBooking({
+        ...data,
+        customerEmail: user.email,
+        tourType: "P2P",
+      });
+      setBookingRef(result.bookingRef);
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || "Submission failed. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
-
+ 
   const canProceed = validateStep(currentStep, data);
-
+ 
   return (
     <div className="min-h-screen bg-slate-50 pb-16">
-      {/* Hero Header */}
       <P2PHeader />
-
+ 
       <div className="max-w-6xl mx-auto px-4 mt-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-          {/* ── Left: Booking Form ── */}
+ 
+          {/* ── Left: Form ── */}
           <div className="lg:col-span-2 space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -158,11 +171,11 @@ const PointToPoint = () => {
               className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8"
             >
               {submitted ? (
-                <SuccessScreen bookingId={bookingId} navigate={navigate} />
+                <SuccessScreen bookingRef={bookingRef} navigate={navigate} />
               ) : (
                 <>
                   <BookingStepIndicator steps={STEPS} currentStep={currentStep} />
-
+ 
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={currentStep}
@@ -177,7 +190,19 @@ const PointToPoint = () => {
                       {currentStep === 3 && <P2PReviewStep data={data} />}
                     </motion.div>
                   </AnimatePresence>
-
+ 
+                  {/* Error message */}
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4 flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm"
+                    >
+                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                      {error}
+                    </motion.div>
+                  )}
+ 
                   {/* Navigation */}
                   <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
                     <button
@@ -187,7 +212,7 @@ const PointToPoint = () => {
                     >
                       <ChevronLeft className="w-4 h-4" /> Back
                     </button>
-
+ 
                     {currentStep < STEPS.length - 1 ? (
                       <button
                         onClick={handleNext}
@@ -199,9 +224,20 @@ const PointToPoint = () => {
                     ) : (
                       <button
                         onClick={handleSubmit}
-                        className="w-50 bg-[#00b0a5] hover:bg-[#009b91] text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 tracking-wide cursor-pointer"
+                        disabled={submitting}
+                        className="flex items-center gap-2 px-7 py-3 rounded-xl bg-[#00b0a5] hover:bg-[#009b91] text-white font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                       >
-                        <Send className="w-4 h-4" /> Submit Booking
+                        {submitting ? (
+                          <>
+                            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                            </svg>
+                            Submitting...
+                          </>
+                        ) : (
+                          <><Send className="w-4 h-4" /> Submit Booking</>
+                        )}
                       </button>
                     )}
                   </div>
@@ -209,15 +245,16 @@ const PointToPoint = () => {
               )}
             </motion.div>
           </div>
-
+ 
           {/* ── Right: Side Panel ── */}
           <div className="lg:col-span-1">
             <P2PSidePanel />
           </div>
+        </div>
       </div>
-    </div>
     </div>
   );
 };
-
+ 
 export default PointToPoint;
+ 

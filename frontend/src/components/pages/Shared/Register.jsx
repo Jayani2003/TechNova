@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, User, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, ArrowRight, AlertCircle } from 'lucide-react';
 import authBg from '../../../assets/auth-bg.png';
+import { AuthContext } from '../../../context/AuthContext';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -13,23 +14,75 @@ function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error,  setError]   = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useContext(AuthContext);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+    console.log('1. Button clicked');
+    console.log('formData:', formData);  // ← ADD THIS
+    setError('');
+
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match!");
+      console.log('BLOCKED: passwords dont match');  // ← ADD THIS
+      setError("Passwords don't match. Please try again.");
       return;
     }
-    // In a real app, handle registration logic here
-    console.log("Registration attempted with:", formData);
-    navigate('/user/dashboard');
+
+    if (formData.password.length < 6) {
+      console.log('BLOCKED: password too short, length:', formData.password.length);  // ← ADD THIS
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+    
+    console.log('2. Validation passed, calling register...');
+    console.log('3. register function is:', typeof register);
+    setLoading(true);
+    try {
+      await register(formData.fullName, formData.email, formData.password);
+      console.log('4. Register succeeded!');
+      navigate('/');
+    } catch (err) {
+      console.log('5. Error caught:', err.message);
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
+
+// const handleRegister = async (e) => {
+//     e.preventDefault();
+//     setError('');
+ 
+//     if (formData.password !== formData.confirmPassword) {
+//       setError("Passwords don't match. Please try again.");
+//       return;
+//     }
+ 
+//     if (formData.password.length < 6) {
+//       setError('Password must be at least 6 characters.');
+//       return;
+//     }
+ 
+//     setLoading(true);
+//     try {
+//       await register(formData.fullName, formData.email, formData.password);
+//       // register() in AuthContext saves the token + user automatically
+//       navigate('/');
+//     } catch (err) {
+//       setError(err.message || 'Registration failed. Please try again.');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
 
   return (
     <div className="flex min-h-screen w-full bg-slate-50 dark:bg-[#1a1a1a]">

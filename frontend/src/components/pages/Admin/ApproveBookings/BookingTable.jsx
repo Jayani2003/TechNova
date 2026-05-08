@@ -157,7 +157,7 @@ function BookingRow({ booking: b, cols, tm, ts, isLast, border, rowHov, onView }
       {/* Category */}
       <div style={cellStyle(cols[5].flex)}>
         <p style={{ margin: 0, fontSize: 12, color: ts }}>
-          {VEHICLE_LABELS[b.categoryId] || b.categoryId || "—"}
+          {b.categoryName || VEHICLE_LABELS[b.categoryId] || b.categoryId || "—"}
         </p>
       </div>
 

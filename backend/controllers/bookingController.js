@@ -1,18 +1,30 @@
-const db = require('../db/connection');
+const db = require('../db/connection'); 
+
+const formatDate = (val) => {
+  if (!val) return null;
+  if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+  return new Date(val).toISOString().split('T')[0];
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const mapBooking = (row) => ({
   id:             row.booking_id,
-  userId:         row.user_id,
+  customerId:     row.customer_id,
   customerName:   row.customer_name,
   customerPhone:  row.customer_phone,
-  customerEmail:  row.email || null,
+  customerEmail:  row.customer_email || null,
   tourType:       row.tour_type,
   categoryId:     row.category_id,
   categoryName:   row.category_name || null,
-  vehicleId:      row.vehicle_id,
-  startDate:      row.start_date,
-  endDate:        row.end_date,
+  vehicleId:      row.vehicle_id || null,
+  assignedVehicle: row.vehicle_name ? {
+    name:        row.vehicle_name,
+    plateNumber: row.vehicle_number || '—',
+    type:        row.category_name  || '',
+  } : null,
+  startDate:      formatDate(row.start_date),
+  endDate:        formatDate(row.end_date),
+  bookingDate:    formatDate(row.booking_date),
   startLocation:  row.start_location,
   endLocation:    row.end_location,
   totalDays:      row.total_days,
@@ -23,7 +35,6 @@ const mapBooking = (row) => ({
   agesOfChildren: row.ages_of_children,
   quotedPrice:    row.quoted_price ? parseFloat(row.quoted_price) : null,
   notes:          row.notes,
-  bookingDate:    row.booking_date,
   status:         row.booking_status,
   quotedAt:       row.quoted_at,
   confirmedAt:    row.confirmed_at,

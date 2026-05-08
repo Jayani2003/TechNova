@@ -1,7 +1,7 @@
 // components/pages/Admin/ApproveBookings/BookingModal.jsx
 import { useState } from "react";
 import {
-  X, MapPin, Calendar, Users, Car, Phone, FileText,
+  X, MapPin, Calendar, Users, Car, Phone, FileText, Clock,
   DollarSign, CheckCircle2, XCircle, Truck, Flag,
   Archive, Hash, Package, Compass,
 } from "lucide-react";
@@ -12,7 +12,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
   const [price,  setPrice]  = useState(booking.quotedPrice ?? "");
   const [vName,  setVName]  = useState(booking.assignedVehicle?.name ?? "");
   const [vPlate, setVPlate] = useState(booking.assignedVehicle?.plateNumber ?? "");
-  const [vType,  setVType]  = useState(booking.assignedVehicle?.type ?? (VEHICLE_LABELS[booking.categoryId] || ""));
+  const [vType,  setVType]  = useState(booking.assignedVehicle?.type ?? (booking.categoryName || VEHICLE_LABELS[booking.categoryId] || ""));
   const [err,    setErr]    = useState("");
 
   const bg     = dark ? "#0f172a" : "#f8fafc";
@@ -114,6 +114,11 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
             )}
             <Row icon={Calendar} label="Start Date" value={booking.startDate} />
             <Row icon={Calendar} label="End Date"   value={booking.endDate} />
+            <Row icon={Clock}    label="Pickup Time" value={
+              booking.pickupTime ||
+              (booking.notes?.match(/Pickup time: ([^|]+)/)?.[1]?.trim()) ||
+              null
+            } />
             <Row icon={Calendar} label="Total Days" value={booking.totalDays ? `${booking.totalDays} day(s)` : null} />
           </div>
 
@@ -122,7 +127,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
           <div style={{ background: card, borderRadius: 14, padding: "4px 16px", border: `1px solid ${border}`, marginBottom: 16 }}>
             <Row icon={Users}    label="Adults"             value={booking.noOfAdults} />
             <Row icon={Users}    label="Children"           value={booking.noOfChildren > 0 ? `${booking.noOfChildren} (Ages: ${booking.agesOfChildren || "—"})` : null} />
-            <Row icon={Car}      label="Requested Category" value={VEHICLE_LABELS[booking.categoryId] || booking.categoryId} />
+            <Row icon={Car}      label="Requested Category" value={booking.categoryName || VEHICLE_LABELS[booking.categoryId] || booking.categoryId} />
             <Row icon={FileText} label="Luggage"            value={`${booking.smallLuggages || 0} small, ${booking.largeLuggages || 0} large`} />
             {booking.babySeatNeeded && <Row icon={Users} label="Baby Seat" value="Required" />}
           </div>
@@ -133,7 +138,10 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
             <Row icon={Phone}    label="Name"  value={booking.customerName} />
             <Row icon={Phone}    label="Phone" value={formatPhone(booking.customerPhone)} />
             <Row icon={FileText} label="Email" value={booking.customerEmail} />
-            {booking.notes && <Row icon={FileText} label="Notes" value={booking.notes} />}
+            {booking.notes && (() => {
+              const clean = booking.notes.replace(/Pickup time: [^|]+\|?\s*/g, '').trim();
+              return clean ? <Row icon={FileText} label="Notes" value={clean} /> : null;
+            })()}
           </div>
 
           {/* Already assigned vehicle */}

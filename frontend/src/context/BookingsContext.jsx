@@ -1,120 +1,60 @@
-// context/BookingsContext.jsx
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
+import { api } from "../config/api";
 
 const BookingsContext = createContext();
-const STORAGE_KEY = "ceylon_bookings";
-
-const loadBookings = () => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch (e) {
-    console.error("Failed to load bookings from localStorage:", e);
-  }
-  return [];
-};
 
 export const BookingsProvider = ({ children }) => {
-  const [bookings, setBookings] = useState(loadBookings);
+  const [bookings, setBookings] = useState([]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
-    } catch (e) {
-      console.error("Failed to save bookings:", e);
-    }
-  }, [bookings]);
+  // ── Fetch customer's own bookings ──────────────────────────────────────────
+  const getCustomerBookings = useCallback(async () => {
+    const data = await api.get("/bookings/my");
+    setBookings(data.bookings);
+    return data.bookings;
+  }, []);
 
-  // ── Add a new booking ──────────────────────────────────────────────────────
-  const addBooking = (bookingData) => {
-    const newBooking = {
-      id: `BK${Date.now()}`,
-      status: "PENDING",
-      quotedPrice: null,
-      assignedVehicle: null,   // added: admin assigns vehicle when quoting
-      vehicleId: null,
-      createdAt: new Date().toISOString().split("T")[0],
-      ...bookingData,
-    };
-    setBookings((prev) => [newBooking, ...prev]);
-    return newBooking;
-  };
+  // ── Fetch ALL bookings (admin) ─────────────────────────────────────────────
+  const getAllBookings = useCallback(async () => {
+    const data = await api.get("/bookings");
+    setBookings(data.bookings);
+    return data.bookings;
+  }, []);
 
-  // ── Customer: accept quoted price ──────────────────────────────────────────
-  const acceptQuote = (bookingId) => {
-    setBookings((prev) =>
-      prev.map((b) =>
-        b.id === bookingId ? { ...b, status: "ACCEPTED" } : b
-      )
-    );
-  };
+  // ── Admin: set quoted price + vehicle ──────────────────────────────────────
+  const setQuotedPrice = useCallback(async (bookingId, price, vehicleInfo = null) => {
+    await api.patch(`/bookings/${bookingId}/quote`, {
+      quotedPrice: price,
+      vehicleId: vehicleInfo?.id || null,
+    });
+    await getAllBookings();
+  }, [getAllBookings]);
 
-  // ── Customer: reject quoted price ──────────────────────────────────────────
-  const rejectQuote = (bookingId) => {
-    setBookings((prev) =>
-      prev.map((b) =>
-        b.id === bookingId ? { ...b, status: "REJECTED" } : b
-      )
-    );
-  };
+  // ── Update booking status ──────────────────────────────────────────────────
+  const updateBookingStatus = useCallback(async (bookingId, status) => {
+    await api.patch(`/bookings/${bookingId}/status`, { status });
+    // Refresh whichever list is loaded
+    try { await getAllBookings(); } catch { await getCustomerBookings(); }
+  }, [getAllBookings, getCustomerBookings]);
 
-  // ── Customer or Admin: cancel booking ─────────────────────────────────────
-  const cancelBooking = (bookingId) => {
-    setBookings((prev) =>
-      prev.map((b) =>
-        b.id === bookingId ? { ...b, status: "CANCELLED" } : b
-      )
-    );
-  };
+  // ── Customer: accept / reject / cancel ────────────────────────────────────
+  const acceptQuote    = (id) => updateBookingStatus(id, "ACCEPTED");
+  const rejectQuote    = (id) => updateBookingStatus(id, "REJECTED");
+  const cancelBooking  = (id) => updateBookingStatus(id, "CANCELLED");
 
-  // ── Admin: set quoted price AND assign vehicle ─────────────────────────────
-  const setQuotedPrice = (bookingId, price, vehicleInfo = null) => {
-    setBookings((prev) =>
-      prev.map((b) =>
-        b.id === bookingId
-          ? {
-              ...b,
-              status: "QUOTED",
-              quotedPrice: price,
-              assignedVehicle: vehicleInfo,  // { name, plateNumber, type }
-            }
-          : b
-      )
-    );
-  };
-
-  // ── Admin: update booking status ───────────────────────────────────────────
-  const updateBookingStatus = (bookingId, status) => {
-    setBookings((prev) =>
-      prev.map((b) =>
-        b.id === bookingId ? { ...b, status } : b
-      )
-    );
-  };
-
-  // ── Get bookings for a specific customer ───────────────────────────────────
-  const getCustomerBookings = (customerEmail) =>
-    bookings.filter((b) => b.customerEmail === customerEmail);
-
-  // ── Get all bookings (admin) ───────────────────────────────────────────────
-  const getAllBookings = () => bookings;
-
-  // ── Get pending count (for admin badge) ────────────────────────────────────
-  const getPendingCount = () =>
-    bookings.filter((b) => b.status === "PENDING").length;
+  // ── Pending count for admin badge ─────────────────────────────────────────
+  const getPendingCount = () => bookings.filter((b) => b.status === "PENDING").length;
 
   return (
     <BookingsContext.Provider
       value={{
         bookings,
-        addBooking,
+        getCustomerBookings,
+        getAllBookings,
+        setQuotedPrice,
+        updateBookingStatus,
         acceptQuote,
         rejectQuote,
         cancelBooking,
-        setQuotedPrice,
-        updateBookingStatus,
-        getCustomerBookings,
-        getAllBookings,
         getPendingCount,
       }}
     >

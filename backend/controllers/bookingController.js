@@ -1,5 +1,5 @@
 const db = require('../db/connection');
- 
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const mapBooking = (row) => ({
   id:             row.booking_id,
@@ -31,7 +31,7 @@ const mapBooking = (row) => ({
   completedAt:    row.completed_at,
   closedAt:       row.closed_at,
 });
- 
+
 // ── POST /api/bookings/p2p ────────────────────────────────────────────────────
 const createP2PBooking = async (req, res) => {
   const {
@@ -53,19 +53,38 @@ const createP2PBooking = async (req, res) => {
     customerPhone,
     notes,
   } = req.body;
- 
+
   // Basic validation
   if (!startLocation || !endLocation || !startDate || !endDate || !categoryId || !customerName || !customerPhone)
     return res.status(400).json({ message: 'Missing required fields.' });
- 
+
   if (!req.user?.id)
     return res.status(401).json({ message: 'Not authenticated.' });
- 
+
   // Build luggage string and full notes
   const luggageStr = `Small: ${smallLuggages || 0}, Large: ${largeLuggages || 0}${babySeatNeeded ? ', Baby seat needed' : ''}`;
   const fullNotes  = [pickupTime ? `Pickup time: ${pickupTime}` : null, notes || null]
     .filter(Boolean).join(' | ');
- 
+
+  // Resolve string category name → integer FK
+let resolvedCategoryId = null;
+if (!isNaN(categoryId)) {
+  resolvedCategoryId = parseInt(categoryId);
+} else {
+  const [catRows] = await db.execute(
+    'SELECT category_id FROM vehicle_category WHERE category_name = ? LIMIT 1',
+    [categoryId]
+  );
+  if (catRows.length > 0) {
+    resolvedCategoryId = catRows[0].category_id;
+  } else {
+    const [ins] = await db.execute(
+      'INSERT INTO vehicle_category (category_name) VALUES (?)', [categoryId]
+    );
+    resolvedCategoryId = ins.insertId;
+  }
+}
+
   try {
     const [result] = await db.execute(
       `INSERT INTO booking
@@ -81,7 +100,7 @@ const createP2PBooking = async (req, res) => {
         req.user.id,
         customerName,
         customerPhone,
-        categoryId,
+        resolvedCategoryId,
         startDate,
         endDate,
         startLocation,
@@ -95,19 +114,19 @@ const createP2PBooking = async (req, res) => {
         fullNotes || null,
       ]
     );
- 
+
     res.status(201).json({
       message: 'Booking submitted successfully.',
       bookingId: result.insertId,
       bookingRef: `CBT-P2P-${result.insertId}`,
     });
- 
+
   } catch (err) {
     console.error('createP2PBooking error:', err);
     res.status(500).json({ message: 'Failed to create booking.' });
   }
 };
- 
+
 // ── GET /api/bookings/my ──────────────────────────────────────────────────────
 const getMyBookings = async (req, res) => {
   try {
@@ -126,7 +145,7 @@ const getMyBookings = async (req, res) => {
     res.status(500).json({ message: 'Failed to load bookings.' });
   }
 };
- 
+
 // ── GET /api/bookings  (admin — all bookings) ─────────────────────────────────
 const getAllBookings = async (req, res) => {
   try {
@@ -145,15 +164,15 @@ const getAllBookings = async (req, res) => {
     res.status(500).json({ message: 'Failed to load bookings.' });
   }
 };
- 
+
 // ── PATCH /api/bookings/:id/quote  (admin sets price + vehicle) ───────────────
 const setQuote = async (req, res) => {
   const { id } = req.params;
   const { quotedPrice, vehicleId } = req.body;
- 
+
   if (!quotedPrice)
     return res.status(400).json({ message: 'quotedPrice is required.' });
- 
+
   try {
     const [result] = await db.execute(
       `UPDATE booking
@@ -162,58 +181,58 @@ const setQuote = async (req, res) => {
        WHERE booking_id = ?`,
       [quotedPrice, vehicleId || null, id]
     );
- 
+
     if (result.affectedRows === 0)
       return res.status(404).json({ message: 'Booking not found.' });
- 
+
     res.json({ message: 'Quote sent to customer.' });
   } catch (err) {
     console.error('setQuote error:', err);
     res.status(500).json({ message: 'Failed to set quote.' });
   }
 };
- 
+
 // ── PATCH /api/bookings/:id/status ───────────────────────────────────────────
 const ALLOWED_TRANSITIONS = {
   CUSTOMER: ['ACCEPTED', 'REJECTED', 'CANCELLED'],
   ADMIN:    ['CONFIRMED', 'TOUR_STARTED', 'COMPLETED', 'CLOSED', 'CANCELLED'],
 };
- 
+
 const STATUS_TIMESTAMP = {
   CONFIRMED:    'confirmed_at',
   TOUR_STARTED: 'tour_started_at',
   COMPLETED:    'completed_at',
   CLOSED:       'closed_at',
 };
- 
+
 const updateStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
   const isAdmin = ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(req.user?.role);
   const allowed = isAdmin ? ALLOWED_TRANSITIONS.ADMIN : ALLOWED_TRANSITIONS.CUSTOMER;
- 
+
   if (!allowed.includes(status))
     return res.status(400).json({ message: `Status '${status}' is not allowed.` });
- 
+
   const tsCol   = STATUS_TIMESTAMP[status];
   const tsClause = tsCol ? `, ${tsCol} = NOW()` : '';
- 
+
   try {
     const [result] = await db.execute(
       `UPDATE booking SET booking_status = ? ${tsClause} WHERE booking_id = ?`,
       [status, id]
     );
- 
+
     if (result.affectedRows === 0)
       return res.status(404).json({ message: 'Booking not found.' });
- 
+
     res.json({ message: `Booking status updated to ${status}.` });
   } catch (err) {
     console.error('updateStatus error:', err);
     res.status(500).json({ message: 'Failed to update status.' });
   }
 };
- 
+
 module.exports = {
   createP2PBooking,
   getMyBookings,

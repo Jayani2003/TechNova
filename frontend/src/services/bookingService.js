@@ -1,4 +1,4 @@
-import { buildApiUrl } from '../config/api';
+import { api } from '../config/api';
  
 // Submit a Point-to-Point booking
 export const submitP2PBooking = (data) => api.post('/bookings/p2p', data);

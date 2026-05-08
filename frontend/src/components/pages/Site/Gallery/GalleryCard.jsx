@@ -6,7 +6,7 @@ const GalleryCard = ({ item, onClick }) => (
     layoutId={`card-${item.id}`}
     whileHover={{ y: -5 }}
     onClick={() => onClick(item)}
-    className="group relative h-80 bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 border border-slate-100 cursor-pointer"
+    className="group relative w-full aspect-square bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 border border-slate-100 cursor-pointer"
   >
     <div className="h-full overflow-hidden">
       <img 
@@ -17,7 +17,7 @@ const GalleryCard = ({ item, onClick }) => (
     </div>
     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity" />
     <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-      <h3 className="text-xl font-bold leading-tight">{item.title}</h3>
+      <h3 className="text-lg font-bold leading-tight line-clamp-2">{item.title}</h3>
     </div>
   </motion.div>
 );

@@ -43,7 +43,7 @@ function TourPackages() {
 	const handleSave = async (data) => {
 		try {
 			if (editingPackage?.id) {
-				packageStore.update(editingPackage.id, data);
+				await packageStore.update(editingPackage.id, data);
 			} else {
 				await packageStore.create(data);
 			}
@@ -56,7 +56,14 @@ function TourPackages() {
 	};
 
 	const handleDeleteConfirm = (id) => {
-		packageStore.delete(id);
+		(async () => {
+			try {
+				await packageStore.delete(id);
+			} catch (err) {
+				console.error('Failed to delete package', err);
+				alert(err?.message || 'Failed to delete package');
+			}
+		})();
 		setDeletingPackage(null);
 	};
 

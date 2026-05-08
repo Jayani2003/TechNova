@@ -28,6 +28,27 @@ const savePackages = (_pkgs) => {
   // persistence removed in favor of backend API; keep a no-op for compatibility
 };
 
+const reloadFromBackend = async () => {
+  try {
+    const res = await fetch(buildApiUrl('/packages/admin/packages'));
+    if (!res.ok) return;
+    const data = await res.json();
+    _packages = data.map(p => ({
+      id: `pkg-${p.package_id || p.id || Math.random().toString(36).slice(2,9)}`,
+      title: p.title,
+      type: p.type,
+      days: Number(p.days) || (p.days ? Number(p.days) : 0),
+      description: p.description,
+      image: p.image_url || p.image || '',
+      destinations: Array.isArray(p.destinations) ? p.destinations : [],
+    }));
+    notify();
+    emitPackagesChanged();
+  } catch (e) {
+    console.error('reloadFromBackend failed', e);
+  }
+};
+
 export const packageStore = {
   // Subscribe to changes (returns unsubscribe fn)
   subscribe: (fn) => {
@@ -129,19 +150,66 @@ export const packageStore = {
   },
 
   // ── UPDATE ──────────────────────────────────────────────
-  update: (id, data) => {
-    _packages = _packages.map(p => p.id === id ? { ...p, ...data } : p);
-    savePackages(_packages);
-    notify();
-    emitPackagesChanged();
+  update: async (id, data) => {
+    try {
+      // extract numeric package id
+      const m = String(id).match(/(\d+)/);
+      if (!m) throw new Error('Invalid package id');
+      const pkgId = m[1];
+
+      const form = new FormData();
+      if (data.title != null) form.append('title', data.title);
+      if (data.type != null) form.append('type', data.type);
+      if (data.days != null) form.append('days', String(data.days));
+      if (data.description != null) form.append('description', data.description || '');
+      if (data.packageImageFile) form.append('packageImage', data.packageImageFile);
+
+      const dests = (data.destinations || []).map((d, i) => {
+        if (d.imageFile) form.append('destImages', d.imageFile);
+        return {
+          name: d.name,
+          description: d.description,
+          dayNumber: d.days || (i + 1),
+          activities: d.activities || [],
+        };
+      });
+      form.append('destinations', JSON.stringify(dests));
+
+      const res = await fetch(buildApiUrl(`/packages/admin/packages/${pkgId}`), {
+        method: 'PUT',
+        body: form,
+      });
+      if (!res.ok) {
+        let msg = 'Failed to update package';
+        try { const body = await res.json(); msg = body.error || body.message || msg; } catch {}
+        throw new Error(msg);
+      }
+
+      // reload full list from backend to keep store in sync
+      await reloadFromBackend();
+    } catch (err) {
+      console.error('package update failed', err);
+      throw err;
+    }
   },
 
   // ── DELETE ──────────────────────────────────────────────
-  delete: (id) => {
-    _packages = _packages.filter(p => p.id !== id);
-    savePackages(_packages);
-    notify();
-    emitPackagesChanged();
+  delete: async (id) => {
+    try {
+      const m = String(id).match(/(\d+)/);
+      if (!m) throw new Error('Invalid package id');
+      const pkgId = m[1];
+      const res = await fetch(buildApiUrl(`/packages/admin/packages/${pkgId}`), { method: 'DELETE' });
+      if (!res.ok) {
+        let msg = 'Failed to delete package';
+        try { const body = await res.json(); msg = body.error || body.message || msg; } catch {}
+        throw new Error(msg);
+      }
+      await reloadFromBackend();
+    } catch (err) {
+      console.error('package delete failed', err);
+      throw err;
+    }
   },
 
   // ── RESET to seed data (dev utility) ────────────────────

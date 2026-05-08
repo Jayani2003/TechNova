@@ -73,12 +73,12 @@ const DestRow = ({ dest, index, onChange, onRemove, canRemove, dark = false }) =
       value={dest.description}
       onChange={e => onChange(index, 'description', e.target.value)}
     />
-    <input
+    {/* <input
       style={inputStyle(false, dark)}
       placeholder="Image URL for this destination or choose file"
       value={dest.image}
       onChange={e => onChange(index, 'image', e.target.value)}
-    />
+    /> */}
     <input
       type="file"
       accept="image/*"
@@ -433,12 +433,12 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false }) =
                 </div>
 
                 <Field label="Cover Image URL *" error={errors.image} dark={dark}>
-                  <input
+                  {/* <input
                     style={inputStyle(errors.image, dark)}
                     placeholder="https://images.unsplash.com/…"
                     value={form.image}
                     onChange={e => set('image', e.target.value)}
-                  />
+                  /> */}
                   <input type="file" accept="image/*" style={{ marginTop: 8 }} onChange={e => set('packageImageFile', e.target.files[0])} />
                   {form.image && (
                     <img src={form.image} alt="" style={{ height:'100px', borderRadius:'10px', objectFit:'cover', width:'100%', marginTop:'4px' }} onError={e => e.target.style.display='none'} />
@@ -449,7 +449,7 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false }) =
                 </Field>
 
                 {/* Highlights */}
-                <div className="apfm-section">Highlights</div>
+                {/* <div className="apfm-section">Highlights</div>
                 {form.highlights.map((hl, i) => (
                   <div key={i} className="apfm-hl-row">
                     <input
@@ -468,7 +468,7 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false }) =
                     <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
                     Add Highlight
                   </button>
-                )}
+                )} */}
 
                 {/* Destinations */}
                 <div className="apfm-section">Destinations & Itinerary</div>

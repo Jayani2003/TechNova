@@ -463,3 +463,154 @@ exports.getPackageDetail = async (req, res) => {
     res.status(500).json({ error: 'Failed to load package.' });
   }
 };
+
+exports.updatePackage = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const schemaMeta = await getPackageSchemaMeta();
+
+    const { title, type, days, description } = req.body;
+    const packageType = type ? toPackageTypeEnum(type) : null;
+
+    const packageImageFile = req.files && req.files.packageImage && req.files.packageImage[0];
+    const packageImage = await uploadBufferToCloudinary(packageImageFile, 'package_uploads');
+    const destFiles = req.files && req.files.destImages ? req.files.destImages : [];
+
+    let destinations = [];
+    try {
+      destinations = req.body.destinations ? JSON.parse(req.body.destinations) : [];
+      if (!Array.isArray(destinations)) destinations = [];
+    } catch (e) {
+      return res.status(400).json({ error: 'destinations must be a JSON array.' });
+    }
+
+    const conn = await db.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      // ensure package exists
+      const [[existing]] = await conn.execute(`SELECT package_id, image_url FROM package WHERE package_id = ?`, [id]);
+      if (!existing) {
+        await conn.rollback();
+        return res.status(404).json({ error: 'Package not found.' });
+      }
+
+      const updateCols = [];
+      const updateVals = [];
+      if (title != null) { updateCols.push('title = ?'); updateVals.push(title); }
+      if (schemaMeta.hasType && packageType) { updateCols.push('type = ?'); updateVals.push(packageType); }
+      if (schemaMeta.hasDays && days != null) {
+        const daysLabel = toPackageDaysLabel(days);
+        const daysVal = schemaMeta.daysType.includes('enum') ? daysLabel : toPackageDaysNumber(daysLabel);
+        updateCols.push('days = ?'); updateVals.push(daysVal);
+      }
+
+      const storedDescription = schemaMeta.hasType
+        ? (description || null)
+        : (description != null ? encodeDescriptionWithTypeMeta(description || '', type) : null);
+      if (schemaMeta.hasDescription && description != null) { updateCols.push('description = ?'); updateVals.push(storedDescription); }
+
+      // image handling: if a new image was uploaded, use it; otherwise keep existing
+      if (schemaMeta.hasImageUrl && packageImage) {
+        updateCols.push('image_url = ?'); updateVals.push(packageImage);
+      }
+
+      if (updateCols.length > 0) {
+        const sql = `UPDATE package SET ${updateCols.join(', ')} WHERE package_id = ?`;
+        await conn.execute(sql, [...updateVals, id]);
+      }
+
+      // Remove existing places/activities for this package before recreating
+      const [places] = await conn.execute(`SELECT pp.place_id FROM package_place pp WHERE pp.package_id = ?`, [id]);
+      const placeIds = places.map(p => p.place_id);
+      if (placeIds.length > 0) {
+        const idsList = placeIds.join(',');
+        // find activity ids
+        const [paRows] = await conn.execute(`SELECT activity_id FROM place_activity WHERE place_id IN (${idsList})`);
+        const activityIds = paRows.map(r => r.activity_id);
+        if (activityIds.length > 0) {
+          await conn.execute(`DELETE FROM place_activity WHERE place_id IN (${idsList})`);
+          await conn.execute(`DELETE FROM activity WHERE activity_id IN (${activityIds.join(',')})`);
+        }
+        await conn.execute(`DELETE FROM package_place WHERE package_id = ?`, [id]);
+        await conn.execute(`DELETE FROM place WHERE place_id IN (${idsList})`);
+      }
+
+      // recreate destinations and activities
+      for (let i = 0; i < destinations.length; i++) {
+        const dest = destinations[i] || {};
+        const destImage = await uploadBufferToCloudinary(destFiles[i], 'package_uploads') || dest.image || null;
+
+        const placeSql = `INSERT INTO place (place_name, image_url, description) VALUES (?, ?, ?)`;
+        const [placeRes] = await conn.execute(placeSql, [dest.name || null, destImage, dest.description || null]);
+        const placeId = placeRes.insertId;
+
+        const dayNumber = dest.dayNumber || (i + 1);
+        await conn.execute(`INSERT INTO package_place (package_id, place_id, day_number) VALUES (?, ?, ?)`, [id, placeId, dayNumber]);
+
+        const activities = Array.isArray(dest.activities) ? dest.activities : [];
+        for (const act of activities) {
+          if (!act.name) continue;
+          const [actRes] = await conn.execute(`INSERT INTO activity (activity_name, phone, description) VALUES (?, ?, ?)`, [act.name, act.phone || null, act.description || null]);
+          const activityId = actRes.insertId;
+          await conn.execute(`INSERT INTO place_activity (place_id, activity_id) VALUES (?, ?)`, [placeId, activityId]);
+        }
+      }
+
+      await conn.commit();
+
+      res.json({ success: true, package_id: Number(id) });
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
+  } catch (error) {
+    console.error('updatePackage failed:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.deletePackage = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const conn = await db.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      const [[existing]] = await conn.execute(`SELECT package_id FROM package WHERE package_id = ?`, [id]);
+      if (!existing) {
+        await conn.rollback();
+        return res.status(404).json({ error: 'Package not found.' });
+      }
+
+      const [places] = await conn.execute(`SELECT pp.place_id FROM package_place pp WHERE pp.package_id = ?`, [id]);
+      const placeIds = places.map(p => p.place_id);
+      if (placeIds.length > 0) {
+        const idsList = placeIds.join(',');
+        const [paRows] = await conn.execute(`SELECT activity_id FROM place_activity WHERE place_id IN (${idsList})`);
+        const activityIds = paRows.map(r => r.activity_id);
+        if (activityIds.length > 0) {
+          await conn.execute(`DELETE FROM place_activity WHERE place_id IN (${idsList})`);
+          await conn.execute(`DELETE FROM activity WHERE activity_id IN (${activityIds.join(',')})`);
+        }
+        await conn.execute(`DELETE FROM package_place WHERE package_id = ?`, [id]);
+        await conn.execute(`DELETE FROM place WHERE place_id IN (${idsList})`);
+      }
+
+      await conn.execute(`DELETE FROM package WHERE package_id = ?`, [id]);
+
+      await conn.commit();
+      res.json({ success: true });
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
+  } catch (error) {
+    console.error('deletePackage failed:', error);
+    res.status(500).json({ error: error.message });
+  }
+};

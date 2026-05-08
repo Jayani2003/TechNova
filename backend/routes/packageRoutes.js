@@ -9,6 +9,15 @@ router.post('/admin/packages', upload.fields([
   { name: 'destImages', maxCount: 20 }
 ]), pkgCtrl.createPackage);
 
+// Admin update package - accept one packageImage and multiple destImages
+router.put('/admin/packages/:id', upload.fields([
+  { name: 'packageImage', maxCount: 1 },
+  { name: 'destImages', maxCount: 20 }
+]), pkgCtrl.updatePackage);
+
+// Admin delete package
+router.delete('/admin/packages/:id', pkgCtrl.deletePackage);
+
 // Admin list packages for table
 router.get('/admin/packages', pkgCtrl.listAdminPackages);
 

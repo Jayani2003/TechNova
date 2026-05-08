@@ -172,7 +172,11 @@ const MyBookingDetail = ({ booking, onBack }) => {
           )}
           <DetailRow icon={Calendar} label="Start Date"   value={booking.startDate} />
           <DetailRow icon={Calendar} label="End Date"     value={booking.endDate} />
-          <DetailRow icon={Clock}    label="Pickup Time"  value={booking.pickupTime} />
+          <DetailRow icon={Clock}    label="Pickup Time"  value={
+            booking.pickupTime ||
+            (booking.notes?.match(/Pickup time: ([^|]+)/)?.[1]?.trim()) ||
+            null
+          } />
           <DetailRow icon={Calendar} label="Total Days"   value={booking.totalDays ? `${booking.totalDays} day(s)` : null} />
         </Section>
 
@@ -186,21 +190,24 @@ const MyBookingDetail = ({ booking, onBack }) => {
           <DetailRow icon={Briefcase} label="Luggage"
             value={(booking.smallLuggages !== undefined || booking.largeLuggages !== undefined)
               ? `${booking.smallLuggages || 0} small, ${booking.largeLuggages || 0} large`
-              : booking.noOfLuggages ? `${booking.noOfLuggages} piece(s)` : null} />
-          <DetailRow icon={Car} label="Requested Category" value={VEHICLE_LABELS[booking.categoryId] || booking.categoryId} />
+              : booking.noOfLuggages || null} />
+          <DetailRow icon={Car} label="Requested Category" value={booking.categoryName || VEHICLE_LABELS[booking.categoryId] || booking.categoryId} />
         </Section>
 
         {/* Contact */}
         <Section title="Contact Details">
           <DetailRow icon={Phone}    label="Name"  value={booking.customerName} />
           <DetailRow icon={Phone}    label="Phone" value={booking.customerPhone} />
-          {booking.notes && <DetailRow icon={FileText} label="Notes" value={booking.notes} />}
+          {booking.notes && (() => {
+            const clean = booking.notes.replace(/Pickup time: [^|]+\|?\s*/g, '').trim();
+            return clean ? <DetailRow icon={FileText} label="Notes" value={clean} /> : null;
+          })()}
         </Section>
 
         {/* Booking info */}
         <Section title="Booking Info">
-          <DetailRow icon={Calendar}  label="Submitted On"        value={booking.createdAt} />
-          <DetailRow icon={FileText}  label="Booking Reference"   value={booking.id} />
+          <DetailRow icon={Calendar}  label="Submitted On"        value={booking.bookingDate} />
+          <DetailRow icon={FileText}  label="Booking Reference"   value={`CBT-P2P-${booking.id}`} />
         </Section>
 
       </div>

@@ -3,16 +3,20 @@ USE tours;
 
 CREATE TABLE user (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
+
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
 
-    role ENUM('ADMIN','CUSTOMER') NOT NULL DEFAULT 'CUSTOMER',
+    role ENUM('ADMIN','CUSTOMER') DEFAULT 'CUSTOMER',
 
-    country VARCHAR(100),
+    contact_number VARCHAR(20) NULL,
+    street_address VARCHAR(255) NULL,
+    country VARCHAR(100) NULL,
+    zipcode VARCHAR(20) NULL,
 
     auth_provider ENUM('LOCAL','GOOGLE','FACEBOOK') DEFAULT 'LOCAL',
-    provider_id VARCHAR(255),
+    provider_id VARCHAR(255) NULL,
 
     status ENUM('ACTIVE','BLOCKED') DEFAULT 'ACTIVE',
 

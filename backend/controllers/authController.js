@@ -34,6 +34,10 @@ const login = async (req, res) => {
       email: user.email,
       name:  user.name,
       role:  user.role,
+      contact_number: user.contact_number,
+      street_address: user.street_address,
+      country: user.country,
+      zipcode: user.zipcode,
     };
 
     const token = signToken(payload);
@@ -63,7 +67,16 @@ const register = async (req, res) => {
       'INSERT INTO user (name, email, password_hash, country, role) VALUES (?, ?, ?, ?, ?)',
       [name, email, hash, country, 'CUSTOMER']);
  
-    const payload = { id: result.insertId, email, name, role: 'CUSTOMER' };
+    const payload = { 
+      id: result.insertId, 
+      email, 
+      name, 
+      role: 'CUSTOMER',
+      country,
+      contact_number: null,
+      street_address: null,
+      zipcode: null
+    };
     const token = signToken(payload);
     res.status(201).json({ token, user: payload });
 
@@ -78,5 +91,61 @@ const register = async (req, res) => {
 const getMe = async (req, res) => {
   res.json({ user: req.user });
 };
+ 
+// ── PUT /api/auth/password ──────────────────────────────────────────────────────
+const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const userId = req.user.id; // From verifyToken middleware
 
-module.exports = { login, register, getMe };
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ message: 'Current and new password are required.' });
+  }
+
+  try {
+    const [rows] = await db.execute('SELECT * FROM user WHERE user_id = ? LIMIT 1', [userId]);
+    const user = rows[0];
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const match = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!match) {
+      return res.status(401).json({ message: 'Incorrect current password.' });
+    }
+
+    const hash = await bcrypt.hash(newPassword, 10);
+    await db.execute('UPDATE user SET password_hash = ? WHERE user_id = ?', [hash, userId]);
+
+    res.json({ message: 'Password updated successfully.' });
+  } catch (err) {
+    console.error('changePassword error:', err);
+    res.status(500).json({ message: 'Failed to change password.' });
+  }
+};
+ 
+// ── PUT /api/auth/profile ─────────────────────────────────────────────────────
+const updateProfile = async (req, res) => {
+  const userId = req.user.id;
+  const { name, contactNumber, address, country, zipcode } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ message: 'Name is required.' });
+  }
+
+  try {
+    await db.execute(
+      `UPDATE user 
+       SET name = ?, contact_number = ?, street_address = ?, country = ?, zipcode = ? 
+       WHERE user_id = ?`,
+      [name, contactNumber || null, address || null, country || null, zipcode || null, userId]
+    );
+
+    res.json({ message: 'Profile updated successfully.' });
+  } catch (err) {
+    console.error('updateProfile error:', err);
+    res.status(500).json({ message: 'Failed to update profile.' });
+  }
+};
+ 
+module.exports = { login, register, getMe, changePassword, updateProfile };

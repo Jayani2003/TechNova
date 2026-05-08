@@ -61,8 +61,41 @@ export function AuthProvider({ children }) {
  
   const getToken = () => localStorage.getItem('cbt_token');
  
+  const changePassword = async (currentPassword, newPassword) => {
+    const res = await fetch(`${API_BASE}/auth/password`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Failed to change password.');
+    return data;
+  };
+ 
+  const updateProfile = async (profileData) => {
+    const res = await fetch(`${API_BASE}/auth/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(profileData),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Failed to update profile.');
+    
+    // Update local user session context
+    const updatedUser = { ...user, ...profileData };
+    _saveSession(getToken(), updatedUser);
+    
+    return data;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, getToken }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, getToken, changePassword, updateProfile }}>
       {!loading && children}
     </AuthContext.Provider>
   );

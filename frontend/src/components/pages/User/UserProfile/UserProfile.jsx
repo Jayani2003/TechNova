@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router';
 import { 
   Camera, Mail, User as UserIcon, Phone, MapPin, Globe, Hash, 
-  Edit3, Check, LayoutDashboard, CreditCard, Shield, CalendarDays, Lock, 
-  CreditCard as CardIcon, MessageCircle, Star
+  Edit3, Check, LayoutDashboard, Shield, CalendarDays, Lock, 
+  MessageCircle, Star, Eye, EyeOff
 } from 'lucide-react';
 import MyMessageList from '../MyMessages/MyMessageList';
 import MyMessageThread from '../MyMessages/MyMessageThread';
@@ -17,11 +17,12 @@ import MyReviews from '../MyReviews/MyReviews';
 
 
 function UserProfile() {
-  const { user } = useContext(AuthContext);
+  const { user, changePassword, logout, updateProfile } = useContext(AuthContext);
   const navigate = useNavigate();
   
   // Tab State
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [toast, setToast] = useState(null);
 
   // State for profile fields (defaults to empty strings if not updated yet)
   const [isEditing, setIsEditing] = useState(false);
@@ -29,10 +30,10 @@ function UserProfile() {
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    contactNumber: '',
-    address: '',
-    country: '',
-    zipcode: ''
+    contactNumber: user?.contact_number || '',
+    address: user?.street_address || '',
+    country: user?.country || '',
+    zipcode: user?.zipcode || ''
   });
 
   const handleChange = (e) => {
@@ -40,9 +41,23 @@ function UserProfile() {
     setProfileData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // Add logic here to save to backend in the future
+  const handleSave = async () => {
+    try {
+      await updateProfile({
+        name: profileData.name,
+        contactNumber: profileData.contactNumber,
+        address: profileData.address,
+        country: profileData.country,
+        zipcode: profileData.zipcode
+      });
+      setIsEditing(false);
+      setToast({ type: 'success', message: 'Profile updated successfully!' });
+      setTimeout(() => setToast(null), 3000);
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      setToast({ type: 'error', message: err.message || 'Failed to update profile. Please try again.' });
+      setTimeout(() => setToast(null), 3000);
+    }
   };
 
   const handleImageUpload = (e) => {
@@ -69,7 +84,6 @@ function UserProfile() {
     { id: 'bookings', label: 'My Bookings', icon: CalendarDays },
     { id: 'reviews', label: 'My Reviews', icon: Star },
     { id: 'messages', label: 'My Messages', icon: MessageCircle },
-    { id: 'payments', label: 'Payments', icon: CreditCard },
     { id: 'security', label: 'Security', icon: Shield },
   ];
 
@@ -87,8 +101,9 @@ function UserProfile() {
     </motion.div>
   );
 
-  const DashboardTab = () => (
+  const renderDashboardTab = () => (
     <motion.div
+      key="dashboard"
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
@@ -173,7 +188,12 @@ function UserProfile() {
                   value={profileData[field.name]}
                   onChange={handleChange}
                   placeholder={field.placeholder}
-                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] transition-all shadow-sm outline-none"
+                  disabled={field.name === 'email'}
+                  className={`w-full px-4 py-3 border border-slate-200 rounded-xl text-sm transition-all shadow-sm outline-none ${
+                    field.name === 'email'
+                      ? 'bg-slate-100 text-slate-500 cursor-not-allowed opacity-80'
+                      : 'bg-white text-slate-800 focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5]'
+                  }`}
                 />
               ) : (
                 <div className="w-full px-4 py-3 bg-slate-50 border border-transparent rounded-xl text-slate-900 text-sm min-h-[46px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]">
@@ -256,176 +276,36 @@ const BookingsTab = () => <MyBookings userEmail={user?.email} />;
     );
   };
 
-const PaymentsTab = () => {
-    const [savedCards, setSavedCards] = useState([
-      { id: 1, name: 'John Doe', last4: '4242', expiry: '12/25' },
-    ]);
-    const [isAddingCard, setIsAddingCard] = useState(false);
-    const [newCard, setNewCard] = useState({ name: '', number: '', expiry: '', cvv: '' });
-
-    const handleAddCard = (e) => {
-      e.preventDefault();
-      if (!newCard.number || newCard.number.length < 4) return;
-      
-      setSavedCards([...savedCards, {
-        id: Date.now(),
-        name: newCard.name,
-        last4: newCard.number.substring(newCard.number.length - 4),
-        expiry: newCard.expiry
-      }]);
-      setIsAddingCard(false);
-      setNewCard({ name: '', number: '', expiry: '', cvv: '' });
-    };
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -15 }}
-        transition={{ duration: 0.3 }}
-        className="p-8 sm:p-10 h-full flex flex-col"
-      >
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-1">Payment Methods</h2>
-            <p className="text-slate-500 text-sm">Manage your saved cards and payment history.</p>
-          </div>
-          {!isAddingCard && (
-            <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsAddingCard(true)}
-              className="flex items-center gap-2 bg-[#00b0a5] hover:bg-[#009b91] text-white px-5 py-2.5 rounded-full font-semibold shadow-md shadow-[#00b0a5]/20 transition-all text-sm cursor-pointer"
-            >
-              + Add New Card
-            </motion.button>
-          )}
-        </div>
-
-        {isAddingCard ? (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8"
-          >
-            <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-              <CardIcon className="w-5 h-5 text-[#00b0a5]"/> Add Credit Card
-            </h3>
-            <form onSubmit={handleAddCard} className="space-y-5">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Cardholder Name</label>
-                <input 
-                  type="text" required placeholder="E.g. John Doe"
-                  value={newCard.name} onChange={(e) => setNewCard({...newCard, name: e.target.value})}
-                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Card Number</label>
-                <input 
-                  type="text" required placeholder="0000 0000 0000 0000" maxLength="19"
-                  value={newCard.number} onChange={(e) => setNewCard({...newCard, number: e.target.value})}
-                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none tracking-widest font-mono"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">Expiry Date</label>
-                  <input 
-                    type="text" required placeholder="MM/YY" maxLength="5"
-                    value={newCard.expiry} onChange={(e) => setNewCard({...newCard, expiry: e.target.value})}
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">CVV</label>
-                  <input 
-                    type="password" required placeholder="123" maxLength="4"
-                    value={newCard.cvv} onChange={(e) => setNewCard({...newCard, cvv: e.target.value})}
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none font-mono"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setIsAddingCard(false)} className="flex-1 px-4 py-3 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                  Cancel
-                </button>
-                <button type="submit" className="flex-1 px-4 py-3 bg-[#00b0a5] text-white font-semibold rounded-xl hover:bg-[#009b91] shadow-md shadow-[#00b0a5]/20 transition-all cursor-pointer">
-                  Save Card
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        ) : (
-          <div className="space-y-4">
-            {savedCards.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
-                <div className="w-16 h-16 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-4">
-                  <CardIcon size={32} />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-1">No saved cards</h3>
-                <p className="text-sm text-slate-500">Add a credit or debit card to make future bookings faster.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {savedCards.map(card => (
-                  <motion.div 
-                    key={card.id}
-                    className="flex items-center justify-between p-5 rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-5">
-                      <div className="hidden sm:flex w-12 h-8 bg-slate-100 rounded border border-slate-200 items-center justify-center">
-                        <CardIcon className="w-5 h-5 text-slate-500" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-800 tracking-wide">
-                          •••• •••• •••• {card.last4}
-                        </p>
-                        <p className="text-sm text-slate-500 mt-0.5">
-                          {card.name} <span className="mx-2">•</span> Expires {card.expiry}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <button 
-                      onClick={() => setSavedCards(savedCards.filter(c => c.id !== card.id))}
-                      className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
-                      title="Remove Card"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </motion.div>
-    );
-  };
-
   const SecurityTab = () => {
     const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
     const [message, setMessage] = useState({ type: '', text: '' });
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const handlePasswordChange = (e) => {
+    const handlePasswordChange = async (e) => {
       e.preventDefault();
       if (passwords.new !== passwords.confirm) {
         setMessage({ type: 'error', text: 'New passwords do not match.' });
         return;
       }
-      if (passwords.new.length < 5) {
+      if (passwords.new.length < 6) {
         setMessage({ type: 'error', text: 'Password must be at least 6 characters long.' });
         return;
       }
-      // Simulate backend update
-      setMessage({ type: 'success', text: 'Password successfully updated!' });
-      setPasswords({ current: '', new: '', confirm: '' });
-      
-      // Clear success message after 4 seconds
-      setTimeout(() => setMessage({ type: '', text: '' }), 4000);
+
+      try {
+        await changePassword(passwords.current, passwords.new);
+        setMessage({ type: 'success', text: 'Password successfully updated! Please log in again.' });
+        setPasswords({ current: '', new: '', confirm: '' });
+        
+        // Log out and redirect after short delay
+        setTimeout(() => {
+          logout();
+          navigate('/login');
+        }, 2500);
+      } catch (err) {
+        setMessage({ type: 'error', text: err.message || 'Failed to update password.' });
+      }
     };
 
     return (
@@ -476,21 +356,39 @@ const PaymentsTab = () => {
               
               <div className="pt-2">
                 <label className="block text-sm font-semibold text-slate-700 mb-1">New Password</label>
-                <input 
-                  type="password" required placeholder="••••••••"
-                  value={passwords.new} onChange={(e) => setPasswords({...passwords, new: e.target.value})}
-                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none transition-all"
-                />
+                <div className="relative">
+                  <input 
+                    type={showNewPassword ? "text" : "password"} required placeholder="••••••••"
+                    value={passwords.new} onChange={(e) => setPasswords({...passwords, new: e.target.value})}
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none transition-all pr-12"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
+                  >
+                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
                 <p className="text-xs text-slate-500 mt-2">Make sure it's at least 6 characters long.</p>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Confirm New Password</label>
-                <input 
-                  type="password" required placeholder="••••••••"
-                  value={passwords.confirm} onChange={(e) => setPasswords({...passwords, confirm: e.target.value})}
-                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none transition-all"
-                />
+                <div className="relative">
+                  <input 
+                    type={showConfirmPassword ? "text" : "password"} required placeholder="••••••••"
+                    value={passwords.confirm} onChange={(e) => setPasswords({...passwords, confirm: e.target.value})}
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none transition-all pr-12"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
               
               <div className="pt-4">
@@ -542,16 +440,40 @@ const PaymentsTab = () => {
         {/* Main Content Area */}
         <div className="flex-1 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] overflow-hidden min-h-[600px]">
           <AnimatePresence mode="wait">
-            {activeTab === 'dashboard' && <DashboardTab key="dashboard" />}
+            {activeTab === 'dashboard' && renderDashboardTab()}
             {activeTab === 'bookings' && <BookingsTab key="bookings" />}
             {activeTab === 'reviews' && <ReviewsTab key="reviews" />}
             {activeTab === 'messages' && <MessagesTab key="messages" />}
-            {activeTab === 'payments' && <PaymentsTab key="payments" />}
             {activeTab === 'security' && <SecurityTab key="security" />}
           </AnimatePresence>
         </div>
 
       </div>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className={`fixed bottom-8 right-8 z-50 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border ${
+              toast.type === 'error' 
+                ? 'bg-red-50 border-red-100 text-red-800' 
+                : 'bg-green-50 border-green-100 text-green-800'
+            }`}
+          >
+            {toast.type === 'success' ? (
+              <Check className="w-5 h-5 text-green-500" />
+            ) : (
+              <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )}
+            <span className="font-semibold text-sm">{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

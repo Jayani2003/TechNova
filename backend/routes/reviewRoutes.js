@@ -1,4 +1,5 @@
 const express = require('express');
+const upload = require('../middleware/reviewUploadMiddleware');
 const {
   getPublishedReviews,
   getReviewableTours,
@@ -9,6 +10,6 @@ const router = express.Router();
 
 router.get('/', getPublishedReviews);
 router.get('/reviewable-tours', getReviewableTours);
-router.post('/', createReview);
+router.post('/', upload.array('images', 5), createReview);
 
 module.exports = router;

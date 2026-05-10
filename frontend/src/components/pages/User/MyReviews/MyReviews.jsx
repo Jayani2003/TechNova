@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import { useBookings } from '../../../../context/BookingsContext';
@@ -8,18 +8,20 @@ import { buildApiUrl } from '../../../../config/api';
 const MyReviews = ({ isEmbedded = false }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { getCustomerBookings } = useBookings();
+  const { getCustomerBookings, bookings } = useBookings();
   const [myReviews, setMyReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const userEmail = user?.email;
 
   // Refresh reviews function
-  const refreshReviews = async () => {
+  const refreshReviews = useCallback(async () => {
     if (!userEmail) return;
     try {
       const res = await fetch(buildApiUrl('/reviews'));
+      if (!res.ok) {
+        throw new Error(`Failed to load reviews (${res.status})`);
+      }
       const data = await res.json();
       if (data.reviews && userEmail) {
         const userRevs = data.reviews.filter(r => 
@@ -30,13 +32,19 @@ const MyReviews = ({ isEmbedded = false }) => {
     } catch (e) {
       console.warn('Failed to refresh reviews:', e.message);
     }
-  };
+  }, [userEmail, user?.name]);
 
-  // Get user's bookings
+  // Fetch customer bookings on mount
+  useEffect(() => {
+    if (userEmail) {
+      getCustomerBookings();
+    }
+  }, [userEmail, getCustomerBookings]);
+
+  // Get user's bookings from context state
   const userBookings = useMemo(() => {
-    if (!userEmail) return [];
-    return getCustomerBookings(userEmail);
-  }, [userEmail, getCustomerBookings, refreshKey]);
+    return bookings && Array.isArray(bookings) ? bookings : [];
+  }, [bookings]);
 
   // Get completed tours (both reviewed and not reviewed)
   const completedTours = useMemo(() => {
@@ -78,11 +86,13 @@ const MyReviews = ({ isEmbedded = false }) => {
   useEffect(() => {
     const handler = () => {
       refreshReviews();
-      setRefreshKey(k => k + 1);
+      if (userEmail) {
+        getCustomerBookings();
+      }
     };
     window.addEventListener('reviews:updated', handler);
     return () => window.removeEventListener('reviews:updated', handler);
-  }, []);
+  }, [userEmail, refreshReviews, getCustomerBookings]);
 
   return (
     <>
@@ -236,6 +246,19 @@ const MyReviews = ({ isEmbedded = false }) => {
           font-size: 13px; font-weight: 300;
           color: #4a7070; line-height: 1.6;
           max-height: 80px; overflow: hidden;
+        }
+
+        .mr-review-images {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .mr-review-image {
+          width: 72px;
+          height: 56px;
+          object-fit: cover;
+          border-radius: 10px;
+          border: 1px solid rgba(0,176,165,0.12);
         }
 
         .mr-empty {
@@ -402,8 +425,20 @@ const MyReviews = ({ isEmbedded = false }) => {
                     <div className="mr-review-comment">{review.comment}</div>
 
                     {review.images?.length > 0 && (
-                      <div style={{ fontSize: '11px', color: '#7a9a9a' }}>
-                        📸 {review.images.length} photo{review.images.length !== 1 ? 's' : ''}
+                      <div className="mr-review-images">
+                        {review.images.slice(0, 4).map((image, imageIndex) => (
+                          <img
+                            key={`${review.id}-${imageIndex}`}
+                            src={image}
+                            alt={`Review image ${imageIndex + 1}`}
+                            className="mr-review-image"
+                          />
+                        ))}
+                        {review.images.length > 4 && (
+                          <div style={{ fontSize: '11px', color: '#7a9a9a', alignSelf: 'center' }}>
+                            +{review.images.length - 4} more
+                          </div>
+                        )}
                       </div>
                     )}
                   </motion.div>

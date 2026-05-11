@@ -163,10 +163,14 @@ const MyReviews = ({ isEmbedded = false }) => {
           font-size: 14px; font-weight: 700;
           color: #0d2b2b;
           margin-bottom: 4px;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
         .mr-notif-subtitle {
           font-size: 12px; color: #5a8080;
           font-weight: 400;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         .mr-cta-btn {
@@ -229,6 +233,9 @@ const MyReviews = ({ isEmbedded = false }) => {
           color: #0d2b2b;
           line-height: 1.4;
           flex: 1;
+          min-width: 0;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
         .mr-review-stars {
           display: flex; gap: 2px;
@@ -240,12 +247,16 @@ const MyReviews = ({ isEmbedded = false }) => {
         .mr-review-meta {
           font-size: 11px; color: #7a9a9a;
           display: flex; gap: 8px; flex-wrap: wrap;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         .mr-review-comment {
           font-size: 13px; font-weight: 300;
           color: #4a7070; line-height: 1.6;
-          max-height: 80px; overflow: hidden;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+          white-space: normal;
         }
 
         .mr-review-images {

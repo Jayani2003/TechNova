@@ -140,6 +140,8 @@ const ReviewCard = ({ review, index = 0 }) => {
         .rvc-name {
           font-size: 14px; font-weight: 800;
           color: #0d2b2b; letter-spacing: -0.01em;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
         .rvc-meta {
           display: flex; align-items: center; gap: 8px;
@@ -147,6 +149,8 @@ const ReviewCard = ({ review, index = 0 }) => {
         }
         .rvc-country {
           font-size: 11px; font-weight: 400; color: #5a8080;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
         .rvc-dot { width: 3px; height: 3px; border-radius: 50%; background: #c0d8d5; }
         .rvc-date {
@@ -166,6 +170,8 @@ const ReviewCard = ({ review, index = 0 }) => {
           font-size: 1rem; font-weight: 800;
           color: #0d2b2b; letter-spacing: -0.02em;
           line-height: 1.25;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         /* Comment */
@@ -173,6 +179,9 @@ const ReviewCard = ({ review, index = 0 }) => {
           font-size: 13.5px; font-weight: 300;
           color: #4a7070; line-height: 1.78;
           position: relative;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+          white-space: normal;
         }
         .rvc-quote-mark {
           font-size: 48px; font-weight: 800;

@@ -90,6 +90,8 @@ const PackageDetailModal = ({ pkg, onClose }) => {
         .pdm-desc {
           font-size: 15px; font-weight: 300; color: #3a5a5a;
           line-height: 1.8; margin-bottom: 20px;
+           overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         /* Highlights */
@@ -134,10 +136,12 @@ const PackageDetailModal = ({ pkg, onClose }) => {
         }
         .pdm-dest-img {
           position: relative; height: 140px; overflow: hidden;
+          
         }
         .pdm-dest-img img {
           width: 100%; height: 100%; object-fit: cover;
           transition: transform 0.6s ease;
+          
         }
         .pdm-dest-card:hover .pdm-dest-img img { transform: scale(1.06); }
         .pdm-dest-img-overlay {
@@ -155,10 +159,13 @@ const PackageDetailModal = ({ pkg, onClose }) => {
         .pdm-dest-name {
           font-size: 14px; font-weight: 800;
           color: #0d2b2b; letter-spacing: -0.02em; margin-bottom: 5px;
+           overflow-wrap: anywhere;
+          word-break: break-word;
         }
         .pdm-dest-desc {
           font-size: 12px; font-weight: 300;
           color: #5a8080; line-height: 1.6; margin-bottom: 12px;
+          
         }
 
         /* Activities */
@@ -260,11 +267,11 @@ const PackageDetailModal = ({ pkg, onClose }) => {
               <p className="pdm-desc">{pkg.description}</p>
 
               {/* Highlights */}
-              <div className="pdm-highlights">
+              {/* <div className="pdm-highlights">
                 {highlights.map(h => (
                   <span key={h} className="pdm-hl">✦ {h}</span>
                 ))}
-              </div>
+              </div> */}
 
               {/* Destinations */}
               <div className="pdm-section-heading">Destinations & Itinerary</div>

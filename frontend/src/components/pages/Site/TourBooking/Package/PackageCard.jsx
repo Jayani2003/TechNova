@@ -119,18 +119,26 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
         .pkc-dest-chips {
           position: absolute; bottom: 14px; left: 12px; right: 12px;
           display: flex; gap: 6px; flex-wrap: nowrap; overflow: hidden; z-index: 2;
+          align-items: center;
+          min-width: 0;
         }
         .pkc-dest-chip {
           background: rgba(255,255,255,0.12); backdrop-filter: blur(10px);
           border: 1px solid rgba(255,255,255,0.2);
           color: #fff; font-size: 10px; font-weight: 600;
-          padding: 4px 10px; border-radius: 100px; white-space: nowrap;
+          padding: 4px 10px; border-radius: 100px;
+          flex: 1 1 auto;
+          min-width: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .pkc-dest-more {
           background: rgba(0,176,165,0.7); backdrop-filter: blur(10px);
           border: 1px solid rgba(255,255,255,0.2);
           color: #fff; font-size: 10px; font-weight: 700;
           padding: 4px 10px; border-radius: 100px; white-space: nowrap;
+          flex: 0 0 auto;
         }
 
         /* Content */
@@ -140,14 +148,17 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
           font-size: 1.25rem; font-weight: 800;
           color: #0d2b2b; letter-spacing: -0.03em;
           line-height: 1.2; margin-bottom: 8px;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         .pkc-desc {
           font-size: 13.5px; font-weight: 300;
           color: #4a7070; line-height: 1.7;
           margin-bottom: 16px;
-          display: -webkit-box; -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical; overflow: hidden;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+          white-space: normal;
         }
 
         /* Highlights */
@@ -160,6 +171,8 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
           border: 1px solid rgba(0,176,165,0.18);
           font-size: 10px; font-weight: 600; color: #00b0a5;
           letter-spacing: 0.04em;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         /* Rule */
@@ -226,12 +239,12 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
         <div className="pkc-content">
           <div className="pkc-title">{pkg.title}</div>
           <div className="pkc-desc">{pkg.description}</div>
-
+{/* 
           <div className="pkc-highlights">
             {highlights.slice(0, 3).map(h => (
               <span key={h} className="pkc-hl">✦ {h}</span>
             ))}
-          </div>
+          </div> */}
 
           <div className="pkc-rule" />
 

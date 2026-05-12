@@ -1,10 +1,11 @@
 import React, { useMemo, useRef, useState } from "react";
-import { ImagePlus, UploadCloud, Sparkles, FileImage, X } from "lucide-react";
+import { ImagePlus, Search, UploadCloud, Sparkles, FileImage, X } from "lucide-react";
 import { MOODS, SEASONS } from "./constants";
 
 export default function UploadTab({ locations, onToast, onAddPhoto }) {
   const fileInputRef = useRef(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [locationSearch, setLocationSearch] = useState("");
   const [form, setForm] = useState({
     title: "",
     location: locations[0]?.name ?? "",
@@ -20,6 +21,10 @@ export default function UploadTab({ locations, onToast, onAddPhoto }) {
   });
 
   const locationOptions = useMemo(() => locations.map((location) => location.name), [locations]);
+  const filteredLocations = useMemo(() => {
+    if (!locationSearch.trim()) return locationOptions;
+    return locationOptions.filter((loc) => loc.toLowerCase().includes(locationSearch.toLowerCase()));
+  }, [locationOptions, locationSearch]);
 
   const resetForm = () => {
     setForm({
@@ -35,6 +40,7 @@ export default function UploadTab({ locations, onToast, onAddPhoto }) {
       withTourists: false,
       status: "draft",
     });
+    setLocationSearch("");
     setPreviewUrl("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -121,34 +127,72 @@ export default function UploadTab({ locations, onToast, onAddPhoto }) {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-stone-500 mb-2">Location</label>
-                <select
-                  value={form.location}
-                  onChange={(e) => setForm((current) => ({ ...current, location: e.target.value }))}
-                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-900 outline-none transition focus:border-teal-600 focus:bg-white"
-                >
-                  {locationOptions.map((locationName) => (
-                    <option key={locationName} value={locationName}>
-                      {locationName}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <div className="sm:col-span-2 grid gap-4">
+                <div className="grid grid-cols-[1fr_1fr] gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide text-stone-500 mb-2">Location</label>
+                    <select
+                      value={form.location}
+                      onChange={(e) => setForm((current) => ({ ...current, location: e.target.value }))}
+                      className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-900 outline-none transition focus:border-teal-600 focus:bg-white"
+                    >
+                      {locationOptions.map((locationName) => (
+                        <option key={locationName} value={locationName}>
+                          {locationName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-stone-500 mb-2">Season</label>
-                <select
-                  value={form.season}
-                  onChange={(e) => setForm((current) => ({ ...current, season: e.target.value }))}
-                  className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-900 outline-none transition focus:border-teal-600 focus:bg-white"
-                >
-                  {SEASONS.map((season) => (
-                    <option key={season.key} value={season.key}>
-                      {season.icon} {season.label}
-                    </option>
-                  ))}
-                </select>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide text-stone-500 mb-2">Search Location</label>
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+                      <input
+                        type="text"
+                        value={locationSearch}
+                        onChange={(e) => setLocationSearch(e.target.value)}
+                        placeholder="Filter locations..."
+                        className="w-full rounded-2xl border border-stone-200 bg-stone-50 py-3 pl-11 pr-4 text-sm font-medium text-stone-900 outline-none transition focus:border-teal-600 focus:bg-white"
+                      />
+                    </div>
+                    {locationSearch && filteredLocations.length > 0 && (
+                      <div className="mt-2 max-h-40 overflow-y-auto rounded-2xl border border-stone-200 bg-white p-2 shadow-md">
+                        {filteredLocations.map((locationName) => (
+                          <button
+                            key={locationName}
+                            type="button"
+                            onClick={() => {
+                              setForm((current) => ({ ...current, location: locationName }));
+                              setLocationSearch("");
+                            }}
+                            className="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-teal-50 hover:text-teal-700 text-stone-700 transition"
+                          >
+                            {locationName}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {locationSearch && filteredLocations.length === 0 && (
+                      <p className="mt-2 text-xs text-stone-500">No matching locations.</p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wide text-stone-500 mb-2">Season</label>
+                  <select
+                    value={form.season}
+                    onChange={(e) => setForm((current) => ({ ...current, season: e.target.value }))}
+                    className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-900 outline-none transition focus:border-teal-600 focus:bg-white"
+                  >
+                    {SEASONS.map((season) => (
+                      <option key={season.key} value={season.key}>
+                        {season.icon} {season.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div>

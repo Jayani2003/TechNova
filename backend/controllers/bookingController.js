@@ -6,6 +6,8 @@ const formatDate = (val) => {
   return new Date(val).toISOString().split('T')[0];
 };
 
+const normalizeTourType = (value) => String(value || 'P2P').toUpperCase();
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const mapBooking = (row) => ({
   id:             row.booking_id,
@@ -16,6 +18,8 @@ const mapBooking = (row) => ({
   tourType:       row.tour_type,
   categoryId:     row.category_id,
   categoryName:   row.category_name || null,
+  packageId:      row.package_id || null,
+  packageName:    row.package_name || null,
   vehicleId:      row.vehicle_id || null,
   assignedVehicle: row.vehicle_name ? {
     name:        row.vehicle_name,
@@ -46,6 +50,9 @@ const mapBooking = (row) => ({
 // ── POST /api/bookings/p2p ────────────────────────────────────────────────────
 const createP2PBooking = async (req, res) => {
   const {
+    tourType,
+    packageId,
+    packageName,
     startLocation,
     endLocation,
     startDate,
@@ -65,9 +72,17 @@ const createP2PBooking = async (req, res) => {
     notes,
   } = req.body;
 
+  const isPackageBooking = normalizeTourType(tourType) === 'PACKAGE';
+
   // Basic validation
-  if (!startLocation || !endLocation || !startDate || !endDate || !categoryId || !customerName || !customerPhone)
+  if (!startDate || !endDate || !categoryId || !customerName || !customerPhone)
     return res.status(400).json({ message: 'Missing required fields.' });
+
+  if (!isPackageBooking && (!startLocation || !endLocation))
+    return res.status(400).json({ message: 'Missing required fields.' });
+
+  if (isPackageBooking && !packageId)
+    return res.status(400).json({ message: 'packageId is required for package bookings.' });
 
   if (!req.user?.id)
     return res.status(401).json({ message: 'Not authenticated.' });
@@ -96,8 +111,12 @@ if (!isNaN(categoryId)) {
   }
 }
 
+  let conn;
   try {
-    const [result] = await db.execute(
+    conn = await db.getConnection();
+    await conn.beginTransaction();
+
+    const [result] = await conn.execute(
       `INSERT INTO booking
         (user_id, customer_name, customer_phone,
          tour_type, category_id,
@@ -106,16 +125,17 @@ if (!isNaN(categoryId)) {
          no_of_adults, no_of_children, ages_of_children,
          no_of_luggages, notes,
          booking_status, booking_date)
-       VALUES (?, ?, ?, 'P2P', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', CURDATE())`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', CURDATE())`,
       [
         req.user.id,
         customerName,
         customerPhone,
+        isPackageBooking ? 'PACKAGE' : 'P2P',
         resolvedCategoryId,
         startDate,
         endDate,
-        startLocation,
-        endLocation,
+        isPackageBooking ? null : startLocation,
+        isPackageBooking ? null : endLocation,
         totalDays  || 1,
         daysRequired || 1,
         noOfAdults || 1,
@@ -126,15 +146,27 @@ if (!isNaN(categoryId)) {
       ]
     );
 
+    if (isPackageBooking) {
+      await conn.execute(
+        'INSERT INTO booking_package (booking_id, package_id) VALUES (?, ?)',
+        [result.insertId, packageId]
+      );
+    }
+
+    await conn.commit();
+
     res.status(201).json({
       message: 'Booking submitted successfully.',
       bookingId: result.insertId,
-      bookingRef: `CBT-P2P-${result.insertId}`,
+      bookingRef: `CBT-${isPackageBooking ? 'PKG' : 'P2P'}-${result.insertId}`,
     });
 
   } catch (err) {
     console.error('createP2PBooking error:', err);
+    if (conn) await conn.rollback();
     res.status(500).json({ message: 'Failed to create booking.' });
+  } finally {
+    if (conn) conn.release();
   }
 };
 
@@ -146,6 +178,8 @@ const getMyBookings = async (req, res) => {
        FROM booking b
        JOIN user u ON u.user_id = b.user_id
        LEFT JOIN vehicle_category vc ON vc.category_id = b.category_id
+       LEFT JOIN booking_package bp ON bp.booking_id = b.booking_id
+       LEFT JOIN package p ON p.package_id = bp.package_id
        WHERE b.user_id = ?
        ORDER BY b.booking_date DESC, b.booking_id DESC`,
       [req.user.id]
@@ -162,10 +196,13 @@ const getAllBookings = async (req, res) => {
   try {
     const [rows] = await db.execute(
       `SELECT b.*, u.email, vc.category_name,
+              p.package_id, p.title AS package_name,
               v.vehicle_number, v.name AS vehicle_name
        FROM booking b
        JOIN user u ON u.user_id = b.user_id
        LEFT JOIN vehicle_category vc ON vc.category_id = b.category_id
+       LEFT JOIN booking_package bp ON bp.booking_id = b.booking_id
+       LEFT JOIN package p ON p.package_id = bp.package_id
        LEFT JOIN vehicle v ON v.vehicle_id = b.vehicle_id
        ORDER BY b.booking_date DESC, b.booking_id DESC`
     );

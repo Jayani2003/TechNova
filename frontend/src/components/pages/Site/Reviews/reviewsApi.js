@@ -22,10 +22,26 @@ export const fetchReviewableTours = async (email) => {
 };
 
 export const createReview = async (payload) => {
+  const formData = new FormData();
+
+  formData.append('customerEmail', payload.customerEmail || '');
+  formData.append('bookingId', payload.bookingId || '');
+  formData.append('stars', String(payload.stars || ''));
+  formData.append('driverName', payload.driverName || '');
+  formData.append('title', payload.title || '');
+  formData.append('comment', payload.comment || '');
+  formData.append('tourTitle', payload.tourTitle || '');
+  formData.append('tourType', payload.tourType || '');
+
+  (payload.images || []).forEach((image) => {
+    if (image instanceof File) {
+      formData.append('images', image);
+    }
+  });
+
   const res = await fetch(buildApiUrl('/reviews'), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: formData,
   });
   return getJson(res);
 };

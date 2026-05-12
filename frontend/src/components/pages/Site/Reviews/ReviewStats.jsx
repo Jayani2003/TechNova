@@ -86,7 +86,7 @@ const ReviewStats = ({ reviews }) => {
                 <StarIcon key={i} filled={i <= Math.round(Number(avg))} />
               ))}
             </div>
-            <div className="rs-total">{total} verified reviews</div>
+            <div className="rs-total">{total} Customer Reviews</div>
           </div>
 
           {/* Right */}

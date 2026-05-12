@@ -179,7 +179,7 @@ const Reviews = () => {
         comment: formData.comment,
         tourTitle: selectedTour?.packageTitle || 'Tour Booking',
         tourType: selectedTour?.packageType || 'Tour',
-        images: [],
+        images: formData.images.map((img) => img.file),
       });
 
       const serverReviews = await fetchPublishedReviews();

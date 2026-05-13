@@ -192,13 +192,37 @@ CREATE TABLE review_image (
     FOREIGN KEY (review_id) REFERENCES review(review_id)
 );
 
+CREATE TABLE gallery_location (
+    location_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    region VARCHAR(100) NOT NULL,
+    latitude DECIMAL(10, 6) NOT NULL,
+    longitude DECIMAL(10, 6) NOT NULL,
+    description TEXT,
+    pin_color VARCHAR(7) DEFAULT '#00b0a5',
+    photo_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_location (name, region)
+);
+
 CREATE TABLE gallery (
     gallery_id  INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(100) NOT NULL,
-    category ENUM('Vehicles', 'Traveler Photos', 'Packages Photos') NOT NULL,
+    title VARCHAR(150) NOT NULL,
     image_url VARCHAR(255) NOT NULL,
     description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    location_id INT NULL,
+    season ENUM('dry', 'inter1', 'swmonsoon', 'inter2') DEFAULT 'dry',
+    mood ENUM('adventure', 'romantic', 'family', 'scenic', 'cultural', 'wildlife') DEFAULT 'adventure',
+    event VARCHAR(100),
+    tourist_name VARCHAR(150),
+    captured_date DATE,
+    tags JSON,
+    with_tourists BOOLEAN DEFAULT FALSE,
+    status ENUM('draft', 'published') DEFAULT 'draft',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (location_id) REFERENCES gallery_location(location_id) ON DELETE SET NULL
 );
 
 CREATE TABLE contact_inquiry (

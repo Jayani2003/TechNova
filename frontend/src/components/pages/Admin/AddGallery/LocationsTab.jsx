@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Search, Plus, MapPin, Edit3, Trash2, Map } from "lucide-react";
 import SriLankaMap from "./SriLankaMap";
 import { PIN_COLORS } from "./constants";
 
-export default function LocationsTab({ locations, setLocations, onToast }) {
+export default function LocationsTab({ locations, onToast, onCreateLocation, onUpdateLocation, onDeleteLocation }) {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
   const [search, setSearch] = useState("");
@@ -11,7 +11,7 @@ export default function LocationsTab({ locations, setLocations, onToast }) {
   const [mapPoint, setMapPoint] = useState(null);
   const [selColor, setSelColor] = useState(PIN_COLORS[0]);
   const [form, setForm] = useState({ name: "", region: "", lat: "", lng: "", desc: "" });
-  const nextId = useRef(locations.length + 1);
+  const [saving, setSaving] = useState(false);
 
   const REGIONS = [
     "all",
@@ -58,40 +58,44 @@ export default function LocationsTab({ locations, setLocations, onToast }) {
     }));
   };
 
-  const save = () => {
+  const save = async () => {
     if (!form.name.trim() || !form.region) {
       onToast("Destination name and region province are required.");
       return;
     }
-    if (editId) {
-      setLocations((prev) =>
-        prev.map((l) =>
-          l.id === editId
-            ? { ...l, ...form, lat: parseFloat(form.lat) || l.lat, lng: parseFloat(form.lng) || l.lng, col: selColor }
-            : l
-        )
-      );
-      onToast(`"${form.name}" has been updated.`);
-    } else {
-      setLocations((prev) => [
-        ...prev,
-        {
-          id: nextId.current++,
-          ...form,
-          lat: parseFloat(form.lat) || 7.5,
-          lng: parseFloat(form.lng) || 80.8,
-          col: selColor,
-          photos: 0,
-        },
-      ]);
-      onToast(`"${form.name}" successfully added to our Sri Lanka network map.`);
+    const payload = {
+      name: form.name.trim(),
+      region: form.region,
+      lat: parseFloat(form.lat) || 7.5,
+      lng: parseFloat(form.lng) || 80.8,
+      desc: form.desc,
+      col: selColor,
+    };
+
+    try {
+      setSaving(true);
+      if (editId) {
+        await onUpdateLocation(editId, payload);
+        onToast(`"${form.name}" has been updated.`);
+      } else {
+        await onCreateLocation(payload);
+        onToast(`"${form.name}" successfully added to our Sri Lanka network map.`);
+      }
+      setShowForm(false);
+    } catch (error) {
+      onToast(error.message || "Failed to save destination.");
+    } finally {
+      setSaving(false);
     }
-    setShowForm(false);
   };
 
-  const del = (loc) => {
-    setLocations((prev) => prev.filter((l) => l.id !== loc.id));
-    onToast(`Destination "${loc.name}" deleted.`);
+  const del = async (loc) => {
+    try {
+      await onDeleteLocation(loc.id);
+      onToast(`Destination "${loc.name}" deleted.`);
+    } catch (error) {
+      onToast(error.message || "Failed to delete destination.");
+    }
   };
 
   return (
@@ -284,9 +288,10 @@ export default function LocationsTab({ locations, setLocations, onToast }) {
                   </button>
                   <button
                     onClick={save}
+                    disabled={saving}
                     className="px-5 py-2 text-xs font-bold text-white bg-teal-600 hover:bg-teal-500 rounded-xl cursor-pointer shadow-md"
                   >
-                    Save Destination
+                    {saving ? "Saving..." : "Save Destination"}
                   </button>
                 </div>
               </div>

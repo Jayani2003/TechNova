@@ -4,6 +4,8 @@ import { MOODS, SEASONS } from "./constants";
 
 export default function UploadTab({ locations, onToast, onAddPhoto }) {
   const fileInputRef = useRef(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
   const [locationSearch, setLocationSearch] = useState("");
   const [form, setForm] = useState({
@@ -42,6 +44,7 @@ export default function UploadTab({ locations, onToast, onAddPhoto }) {
     });
     setLocationSearch("");
     setPreviewUrl("");
+    setSelectedFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -56,6 +59,8 @@ export default function UploadTab({ locations, onToast, onAddPhoto }) {
       return;
     }
 
+    setSelectedFile(file);
+
     const reader = new FileReader();
     reader.onload = () => {
       setPreviewUrl(String(reader.result || ""));
@@ -63,7 +68,7 @@ export default function UploadTab({ locations, onToast, onAddPhoto }) {
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!form.title.trim()) {
@@ -76,29 +81,38 @@ export default function UploadTab({ locations, onToast, onAddPhoto }) {
       return;
     }
 
-    const image = previewUrl || "https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=800&q=80";
+    if (!selectedFile) {
+      onToast("Please select an image file to upload.");
+      return;
+    }
 
-    onAddPhoto({
-      id: Date.now(),
-      title: form.title.trim(),
-      image,
-      season: form.season,
-      mood: form.mood,
-      loc: form.location,
-      event: form.event.trim() || null,
-      status: form.status,
-      tourist: form.tourist.trim() || "Unknown traveler",
-      date: form.date,
-      desc: form.desc.trim(),
-      tags: form.tags
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean),
-      withTourists: form.withTourists,
-    });
+    const tags = form.tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
 
-    onToast(`"${form.title.trim()}" added to the gallery.`);
-    resetForm();
+    try {
+      setSaving(true);
+      await onAddPhoto({
+        file: selectedFile,
+        payload: {
+          title: form.title.trim(),
+          location: form.location,
+          season: form.season,
+          mood: form.mood,
+          event: form.event.trim() || "",
+          tourist: form.tourist.trim() || "",
+          date: form.date,
+          description: form.desc.trim(),
+          tags: JSON.stringify(tags),
+          withTourists: String(form.withTourists),
+          status: form.status,
+        },
+      });
+      resetForm();
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -295,10 +309,11 @@ export default function UploadTab({ locations, onToast, onAddPhoto }) {
                 </button>
                 <button
                   type="submit"
+                  disabled={saving}
                   className="inline-flex items-center gap-2 rounded-2xl bg-teal-600 px-5 py-3 text-sm font-bold text-white shadow-md shadow-teal-200 transition hover:bg-teal-500 cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4" />
-                  Save to Gallery
+                  {saving ? "Saving..." : "Save to Gallery"}
                 </button>
               </div>
             </form>

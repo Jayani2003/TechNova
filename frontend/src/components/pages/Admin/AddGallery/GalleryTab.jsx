@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Search, X, Grid, List, MapPin, User, Users, Eye, Trash2 } from "lucide-react";
 import { SEASONS, MOODS } from "./constants";
 
-export default function GalleryTab({ photos, setPhotos, onToast, onViewPhoto }) {
+export default function GalleryTab({ photos, onViewPhoto, onDeletePhoto, onToggleStatus }) {
   const [filter, setFilter] = useState("all");
   const [moodFilter, setMoodFilter] = useState("all");
   const [seasonFilter, setSeasonFilter] = useState("all");
@@ -32,19 +32,6 @@ export default function GalleryTab({ photos, setPhotos, onToast, onViewPhoto }) 
 
     return matchStatus && matchMood && matchSeason && matchSearch;
   });
-
-  const deletePhoto = (id, e) => {
-    e.stopPropagation();
-    setPhotos((prev) => prev.filter((p) => p.id !== id));
-    onToast("Photo removed from database successfully.");
-  };
-
-  const toggleStatus = (p, e) => {
-    e.stopPropagation();
-    const nextStatus = p.status === "published" ? "draft" : "published";
-    setPhotos((prev) => prev.map((item) => (item.id === p.id ? { ...item, status: nextStatus } : item)));
-    onToast(`"${p.title}" status changed to ${nextStatus.toUpperCase()}`);
-  };
 
   return (
     <div>
@@ -249,7 +236,7 @@ export default function GalleryTab({ photos, setPhotos, onToast, onViewPhoto }) 
 
                     <div className="flex gap-2 mt-4 pt-3 border-t border-stone-150 justify-between items-center">
                       <button
-                        onClick={(e) => toggleStatus(p, e)}
+                        onClick={(e) => onToggleStatus(p, e)}
                         className={`text-[10px] font-extrabold px-3 py-1 rounded-lg transition-colors cursor-pointer ${
                           p.status === "published"
                             ? "bg-stone-100 hover:bg-stone-200 text-stone-600"
@@ -259,7 +246,7 @@ export default function GalleryTab({ photos, setPhotos, onToast, onViewPhoto }) 
                         {p.status === "published" ? "Demote to Draft" : "Go Live"}
                       </button>
                       <button
-                        onClick={(e) => deletePhoto(p.id, e)}
+                        onClick={(e) => onDeletePhoto(p.id, e)}
                         className="p-1.5 rounded-lg border border-red-200 text-red-600 bg-red-50 hover:bg-red-600 hover:text-white transition-all cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -329,13 +316,13 @@ export default function GalleryTab({ photos, setPhotos, onToast, onViewPhoto }) 
 
                 <div className="flex gap-2 items-center border-t md:border-t-0 pt-3 md:pt-0 w-full md:w-auto justify-end">
                   <button
-                    onClick={(e) => toggleStatus(p, e)}
+                    onClick={(e) => onToggleStatus(p, e)}
                     className="text-[10px] font-bold border border-stone-200 hover:border-teal-700 hover:bg-teal-50 hover:text-teal-800 rounded-lg px-3 py-1.5 text-stone-600 transition-all cursor-pointer"
                   >
                     {p.status === "published" ? "Make Draft" : "Make Live"}
                   </button>
                   <button
-                    onClick={(e) => deletePhoto(p.id, e)}
+                    onClick={(e) => onDeletePhoto(p.id, e)}
                     className="p-1.5 rounded-lg border border-red-150 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />

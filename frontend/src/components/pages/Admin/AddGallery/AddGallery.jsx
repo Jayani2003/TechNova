@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { UploadCloud, Camera, MapPin } from "lucide-react";
 import Topbar from "./Topbar";
 import StatCards from "./StatCards";
@@ -7,15 +7,25 @@ import GalleryTab from "./GalleryTab";
 import LocationsTab from "./LocationsTab";
 import LightboxModal from "./LightboxModal";
 import Toast from "./Toast";
-import { SAMPLE_PHOTOS, INIT_LOCS } from "./constants";
+import {
+  fetchGalleryPhotos,
+  createGalleryPhoto,
+  updateGalleryPhotoStatus,
+  deleteGalleryPhoto,
+  fetchLocations,
+  createLocation,
+  updateLocation,
+  deleteLocation,
+} from "../../../../services/galleryService";
 
 export default function AddGallery() {
   const [tab, setTab] = useState("gallery");
-  const [photos, setPhotos] = useState(SAMPLE_PHOTOS);
-  const [locations, setLocations] = useState(INIT_LOCS);
+  const [photos, setPhotos] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [toast, setToast] = useState({ message: "", visible: false });
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
   const toastTimer = useRef(null);
 
   const showToast = useCallback((message) => {
@@ -38,25 +48,77 @@ export default function AddGallery() {
     { key: "locations", icon: <MapPin className="w-4 h-4" />, label: "Locations", badge: locations.length },
   ];
 
-  const handleAddPhoto = (newPhoto) => {
-    setPhotos((prev) => [newPhoto, ...prev]);
-    setLocations((prevLocs) =>
-      prevLocs.map((l) => (l.name.toLowerCase() === newPhoto.loc.toLowerCase() ? { ...l, photos: l.photos + 1 } : l))
-    );
-    setTab("gallery");
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [photoRows, locationRows] = await Promise.all([fetchGalleryPhotos(), fetchLocations()]);
+      setPhotos(photoRows);
+      setLocations(locationRows);
+    } catch (error) {
+      showToast(error.message || "Failed to load gallery data.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleAddPhoto = async ({ file, payload }) => {
+    try {
+      const created = await createGalleryPhoto({ file, payload });
+      setPhotos((prev) => [created, ...prev]);
+      const locationRows = await fetchLocations();
+      setLocations(locationRows);
+      setTab("gallery");
+      showToast(`"${created.title}" added to the gallery.`);
+    } catch (error) {
+      showToast(error.message || "Failed to save photo.");
+      throw error;
+    }
   };
 
-  const handleToggleStatus = (photo, e) => {
+  const handleToggleStatus = async (photo, e) => {
     e?.stopPropagation();
     const nextStatus = photo.status === "published" ? "draft" : "published";
-    setPhotos((prev) => prev.map((item) => (item.id === photo.id ? { ...item, status: nextStatus } : item)));
-    showToast(`"${photo.title}" changed to ${nextStatus.toUpperCase()}`);
+    try {
+      const updated = await updateGalleryPhotoStatus(photo.id, nextStatus);
+      setPhotos((prev) => prev.map((item) => (item.id === photo.id ? updated : item)));
+      showToast(`"${photo.title}" changed to ${nextStatus.toUpperCase()}`);
+    } catch (error) {
+      showToast(error.message || "Failed to update status.");
+    }
   };
 
-  const handleDeletePhoto = (id, e) => {
+  const handleDeletePhoto = async (id, e) => {
     e?.stopPropagation();
-    setPhotos((prev) => prev.filter((p) => p.id !== id));
-    showToast("Selected photograph has been removed.");
+    try {
+      await deleteGalleryPhoto(id);
+      setPhotos((prev) => prev.filter((p) => p.id !== id));
+      const locationRows = await fetchLocations();
+      setLocations(locationRows);
+      showToast("Selected photograph has been removed.");
+    } catch (error) {
+      showToast(error.message || "Failed to delete photo.");
+    }
+  };
+
+  const handleCreateLocation = async (payload) => {
+    const created = await createLocation(payload);
+    setLocations((prev) => [...prev, created]);
+    return created;
+  };
+
+  const handleUpdateLocation = async (id, payload) => {
+    const updated = await updateLocation(id, payload);
+    setLocations((prev) => prev.map((item) => (item.id === id ? updated : item)));
+    return updated;
+  };
+
+  const handleDeleteLocation = async (id) => {
+    await deleteLocation(id);
+    setLocations((prev) => prev.filter((item) => item.id !== id));
   };
 
   return (
@@ -122,13 +184,24 @@ export default function AddGallery() {
                     )
                   : photos
               }
-              setPhotos={setPhotos}
               onToast={showToast}
               onViewPhoto={(p) => setSelectedPhoto(p)}
+              onDeletePhoto={handleDeletePhoto}
+              onToggleStatus={handleToggleStatus}
             />
           )}
 
-          {tab === "locations" && <LocationsTab locations={locations} setLocations={setLocations} onToast={showToast} />}
+          {tab === "locations" && (
+            <LocationsTab
+              locations={locations}
+              onToast={showToast}
+              onCreateLocation={handleCreateLocation}
+              onUpdateLocation={handleUpdateLocation}
+              onDeleteLocation={handleDeleteLocation}
+            />
+          )}
+
+          {loading && <p className="mt-4 text-xs font-semibold text-stone-500">Loading gallery data...</p>}
         </div>
       </div>
 

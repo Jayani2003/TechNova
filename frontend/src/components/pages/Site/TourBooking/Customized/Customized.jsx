@@ -17,38 +17,26 @@ import {
   Baby,
   Phone,
   FileText,
+  Compass,
+  Zap,
 } from "lucide-react";
 import { AuthContext } from "../../../../../context/AuthContext";
 import { submitCustomBooking } from "../../../../../services/bookingService";
 import BookingStepIndicator from "../Booking/BookingStepIndicator";
 import BookingPassengersStep from "../Booking/BookingPassengersStep";
 import BookingNotesStep from "../Booking/BookingNotesStep";
+import CustomizedHeader from "./CustomizedHeader";
 
 const STEPS = ["Your Plan", "Passengers", "More Info", "Review"];
 
 const PLACE_OPTIONS = [
-  "Colombo",
-  "Kandy",
-  "Galle",
-  "Ella",
-  "Sigiriya",
-  "Trincomalee",
-  "Nuwara Eliya",
-  "Mirissa",
-  "Arugam Bay",
-  "Hikkaduwa",
-  "Polonnaruwa",
-  "Anuradhapura",
+  "Colombo", "Kandy", "Galle", "Ella", "Sigiriya", "Trincomalee", 
+  "Nuwara Eliya", "Mirissa", "Arugam Bay", "Hikkaduwa", "Polonnaruwa", "Anuradhapura",
 ];
 
 const ACTIVITY_OPTIONS = [
-  "Diving",
-  "Water Rafting",
-  "Kayaking",
-  "Hiking",
-  "Snorkeling Safari",
-  "Kite Surfing",
-  "Whale Watching",
+  "Diving", "Water Rafting", "Kayaking", "Hiking", "Snorkeling Safari", 
+  "Kite Surfing", "Whale Watching",
 ];
 
 const initialData = {
@@ -72,71 +60,92 @@ const initialData = {
   notes:          "",
 };
 
+// ─── Guest Guard ──────────────────────────────────────────────────────────────
 const GuestGuard = ({ navigate }) => (
-  <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+  <div className="min-h-screen bg-[#f7fffe] flex items-center justify-center px-4">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center max-w-md w-full"
+      className="bg-white rounded-3xl border border-[#00b0a5]/10 shadow-xl p-10 text-center max-w-md w-full"
     >
-      <div className="w-16 h-16 bg-[#00b0a5]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-        <Lock className="w-8 h-8 text-[#00b0a5]" />
+      <div className="w-20 h-20 bg-[#00b0a5]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+        <Lock className="w-10 h-10 text-[#00b0a5]" />
       </div>
-      <h2 className="text-2xl font-extrabold text-slate-800 mb-2">Login Required</h2>
-      <p className="text-slate-500 text-sm mb-6">
-        You need to be logged in to place a customized tour booking.
+      <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tighter uppercase">Login Required</h2>
+      <p className="text-slate-500 text-base mb-8">
+        You need to be logged in to design and book your own customized Sri Lankan adventure.
       </p>
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+      <div className="flex flex-col gap-3">
         <button
           onClick={() => navigate("/login")}
-          className="bg-[#00b0a5] hover:bg-[#009b91] text-white px-6 py-3 rounded-xl font-semibold transition-colors cursor-pointer"
+          className="bg-[#00b0a5] hover:bg-[#008f86] text-white px-8 py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#00b0a5]/20 cursor-pointer"
         >
-          Login
+          Sign In
         </button>
         <button
           onClick={() => navigate("/register")}
-          className="border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
+          className="border-2 border-[#00b0a5]/20 text-slate-700 px-8 py-4 rounded-xl font-bold hover:bg-[#00b0a5]/5 transition-all cursor-pointer"
         >
-          Register
+          Create Account
         </button>
       </div>
     </motion.div>
   </div>
 );
 
+// ─── Success Screen ───────────────────────────────────────────────────────────
 const SuccessScreen = ({ bookingRef, navigate }) => (
   <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
     transition={{ duration: 0.5 }}
-    className="text-center"
+    className="text-center py-8"
   >
-    <div className="w-20 h-20 bg-[#00b0a5]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-      <CheckCircle className="w-10 h-10 text-[#00b0a5]" />
+    <div className="w-24 h-24 bg-[#00b0a5]/10 rounded-full flex items-center justify-center mx-auto mb-8 relative">
+      <CheckCircle className="w-12 h-12 text-[#00b0a5]" />
+      <motion.div 
+        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 2, repeat: Infinity }}
+        className="absolute inset-0 bg-[#00b0a5]/20 rounded-full"
+      />
     </div>
-    <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight mb-3">
-      Customized Tour Requested!
+    <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter mb-4 uppercase">
+      Your Journey Awaits!
     </h2>
-    <p className="text-slate-500 text-sm mb-2">Your booking reference is:</p>
-    <p className="text-lg font-bold text-[#00b0a5] mb-8">{bookingRef}</p>
-    <div className="bg-slate-50 rounded-2xl p-5 mb-6 text-left space-y-2">
+    <p className="text-slate-500 text-lg mb-2 font-medium">Booking Reference:</p>
+    <p className="text-2xl font-black text-[#00b0a5] mb-10 tracking-widest bg-[#00b0a5]/5 inline-block px-6 py-2 rounded-full border border-[#00b0a5]/20">{bookingRef}</p>
+    
+    <div className="bg-[#f7fffe] rounded-3xl p-8 mb-10 text-left border border-[#00b0a5]/10 shadow-sm space-y-4 max-w-lg mx-auto">
+      <h4 className="font-bold text-slate-800 uppercase tracking-widest text-xs mb-2">Next Steps:</h4>
       {[
-        "Your custom plan is sent for review",
-        "Our team will send a price quote within 24 hours",
-        "Track the status from your profile",
+        "Our travel experts will review your custom itinerary",
+        "A personalized price quote will be sent to your profile",
+        "You'll receive an email notification once reviewed",
+        "Accept the quote to finalize your dream vacation"
       ].map((s, i) => (
-        <div key={i} className="flex items-start gap-2 text-sm text-slate-600">
-          <span className="text-[#00b0a5] font-bold flex-shrink-0">✓</span>
-          {s}
+        <div key={i} className="flex items-start gap-4">
+          <div className="w-6 h-6 bg-[#00b0a5] rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
+            {i + 1}
+          </div>
+          <p className="text-slate-600 font-medium">{s}</p>
         </div>
       ))}
     </div>
-    <button
-      onClick={() => navigate("/user/profile")}
-      className="w-full bg-[#00b0a5] hover:bg-[#009b91] text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 tracking-wide cursor-pointer"
-    >
-      View My Bookings
-    </button>
+
+    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <button
+        onClick={() => navigate("/user/profile")}
+        className="bg-[#00b0a5] hover:bg-[#008f86] text-white px-10 py-4 rounded-2xl font-black transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#00b0a5]/20 flex items-center justify-center gap-2 tracking-widest cursor-pointer uppercase text-sm"
+      >
+        View My Bookings
+      </button>
+      <button
+        onClick={() => window.location.href = "/"}
+        className="bg-white border-2 border-slate-100 text-slate-600 px-10 py-4 rounded-2xl font-black transition-all hover:bg-slate-50 flex items-center justify-center gap-2 tracking-widest cursor-pointer uppercase text-sm"
+      >
+        Back to Home
+      </button>
+    </div>
   </motion.div>
 );
 
@@ -145,7 +154,6 @@ const validateStep = (step, data) => {
     case 0:
       return (
         data.selectedCities.length > 0 &&
-        data.categoryId &&
         data.startDate &&
         data.endDate &&
         data.pickupTime
@@ -175,80 +183,61 @@ const CustomReviewStep = ({ data }) => {
 
   const ReviewRow = ({ icon: Icon, label, value }) =>
     value ? (
-      <div className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
-        <div className="w-8 h-8 bg-[#00b0a5]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-          <Icon className="w-4 h-4 text-[#00b0a5]" />
+      <div className="flex items-start gap-4 py-4 border-b border-slate-50 last:border-0">
+        <div className="w-10 h-10 bg-[#00b0a5]/10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+          <Icon className="w-5 h-5 text-[#00b0a5]" />
         </div>
         <div>
-          <p className="text-xs text-slate-400 font-medium">{label}</p>
-          <p className="text-sm font-semibold text-slate-800 mt-0.5">{value}</p>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{label}</p>
+          <p className="text-base font-bold text-slate-800 mt-0.5">{value}</p>
         </div>
       </div>
     ) : null;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-bold text-slate-800 mb-1">Review Your Booking</h3>
-        <p className="text-sm text-slate-500">
-          Check your custom travel plan before submitting. We will send a quote soon.
+    <div className="space-y-8">
+      <div className="text-center mb-10">
+        <div className="inline-flex items-center gap-2 bg-[#00b0a5]/10 text-[#00b0a5] px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-4">
+          <Compass className="w-4 h-4" /> Customized Itinerary
+        </div>
+        <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Review Your Plan</h3>
+        <p className="text-sm text-slate-500 mt-2">
+          Almost there! Please verify your travel details before submitting.
         </p>
       </div>
 
-      <div className="inline-flex items-center gap-2 bg-[#00b0a5]/10 text-[#00b0a5] px-4 py-2 rounded-full text-sm font-bold">
-        🌍 Customized Tour
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 hover:shadow-md transition-shadow">
+          <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-6 border-b border-[#00b0a5]/10 pb-4">Destinations & Dates</p>
+          <ReviewRow icon={MapPin} label="Route" value={data.selectedCities.join(" → ")} />
+          <ReviewRow icon={Zap} label="Activities" value={data.activities.length > 0 ? data.activities.join(", ") : "Sightseeing"} />
+          <ReviewRow icon={Calendar} label="Travel Period" value={`${data.startDate} to ${data.endDate}`} />
+          <ReviewRow icon={Clock} label="Pickup Time" value={data.pickupTime} />
+        </div>
+
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 hover:shadow-md transition-shadow">
+          <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-6 border-b border-[#00b0a5]/10 pb-4">Passengers & Vehicle</p>
+          <ReviewRow icon={Users} label="Travelers" value={`${data.noOfAdults} Adults${data.noOfChildren > 0 ? `, ${data.noOfChildren} Children` : ""}`} />
+          <ReviewRow icon={Car} label="Vehicle Type" value={VEHICLE_LABELS[data.categoryId] || "Not Selected"} />
+          <ReviewRow icon={Briefcase} label="Luggage" value={`${data.smallLuggages || 0} Small, ${data.largeLuggages || 0} Large`} />
+          <ReviewRow icon={Phone} label="Contact Name" value={data.customerName} />
+        </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Your Plan</p>
-        <ReviewRow icon={MapPin} label="Selected Cities" value={data.selectedCities.join(", ")} />
-        <ReviewRow icon={MapPin} label="Activities" value={data.activities.join(", ")} />
-        <ReviewRow icon={Calendar} label="Travel Dates" value={`${data.startDate} → ${data.endDate}`} />
-        <ReviewRow icon={Clock} label="Preferred Pickup Time" value={data.pickupTime} />
-        <ReviewRow icon={Calendar} label="Total Days" value={`${data.totalDays} day(s)`} />
-      </div>
+      {data.notes && (
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+           <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-4">Special Requests</p>
+           <p className="text-slate-600 font-medium italic">"{data.notes}"</p>
+        </div>
+      )}
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Passengers & Vehicle</p>
-        <ReviewRow icon={Users} label="Adults" value={`${data.noOfAdults} adult(s)`} />
-        {data.noOfChildren > 0 && (
-          <ReviewRow
-            icon={Users}
-            label="Children"
-            value={`${data.noOfChildren} child(ren) — Ages: ${data.agesOfChildren || "not specified"}`}
-          />
-        )}
-        <ReviewRow
-          icon={Car}
-          label="Luggage"
-          value={`${data.smallLuggages || 0} small, ${data.largeLuggages || 0} large`}
-        />
-        <ReviewRow icon={Car} label="Vehicle Category" value={VEHICLE_LABELS[data.categoryId] || data.categoryId} />
-      </div>
-
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Contact</p>
-        <ReviewRow icon={Phone} label="Name" value={data.customerName} />
-        <ReviewRow icon={Phone} label="Phone" value={data.customerPhone || "—"} />
-        {data.notes && <ReviewRow icon={FileText} label="Additional Notes" value={data.notes} />}
-      </div>
-
-      <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-        <p className="text-sm font-bold text-slate-700 mb-3">What happens after you submit?</p>
-        {[
-          "Your custom plan is submitted with status: PENDING",
-          "Our team reviews your request within 24 hours",
-          "We'll send you a price quote through the system",
-          "You accept or reject the quote from your profile",
-          "Once accepted, we confirm and assign your vehicle",
-        ].map((step, i) => (
-          <div key={i} className="flex items-start gap-2 mb-2">
-            <div className="w-5 h-5 rounded-full bg-[#00b0a5] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">
-              {i + 1}
-            </div>
-            <p className="text-sm text-slate-600">{step}</p>
-          </div>
-        ))}
+      <div className="bg-[#00b0a5]/5 rounded-3xl p-8 border border-[#00b0a5]/10">
+        <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4">Submission Notice</h4>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          By clicking "Submit Booking", your request will be sent to our team for manual review. 
+          We will calculate the best possible price based on your route and requirements. 
+          No payment is required at this stage.
+        </p>
       </div>
     </div>
   );
@@ -259,49 +248,53 @@ const CustomSidePanel = () => (
     initial={{ opacity: 0, x: 20 }}
     animate={{ opacity: 1, x: 0 }}
     transition={{ duration: 0.6, delay: 0.2 }}
-    className="space-y-4"
+    className="space-y-6"
   >
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-      <h2 className="text-2xl font-extrabold text-slate-800 mb-5">How It Works</h2>
-      <div className="space-y-4">
+    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+      <h2 className="text-2xl font-black text-slate-900 mb-8 uppercase tracking-tighter">Your Process</h2>
+      <div className="space-y-8">
         {[
-          { title: "Submit Your Plan", desc: "Choose your cities, activities, and vehicle preferences." },
-          { title: "Receive a Quote", desc: "We’ll review and send you a custom price." },
-          { title: "Confirm & Travel", desc: "Accept the quote and enjoy your tailor-made tour." },
-        ].map(({ title, desc }) => (
-          <div key={title} className="flex gap-3">
-            <div className="flex flex-col items-center">
-              <div className="w-8 h-8 bg-[#00b0a5] rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                {title.charAt(0)}
-              </div>
-              <div className="w-0.5 h-6 bg-slate-200 mt-1" />
+          { title: "Design", desc: "Pick your stops and activities.", icon: <MapPin className="w-4 h-4" /> },
+          { title: "Review", desc: "Our team crafts the best price.", icon: <Clock className="w-4 h-4" /> },
+          { title: "Embark", desc: "Approve and start your tour.", icon: <CheckCircle className="w-4 h-4" /> },
+        ].map(({ title, desc, icon }, idx) => (
+          <div key={title} className="flex gap-5 relative">
+            {idx < 2 && <div className="absolute left-6 top-10 bottom-[-32px] w-0.5 bg-slate-100" />}
+            <div className="w-12 h-12 bg-[#f7fffe] border border-[#00b0a5]/20 rounded-2xl flex items-center justify-center text-[#00b0a5] flex-shrink-0 z-10 font-black shadow-sm">
+              {icon}
             </div>
-            <div className="pb-2">
-              <p className="text-sm font-bold text-slate-800">{title}</p>
-              <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+            <div>
+              <p className="text-sm font-black text-slate-900 uppercase tracking-widest">{title}</p>
+              <p className="text-xs text-slate-500 mt-1 font-medium leading-relaxed">{desc}</p>
             </div>
           </div>
         ))}
       </div>
     </div>
 
-    <div className="bg-[#00b0a5]/10 border border-[#00b0a5]/20 rounded-2xl p-6">
-      <h3 className="font-extrabold text-slate-800 mb-1">Need Help Planning?</h3>
-      <p className="text-sm text-slate-600 mb-3">
-        Our travel experts can help shape your ideal Sri Lanka itinerary.
+    <div className="bg-gradient-to-br from-[#00b0a5] to-[#007a72] rounded-3xl p-8 text-white shadow-xl shadow-[#00b0a5]/20 relative overflow-hidden">
+      <div className="absolute top-0 right-0 p-4 opacity-10">
+        <Phone className="w-24 h-24 rotate-12" />
+      </div>
+      <h3 className="text-xl font-black mb-2 uppercase tracking-tighter">Need Assistance?</h3>
+      <p className="text-sm text-white/80 mb-6 font-medium leading-relaxed">
+        Let our travel consultants help you build the perfect itinerary.
       </p>
       <a
         href="tel:+94778619582"
-        className="flex items-center gap-2 text-[#00b0a5] font-semibold hover:text-[#009b91] transition-colors"
+        className="inline-flex items-center gap-3 bg-white text-[#00b0a5] px-6 py-3 rounded-xl font-black hover:bg-slate-50 transition-all text-sm tracking-widest uppercase shadow-lg shadow-black/10"
       >
-        +94 77 861 9582
+        <Phone className="w-4 h-4" /> Call Experts
       </a>
     </div>
 
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
-      <p className="text-sm font-bold text-slate-700 mb-1">Booking Policy</p>
-      <p className="text-xs text-slate-500 leading-relaxed">
-        Customized tours are reviewed manually, and no payment is required until the quote is approved.
+    <div className="bg-slate-900 rounded-3xl p-8 text-white">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-2 h-2 bg-[#00b0a5] rounded-full animate-pulse" />
+        <p className="text-xs font-black uppercase tracking-widest text-[#00b0a5]">Booking Policy</p>
+      </div>
+      <p className="text-xs text-white/60 leading-relaxed font-medium">
+        Custom tours require manual quotation. Quotes are typically ready within 24 hours. No upfront payment required to submit.
       </p>
     </div>
   </motion.div>
@@ -332,10 +325,7 @@ const Customized = () => {
   };
 
   const handleRemoveCity = (city) => {
-    handleChange(
-      "selectedCities",
-      data.selectedCities.filter((item) => item !== city)
-    );
+    handleChange("selectedCities", data.selectedCities.filter((item) => item !== city));
   };
 
   const handleAddActivity = () => {
@@ -347,10 +337,7 @@ const Customized = () => {
   };
 
   const handleRemoveActivity = (activity) => {
-    handleChange(
-      "activities",
-      data.activities.filter((item) => item !== activity)
-    );
+    handleChange("activities", data.activities.filter((item) => item !== activity));
   };
 
   const handleStartDate = (val) => {
@@ -378,14 +365,16 @@ const Customized = () => {
     if (validateStep(currentStep, data)) {
       setError("");
       setCurrentStep((s) => s + 1);
+      window.scrollTo({ top: 400, behavior: "smooth" });
     } else {
-      setError("Please complete all required fields before continuing.");
+      setError("Please complete all required fields for this step.");
     }
   };
 
   const handleBack = () => {
     setError("");
     setCurrentStep((s) => s - 1);
+    window.scrollTo({ top: 400, behavior: "smooth" });
   };
 
   const handleSubmit = async () => {
@@ -398,8 +387,9 @@ const Customized = () => {
       });
       setBookingRef(result.bookingRef);
       setSubmitted(true);
+      window.scrollTo({ top: 200, behavior: "smooth" });
     } catch (err) {
-      setError(err.message || "Submission failed. Please try again.");
+      setError(err.message || "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -409,263 +399,272 @@ const Customized = () => {
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-16">
-      <div className="max-w-6xl mx-auto px-4 mt-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
+    <div className="min-h-screen bg-[#f7fffe] pb-24 relative overflow-hidden">
+      {/* Subtle Background Decoration */}
+      <div className="absolute top-0 right-0 w-1/2 h-full opacity-[0.03] pointer-events-none">
+        <img 
+          src="https://images.unsplash.com/photo-1586611292717-f828b1ad740b?q=80&w=1200" 
+          alt="" 
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      <CustomizedHeader />
+
+      <div className="max-w-7xl mx-auto px-4 -mt-20 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-8">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8"
+              transition={{ duration: 0.6 }}
+              className="bg-white rounded-[2rem] border border-[#00b0a5]/10 shadow-2xl shadow-[#00b0a5]/5 overflow-hidden"
             >
-              {submitted ? (
-                <SuccessScreen bookingRef={bookingRef} navigate={navigate} />
-              ) : (
-                <>
-                  <BookingStepIndicator steps={STEPS} currentStep={currentStep} />
+              <div className="p-8 md:p-12">
+                {submitted ? (
+                  <SuccessScreen bookingRef={bookingRef} navigate={navigate} />
+                ) : (
+                  <>
+                    <BookingStepIndicator steps={STEPS} currentStep={currentStep} />
 
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={currentStep}
-                      initial={{ opacity: 0, x: 30 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -30 }}
-                      transition={{ duration: 0.25 }}
-                    >
-                      {currentStep === 0 && (
-                        <div className="space-y-6">
-                          <div>
-                            <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
-                              <MapPin className="w-5 h-5 text-[#00b0a5]" /> Choose Your Stops
-                            </h3>
-                            <p className="text-sm text-slate-500 mb-4">
-                              Select one or more cities or places for your customized itinerary.
-                            </p>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                                  Add a city or destination
-                                </label>
-                                <div className="flex gap-2">
-                                  <select
-                                    value={selectedCity}
-                                    onChange={(e) => setSelectedCity(e.target.value)}
-                                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20"
-                                  >
-                                    <option value="">Select a city</option>
-                                    {PLACE_OPTIONS.map((place) => (
-                                      <option key={place} value={place}>
-                                        {place}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  <button
-                                    type="button"
-                                    onClick={handleAddCity}
-                                    className="bg-[#00b0a5] text-white px-4 rounded-xl font-semibold hover:bg-[#009b91] transition-colors"
-                                  >
-                                    Add
-                                  </button>
-                                </div>
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                                  Choose activities
-                                </label>
-                                <div className="flex gap-2">
-                                  <select
-                                    value={selectedActivity}
-                                    onChange={(e) => setSelectedActivity(e.target.value)}
-                                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20"
-                                  >
-                                    <option value="">Select an activity</option>
-                                    {ACTIVITY_OPTIONS.map((activity) => (
-                                      <option key={activity} value={activity}>
-                                        {activity}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  <button
-                                    type="button"
-                                    onClick={handleAddActivity}
-                                    className="bg-[#00b0a5] text-white px-4 rounded-xl font-semibold hover:bg-[#009b91] transition-colors"
-                                  >
-                                    Add
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="mt-5 space-y-3">
-                              <div>
-                                <p className="text-sm font-semibold text-slate-700 mb-2">Selected Destinations</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {data.selectedCities.length > 0 ? (
-                                    data.selectedCities.map((city) => (
-                                      <span key={city} className="inline-flex items-center gap-2 bg-[#00b0a5]/10 text-[#09483c] rounded-full px-3 py-2 text-sm">
-                                        {city}
-                                        <button
-                                          type="button"
-                                          onClick={() => handleRemoveCity(city)}
-                                          className="text-[#006d5f] font-bold"
-                                        >
-                                          ×
-                                        </button>
-                                      </span>
-                                    ))
-                                  ) : (
-                                    <p className="text-sm text-slate-500">No cities added yet.</p>
-                                  )}
-                                </div>
-                              </div>
-
-                              <div>
-                                <p className="text-sm font-semibold text-slate-700 mb-2">Selected Activities</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {data.activities.length > 0 ? (
-                                    data.activities.map((activity) => (
-                                      <span key={activity} className="inline-flex items-center gap-2 bg-[#00b0a5]/10 text-[#09483c] rounded-full px-3 py-2 text-sm">
-                                        {activity}
-                                        <button
-                                          type="button"
-                                          onClick={() => handleRemoveActivity(activity)}
-                                          className="text-[#006d5f] font-bold"
-                                        >
-                                          ×
-                                        </button>
-                                      </span>
-                                    ))
-                                  ) : (
-                                    <p className="text-sm text-slate-500">No activities selected yet.</p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div>
-                            <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
-                              <Calendar className="w-5 h-5 text-[#00b0a5]" /> Travel Dates
-                            </h3>
-                            <p className="text-sm text-slate-500 mb-4">
-                              Add your desired start and end dates.
-                            </p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                                  Start Date *
-                                </label>
-                                <input
-                                  type="date"
-                                  min={today}
-                                  value={data.startDate}
-                                  onChange={(e) => handleStartDate(e.target.value)}
-                                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                                  End Date *
-                                </label>
-                                <input
-                                  type="date"
-                                  min={data.startDate || today}
-                                  value={data.endDate}
-                                  onChange={(e) => handleEndDate(e.target.value)}
-                                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20"
-                                />
-                              </div>
-                            </div>
-                            <div className="mt-4">
-                              <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                                <Clock className="w-4 h-4" /> Preferred Pickup Time *
-                              </label>
-                              <input
-                                type="time"
-                                value={data.pickupTime}
-                                onChange={(e) => handleChange("pickupTime", e.target.value)}
-                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20"
-                              />
-                            </div>
-
-                            {data.totalDays > 0 && (
-                              <div className="mt-4 bg-[#00b0a5]/5 border border-[#00b0a5]/20 rounded-xl p-4 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-[#00b0a5]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                                  <Calendar className="w-5 h-5 text-[#00b0a5]" />
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentStep}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className="mt-12"
+                      >
+                        {currentStep === 0 && (
+                          <div className="space-y-10">
+                            <section>
+                              <div className="flex items-center gap-3 mb-6">
+                                <div className="w-12 h-12 bg-[#00b0a5]/10 rounded-2xl flex items-center justify-center text-[#00b0a5]">
+                                  <MapPin className="w-6 h-6" />
                                 </div>
                                 <div>
-                                  <p className="text-sm font-bold text-slate-800">
-                                    {data.totalDays} {data.totalDays === 1 ? "Day" : "Days"} Trip
-                                  </p>
-                                  <p className="text-xs text-slate-500">
-                                    {data.startDate} → {data.endDate}
-                                  </p>
+                                  <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Pick Your Stops</h3>
+                                  <p className="text-sm text-slate-500">Add cities and landmarks to your personal route.</p>
                                 </div>
                               </div>
-                            )}
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
+                                <div className="space-y-2">
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Add Destination</label>
+                                  <div className="flex gap-2">
+                                    <select
+                                      value={selectedCity}
+                                      onChange={(e) => setSelectedCity(e.target.value)}
+                                      className="flex-1 px-4 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold"
+                                    >
+                                      <option value="">Select a city...</option>
+                                      {PLACE_OPTIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+                                    </select>
+                                    <button
+                                      type="button"
+                                      onClick={handleAddCity}
+                                      className="bg-[#00b0a5] text-white px-6 rounded-2xl font-black hover:bg-[#008f86] transition-all hover:scale-105 active:scale-95 text-xs uppercase tracking-widest shadow-lg shadow-[#00b0a5]/20"
+                                    >
+                                      Add
+                                    </button>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Add Activity</label>
+                                  <div className="flex gap-2">
+                                    <select
+                                      value={selectedActivity}
+                                      onChange={(e) => setSelectedActivity(e.target.value)}
+                                      className="flex-1 px-4 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold"
+                                    >
+                                      <option value="">Select an activity...</option>
+                                      {ACTIVITY_OPTIONS.map((a) => <option key={a} value={a}>{a}</option>)}
+                                    </select>
+                                    <button
+                                      type="button"
+                                      onClick={handleAddActivity}
+                                      className="bg-[#00b0a5] text-white px-6 rounded-2xl font-black hover:bg-[#008f86] transition-all hover:scale-105 active:scale-95 text-xs uppercase tracking-widest shadow-lg shadow-[#00b0a5]/20"
+                                    >
+                                      Add
+                                    </button>
+                                  </div>
+                                </div>
+
+                                <div className="md:col-span-2 space-y-6 mt-4">
+                                  <div>
+                                    <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-3 ml-1">Route Itinerary</p>
+                                    <div className="flex flex-wrap gap-2">
+                                      {data.selectedCities.length > 0 ? (
+                                        data.selectedCities.map((city) => (
+                                          <motion.span 
+                                            layout
+                                            initial={{ scale: 0.8, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            key={city} 
+                                            className="inline-flex items-center gap-2 bg-white border-2 border-[#00b0a5]/20 text-[#008f86] rounded-xl px-4 py-2 text-sm font-bold shadow-sm"
+                                          >
+                                            {city}
+                                            <button onClick={() => handleRemoveCity(city)} className="text-red-400 hover:text-red-600 transition-colors ml-1">×</button>
+                                          </motion.span>
+                                        ))
+                                      ) : (
+                                        <div className="w-full py-4 text-center border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 text-sm font-medium">No destinations added yet</div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-3 ml-1">Selected Activities</p>
+                                    <div className="flex flex-wrap gap-2">
+                                      {data.activities.length > 0 ? (
+                                        data.activities.map((act) => (
+                                          <motion.span 
+                                            layout
+                                            initial={{ scale: 0.8, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            key={act} 
+                                            className="inline-flex items-center gap-2 bg-[#00b0a5] text-white rounded-xl px-4 py-2 text-sm font-bold shadow-md shadow-[#00b0a5]/10"
+                                          >
+                                            {act}
+                                            <button onClick={() => handleRemoveActivity(act)} className="text-white/70 hover:text-white transition-colors ml-1">×</button>
+                                          </motion.span>
+                                        ))
+                                      ) : (
+                                        <div className="w-full py-4 text-center border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 text-sm font-medium">No activities selected yet</div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="flex items-center gap-3 mb-6">
+                                <div className="w-12 h-12 bg-[#00b0a5]/10 rounded-2xl flex items-center justify-center text-[#00b0a5]">
+                                  <Calendar className="w-6 h-6" />
+                                </div>
+                                <div>
+                                  <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Travel Dates</h3>
+                                  <p className="text-sm text-slate-500">When would you like to start your journey?</p>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-8 rounded-[2rem] border-2 border-[#f7fffe] shadow-sm">
+                                <div className="space-y-2">
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Departure Date *</label>
+                                  <input
+                                    type="date"
+                                    min={today}
+                                    value={data.startDate}
+                                    onChange={(e) => handleStartDate(e.target.value)}
+                                    className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:bg-white font-semibold"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Return Date *</label>
+                                  <input
+                                    type="date"
+                                    min={data.startDate || today}
+                                    value={data.endDate}
+                                    onChange={(e) => handleEndDate(e.target.value)}
+                                    className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:bg-white font-semibold"
+                                  />
+                                </div>
+                                <div className="md:col-span-2 space-y-2">
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Pickup Time *</label>
+                                  <div className="relative">
+                                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                                    <input
+                                      type="time"
+                                      value={data.pickupTime}
+                                      onChange={(e) => handleChange("pickupTime", e.target.value)}
+                                      className="w-full pl-12 pr-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:bg-white font-semibold"
+                                    />
+                                  </div>
+                                </div>
+
+                                {data.totalDays > 0 && (
+                                  <motion.div 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="md:col-span-2 bg-[#00b0a5] rounded-2xl p-6 text-white flex items-center justify-between shadow-xl shadow-[#00b0a5]/20"
+                                  >
+                                    <div>
+                                      <p className="text-xs font-black uppercase tracking-widest opacity-80">Total Duration</p>
+                                      <p className="text-2xl font-black">{data.totalDays} {data.totalDays === 1 ? "Full Day" : "Incredible Days"}</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-xs font-black uppercase tracking-widest opacity-80">Trip Range</p>
+                                      <p className="text-sm font-bold">{data.startDate} — {data.endDate}</p>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </div>
+                            </section>
                           </div>
-                        </div>
-                      )}
-                      {currentStep === 1 && <BookingPassengersStep data={data} onChange={handleChange} />}
-                      {currentStep === 2 && <BookingNotesStep data={data} onChange={handleChange} />}
-                      {currentStep === 3 && <CustomReviewStep data={data} />}
-                    </motion.div>
-                  </AnimatePresence>
-
-                  {error && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-4 flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm"
-                    >
-                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                      {error}
-                    </motion.div>
-                  )}
-
-                  <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
-                    <button
-                      onClick={handleBack}
-                      disabled={currentStep === 0}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                    >
-                      <ChevronLeft className="w-4 h-4" /> Back
-                    </button>
-                    {currentStep < STEPS.length - 1 ? (
-                      <button
-                        onClick={handleNext}
-                        disabled={!canProceed}
-                        className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#00b0a5] hover:bg-[#009b91] text-white font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                      >
-                        Next <ChevronRight className="w-4 h-4" />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={handleSubmit}
-                        disabled={submitting}
-                        className="flex items-center gap-2 px-7 py-3 rounded-xl bg-[#00b0a5] hover:bg-[#009b91] text-white font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
-                      >
-                        {submitting ? (
-                          <>
-                            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                            </svg>
-                            Submitting...
-                          </>
-                        ) : (
-                          <><Send className="w-4 h-4" /> Submit Booking</>
                         )}
-                      </button>
+                        {currentStep === 1 && <BookingPassengersStep data={data} onChange={handleChange} />}
+                        {currentStep === 2 && <BookingNotesStep data={data} onChange={handleChange} />}
+                        {currentStep === 3 && <CustomReviewStep data={data} />}
+                      </motion.div>
+                    </AnimatePresence>
+
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-8 flex items-center gap-3 bg-red-50 border-2 border-red-100 text-red-700 rounded-2xl px-6 py-4 text-sm font-bold shadow-sm"
+                      >
+                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                        {error}
+                      </motion.div>
                     )}
-                  </div>
-                </>
-              )}
+
+                    <div className="flex items-center justify-between mt-12 pt-10 border-t-2 border-slate-50">
+                      <button
+                        onClick={handleBack}
+                        disabled={currentStep === 0}
+                        className="flex items-center gap-2 px-8 py-4 rounded-xl border-2 border-slate-100 text-slate-500 font-black uppercase tracking-widest text-xs hover:bg-slate-50 hover:text-slate-700 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        <ChevronLeft className="w-4 h-4" /> Back
+                      </button>
+                      {currentStep < STEPS.length - 1 ? (
+                        <button
+                          onClick={handleNext}
+                          disabled={!canProceed}
+                          className="flex items-center gap-2 px-10 py-4 rounded-xl bg-[#00b0a5] hover:bg-[#008f86] text-white font-black uppercase tracking-widest text-xs transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-[#00b0a5]/20"
+                        >
+                          Next Step <ChevronRight className="w-4 h-4" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={handleSubmit}
+                          disabled={submitting}
+                          className="flex items-center gap-2 px-10 py-4 rounded-xl bg-[#00b0a5] hover:bg-[#008f86] text-white font-black uppercase tracking-widest text-xs transition-all hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer shadow-xl shadow-[#00b0a5]/30"
+                        >
+                          {submitting ? (
+                            <>
+                              <svg className="animate-spin w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                              </svg>
+                              Processing...
+                            </>
+                          ) : (
+                            <><Send className="w-4 h-4 mr-2" /> Submit Booking</>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
             </motion.div>
           </div>
-          <div className="lg:col-span-1">
+          
+          <div className="lg:col-span-4">
             <CustomSidePanel />
           </div>
         </div>

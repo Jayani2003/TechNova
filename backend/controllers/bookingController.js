@@ -172,7 +172,7 @@ const createP2PBooking = async (req, res) => {
     res.status(201).json({
       message: 'Booking submitted successfully.',
       bookingId: result.insertId,
-      bookingRef: `CBT-${isPackageBooking ? 'PKG' : 'P2P'}-${result.insertId}`,
+      bookingRef: `CBT-${isPackageBooking ? 'PKG' : isCustomBooking ? 'CUS' : 'P2P'}-${result.insertId}`,
     });
 
   } catch (err) {

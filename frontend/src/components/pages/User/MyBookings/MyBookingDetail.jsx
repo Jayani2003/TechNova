@@ -1,6 +1,7 @@
 // components/pages/User/MyBookings/MyBookingDetail.jsx
 import { motion } from "framer-motion";
-import { ArrowLeft, MapPin, Calendar, Users, Car, Phone, FileText, Clock, Baby, Briefcase, Check, X } from "lucide-react";
+import { useNavigate } from "react-router";
+import { ArrowLeft, MapPin, Calendar, Users, Car, Phone, FileText, Clock, Baby, Briefcase, Check, X, Zap } from "lucide-react";
 import { STATUS_STYLES, TOUR_TYPE_LABEL } from "./MyBookingCard";
 import { useBookings } from "../../../../context/BookingsContext.jsx";
 
@@ -30,6 +31,7 @@ const Section = ({ title, children, accent }) => (
 );
 
 const MyBookingDetail = ({ booking, onBack }) => {
+  const navigate = useNavigate();
   const { acceptQuote, rejectQuote, cancelBooking } = useBookings();
 
   const statusSteps = ["PENDING", "QUOTED", "ACCEPTED", "CONFIRMED", "TOUR_STARTED", "COMPLETED", "CLOSED"];
@@ -48,8 +50,12 @@ const MyBookingDetail = ({ booking, onBack }) => {
     >
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={onBack} className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors cursor-pointer">
-          <ArrowLeft className="w-4 h-4 text-slate-600" />
+        <button 
+          onClick={onBack} 
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm hover:border-[#00b0a5] hover:text-[#00b0a5] hover:bg-[#00b0a5]/5 transition-all cursor-pointer group shadow-sm"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span>Back to List</span>
         </button>
         <div className="flex-1">
           <h2 className="text-lg font-bold text-slate-800">{booking.id}</h2>
@@ -58,6 +64,19 @@ const MyBookingDetail = ({ booking, onBack }) => {
         <span className={`text-xs px-3 py-1.5 rounded-full font-bold ${STATUS_STYLES[booking.status] || "bg-slate-100 text-slate-600"}`}>
           {booking.status.replace("_", " ")}
         </span>
+
+        {booking.status === "PENDING" && (
+          <button
+            onClick={() => {
+              const path = booking.tourType === "CUSTOM" ? "/tour-booking/customized" : "/tour-booking/point";
+              navigate(path, { state: { editBooking: booking } });
+            }}
+            className="ml-auto flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#00b0a5] text-white font-bold text-sm hover:bg-[#008f86] transition-all cursor-pointer group shadow-lg shadow-[#00b0a5]/20"
+          >
+            <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            <span>Modify Request</span>
+          </button>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-0 pr-1">

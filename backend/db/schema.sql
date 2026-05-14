@@ -97,7 +97,7 @@ CREATE TABLE package_place (
 CREATE TABLE booking (
     booking_id     INT AUTO_INCREMENT PRIMARY KEY,
     user_id    INT NOT NULL,
-    customer_name  VARCHAR(100) NOT NULL,
+    customer_name  VARCHAR(100) NOT NULL, -- Mirrors user.name at booking time
     customer_phone VARCHAR(20) NOT NULL,
     tour_type      ENUM('P2P','PACKAGE','CUSTOM') NOT NULL,
     category_id    INT NOT NULL,
@@ -123,6 +123,7 @@ CREATE TABLE booking (
     quoted_price     DECIMAL(10,2) NULL,
 
     notes          TEXT,
+    tour_thoughts  TEXT,
     booking_date   DATE NOT NULL DEFAULT (CURRENT_DATE),
 
     -- status
@@ -158,12 +159,18 @@ CREATE TABLE booking_package (
     FOREIGN KEY (package_id) REFERENCES package(package_id)
 );
 
-CREATE TABLE booking_custom (
-    id             INT AUTO_INCREMENT PRIMARY KEY,
-    booking_id     INT NOT NULL UNIQUE,
-    itinerary_text TEXT,
-    itinerary_file VARCHAR(255),
-    FOREIGN KEY (booking_id) REFERENCES booking(booking_id)
+CREATE TABLE booking_custom_cities (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id INT NOT NULL,
+    city_name  VARCHAR(100) NOT NULL,
+    FOREIGN KEY (booking_id) REFERENCES booking(booking_id) ON DELETE CASCADE
+);
+
+CREATE TABLE booking_custom_activities (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id    INT NOT NULL,
+    activity_name VARCHAR(100) NOT NULL,
+    FOREIGN KEY (booking_id) REFERENCES booking(booking_id) ON DELETE CASCADE
 );
 
 CREATE TABLE payment (

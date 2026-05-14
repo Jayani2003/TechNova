@@ -1,9 +1,9 @@
 import { useState, useContext } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Send, Lock, CheckCircle, AlertCircle } from "lucide-react";
 import { AuthContext } from "../../../../../context/AuthContext";
-import { submitP2PBooking } from "../../../../../services/bookingService";
+import { submitP2PBooking, updateBooking } from "../../../../../services/bookingService";
 import P2PHeader from "./P2PHeader";
 import BookingStepIndicator from "../Booking/BookingStepIndicator";
 import P2PTripStep from "./P2PTripStep";
@@ -120,9 +120,35 @@ const validateStep = (step, data) => {
 const PointToPoint = () => {
   const { user } = useContext(AuthContext);
   const navigate  = useNavigate();
+  const location = useLocation();
+  const editBooking = location.state?.editBooking || null;
  
   const [currentStep, setCurrentStep] = useState(0);
-  const [data, setData]               = useState(initialData);
+  const [data, setData] = useState(() => {
+    if (editBooking) {
+      // Parse pickup time from notes
+      const pickupTimeMatch = editBooking.notes?.match(/Pickup time: ([^|]+)/);
+      const cleanNotes = editBooking.notes
+        ?.replace(/Pickup time: [^|]+\|?\s*/g, '')
+        ?.replace(/Activities: [^|]+\|?\s*/g, '')
+        ?.replace(/Cities: [^|]+\|?\s*/g, '')
+        ?.trim();
+
+      // Extract small and large luggage from luggage string
+      const luggageMatch = editBooking.noOfLuggages?.match(/Small: (\d+), Large: (\d+)/);
+
+      return {
+        ...initialData,
+        ...editBooking,
+        pickupTime: pickupTimeMatch ? pickupTimeMatch[1].trim() : "",
+        notes: cleanNotes || "",
+        smallLuggages: luggageMatch ? parseInt(luggageMatch[1]) : 0,
+        largeLuggages: luggageMatch ? parseInt(luggageMatch[2]) : 0,
+        babySeatNeeded: editBooking.noOfLuggages?.includes("Baby seat needed") || false,
+      };
+    }
+    return initialData;
+  });
   const [submitted, setSubmitted]     = useState(false);
   const [bookingRef, setBookingRef]   = useState("");
   const [submitting, setSubmitting]   = useState(false);
@@ -139,13 +165,24 @@ const PointToPoint = () => {
     setSubmitting(true);
     setError("");
     try {
-      const result = await submitP2PBooking({
-        ...data,
-        customerEmail: user.email,
-        tourType: "P2P",
-      });
-      setBookingRef(result.bookingRef);
-      setSubmitted(true);
+      if (editBooking) {
+        await updateBooking(editBooking.id, {
+          ...data,
+          customerEmail: user.email,
+          tourType: "P2P",
+        });
+        setBookingRef(editBooking.bookingRef || editBooking.id);
+        setSubmitted(true);
+        window.scrollTo({ top: 200, behavior: "smooth" });
+      } else {
+        const result = await submitP2PBooking({
+          ...data,
+          customerEmail: user.email,
+          tourType: "P2P",
+        });
+        setBookingRef(result.bookingRef);
+        setSubmitted(true);
+      }
     } catch (err) {
       setError(err.message || "Submission failed. Please try again.");
     } finally {
@@ -175,6 +212,22 @@ const PointToPoint = () => {
               ) : (
                 <>
                   <BookingStepIndicator steps={STEPS} currentStep={currentStep} />
+ 
+                  {editBooking && (
+                    <div className="mb-6 flex items-center justify-between bg-amber-50 border border-amber-100 rounded-2xl px-5 py-2.5">
+                      <p className="text-sm font-bold text-amber-800">Editing Booking: {editBooking.id}</p>
+                      <button 
+                        onClick={() => {
+                          setData(initialData);
+                          setCurrentStep(0);
+                          navigate(location.pathname, { replace: true, state: {} });
+                        }}
+                        className="text-xs font-bold text-amber-600 hover:text-amber-700 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
  
                   <AnimatePresence mode="wait">
                     <motion.div

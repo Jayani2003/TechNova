@@ -1,5 +1,5 @@
 import { useState, useContext } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft,
@@ -26,6 +26,7 @@ import BookingStepIndicator from "../Booking/BookingStepIndicator";
 import BookingPassengersStep from "../Booking/BookingPassengersStep";
 import BookingNotesStep from "../Booking/BookingNotesStep";
 import CustomizedHeader from "./CustomizedHeader";
+import { updateBooking } from "../../../../../services/bookingService";
 
 const STEPS = ["Your Plan", "Passengers", "More Info", "Review"];
 
@@ -58,6 +59,7 @@ const initialData = {
   customerName:   "",
   customerPhone:  "",
   notes:          "",
+  tourThoughts:   "",
 };
 
 // ─── Guest Guard ──────────────────────────────────────────────────────────────
@@ -152,20 +154,32 @@ const SuccessScreen = ({ bookingRef, navigate }) => (
 const validateStep = (step, data) => {
   switch (step) {
     case 0:
-      return (
-        data.selectedCities.length > 0 &&
-        data.startDate &&
-        data.endDate &&
-        data.pickupTime
-      );
+      if (data.selectedCities.length === 0) return { valid: false, msg: "Please select at least one destination." };
+      if (data.selectedCities.length > 7) return { valid: false, msg: "Maximum 7 destinations allowed." };
+      if (data.activities.length > 7) return { valid: false, msg: "Maximum 7 activities allowed." };
+      if (!data.startDate || !data.endDate || !data.pickupTime) return { valid: false, msg: "Please select travel dates and pickup time." };
+      return { valid: true };
     case 1:
-      return data.noOfAdults >= 1 && data.categoryId;
+      if (data.noOfAdults < 1) return { valid: false, msg: "At least 1 adult is required." };
+      if (!data.categoryId) return { valid: false, msg: "Please select a vehicle category." };
+      return { valid: true };
     case 2:
-      return data.customerName.trim() && data.customerPhone.trim();
+      if (!data.customerName.trim()) return { valid: false, msg: "Please enter your full name." };
+      if (!data.customerPhone.trim()) return { valid: false, msg: "Please enter your phone number." };
+      
+      // Phone validation for +94
+      if (data.customerPhone.startsWith("+94")) {
+        const numberPart = data.customerPhone.split(" ")[1] || "";
+        const cleanNumber = numberPart.replace(/\s/g, "");
+        if (cleanNumber.length !== 9) {
+          return { valid: false, msg: "Sri Lankan phone numbers must have exactly 9 digits after +94." };
+        }
+      }
+      return { valid: true };
     case 3:
-      return true;
+      return { valid: true };
     default:
-      return false;
+      return { valid: false, msg: "Invalid step." };
   }
 };
 
@@ -223,6 +237,21 @@ const CustomReviewStep = ({ data }) => {
           <ReviewRow icon={Phone} label="Contact Name" value={data.customerName} />
         </div>
       </div>
+
+      {data.tourThoughts && (
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+           <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-4">Traveler's Thoughts</p>
+           <p className="text-slate-600 font-medium italic leading-relaxed mb-4">"{data.tourThoughts}"</p>
+           <div className="bg-[#f7fffe] p-4 rounded-2xl border border-[#00b0a5]/10 flex items-center gap-3">
+             <div className="w-8 h-8 bg-[#00b0a5]/10 rounded-full flex items-center justify-center flex-shrink-0">
+               <Zap className="w-4 h-4 text-[#00b0a5]" />
+             </div>
+             <p className="text-xs text-slate-500 font-medium italic">
+               Note: These details will be carefully reviewed by the <strong>Ceylon Best Tour</strong> team. We will plan the most efficient route and handle all necessary arrangements (hotels, permits, etc.) based on your ideas.
+             </p>
+           </div>
+        </div>
+      )}
 
       {data.notes && (
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
@@ -303,8 +332,44 @@ const CustomSidePanel = () => (
 const Customized = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const editBooking = location.state?.editBooking || null;
+
   const [currentStep, setCurrentStep] = useState(0);
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState(() => {
+    if (editBooking) {
+      // Parse pickup time from notes
+      const pickupTimeMatch = editBooking.notes?.match(/Pickup time: ([^|]+)/);
+      const thoughtsMatch = editBooking.notes?.match(/Traveler Thoughts: ([^|]+)/);
+      const cleanNotes = editBooking.notes
+        ?.replace(/Pickup time: [^|]+\|?\s*/g, '')
+        ?.replace(/Traveler Thoughts: [^|]+\|?\s*/g, '')
+        ?.replace(/Activities: [^|]+\|?\s*/g, '')
+        ?.replace(/Cities: [^|]+\|?\s*/g, '')
+        ?.trim();
+
+      // Extract small and large luggage from luggage string
+      const luggageMatch = editBooking.noOfLuggages?.match(/Small: (\d+), Large: (\d+)/);
+
+      // Extract cities and activities from notes (legacy) or just use empty if not found
+      const citiesMatch = editBooking.notes?.match(/Cities: ([^|]+)/);
+      const activitiesMatch = editBooking.notes?.match(/Activities: ([^|]+)/);
+
+      return {
+        ...initialData,
+        ...editBooking,
+        selectedCities: citiesMatch ? citiesMatch[1].split(', ') : [],
+        activities: activitiesMatch ? activitiesMatch[1].split(', ') : [],
+        pickupTime: pickupTimeMatch ? pickupTimeMatch[1].trim() : "",
+        tourThoughts: thoughtsMatch ? thoughtsMatch[1].trim() : "",
+        notes: cleanNotes || "",
+        smallLuggages: luggageMatch ? parseInt(luggageMatch[1]) : 0,
+        largeLuggages: luggageMatch ? parseInt(luggageMatch[2]) : 0,
+        babySeatNeeded: editBooking.noOfLuggages?.includes("Baby seat needed") || false,
+      };
+    }
+    return initialData;
+  });
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedActivity, setSelectedActivity] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -318,8 +383,13 @@ const Customized = () => {
 
   const handleAddCity = () => {
     if (!selectedCity) return;
+    if (data.selectedCities.length >= 7) {
+      setError("You can select a maximum of 7 destinations.");
+      return;
+    }
     if (!data.selectedCities.includes(selectedCity)) {
       handleChange("selectedCities", [...data.selectedCities, selectedCity]);
+      setError("");
     }
     setSelectedCity("");
   };
@@ -330,8 +400,13 @@ const Customized = () => {
 
   const handleAddActivity = () => {
     if (!selectedActivity) return;
+    if (data.activities.length >= 7) {
+      setError("You can select a maximum of 7 activities.");
+      return;
+    }
     if (!data.activities.includes(selectedActivity)) {
       handleChange("activities", [...data.activities, selectedActivity]);
+      setError("");
     }
     setSelectedActivity("");
   };
@@ -362,12 +437,17 @@ const Customized = () => {
   };
 
   const handleNext = () => {
-    if (validateStep(currentStep, data)) {
+    const validation = validateStep(currentStep, data);
+    if (validation.valid) {
       setError("");
       setCurrentStep((s) => s + 1);
       window.scrollTo({ top: 400, behavior: "smooth" });
     } else {
-      setError("Please complete all required fields for this step.");
+      setError(validation.msg || "Please complete all required fields.");
+      // Specific popup for phone number validation
+      if (validation.msg && validation.msg.includes("9 digits")) {
+        alert(validation.msg);
+      }
     }
   };
 
@@ -381,13 +461,23 @@ const Customized = () => {
     setSubmitting(true);
     setError("");
     try {
-      const result = await submitCustomBooking({
-        ...data,
-        customerEmail: user.email,
-      });
-      setBookingRef(result.bookingRef);
-      setSubmitted(true);
-      window.scrollTo({ top: 200, behavior: "smooth" });
+      if (editBooking) {
+        await updateBooking(editBooking.id, {
+          ...data,
+          customerEmail: user.email,
+        });
+        setBookingRef(editBooking.bookingRef || editBooking.id);
+        setSubmitted(true);
+        window.scrollTo({ top: 200, behavior: "smooth" });
+      } else {
+        const result = await submitCustomBooking({
+          ...data,
+          customerEmail: user.email,
+        });
+        setBookingRef(result.bookingRef);
+        setSubmitted(true);
+        window.scrollTo({ top: 200, behavior: "smooth" });
+      }
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -395,7 +485,7 @@ const Customized = () => {
     }
   };
 
-  const canProceed = validateStep(currentStep, data);
+  const canProceed = validateStep(currentStep, data).valid;
   const today = new Date().toISOString().split("T")[0];
 
   return (
@@ -426,6 +516,25 @@ const Customized = () => {
                 ) : (
                   <>
                     <BookingStepIndicator steps={STEPS} currentStep={currentStep} />
+                    
+                    {editBooking && (
+                      <div className="mb-6 flex items-center justify-between bg-amber-50 border border-amber-100 rounded-2xl px-6 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                          <p className="text-sm font-bold text-amber-800">Editing Booking: <span className="font-mono">{editBooking.id}</span></p>
+                        </div>
+                        <button 
+                          onClick={() => {
+                            setData(initialData);
+                            setCurrentStep(0);
+                            navigate(location.pathname, { replace: true, state: {} });
+                          }}
+                          className="text-xs font-black uppercase tracking-widest text-amber-600 hover:text-amber-700 transition-colors cursor-pointer"
+                        >
+                          Cancel Edit
+                        </button>
+                      </div>
+                    )}
 
                     <AnimatePresence mode="wait">
                       <motion.div
@@ -451,7 +560,7 @@ const Customized = () => {
 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
                                 <div className="space-y-2">
-                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Add Destination</label>
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Add Destination <span className="text-[#00b0a5]">(Max 7)</span></label>
                                   <div className="flex gap-2">
                                     <select
                                       value={selectedCity}
@@ -472,7 +581,7 @@ const Customized = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Add Activity</label>
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Add Activity <span className="text-[#00b0a5]">(Max 7)</span></label>
                                   <div className="flex gap-2">
                                     <select
                                       value={selectedActivity}
@@ -510,7 +619,7 @@ const Customized = () => {
                                           </motion.span>
                                         ))
                                       ) : (
-                                        <div className="w-full py-4 text-center border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 text-sm font-medium">No destinations added yet</div>
+                                        <div className="w-full py-4 text-center border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 text-sm font-medium">Select up to 7 destinations for your route</div>
                                       )}
                                     </div>
                                   </div>
@@ -532,7 +641,7 @@ const Customized = () => {
                                           </motion.span>
                                         ))
                                       ) : (
-                                        <div className="w-full py-4 text-center border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 text-sm font-medium">No activities selected yet</div>
+                                        <div className="w-full py-4 text-center border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 text-sm font-medium">Choose up to 7 adventure activities</div>
                                       )}
                                     </div>
                                   </div>
@@ -559,7 +668,7 @@ const Customized = () => {
                                     min={today}
                                     value={data.startDate}
                                     onChange={(e) => handleStartDate(e.target.value)}
-                                    className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:bg-white font-semibold"
+                                    className="w-full px-5 py-4 bg-white border-2 border-slate-200 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold [color-scheme:light]"
                                   />
                                 </div>
                                 <div className="space-y-2">
@@ -569,7 +678,7 @@ const Customized = () => {
                                     min={data.startDate || today}
                                     value={data.endDate}
                                     onChange={(e) => handleEndDate(e.target.value)}
-                                    className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:bg-white font-semibold"
+                                    className="w-full px-5 py-4 bg-white border-2 border-slate-200 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold [color-scheme:light]"
                                   />
                                 </div>
                                 <div className="md:col-span-2 space-y-2">
@@ -580,7 +689,7 @@ const Customized = () => {
                                       type="time"
                                       value={data.pickupTime}
                                       onChange={(e) => handleChange("pickupTime", e.target.value)}
-                                      className="w-full pl-12 pr-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:bg-white font-semibold"
+                                      className="w-full pl-12 pr-5 py-4 bg-white border-2 border-slate-200 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold [color-scheme:light]"
                                     />
                                   </div>
                                 </div>
@@ -601,6 +710,29 @@ const Customized = () => {
                                     </div>
                                   </motion.div>
                                 )}
+                              </div>
+                            </section>
+                            <section>
+                              <div className="flex items-center gap-3 mb-6">
+                                <div className="w-12 h-12 bg-[#00b0a5]/10 rounded-2xl flex items-center justify-center text-[#00b0a5]">
+                                  <FileText className="w-6 h-6" />
+                                </div>
+                                <div>
+                                  <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Your Dream Itinerary</h3>
+                                  <p className="text-sm text-slate-500">Share your thoughts, experiences, or specific ideas for this tour.</p>
+                                </div>
+                              </div>
+                              <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
+                                <textarea
+                                  value={data.tourThoughts}
+                                  onChange={(e) => handleChange("tourThoughts", e.target.value)}
+                                  placeholder="E.g. I saw a video about the Nine Arch Bridge and would love to experience it at sunrise... I'm a big fan of Ceylon tea and want to visit a factory..."
+                                  rows={4}
+                                  className="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-medium resize-none"
+                                />
+                                <p className="text-xs text-slate-400 mt-3 italic">
+                                  Don't worry about the specifics - just tell us what you're dreaming of!
+                                </p>
                               </div>
                             </section>
                           </div>

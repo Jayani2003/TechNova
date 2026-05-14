@@ -1,14 +1,14 @@
 import { Users, Briefcase, Car, Baby } from "lucide-react";
 
 const VEHICLE_CATEGORIES = [
-  { id: "mini_car", label: "Mini Car", desc: "2 adults, 1 luggage", icon: "🚗" },
-  { id: "normal_car", label: "Normal Car", desc: "3 adults, 2 luggage", icon: "🚙" },
-  { id: "sedan_car", label: "Sedan Car", desc: "4 adults, 3 luggage", icon: "🚘" },
-  { id: "mpv", label: "MPV", desc: "6 adults, 4 luggage", icon: "🚐" },
-  { id: "suv", label: "SUV", desc: "5 adults, 4 luggage", icon: "🛻" },
-  { id: "mini_van", label: "Mini Van", desc: "8 adults, 5 luggage", icon: "🚌" },
-  { id: "van", label: "Van", desc: "10 adults, 6 luggage", icon: "🚌" },
-  { id: "large_van", label: "Large Van", desc: "14 adults, 8 luggage", icon: "🚌" },
+  { id: "mini_car", label: "Mini Car", desc: "2 adults, 1 luggage", icon: "🚗", maxAdults: 2, maxLuggage: 1 },
+  { id: "normal_car", label: "Normal Car", desc: "3 adults, 2 luggage", icon: "🚙", maxAdults: 3, maxLuggage: 2 },
+  { id: "sedan_car", label: "Sedan Car", desc: "4 adults, 3 luggage", icon: "🚘", maxAdults: 4, maxLuggage: 3 },
+  { id: "mpv", label: "MPV", desc: "6 adults, 4 luggage", icon: "🚐", maxAdults: 6, maxLuggage: 4 },
+  { id: "suv", label: "SUV", desc: "5 adults, 4 luggage", icon: "🛻", maxAdults: 5, maxLuggage: 4 },
+  { id: "mini_van", label: "Mini Van", desc: "8 adults, 5 luggage", icon: "🚌", maxAdults: 8, maxLuggage: 5 },
+  { id: "van", label: "Van", desc: "10 adults, 6 luggage", icon: "🚌", maxAdults: 10, maxLuggage: 6 },
+  { id: "large_van", label: "Large Van", desc: "14 adults, 8 luggage", icon: "🚌", maxAdults: 14, maxLuggage: 8 },
 ];
 
 const inputClass =
@@ -170,7 +170,10 @@ const BookingPassengersStep = ({ data, onChange }) => {
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {VEHICLE_CATEGORIES.map((cat) => (
+          {VEHICLE_CATEGORIES.filter(cat => 
+            cat.maxAdults >= (data.noOfAdults || 0) && 
+            cat.maxLuggage >= (data.largeLuggages || 0)
+          ).map((cat) => (
             <button
               key={cat.id}
               type="button"
@@ -188,6 +191,19 @@ const BookingPassengersStep = ({ data, onChange }) => {
               <span className="text-[10px] text-slate-400 mt-0.5">{cat.desc}</span>
             </button>
           ))}
+          {VEHICLE_CATEGORIES.filter(cat => 
+            cat.maxAdults >= (data.noOfAdults || 0) && 
+            cat.maxLuggage >= (data.largeLuggages || 0)
+          ).length === 0 && (
+            <div className="col-span-full py-6 text-center bg-red-50 rounded-2xl border border-red-100">
+              <p className="text-sm text-red-600 font-semibold">
+                No vehicles available for this many passengers and luggage.
+              </p>
+              <p className="text-xs text-red-400 mt-1">
+                Please reduce the number of passengers or luggage, or contact us for a custom solution.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -72,6 +72,7 @@ const createP2PBooking = async (req, res) => {
     customerName,
     customerPhone,
     notes,
+    tourThoughts,
   } = req.body;
 
   const isPackageBooking = normalizeTourType(tourType) === 'PACKAGE';
@@ -99,10 +100,12 @@ const createP2PBooking = async (req, res) => {
   const luggageStr = `Small: ${smallLuggages || 0}, Large: ${largeLuggages || 0}${babySeatNeeded ? ', Baby seat needed' : ''}`;
   const cityNotes = selectedCityList.length ? `Cities: ${selectedCityList.join(', ')}` : null;
   const activityNotes = activityList.length ? `Activities: ${activityList.join(', ')}` : null;
+  const thoughtsNotes = tourThoughts ? `Traveler Thoughts: ${tourThoughts}` : null;
   const fullNotes = [
     pickupTime ? `Pickup time: ${pickupTime}` : null,
     cityNotes,
     activityNotes,
+    thoughtsNotes,
     notes || null,
   ].filter(Boolean).join(' | ');
 
@@ -137,9 +140,9 @@ const createP2PBooking = async (req, res) => {
          start_date, end_date, start_location, end_location,
          total_days, days_required,
          no_of_adults, no_of_children, ages_of_children,
-         no_of_luggages, notes,
+         no_of_luggages, notes, tour_thoughts,
          booking_status, booking_date)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', CURDATE())`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', CURDATE())`,
       [
         req.user.id,
         customerName,
@@ -157,14 +160,55 @@ const createP2PBooking = async (req, res) => {
         agesOfChildren || null,
         luggageStr,
         fullNotes || null,
+        tourThoughts || null,
       ]
     );
+
+    const bookingId = result.insertId;
 
     if (isPackageBooking) {
       await conn.execute(
         'INSERT INTO booking_package (booking_id, package_id) VALUES (?, ?)',
         [result.insertId, packageId]
       );
+    }
+
+    // ── Handle Custom Selections ──────────────────────────────────────────────
+    if (isCustomBooking) {
+      if (selectedCityList.length > 0) {
+        for (let i = 0; i < selectedCityList.length; i++) {
+          const cityName = selectedCityList[i];
+          // Try to find place_id
+          const [places] = await conn.execute('SELECT place_id FROM place WHERE place_name = ? LIMIT 1', [cityName]);
+          const placeId = places.length > 0 ? places[0].place_id : null;
+
+          await conn.execute(
+            'INSERT INTO booking_custom_cities (booking_id, place_id, custom_name, sequence_order) VALUES (?, ?, ?, ?)',
+            [bookingId, placeId, placeId ? null : cityName, i]
+          );
+        }
+      }
+      if (activityList.length > 0) {
+        for (const actName of activityList) {
+          // Try to find activity_id
+          const [activities] = await conn.execute('SELECT activity_id FROM activity WHERE activity_name = ? LIMIT 1', [actName]);
+          
+          if (activities.length > 0) {
+            await conn.execute(
+              'INSERT INTO booking_custom_activities (booking_id, activity_id) VALUES (?, ?)',
+              [bookingId, activities[0].activity_id]
+            );
+          } else {
+            // If not found, we could either skip or insert into activity table first. 
+            // For now, let's try to insert into activity table to ensure the link works.
+            const [newAct] = await conn.execute('INSERT INTO activity (activity_name) VALUES (?)', [actName]);
+            await conn.execute(
+              'INSERT INTO booking_custom_activities (booking_id, activity_id) VALUES (?, ?)',
+              [bookingId, newAct.insertId]
+            );
+          }
+        }
+      }
     }
 
     await conn.commit();
@@ -295,10 +339,170 @@ const updateStatus = async (req, res) => {
   }
 };
 
+
+// ── PUT /api/bookings/:id ─────────────────────────────────────────────────────
+const updateBooking = async (req, res) => {
+  const { id } = req.params;
+  const {
+    tourType,
+    startLocation,
+    endLocation,
+    selectedCities,
+    activities,
+    startDate,
+    endDate,
+    pickupTime,
+    totalDays,
+    daysRequired,
+    categoryId,
+    noOfAdults,
+    noOfChildren,
+    agesOfChildren,
+    babySeatNeeded,
+    smallLuggages,
+    largeLuggages,
+    customerName,
+    customerPhone,
+    notes,
+    tourThoughts,
+  } = req.body;
+
+  const isCustomBooking = String(tourType).toUpperCase() === 'CUSTOM';
+  const selectedCityList = Array.isArray(selectedCities) ? selectedCities.filter(Boolean) : [];
+  const activityList = Array.isArray(activities) ? activities.filter(Boolean) : [];
+
+  if (!startDate || !endDate || !categoryId || !customerName || !customerPhone)
+    return res.status(400).json({ message: 'Missing required fields.' });
+
+  // Luggage string and full notes (same logic as create)
+  const luggageStr = `Small: ${smallLuggages || 0}, Large: ${largeLuggages || 0}${babySeatNeeded ? ', Baby seat needed' : ''}`;
+  const cityNotes = selectedCityList.length ? `Cities: ${selectedCityList.join(', ')}` : null;
+  const activityNotes = activityList.length ? `Activities: ${activityList.join(', ')}` : null;
+  const thoughtsNotes = tourThoughts ? `Traveler Thoughts: ${tourThoughts}` : null;
+  const fullNotes = [
+    pickupTime ? `Pickup time: ${pickupTime}` : null,
+    cityNotes,
+    activityNotes,
+    thoughtsNotes,
+    notes || null,
+  ].filter(Boolean).join(' | ');
+
+  // Resolve category ID
+  let resolvedCategoryId = null;
+  if (!isNaN(categoryId)) {
+    resolvedCategoryId = parseInt(categoryId);
+  } else {
+    const [catRows] = await db.execute(
+      'SELECT category_id FROM vehicle_category WHERE category_name = ? LIMIT 1',
+      [categoryId]
+    );
+    if (catRows.length > 0) {
+      resolvedCategoryId = catRows[0].category_id;
+    } else {
+      const [ins] = await db.execute(
+        'INSERT INTO vehicle_category (category_name) VALUES (?)', [categoryId]
+      );
+      resolvedCategoryId = ins.insertId;
+    }
+  }
+
+  let conn;
+  try {
+    conn = await db.getConnection();
+    await conn.beginTransaction();
+
+    // Check if booking exists, belongs to user, and is PENDING
+    const [existing] = await conn.execute(
+      'SELECT booking_status, user_id FROM booking WHERE booking_id = ?',
+      [id]
+    );
+
+    if (existing.length === 0) {
+      await conn.rollback();
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    if (existing[0].user_id !== req.user.id) {
+      await conn.rollback();
+      return res.status(403).json({ message: 'Unauthorized to edit this booking.' });
+    }
+
+    if (existing[0].booking_status !== 'PENDING') {
+      await conn.rollback();
+      return res.status(400).json({ message: 'Only pending bookings can be edited.' });
+    }
+
+    await conn.execute(
+      `UPDATE booking
+       SET customer_name = ?, customer_phone = ?,
+           category_id = ?, start_date = ?, end_date = ?,
+           start_location = ?, end_location = ?,
+           total_days = ?, days_required = ?,
+           no_of_adults = ?, no_of_children = ?, ages_of_children = ?,
+           no_of_luggages = ?, notes = ?, tour_thoughts = ?
+       WHERE booking_id = ?`,
+      [
+        customerName, customerPhone,
+        resolvedCategoryId, startDate, endDate,
+        startLocation || null, endLocation || null,
+        totalDays || 1, daysRequired || 1,
+        noOfAdults || 1, noOfChildren || 0, agesOfChildren || null,
+        luggageStr, fullNotes || null, tourThoughts || null,
+        id
+      ]
+    );
+
+    // Refresh custom selections if it's a custom booking
+    if (isCustomBooking) {
+      await conn.execute('DELETE FROM booking_custom_cities WHERE booking_id = ?', [id]);
+      await conn.execute('DELETE FROM booking_custom_activities WHERE booking_id = ?', [id]);
+
+      if (selectedCityList.length > 0) {
+        for (let i = 0; i < selectedCityList.length; i++) {
+          const cityName = selectedCityList[i];
+          const [places] = await conn.execute('SELECT place_id FROM place WHERE place_name = ? LIMIT 1', [cityName]);
+          const placeId = places.length > 0 ? places[0].place_id : null;
+
+          await conn.execute(
+            'INSERT INTO booking_custom_cities (booking_id, place_id, custom_name, sequence_order) VALUES (?, ?, ?, ?)',
+            [id, placeId, placeId ? null : cityName, i]
+          );
+        }
+      }
+      if (activityList.length > 0) {
+        for (const actName of activityList) {
+          const [activities] = await conn.execute('SELECT activity_id FROM activity WHERE activity_name = ? LIMIT 1', [actName]);
+          let actId = activities.length > 0 ? activities[0].activity_id : null;
+
+          if (!actId) {
+            const [newAct] = await conn.execute('INSERT INTO activity (activity_name) VALUES (?)', [actName]);
+            actId = newAct.insertId;
+          }
+
+          await conn.execute(
+            'INSERT INTO booking_custom_activities (booking_id, activity_id) VALUES (?, ?)',
+            [id, actId]
+          );
+        }
+      }
+    }
+
+    await conn.commit();
+    res.json({ message: 'Booking updated successfully.' });
+  } catch (err) {
+    if (conn) await conn.rollback();
+    console.error('updateBooking error:', err);
+    res.status(500).json({ message: 'Failed to update booking.' });
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
 module.exports = {
   createP2PBooking,
   getMyBookings,
   getAllBookings,
   setQuote,
   updateStatus,
+  updateBooking,
 };

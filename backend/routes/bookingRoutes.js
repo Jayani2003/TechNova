@@ -6,6 +6,7 @@ const {
   getAllBookings,
   setQuote,
   updateStatus,
+  updateBooking,
 } = require('../controllers/bookingController');
 const { verifyToken } = require('../middleware/authMiddleware');
 const { adminOnly } = require('../middleware/adminMiddleware');
@@ -13,6 +14,7 @@ const { adminOnly } = require('../middleware/adminMiddleware');
 // ── Customer routes (require login) ──────────────────────────────────────────
 router.post('/p2p', verifyToken, createP2PBooking);
 router.get('/my', verifyToken, getMyBookings);
+router.put('/:id', verifyToken, updateBooking);
 
 // ── Admin routes ──────────────────────────────────────────────────────────────
 router.get('/', verifyToken, adminOnly, getAllBookings);

@@ -6,6 +6,9 @@ export const submitP2PBooking = (data) => api.post('/bookings/p2p', data);
 // Submit a Customized tour booking
 export const submitCustomBooking = (data) => api.post('/bookings/p2p', data);
 
+// Update an existing booking
+export const updateBooking = (id, data) => api.put(`/bookings/${id}`, data);
+
 const buildPackageBookingPayload = (data) => ({
   tourType: 'PACKAGE',
   packageId: data.packageId,

@@ -34,7 +34,7 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
   const accentColor = TYPE_COLORS[pkg.type] || '#00b0a5';
   const destinations = Array.isArray(pkg.destinations) ? pkg.destinations : [];
   const highlights = Array.isArray(pkg.highlights) ? pkg.highlights : [];
-  const topDests = destinations.slice(0, 3);
+  const topDests = destinations.slice(0, 2);
 
   return (
     <>
@@ -225,14 +225,17 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
           </div>
           <div className="pkc-days-badge">📅 {pkg.days} Days</div>
 
-          <div className="pkc-dest-chips">
+         
+          <button onClick={() => onShowMore(pkg)}>
+         <div className="pkc-dest-chips">
             {topDests.map(d => (
               <span key={d.name} className="pkc-dest-chip">{d.name}</span>
             ))}
-            {destinations.length > 3 && (
-              <span className="pkc-dest-more">+{destinations.length - 3} more</span>
+            {(pkg.hidden_dest_count > 0 || destinations.length > 2) && (
+              <span className="pkc-dest-more">+{pkg.hidden_dest_count ?? Math.max(0, destinations.length - 2)} more</span>
             )}
           </div>
+          </button>
         </div>
 
         {/* Content */}

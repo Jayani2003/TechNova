@@ -11,8 +11,34 @@ const MyReviews = ({ isEmbedded = false }) => {
   const { getCustomerBookings, bookings } = useBookings();
   const [myReviews, setMyReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedComments, setExpandedComments] = useState(new Set());
+  const [expandedImages, setExpandedImages] = useState(new Set());
 
   const userEmail = user?.email;
+
+  const toggleCommentExpand = (reviewId) => {
+    setExpandedComments(prev => {
+      const next = new Set(prev);
+      if (next.has(reviewId)) {
+        next.delete(reviewId);
+      } else {
+        next.add(reviewId);
+      }
+      return next;
+    });
+  };
+
+  const toggleImagesExpand = (reviewId) => {
+    setExpandedImages(prev => {
+      const next = new Set(prev);
+      if (next.has(reviewId)) {
+        next.delete(reviewId);
+      } else {
+        next.add(reviewId);
+      }
+      return next;
+    });
+  };
 
   // Refresh reviews function
   const refreshReviews = useCallback(async () => {
@@ -251,6 +277,12 @@ const MyReviews = ({ isEmbedded = false }) => {
           word-break: break-word;
         }
 
+        .mr-review-comment-container {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
         .mr-review-comment {
           font-size: 13px; font-weight: 300;
           color: #4a7070; line-height: 1.6;
@@ -259,10 +291,26 @@ const MyReviews = ({ isEmbedded = false }) => {
           white-space: normal;
         }
 
+        .mr-see-more-btn {
+          align-self: flex-start;
+          background: none;
+          border: none;
+          color: #00b0a5;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          padding: 0;
+          transition: color 0.2s ease;
+        }
+        .mr-see-more-btn:hover {
+          color: #009e94;
+        }
+
         .mr-review-images {
           display: flex;
           gap: 8px;
           flex-wrap: wrap;
+          align-items: center;
         }
         .mr-review-image {
           width: 72px;
@@ -270,6 +318,27 @@ const MyReviews = ({ isEmbedded = false }) => {
           object-fit: cover;
           border-radius: 10px;
           border: 1px solid rgba(0,176,165,0.12);
+        }
+
+        .mr-image-expand-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 72px;
+          height: 56px;
+          border-radius: 10px;
+          border: 1.5px solid rgba(0,176,165,0.25);
+          background: rgba(0,176,165,0.08);
+          color: #00b0a5;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .mr-image-expand-btn:hover {
+          background: rgba(0,176,165,0.15);
+          border-color: #00b0a5;
+          transform: scale(1.05);
         }
 
         .mr-empty {
@@ -433,22 +502,50 @@ const MyReviews = ({ isEmbedded = false }) => {
                       )}
                     </div>
 
-                    <div className="mr-review-comment">{review.comment}</div>
+                    <div className="mr-review-comment-container">
+                      <div className="mr-review-comment">
+                        {expandedComments.has(review.id)
+                          ? review.comment
+                          : review.comment.length > 150
+                          ? review.comment.substring(0, 150) + '...'
+                          : review.comment}
+                      </div>
+                      {review.comment.length > 150 && (
+                        <button
+                          className="mr-see-more-btn"
+                          onClick={() => toggleCommentExpand(review.id)}
+                        >
+                          {expandedComments.has(review.id) ? '← See Less' : 'See More →'}
+                        </button>
+                      )}
+                    </div>
 
                     {review.images?.length > 0 && (
-                      <div className="mr-review-images">
-                        {review.images.slice(0, 4).map((image, imageIndex) => (
-                          <img
-                            key={`${review.id}-${imageIndex}`}
-                            src={image}
-                            alt={`Review image ${imageIndex + 1}`}
-                            className="mr-review-image"
-                          />
-                        ))}
-                        {review.images.length > 4 && (
-                          <div style={{ fontSize: '11px', color: '#7a9a9a', alignSelf: 'center' }}>
-                            +{review.images.length - 4} more
-                          </div>
+                      <div className={`mr-review-images ${expandedImages.has(review.id) ? 'expanded' : ''}`}>
+                        {expandedImages.has(review.id)
+                          ? review.images.map((image, imageIndex) => (
+                              <img
+                                key={`${review.id}-${imageIndex}`}
+                                src={image}
+                                alt={`Review image ${imageIndex + 1}`}
+                                className="mr-review-image"
+                              />
+                            ))
+                          : review.images.slice(0, 4).map((image, imageIndex) => (
+                              <img
+                                key={`${review.id}-${imageIndex}`}
+                                src={image}
+                                alt={`Review image ${imageIndex + 1}`}
+                                className="mr-review-image"
+                              />
+                            ))}
+                        {review.images.length > 4 && !expandedImages.has(review.id) && (
+                          <button
+                            className="mr-image-expand-btn"
+                            onClick={() => toggleImagesExpand(review.id)}
+                          >
+                            +{review.images.length - 4}
+                          </button>
                         )}
                       </div>
                     )}

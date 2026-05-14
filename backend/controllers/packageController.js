@@ -317,12 +317,21 @@ exports.listAdminPackages = async (req, res) => {
         });
         return acc;
       }, {});
+      // also compute counts for hidden destination preview counts
+      var placeCountByPkgAdmin = places.reduce((acc, p) => {
+        acc[p.package_id] = (acc[p.package_id] || 0) + 1;
+        return acc;
+      }, {});
     }
 
     res.json(packages.map(r => {
       const decoded = schemaMeta.hasType
         ? { type: toPackageTypeLabel(r.type), description: r.description }
         : decodeDescriptionWithTypeMeta(r.description);
+
+      const total = (placeCountByPkgAdmin && placeCountByPkgAdmin[r.package_id]) || 0;
+      const shown = (destinationsByPackage[r.package_id] || []).length;
+      const hidden = Math.max(0, total - Math.min(2, shown));
 
       return ({
       id: r.package_id,
@@ -333,6 +342,7 @@ exports.listAdminPackages = async (req, res) => {
       image_url: r.image_url,
       destinations: destinationsByPackage[r.package_id] || [],
       places_count: (destinationsByPackage[r.package_id] || []).length,
+      hidden_dest_count: hidden,
       });
     }));
   } catch (error) {
@@ -355,9 +365,10 @@ exports.listPublicPackages = async (req, res) => {
       FROM package
       ORDER BY package_id DESC
     `);
-    // For performance, load up to first 3 destinations per package
+    // For performance, load up to first 2 destinations per package and include hidden count
     const pkgIds = packages.map(p => p.package_id);
     let placesByPkg = {};
+    let placeCountByPkg = {};
     if (pkgIds.length > 0) {
       const [places] = await db.execute(
         `SELECT pp.package_id, pl.place_name, pl.image_url, pp.day_number
@@ -366,9 +377,13 @@ exports.listPublicPackages = async (req, res) => {
          WHERE pp.package_id IN (${pkgIds.join(',')})
          ORDER BY pp.package_id, pp.day_number ASC`
       );
+      placeCountByPkg = places.reduce((acc, p) => {
+        acc[p.package_id] = (acc[p.package_id] || 0) + 1;
+        return acc;
+      }, {});
       placesByPkg = places.reduce((acc, p) => {
         acc[p.package_id] = acc[p.package_id] || [];
-        if (acc[p.package_id].length < 3) acc[p.package_id].push({ name: p.place_name, image: p.image_url, dayNumber: p.day_number });
+        if (acc[p.package_id].length < 2) acc[p.package_id].push({ name: p.place_name, image: p.image_url, dayNumber: p.day_number });
         return acc;
       }, {});
     }
@@ -377,6 +392,10 @@ exports.listPublicPackages = async (req, res) => {
       const decoded = schemaMeta.hasType
         ? { type: toPackageTypeLabel(p.type), description: p.description }
         : decodeDescriptionWithTypeMeta(p.description);
+
+      const shown = (placesByPkg[p.package_id] || []).length;
+      const total = placeCountByPkg[p.package_id] || 0;
+      const hidden = Math.max(0, total - shown);
 
       return ({
       id: p.package_id,
@@ -387,6 +406,7 @@ exports.listPublicPackages = async (req, res) => {
       image: p.image_url,
       highlights: [],
       destinations: placesByPkg[p.package_id] || [],
+      hidden_dest_count: hidden,
       });
     });
     res.json(result);

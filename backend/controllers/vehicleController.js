@@ -15,7 +15,7 @@ const STATUS_LABELS = {
   AVAILABLE: 'Available',
   BOOKED: 'Booked',
   MAINTENANCE: 'Maintenance',
-  RETIRED: 'Retired',
+  RETIRED: 'Retired', 
 };
 
 const normalizeStatus = (status) => {

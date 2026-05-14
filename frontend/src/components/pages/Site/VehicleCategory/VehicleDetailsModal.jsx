@@ -1,7 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import FeatureBadge from './FeatureBadge';
 
 const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [isOpen]);
+
     if (!isOpen || !vehicle) return null;
 
     const isAvailable = vehicle.status === 'Available';
@@ -10,10 +21,20 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
         : [];
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 md:p-8 overflow-auto">
-            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 ring-1 ring-black/5 w-full max-w-3xl my-8 overflow-hidden">
+        <>
+            <style>{`
+                .modal-hide-scrollbar {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+                .modal-hide-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+            `}</style>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-hidden p-6 md:p-8 flex items-center justify-center">
+                <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 ring-1 ring-black/5 w-full max-w-3xl max-h-[calc(100vh-3rem)] overflow-y-auto modal-hide-scrollbar">
                 {/* Image Header */}
-                <div className="relative h-56 md:h-72 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden">
+                <div className="relative h-56 md:h-72 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden rounded-t-2xl">
                     {vehicle.image_url ? (
                         <div className="absolute inset-0 flex items-center justify-center p-4 md:p-6">
                             <img
@@ -201,7 +222,8 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
+        </>
     );
 };
 

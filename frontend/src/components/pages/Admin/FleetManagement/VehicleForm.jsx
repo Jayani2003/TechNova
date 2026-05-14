@@ -15,7 +15,6 @@ const initialFormData = {
     luggage_capacity: 2,
     price_per_day: '',
     status: 'Available',
-    image_url: '',
     mileage: '',
     engine_capacity: '',
     features: '',
@@ -24,6 +23,8 @@ const initialFormData = {
 const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }) => {
     const [formData, setFormData] = useState(initialFormData);
     const [errors, setErrors] = useState({});
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState('');
 
     const isEditing = !!vehicle;
 
@@ -44,13 +45,16 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                 luggage_capacity: vehicle.luggage_capacity || 2,
                 price_per_day: vehicle.price_per_day || '',
                 status: vehicle.status || 'Available',
-                image_url: vehicle.image_url || '',
                 mileage: vehicle.mileage || '',
                 engine_capacity: vehicle.engine_capacity || '',
                 features: vehicle.features || '',
             });
+            setImageFile(null);
+            setImagePreview(vehicle.image_url || '');
         } else {
             setFormData(initialFormData);
+            setImageFile(null);
+            setImagePreview('');
         }
         setErrors({});
     }, [vehicle, isOpen]);
@@ -65,6 +69,18 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
         // Clear error when user types
         if (errors[name]) {
             setErrors((prev) => ({ ...prev, [name]: '' }));
+        }
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files?.[0] || null;
+        setImageFile(file);
+
+        if (file) {
+            const previewUrl = URL.createObjectURL(file);
+            setImagePreview(previewUrl);
+        } else {
+            setImagePreview(vehicle?.image_url || '');
         }
     };
 
@@ -85,7 +101,7 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validate()) {
-            onSubmit(formData);
+            onSubmit({ ...formData, imageFile });
         }
     };
 
@@ -408,17 +424,21 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                             Additional Information
                         </h3>
                         <div className="space-y-4">
-                            {/* Image URL */}
+                            {/* Image Upload */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Image</label>
                                 <input
-                                    type="text"
-                                    name="image_url"
-                                    value={formData.image_url}
-                                    onChange={handleChange}
-                                    placeholder="https://example.com/image.jpg"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
+                                <p className="text-xs text-gray-500 mt-1">Choose an image from your PC. It will be uploaded to Cloudinary.</p>
+                                {imagePreview && (
+                                    <div className="mt-3 rounded-xl border border-gray-200 overflow-hidden bg-gray-50">
+                                        <img src={imagePreview} alt="Vehicle preview" className="h-52 w-full object-cover" />
+                                    </div>
+                                )}
                             </div>
 
                             {/* Features */}

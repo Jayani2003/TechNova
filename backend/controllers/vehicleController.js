@@ -132,6 +132,8 @@ exports.getCategoryById = async (req, res) => {
 exports.createCategory = async (req, res) => {
   try {
     const { name, description = '', image_url = null } = req.body;
+    const uploadedImageUrl = req.file?.path || req.file?.url || req.file?.secure_url || req.file?.location || req.file?.filename || null;
+    const resolvedImageUrl = uploadedImageUrl || image_url || null;
 
     if (!name) {
       return res.status(400).json({ success: false, message: 'Category name is required.' });
@@ -139,7 +141,7 @@ exports.createCategory = async (req, res) => {
 
     const [result] = await db.execute(
       'INSERT INTO vehicle_category (category_name, description, image_url) VALUES (?, ?, ?)',
-      [name, description || null, image_url]
+      [name, description || null, resolvedImageUrl]
     );
 
     res.status(201).json({
@@ -148,7 +150,7 @@ exports.createCategory = async (req, res) => {
         id: result.insertId,
         name,
         description: description || '',
-        image_url,
+        image_url: resolvedImageUrl,
         vehicle_count: 0,
       },
     });
@@ -160,15 +162,27 @@ exports.createCategory = async (req, res) => {
 
 exports.updateCategory = async (req, res) => {
   try {
-    const { name, description = '', image_url = null } = req.body;
+    const { name, description = '', image_url } = req.body;
+    const uploadedImageUrl = req.file?.path || req.file?.url || req.file?.secure_url || req.file?.location || req.file?.filename || null;
 
     if (!name) {
       return res.status(400).json({ success: false, message: 'Category name is required.' });
     }
 
+    const [existingRows] = await db.execute(
+      'SELECT image_url FROM vehicle_category WHERE category_id = ? LIMIT 1',
+      [req.params.id]
+    );
+
+    if (!existingRows.length) {
+      return res.status(404).json({ success: false, message: 'Category not found.' });
+    }
+
+    const resolvedImageUrl = uploadedImageUrl || image_url || existingRows[0].image_url || null;
+
     const [result] = await db.execute(
       'UPDATE vehicle_category SET category_name = ?, description = ?, image_url = ? WHERE category_id = ?',
-      [name, description || null, image_url, req.params.id]
+      [name, description || null, resolvedImageUrl, req.params.id]
     );
 
     if (result.affectedRows === 0) {
@@ -346,6 +360,7 @@ exports.createVehicle = async (req, res) => {
       engine_capacity,
       features,
     } = req.body;
+    const uploadedImageUrl = req.file?.path || req.file?.url || req.file?.secure_url || req.file?.location || req.file?.filename || null;
 
     const resolvedCategoryId = safeNumber(category_id);
     if (!resolvedCategoryId) {
@@ -396,7 +411,7 @@ exports.createVehicle = async (req, res) => {
         0,
         safeNumber(luggage_capacity) || 0,
         safeNumber(price_per_day),
-        image_url || null,
+        uploadedImageUrl || image_url || null,
         normalizeStatus(status),
         brand || null,
         model || null,
@@ -476,10 +491,22 @@ exports.updateVehicle = async (req, res) => {
       engine_capacity,
       features,
     } = req.body;
+    const uploadedImageUrl = req.file?.path || req.file?.url || req.file?.secure_url || req.file?.location || req.file?.filename || null;
 
     const resolvedCategoryId = safeNumber(category_id);
     const vehicleLabel = vehicle_name || name || '';
     const plateNumber = license_plate || vehicle_number || '';
+
+    const [existingRows] = await db.execute(
+      'SELECT image_url FROM vehicle WHERE vehicle_id = ? LIMIT 1',
+      [req.params.id]
+    );
+
+    if (!existingRows.length) {
+      return res.status(404).json({ success: false, message: 'Vehicle not found.' });
+    }
+
+    const resolvedImageUrl = uploadedImageUrl || image_url || existingRows[0].image_url || null;
 
     const [result] = await db.execute(
       `UPDATE vehicle SET
@@ -511,7 +538,7 @@ exports.updateVehicle = async (req, res) => {
         safeNumber(seats || adult_seats),
         safeNumber(luggage_capacity),
         safeNumber(price_per_day),
-        image_url || null,
+        resolvedImageUrl,
         normalizeStatus(status),
         brand || null,
         model || null,

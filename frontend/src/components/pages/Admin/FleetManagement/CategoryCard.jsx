@@ -13,6 +13,7 @@ const categoryIcons = {
 
 const CategoryCard = ({ category, isSelected, onClick }) => {
     const icon = categoryIcons[category.name] || '🚗';
+    const hasImage = Boolean(category.image_url);
 
     return (
         <div
@@ -24,7 +25,17 @@ const CategoryCard = ({ category, isSelected, onClick }) => {
             }`}
         >
             <div className="flex flex-col items-center text-center">
-                <div className="text-4xl mb-2">{icon}</div>
+                <div className="mb-2 h-14 w-14 overflow-hidden rounded-full border border-gray-200 bg-gray-50 flex items-center justify-center">
+                    {hasImage ? (
+                        <img
+                            src={category.image_url}
+                            alt={category.name}
+                            className="h-full w-full object-cover"
+                        />
+                    ) : (
+                        <span className="text-4xl">{icon}</span>
+                    )}
+                </div>
                 <h3
                     className={`font-semibold text-sm ${
                         isSelected ? 'text-blue-700' : 'text-gray-700'

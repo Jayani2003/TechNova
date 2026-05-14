@@ -43,6 +43,14 @@ CREATE TABLE vehicle (
     price_per_day    DECIMAL(10,2),
     image_url        VARCHAR(255),
     vehicle_status   ENUM('AVAILABLE','BOOKED','MAINTENANCE') DEFAULT 'AVAILABLE',
+    brand            VARCHAR(100),
+    model            VARCHAR(100),
+    fuel_type        VARCHAR(50),
+    transmission     VARCHAR(50),
+    air_conditioning BOOLEAN DEFAULT FALSE,
+    mileage          INT,
+    engine_capacity  VARCHAR(50),
+    features         TEXT,
     FOREIGN KEY (category_id) REFERENCES vehicle_category(category_id)
 );
 

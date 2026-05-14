@@ -7,6 +7,7 @@ const locationRoutes = require('./routes/locationRoutes');
 const reviewRoutes  = require('./routes/reviewRoutes');
 const authRoutes    = require('./routes/authRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const vehicleRoutes = require('./routes/vehicleRoutes');
  
 
 
@@ -40,6 +41,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/gallery',  galleryRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/reviews',  reviewRoutes);
+app.use('/api/vehicles', vehicleRoutes);
  
 // ── Global error handler ──────────────────────────────────────────────────────
 

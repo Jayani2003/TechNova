@@ -55,6 +55,8 @@ const createP2PBooking = async (req, res) => {
     packageName,
     startLocation,
     endLocation,
+    selectedCities,
+    activities,
     startDate,
     endDate,
     pickupTime,       // stored in notes prefix
@@ -73,13 +75,19 @@ const createP2PBooking = async (req, res) => {
   } = req.body;
 
   const isPackageBooking = normalizeTourType(tourType) === 'PACKAGE';
+  const isCustomBooking = normalizeTourType(tourType) === 'CUSTOM';
+  const selectedCityList = Array.isArray(selectedCities) ? selectedCities.filter(Boolean) : [];
+  const activityList = Array.isArray(activities) ? activities.filter(Boolean) : [];
 
   // Basic validation
   if (!startDate || !endDate || !categoryId || !customerName || !customerPhone)
     return res.status(400).json({ message: 'Missing required fields.' });
 
-  if (!isPackageBooking && (!startLocation || !endLocation))
+  if (!isPackageBooking && !isCustomBooking && (!startLocation || !endLocation))
     return res.status(400).json({ message: 'Missing required fields.' });
+
+  if (isCustomBooking && selectedCityList.length === 0)
+    return res.status(400).json({ message: 'Please select at least one city for a customized tour.' });
 
   if (isPackageBooking && !packageId)
     return res.status(400).json({ message: 'packageId is required for package bookings.' });
@@ -89,14 +97,20 @@ const createP2PBooking = async (req, res) => {
 
   // Build luggage string and full notes
   const luggageStr = `Small: ${smallLuggages || 0}, Large: ${largeLuggages || 0}${babySeatNeeded ? ', Baby seat needed' : ''}`;
-  const fullNotes  = [pickupTime ? `Pickup time: ${pickupTime}` : null, notes || null]
-    .filter(Boolean).join(' | ');
+  const cityNotes = selectedCityList.length ? `Cities: ${selectedCityList.join(', ')}` : null;
+  const activityNotes = activityList.length ? `Activities: ${activityList.join(', ')}` : null;
+  const fullNotes = [
+    pickupTime ? `Pickup time: ${pickupTime}` : null,
+    cityNotes,
+    activityNotes,
+    notes || null,
+  ].filter(Boolean).join(' | ');
 
   // Resolve string category name → integer FK
-let resolvedCategoryId = null;
-if (!isNaN(categoryId)) {
-  resolvedCategoryId = parseInt(categoryId);
-} else {
+  let resolvedCategoryId = null;
+  if (!isNaN(categoryId)) {
+    resolvedCategoryId = parseInt(categoryId);
+  } else {
   const [catRows] = await db.execute(
     'SELECT category_id FROM vehicle_category WHERE category_name = ? LIMIT 1',
     [categoryId]
@@ -130,12 +144,12 @@ if (!isNaN(categoryId)) {
         req.user.id,
         customerName,
         customerPhone,
-        isPackageBooking ? 'PACKAGE' : 'P2P',
+        isPackageBooking ? 'PACKAGE' : isCustomBooking ? 'CUSTOM' : 'P2P',
         resolvedCategoryId,
         startDate,
         endDate,
-        isPackageBooking ? null : startLocation,
-        isPackageBooking ? null : endLocation,
+        isPackageBooking || isCustomBooking ? null : startLocation,
+        isPackageBooking || isCustomBooking ? null : endLocation,
         totalDays  || 1,
         daysRequired || 1,
         noOfAdults || 1,

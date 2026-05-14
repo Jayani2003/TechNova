@@ -3,6 +3,9 @@ import { api } from '../config/api';
 // Submit a Point-to-Point booking
 export const submitP2PBooking = (data) => api.post('/bookings/p2p', data);
 
+// Submit a Customized tour booking
+export const submitCustomBooking = (data) => api.post('/bookings/p2p', data);
+
 const buildPackageBookingPayload = (data) => ({
   tourType: 'PACKAGE',
   packageId: data.packageId,

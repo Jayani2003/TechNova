@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -32,7 +32,7 @@ const STEPS = ["Your Plan", "Passengers", "More Info", "Review"];
 
 const PLACE_OPTIONS = [
   "Colombo", "Kandy", "Galle", "Ella", "Sigiriya", "Trincomalee", 
-  "Nuwara Eliya", "Mirissa", "Arugam Bay", "Hikkaduwa", "Polonnaruwa", "Anuradhapura",
+  "Nuwara Eliya", "Mirissa", "Arugam Bay", "Hikkaduwa", "Polonnaruwa", "Ratnapura", "Anuradhapura",
 ];
 
 const ACTIVITY_OPTIONS = [
@@ -62,7 +62,7 @@ const initialData = {
   tourThoughts:   "",
 };
 
-// ─── Guest Guard ──────────────────────────────────────────────────────────────
+
 const GuestGuard = ({ navigate }) => (
   <div className="min-h-screen bg-[#f7fffe] flex items-center justify-center px-4">
     <motion.div
@@ -95,7 +95,7 @@ const GuestGuard = ({ navigate }) => (
   </div>
 );
 
-// ─── Success Screen ───────────────────────────────────────────────────────────
+
 const SuccessScreen = ({ bookingRef, navigate }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.95 }}
@@ -167,7 +167,7 @@ const validateStep = (step, data) => {
       if (!data.customerName.trim()) return { valid: false, msg: "Please enter your full name." };
       if (!data.customerPhone.trim()) return { valid: false, msg: "Please enter your phone number." };
       
-      // Phone validation for +94
+
       if (data.customerPhone.startsWith("+94")) {
         const numberPart = data.customerPhone.split(" ")[1] || "";
         const cleanNumber = numberPart.replace(/\s/g, "");
@@ -181,6 +181,29 @@ const validateStep = (step, data) => {
     default:
       return { valid: false, msg: "Invalid step." };
   }
+};
+
+const RatnapuraDiscountBox = () => {
+  const couponRef = useMemo(() => `DISC_COUP_RAT ${Math.floor(1000 + Math.random() * 9000)}`, []);
+  
+  return (
+    <div className="bg-amber-50 rounded-3xl p-8 border border-amber-200 mt-6">
+       <div className="flex items-center gap-3 mb-4 text-amber-800">
+         <Zap className="w-5 h-5 fill-amber-500 text-amber-500" />
+         <h4 className="text-sm font-black uppercase tracking-widest">Special Offer Applied!</h4>
+       </div>
+       <p className="text-sm text-amber-900 font-medium leading-relaxed mb-4">
+         Since your journey includes <strong>Ratnapura</strong>, you are eligible for a <span className="text-lg font-black text-amber-600">20% DISCOUNT</span> on your final quoted price!
+       </p>
+       <div className="bg-white/60 border border-amber-200 rounded-2xl p-4 flex items-center justify-between">
+         <p className="text-[10px] text-amber-700 font-bold uppercase tracking-widest">Coupon Reference</p>
+         <p className="text-sm font-black text-amber-800 font-mono tracking-tighter">{couponRef}</p>
+       </div>
+       <p className="text-[10px] text-amber-500 font-medium italic mt-4">
+         Note: The exact discount will be applied by our team when we send your official price quote.
+       </p>
+    </div>
+  );
 };
 
 const CustomReviewStep = ({ data }) => {
@@ -260,7 +283,11 @@ const CustomReviewStep = ({ data }) => {
         </div>
       )}
 
-      <div className="bg-[#00b0a5]/5 rounded-3xl p-8 border border-[#00b0a5]/10">
+      {data.selectedCities.some(c => c.toLowerCase() === 'ratnapura') && (
+        <RatnapuraDiscountBox />
+      )}
+
+      <div className="bg-[#00b0a5]/5 rounded-3xl p-8 border border-[#00b0a5]/10 mt-6">
         <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4">Submission Notice</h4>
         <p className="text-sm text-slate-600 leading-relaxed">
           By clicking "Submit Booking", your request will be sent to our team for manual review. 
@@ -338,7 +365,7 @@ const Customized = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [data, setData] = useState(() => {
     if (editBooking) {
-      // Parse pickup time from notes
+      
       const pickupTimeMatch = editBooking.notes?.match(/Pickup time: ([^|]+)/);
       const thoughtsMatch = editBooking.notes?.match(/Traveler Thoughts: ([^|]+)/);
       const cleanNotes = editBooking.notes
@@ -348,7 +375,7 @@ const Customized = () => {
         ?.replace(/Cities: [^|]+\|?\s*/g, '')
         ?.trim();
 
-      // Extract small and large luggage from luggage string
+      
       const luggageMatch = editBooking.noOfLuggages?.match(/Small: (\d+), Large: (\d+)/);
 
       // Extract cities and activities from notes (legacy) or just use empty if not found

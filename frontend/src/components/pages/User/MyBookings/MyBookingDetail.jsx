@@ -226,8 +226,30 @@ const MyBookingDetail = ({ booking, onBack }) => {
         {/* Booking info */}
         <Section title="Booking Info">
           <DetailRow icon={Calendar}  label="Submitted On"        value={booking.bookingDate} />
-          <DetailRow icon={FileText}  label="Booking Reference"   value={`CBT-P2P-${booking.id}`} />
+          <DetailRow icon={FileText}  label="Booking Reference"   value={`CBT-${booking.tourType === "CUSTOM" ? "CUS" : booking.tourType === "PACKAGE" ? "PKG" : "P2P"}-${booking.id}`} />
         </Section>
+
+        {/* Special Offers (Coupon) */}
+        {booking.couponCode && (
+          <Section title="Special Offers" accent>
+            <div className="flex items-center gap-3 bg-amber-50 rounded-xl p-3 border border-amber-100">
+              <div className="w-8 h-8 bg-amber-200 rounded-full flex items-center justify-center flex-shrink-0">
+                <Zap className="w-4 h-4 text-amber-700 fill-amber-500" />
+              </div>
+              <div className="flex-1">
+                <p className="text-[10px] text-amber-600 font-bold uppercase tracking-widest leading-none mb-1">Active Discount applied</p>
+                <p className="text-sm font-black text-amber-800 font-mono tracking-tighter">{booking.couponCode}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] text-amber-400 font-bold uppercase">Discount</p>
+                <p className="text-sm font-black text-amber-600">20% OFF</p>
+              </div>
+            </div>
+            <p className="text-[10px] text-amber-500 font-medium italic mt-2 px-1">
+              * This discount will be applied to your final quoted price by the admin.
+            </p>
+          </Section>
+        )}
 
       </div>
     </motion.div>

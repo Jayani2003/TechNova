@@ -17,7 +17,7 @@ const inputClass =
 const BookingPassengersStep = ({ data, onChange }) => {
   return (
     <div className="space-y-6">
-      {/* ── Passengers ── */}
+      
       <div>
         <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
           <Users className="w-5 h-5 text-[#00b0a5]" /> Passengers
@@ -41,7 +41,7 @@ const BookingPassengersStep = ({ data, onChange }) => {
             />
           </div>
 
-          {/* Children */}
+        
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">
               Number of Children
@@ -62,7 +62,7 @@ const BookingPassengersStep = ({ data, onChange }) => {
             />
           </div>
 
-          {/* Ages of children — shown only if children > 0 */}
+          
           {data.noOfChildren > 0 && (
             <>
               <div className="sm:col-span-2">
@@ -81,7 +81,7 @@ const BookingPassengersStep = ({ data, onChange }) => {
                 </p>
               </div>
 
-              {/* Baby seat */}
+              
               <div className="sm:col-span-2">
                 <label className="flex items-center gap-3 cursor-pointer select-none group">
                   <div className="relative">
@@ -119,7 +119,7 @@ const BookingPassengersStep = ({ data, onChange }) => {
         </div>
       </div>
 
-      {/* ── Luggage ── */}
+      
       <div>
         <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
           <Briefcase className="w-5 h-5 text-[#00b0a5]" /> Luggage
@@ -160,7 +160,7 @@ const BookingPassengersStep = ({ data, onChange }) => {
         </div>
       </div>
 
-      {/* ── Vehicle Category ── */}
+      
       <div>
         <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
           <Car className="w-5 h-5 text-[#00b0a5]" /> Preferred Vehicle Category *

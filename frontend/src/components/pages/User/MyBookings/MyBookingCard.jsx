@@ -47,6 +47,11 @@ const MyBookingCard = ({ booking, onClick }) => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {booking.couponCode && (
+            <span className="bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter border border-amber-200">
+              Discounted
+            </span>
+          )}
           <span className={`text-xs px-3 py-1 rounded-full font-semibold ${STATUS_STYLES[booking.status] || "bg-slate-100 text-slate-600"}`}>
             {booking.status}
           </span>

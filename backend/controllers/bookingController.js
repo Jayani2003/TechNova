@@ -8,7 +8,7 @@ const formatDate = (val) => {
 
 const normalizeTourType = (value) => String(value || 'P2P').toUpperCase();
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+
 const mapBooking = (row) => ({
   id:             row.booking_id,
   customerId:     row.customer_id,
@@ -39,6 +39,7 @@ const mapBooking = (row) => ({
   agesOfChildren: row.ages_of_children,
   quotedPrice:    row.quoted_price ? parseFloat(row.quoted_price) : null,
   notes:          row.notes,
+  couponCode:     row.coupon_code,
   status:         row.booking_status,
   quotedAt:       row.quoted_at,
   confirmedAt:    row.confirmed_at,
@@ -47,7 +48,7 @@ const mapBooking = (row) => ({
   closedAt:       row.closed_at,
 });
 
-// ── POST /api/bookings/p2p ────────────────────────────────────────────────────
+
 const createP2PBooking = async (req, res) => {
   const {
     tourType,
@@ -59,7 +60,7 @@ const createP2PBooking = async (req, res) => {
     activities,
     startDate,
     endDate,
-    pickupTime,       // stored in notes prefix
+    pickupTime,       
     totalDays,
     daysRequired,
     categoryId,
@@ -96,7 +97,7 @@ const createP2PBooking = async (req, res) => {
   if (!req.user?.id)
     return res.status(401).json({ message: 'Not authenticated.' });
 
-  // Build luggage string and full notes
+  
   const luggageStr = `Small: ${smallLuggages || 0}, Large: ${largeLuggages || 0}${babySeatNeeded ? ', Baby seat needed' : ''}`;
   const cityNotes = selectedCityList.length ? `Cities: ${selectedCityList.join(', ')}` : null;
   const activityNotes = activityList.length ? `Activities: ${activityList.join(', ')}` : null;
@@ -109,43 +110,60 @@ const createP2PBooking = async (req, res) => {
     notes || null,
   ].filter(Boolean).join(' | ');
 
-  // Resolve string category name → integer FK
+  
   let resolvedCategoryId = null;
   if (!isNaN(categoryId)) {
     resolvedCategoryId = parseInt(categoryId);
   } else {
-  const [catRows] = await db.execute(
-    'SELECT category_id FROM vehicle_category WHERE category_name = ? LIMIT 1',
-    [categoryId]
-  );
-  if (catRows.length > 0) {
-    resolvedCategoryId = catRows[0].category_id;
-  } else {
-    const [ins] = await db.execute(
-      'INSERT INTO vehicle_category (category_name) VALUES (?)', [categoryId]
+    const [catRows] = await db.execute(
+      'SELECT category_id FROM vehicle_category WHERE category_name = ? LIMIT 1',
+      [categoryId]
     );
-    resolvedCategoryId = ins.insertId;
+    if (catRows.length > 0) {
+      resolvedCategoryId = catRows[0].category_id;
+    } else {
+      const [ins] = await db.execute(
+        'INSERT INTO vehicle_category (category_name) VALUES (?)', 
+        [categoryId]
+      );
+      resolvedCategoryId = ins.insertId;
+    }
   }
-}
 
   let conn;
   try {
     conn = await db.getConnection();
     await conn.beginTransaction();
 
+    // 1. Fetch user's name from database (Automated Identity)
+    const [userRows] = await conn.execute('SELECT name FROM user WHERE user_id = ?', [req.user.id]);
+    if (userRows.length === 0) {
+      await conn.rollback();
+      return res.status(404).json({ message: 'User not found.' });
+    }
+    const dbCustomerName = userRows[0].name;
+
+    // 2. Handle Ratnapura Discount
+    let couponCode = null;
+    const hasRatnapura = selectedCityList.some(c => c.toLowerCase() === 'ratnapura');
+    if (hasRatnapura) {
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      couponCode = `DISC_COUP_RAT ${randomNum}`;
+    }
+
     const [result] = await conn.execute(
-      `INSERT INTO booking
-        (user_id, customer_name, customer_phone,
-         tour_type, category_id,
+      `INSERT INTO booking 
+        (user_id, customer_name, customer_phone, 
+         tour_type, category_id, 
          start_date, end_date, start_location, end_location,
          total_days, days_required,
          no_of_adults, no_of_children, ages_of_children,
          no_of_luggages, notes, tour_thoughts,
-         booking_status, booking_date)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', CURDATE())`,
+         booking_status, booking_date, coupon_code)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', CURDATE(), ?)`,
       [
         req.user.id,
-        customerName,
+        dbCustomerName, // Using name from DB
         customerPhone,
         isPackageBooking ? 'PACKAGE' : isCustomBooking ? 'CUSTOM' : 'P2P',
         resolvedCategoryId,
@@ -161,6 +179,7 @@ const createP2PBooking = async (req, res) => {
         luggageStr,
         fullNotes || null,
         tourThoughts || null,
+        couponCode
       ]
     );
 
@@ -173,7 +192,7 @@ const createP2PBooking = async (req, res) => {
       );
     }
 
-    // ── Handle Custom Selections ──────────────────────────────────────────────
+  
     if (isCustomBooking) {
       if (selectedCityList.length > 0) {
         for (let i = 0; i < selectedCityList.length; i++) {
@@ -199,8 +218,7 @@ const createP2PBooking = async (req, res) => {
               [bookingId, activities[0].activity_id]
             );
           } else {
-            // If not found, we could either skip or insert into activity table first. 
-            // For now, let's try to insert into activity table to ensure the link works.
+          
             const [newAct] = await conn.execute('INSERT INTO activity (activity_name) VALUES (?)', [actName]);
             await conn.execute(
               'INSERT INTO booking_custom_activities (booking_id, activity_id) VALUES (?, ?)',
@@ -228,7 +246,7 @@ const createP2PBooking = async (req, res) => {
   }
 };
 
-// ── GET /api/bookings/my ──────────────────────────────────────────────────────
+
 const getMyBookings = async (req, res) => {
   try {
     const [rows] = await db.execute(
@@ -405,6 +423,13 @@ const updateBooking = async (req, res) => {
       resolvedCategoryId = ins.insertId;
     }
   }
+  // Handle Ratnapura Discount
+  let couponCode = null;
+  const hasRatnapura = selectedCityList.some(c => c.toLowerCase() === 'ratnapura');
+  if (hasRatnapura) {
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    couponCode = `DISC_COUP_RAT ${randomNum}`;
+  }
 
   let conn;
   try {
@@ -439,7 +464,8 @@ const updateBooking = async (req, res) => {
            start_location = ?, end_location = ?,
            total_days = ?, days_required = ?,
            no_of_adults = ?, no_of_children = ?, ages_of_children = ?,
-           no_of_luggages = ?, notes = ?, tour_thoughts = ?
+           no_of_luggages = ?, notes = ?, tour_thoughts = ?,
+           coupon_code = ?
        WHERE booking_id = ?`,
       [
         customerName, customerPhone,
@@ -448,6 +474,7 @@ const updateBooking = async (req, res) => {
         totalDays || 1, daysRequired || 1,
         noOfAdults || 1, noOfChildren || 0, agesOfChildren || null,
         luggageStr, fullNotes || null, tourThoughts || null,
+        couponCode,
         id
       ]
     );

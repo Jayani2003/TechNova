@@ -89,7 +89,7 @@ CREATE TABLE package_place (
 CREATE TABLE booking (
     booking_id     INT AUTO_INCREMENT PRIMARY KEY,
     user_id    INT NOT NULL,
-    customer_name  VARCHAR(100) NOT NULL, -- Mirrors user.name at booking time
+    customer_name  VARCHAR(100) NOT NULL,
     customer_phone VARCHAR(20) NOT NULL,
     tour_type      ENUM('P2P','PACKAGE','CUSTOM') NOT NULL,
     category_id    INT NOT NULL,
@@ -113,6 +113,7 @@ CREATE TABLE booking (
 
     -- pricing (admin sets, customer accepts or rejects)
     quoted_price     DECIMAL(10,2) NULL,
+    coupon_code      VARCHAR(50) NULL, -- Stores dynamic discount codes (e.g. DISC_COUP_RAT_XXXX)
 
     notes          TEXT,
     tour_thoughts  TEXT,
@@ -152,17 +153,21 @@ CREATE TABLE booking_package (
 );
 
 CREATE TABLE booking_custom_cities (
-    id         INT AUTO_INCREMENT PRIMARY KEY,
-    booking_id INT NOT NULL,
-    city_name  VARCHAR(100) NOT NULL,
-    FOREIGN KEY (booking_id) REFERENCES booking(booking_id) ON DELETE CASCADE
+    id             INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id     INT NOT NULL,
+    place_id       INT NULL,           -- Link to place table if match found
+    custom_name    VARCHAR(100) NULL,  -- Fallback for raw strings
+    sequence_order INT NOT NULL DEFAULT 0,
+    FOREIGN KEY (booking_id) REFERENCES booking(booking_id) ON DELETE CASCADE,
+    FOREIGN KEY (place_id)   REFERENCES place(place_id) ON DELETE SET NULL
 );
 
 CREATE TABLE booking_custom_activities (
     id            INT AUTO_INCREMENT PRIMARY KEY,
     booking_id    INT NOT NULL,
-    activity_name VARCHAR(100) NOT NULL,
-    FOREIGN KEY (booking_id) REFERENCES booking(booking_id) ON DELETE CASCADE
+    activity_id   INT NOT NULL,
+    FOREIGN KEY (booking_id)  REFERENCES booking(booking_id) ON DELETE CASCADE,
+    FOREIGN KEY (activity_id) REFERENCES activity(activity_id) ON DELETE CASCADE
 );
 
 CREATE TABLE payment (

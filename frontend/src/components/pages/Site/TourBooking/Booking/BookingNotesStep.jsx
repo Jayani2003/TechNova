@@ -52,7 +52,7 @@ const BookingNotesStep = ({ data, onChange }) => {
  
   return (
     <div className="space-y-6">
-      {/* ── Contact Details ── */}
+      
       <div>
         <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
           <Phone className="w-5 h-5 text-[#00b0a5]" /> Contact Details
@@ -62,7 +62,7 @@ const BookingNotesStep = ({ data, onChange }) => {
         </p>
  
         <div className="space-y-4">
-          {/* Full Name */}
+          
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">
               Full Name *
@@ -76,13 +76,13 @@ const BookingNotesStep = ({ data, onChange }) => {
             />
           </div>
  
-          {/* Phone with country code */}
+          
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">
               Phone Number *
             </label>
             <div className="flex gap-2">
-              {/* Country code dropdown */}
+              
               <div className="relative">
                 <select
                   value={getCountryCode()}
@@ -98,7 +98,7 @@ const BookingNotesStep = ({ data, onChange }) => {
                 <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               </div>
  
-              {/* Phone number */}
+          
               <input
                 type="tel"
                 value={getPhoneNumber()}
@@ -114,7 +114,7 @@ const BookingNotesStep = ({ data, onChange }) => {
         </div>
       </div>
  
-      {/* ── Additional Notes ── */}
+      
       <div>
         <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
           <FileText className="w-5 h-5 text-[#00b0a5]" /> Additional Notes
@@ -131,7 +131,7 @@ const BookingNotesStep = ({ data, onChange }) => {
         />
       </div>
 
-      {/* ── Included Services ── */}
+      
       <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
         <p className="text-sm font-bold text-slate-700 mb-3">✅ Included with every booking:</p>
         <div className="grid grid-cols-2 gap-2">

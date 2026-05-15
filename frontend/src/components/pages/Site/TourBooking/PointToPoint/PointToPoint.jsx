@@ -105,12 +105,18 @@ const SuccessScreen = ({ bookingRef, navigate }) => (
   </motion.div>
 );
  
+const validatePhone = (phone) => {
+  const number = phone ? phone.split(" ").slice(1).join("") : "";
+  const digits = number.replace(/\s/g, "");
+  return digits.length >= 7 && digits.length <= 15 && /^\d+$/.test(digits);
+};
+
 // ─── Step Validation ──────────────────────────────────────────────────────────
 const validateStep = (step, data) => {
   switch (step) {
     case 0: return data.startLocation.trim() && data.endLocation.trim() && data.startDate && data.endDate && data.pickupTime;
     case 1: return data.noOfAdults >= 1 && data.categoryId;
-    case 2: return data.customerName.trim() && data.customerPhone.trim();
+    case 2: return data.customerName.trim() && data.customerPhone.trim() && validatePhone(data.customerPhone);
     case 3: return true;
     default: return false;
   }
@@ -123,7 +129,8 @@ const PointToPoint = () => {
   const location = useLocation();
   const editBooking = location.state?.editBooking || null;
  
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep]         = useState(0);
+  const [maxReachedStep, setMaxReachedStep]   = useState(0);
   const [data, setData] = useState(() => {
     if (editBooking) {
       // Parse pickup time from notes
@@ -157,7 +164,13 @@ const PointToPoint = () => {
   if (!user) return <GuestGuard navigate={navigate} />;
  
   const handleChange = (field, value) => setData((prev) => ({ ...prev, [field]: value }));
-  const handleNext   = () => { if (validateStep(currentStep, data)) setCurrentStep((s) => s + 1); };
+  const handleNext   = () => {
+    if (validateStep(currentStep, data)) {
+      const next = currentStep + 1;
+      setCurrentStep(next);
+      setMaxReachedStep((prev) => Math.max(prev, next));
+    }
+  };
   const handleBack   = () => { setError(""); setCurrentStep((s) => s - 1); };
  
   // ── Submit to real backend ──────────────────────────────────────────────────
@@ -211,7 +224,12 @@ const PointToPoint = () => {
                 <SuccessScreen bookingRef={bookingRef} navigate={navigate} />
               ) : (
                 <>
-                  <BookingStepIndicator steps={STEPS} currentStep={currentStep} />
+                  <BookingStepIndicator
+                    steps={STEPS}
+                    currentStep={currentStep}
+                    maxReachedStep={maxReachedStep}
+                    onStepClick={(step) => { setError(""); setCurrentStep(step); }}
+                  />
  
                   {editBooking && (
                     <div className="mb-6 flex items-center justify-between bg-amber-50 border border-amber-100 rounded-2xl px-5 py-2.5">

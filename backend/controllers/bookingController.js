@@ -59,7 +59,7 @@ const createP2PBooking = async (req, res) => {
     activities,
     startDate,
     endDate,
-    pickupTime,       // stored in notes prefix
+    pickupTime,
     totalDays,
     daysRequired,
     categoryId,
@@ -109,7 +109,7 @@ const createP2PBooking = async (req, res) => {
     notes || null,
   ].filter(Boolean).join(' | ');
 
-  // Resolve string category name → integer FK
+  // string category name → integer FK
   let resolvedCategoryId = null;
   if (!isNaN(categoryId)) {
     resolvedCategoryId = parseInt(categoryId);

@@ -56,28 +56,56 @@ const BookingPassengersStep = ({ data, onChange }) => {
                 if (val === 0) {
                   onChange("agesOfChildren", "");
                   onChange("babySeatNeeded", false);
+                } else {
+                  // Resize ages array to match new count
+                  const current = data.agesOfChildren
+                    ? data.agesOfChildren.split(",").map(a => a.trim())
+                    : [];
+                  const resized = Array.from({ length: val }, (_, i) => current[i] || "");
+                  onChange("agesOfChildren", resized.join(","));
                 }
               }}
               className={inputClass}
             />
           </div>
 
-          {/* Ages of children — shown only if children > 0 */}
+          {/* Individual age boxes — one per child */}
           {data.noOfChildren > 0 && (
             <>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Ages of Children *
                 </label>
-                <input
-                  type="text"
-                  value={data.agesOfChildren}
-                  onChange={(e) => onChange("agesOfChildren", e.target.value)}
-                  placeholder='E.g. "3, 7, 12"'
-                  className={inputClass}
-                />
-                <p className="text-xs text-slate-400 mt-1">
-                  Enter each child's age separated by a comma.
+                <div className="flex flex-wrap gap-3">
+                  {Array.from({ length: data.noOfChildren }, (_, i) => {
+                    const ages = data.agesOfChildren
+                      ? data.agesOfChildren.split(",").map(a => a.trim())
+                      : [];
+                    return (
+                      <div key={i} className="flex flex-col items-center gap-1">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          Child {i + 1}
+                        </span>
+                        <input
+                          type="number"
+                          min="0"
+                          max="17"
+                          value={ages[i] || ""}
+                          onChange={(e) => {
+                            const updated = Array.from({ length: data.noOfChildren }, (_, j) =>
+                              j === i ? e.target.value : (ages[j] || "")
+                            );
+                            onChange("agesOfChildren", updated.join(","));
+                          }}
+                          placeholder="Age"
+                          className="w-16 text-center px-2 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-slate-400 mt-2">
+                  Enter the age of each child (0–17).
                 </p>
               </div>
 

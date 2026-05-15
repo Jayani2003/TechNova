@@ -61,9 +61,17 @@ const Package = () => {
       const res = await fetch(buildApiUrl(`/packages/${pkg.id}`));
       if (res.ok) {
         const data = await res.json();
+        // fetch recommendations
+        let recs = null;
+        try {
+          const r = await fetch(buildApiUrl(`/packages/${pkg.id}/recommendations`));
+          if (r.ok) recs = await r.json();
+        } catch (err) { /* ignore */ }
+
         setSelectedPkg({
           ...data,
           highlights: data.highlights || [],
+          recommendations: recs,
         });
         return;
       }
@@ -104,6 +112,7 @@ const Package = () => {
         <PackageDetailModal
           pkg={selectedPkg}
           onClose={() => setSelectedPkg(null)}
+          onShowMore={handleShowMore}
         />
       )}
 

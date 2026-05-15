@@ -1,17 +1,20 @@
 // ─────────────────────────────────────────────────────────────
-//  ADMIN PACKAGES CRUD STORE
-//  In production replace with API calls (REST/GraphQL).
-//  This module acts as the single source of truth shared
-//  between admin and user-side pages.
-//
-//  User-side PackagesPage reads from packagesData.js which
-//  in production points to the same API/database.
-//  Here we simulate that with a shared in-memory store +
-//  localStorage persistence for demo purposes.
+//  ADMIN PACKAGES CRUD STORE (API-backed)
+//  Uses backend endpoints as source of truth.
 // ─────────────────────────────────────────────────────────────
 
-import { packages as seedPackages, PACKAGE_TYPES, PACKAGE_DAYS } from '../../Site/TourBooking/Package/packagesData';
 import { buildApiUrl } from '../../../../config/api';
+
+const PACKAGE_TYPES = [
+  'Beach Side',
+  'Hill Country',
+  'Safari',
+  'Cultural Heritage',
+  'Adventure',
+  'Wellness & Ayurveda',
+];
+
+const PACKAGE_DAYS = [7, 14, 21, 28];
 
 const PACKAGES_CHANGED_EVENT = 'sl-admin-packages-changed';
 
@@ -22,10 +25,6 @@ const notify = () => _subscribers.forEach(fn => fn([..._packages]));
 
 const emitPackagesChanged = () => {
   if (typeof window !== 'undefined') window.dispatchEvent(new Event(PACKAGES_CHANGED_EVENT));
-};
-
-const savePackages = (_pkgs) => {
-  // persistence removed in favor of backend API; keep a no-op for compatibility
 };
 
 const reloadFromBackend = async () => {
@@ -70,10 +69,10 @@ export const packageStore = {
             destinations: Array.isArray(p.destinations) ? p.destinations : [],
           }));
         } else {
-          _packages = [...seedPackages];
+          _packages = [];
         }
       } catch (e) {
-        _packages = [...seedPackages];
+        _packages = [];
       }
       fn([..._packages]);
     })();
@@ -213,11 +212,8 @@ export const packageStore = {
   },
 
   // ── RESET to seed data (dev utility) ────────────────────
-  reset: () => {
-    _packages = [...seedPackages];
-    savePackages(_packages);
-    notify();
-    emitPackagesChanged();
+  reset: async () => {
+    await reloadFromBackend();
   },
 };
 

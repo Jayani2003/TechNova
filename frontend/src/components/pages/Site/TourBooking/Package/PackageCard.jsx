@@ -19,7 +19,7 @@ const TYPE_ICONS = {
   'Wellness & Ayurveda': '🌿',
 };
 
-const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
+const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDestinationsAction = true }) => {
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -225,17 +225,28 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
           </div>
           <div className="pkc-days-badge">📅 {pkg.days} Days</div>
 
-         
-          <button onClick={() => onShowMore(pkg)}>
-         <div className="pkc-dest-chips">
-            {topDests.map(d => (
-              <span key={d.name} className="pkc-dest-chip">{d.name}</span>
-            ))}
-            {(pkg.hidden_dest_count > 0 || destinations.length > 2) && (
-              <span className="pkc-dest-more">+{pkg.hidden_dest_count ?? Math.max(0, destinations.length - 2)} more</span>
-            )}
-          </div>
-          </button>
+
+          {showDestinationsAction ? (
+            <button type="button" onClick={() => onShowMore?.(pkg)}>
+              <div className="pkc-dest-chips">
+                {topDests.map(d => (
+                  <span key={d.name} className="pkc-dest-chip">{d.name}</span>
+                ))}
+                {(pkg.hidden_dest_count > 0 || destinations.length > 2) && (
+                  <span className="pkc-dest-more">+{pkg.hidden_dest_count ?? Math.max(0, destinations.length - 2)} more</span>
+                )}
+              </div>
+            </button>
+          ) : (
+            <div className="pkc-dest-chips">
+              {topDests.map(d => (
+                <span key={d.name} className="pkc-dest-chip">{d.name}</span>
+              ))}
+              {(pkg.hidden_dest_count > 0 || destinations.length > 2) && (
+                <span className="pkc-dest-more">+{pkg.hidden_dest_count ?? Math.max(0, destinations.length - 2)} more</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Content */}
@@ -252,13 +263,15 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
           <div className="pkc-rule" />
 
           <div className="pkc-actions">
-            <Link to={`/tour-booking/package/book?packageId=${pkg.id}&packageTitle=${encodeURIComponent(pkg.title || "Package Tour")}&packageDays=${encodeURIComponent(pkg.days || "")}`} className="pkc-book-btn">
-              Book Now
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </Link>
-            <button className="pkc-more-btn" onClick={() => onShowMore(pkg)}>
+            {showBookButton && (
+              <Link to={`/tour-booking/package/book?packageId=${pkg.id}&packageTitle=${encodeURIComponent(pkg.title || "Package Tour")}&packageDays=${encodeURIComponent(pkg.days || "")}`} className="pkc-book-btn">
+                Book Now
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+            )}
+            <button type="button" className="pkc-more-btn" onClick={() => onShowMore?.(pkg)} style={showBookButton ? undefined : { width: '100%' }}>
               Details
             </button>
           </div>

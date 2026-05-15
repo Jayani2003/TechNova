@@ -527,6 +527,70 @@ exports.getPackageDetail = async (req, res) => {
   }
 };
 
+// GET /api/packages/:id/recommendations
+exports.getRecommendations = async (req, res) => {
+  const { id } = req.params;
+  const limit = Number(req.query.limit) || 6;
+  try {
+    const schemaMeta = await getPackageSchemaMeta();
+    // load base package
+    const [[pkgRow]] = await db.execute(`SELECT package_id, title, ${schemaMeta.hasType ? 'type' : 'NULL AS type'}, ${schemaMeta.hasDays ? 'days' : 'NULL AS days'} FROM package WHERE package_id = ?`, [id]);
+    if (!pkgRow) return res.status(404).json({ error: 'Package not found.' });
+
+    const pkgType = schemaMeta.hasType ? pkgRow.type : null;
+    const pkgDays = schemaMeta.hasDays ? pkgRow.days : null;
+
+    // Helper queries
+    const similarByType = pkgType ? await db.execute(
+      `SELECT package_id AS id, title, ${schemaMeta.hasType ? 'type' : 'NULL AS type'}, ${schemaMeta.hasDays ? 'days' : 'NULL AS days'}, image_url AS image FROM package WHERE package_id != ? AND type = ? ORDER BY package_id DESC LIMIT ${Number(limit)}`,
+      [id, pkgType]
+    ) : [[],];
+
+    const similarByDays = pkgDays ? await db.execute(
+      `SELECT package_id AS id, title, ${schemaMeta.hasType ? 'type' : 'NULL AS type'}, ${schemaMeta.hasDays ? 'days' : 'NULL AS days'}, image_url AS image FROM package WHERE package_id != ? AND days = ? ORDER BY package_id DESC LIMIT ${Number(limit)}`,
+      [id, pkgDays]
+    ) : [[],];
+
+    // Top rated packages (average rating via reviews -> booking_package)
+    const [topRated] = await db.execute(
+      `SELECT bp.package_id AS id, p.title, p.image_url AS image, AVG(r.rating) AS avg_rating, COUNT(r.review_id) AS reviews_count
+       FROM review r
+       INNER JOIN booking_package bp ON bp.booking_id = r.booking_id
+       INNER JOIN package p ON p.package_id = bp.package_id
+       WHERE bp.package_id != ?
+       GROUP BY bp.package_id
+       ORDER BY avg_rating DESC, reviews_count DESC
+       LIMIT ${Number(limit)}`,
+      [id]
+    );
+
+    // Most booked packages
+    const [mostBooked] = await db.execute(
+      `SELECT bp.package_id AS id, p.title, p.image_url AS image, COUNT(bp.booking_id) AS bookings_count
+       FROM booking_package bp
+       INNER JOIN package p ON p.package_id = bp.package_id
+       WHERE bp.package_id != ?
+       GROUP BY bp.package_id
+       ORDER BY bookings_count DESC
+       LIMIT ${Number(limit)}`,
+      [id]
+    );
+
+    // Normalize results
+    const normalize = (rows) => (Array.isArray(rows) ? rows.map(r => ({ id: r.id, title: r.title, type: r.type || null, days: r.days || null, image: r.image || r.image_url || null, avg_rating: r.avg_rating != null ? Number(r.avg_rating) : undefined, reviews_count: r.reviews_count != null ? Number(r.reviews_count) : undefined, bookings_count: r.bookings_count != null ? Number(r.bookings_count) : undefined })) : []);
+
+    res.json({
+      similarByType: normalize(similarByType[0] || similarByType),
+      similarByDays: normalize(similarByDays[0] || similarByDays),
+      topRated: normalize(topRated[0] || topRated),
+      mostBooked: normalize(mostBooked[0] || mostBooked),
+    });
+  } catch (error) {
+    console.error('getRecommendations failed:', error);
+    res.status(500).json({ error: 'Failed to compute recommendations.' });
+  }
+};
+
 exports.updatePackage = async (req, res) => {
   const { id } = req.params;
   try {

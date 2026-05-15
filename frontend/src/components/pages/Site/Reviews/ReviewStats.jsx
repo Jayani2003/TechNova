@@ -1,13 +1,27 @@
-import { getAggregateStats } from './reviewsData';
-
 const StarIcon = ({ filled }) => (
   <svg width="18" height="18" viewBox="0 0 18 18" fill={filled ? '#00b0a5' : 'none'} stroke="#00b0a5" strokeWidth="1.5">
     <path d="M9 1.5l2.1 4.3 4.7.7-3.4 3.3.8 4.7L9 12.1l-4.2 2.4.8-4.7-3.4-3.3 4.7-.7L9 1.5z"/>
   </svg>
 );
 
-const ReviewStats = ({ reviews }) => {
-  const { avg, total, breakdown } = getAggregateStats(reviews);
+const getAggregateStats = (reviews = []) => {
+  if (!Array.isArray(reviews) || !reviews.length) return { avg: 0, total: 0, breakdown: {} };
+  const total = reviews.length;
+  const sum = reviews.reduce((acc, r) => acc + Number(r.stars || 0), 0);
+  const avg = (sum / total).toFixed(1);
+  const breakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  reviews.forEach((r) => {
+    const key = Number(r.stars || 0);
+    if (breakdown[key] != null) breakdown[key] += 1;
+  });
+  return { avg, total, breakdown };
+};
+
+const ReviewStats = ({ reviews, stats }) => {
+  const fallback = getAggregateStats(reviews);
+  const avg = stats?.avg ?? fallback.avg;
+  const total = stats?.total ?? fallback.total;
+  const breakdown = stats?.breakdown ?? fallback.breakdown;
 
   return (
     <>

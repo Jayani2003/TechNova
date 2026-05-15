@@ -1,5 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { buildApiUrl } from '../../../../../config/api';
+import PackageCard from './PackageCard';
 
 const TYPE_ICONS = {
   'Beach Side':          '🏖️',
@@ -10,8 +13,43 @@ const TYPE_ICONS = {
   'Wellness & Ayurveda': '🌿',
 };
 
-const PackageDetailModal = ({ pkg, onClose }) => {
+const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
   if (!pkg) return null;
+  const [recommendations, setRecommendations] = useState(null);
+
+  const handleRecommendationShowMore = (recPkg) => {
+    if (!onShowMore || !recPkg?.id) return;
+    // Close current modal first, then ask parent to load/show the new package detail.
+    try {
+      onClose && onClose();
+    } catch (e) {
+      // ignore
+    }
+    onShowMore({ id: Number(recPkg.id) || recPkg.id });
+  };
+
+  useEffect(() => {
+    // prefer recommendations already attached to pkg (from parent), else fetch
+    if (pkg?.recommendations) {
+      setRecommendations(pkg.recommendations);
+      return;
+    }
+    let cancelled = false;
+    const load = async () => {
+      if (!pkg?.id) return;
+      try {
+        const res = await fetch(buildApiUrl(`/packages/${pkg.id}/recommendations`));
+        if (!cancelled && res.ok) {
+          const data = await res.json();
+          setRecommendations(data);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [pkg?.id, pkg?.recommendations]);
   const destinations = Array.isArray(pkg.destinations) ? pkg.destinations : [];
   const highlights = Array.isArray(pkg.highlights) ? pkg.highlights : [];
 
@@ -228,6 +266,62 @@ const PackageDetailModal = ({ pkg, onClose }) => {
           transition: all 0.2s ease;
         }
         .pdm-close-btn:hover { border-color: #00b0a5; color: #00b0a5; }
+        /* Recommendations compact layout */
+        .pdm-rec-group { margin-bottom: 18px; }
+        .pdm-rec-shell {
+          border: 1px solid rgba(0,176,165,0.12);
+          background: linear-gradient(180deg, rgba(236,255,253,0.9) 0%, rgba(255,255,255,0.98) 100%);
+          border-radius: 22px;
+          padding: 14px;
+          box-shadow: 0 10px 28px rgba(0,60,50,0.06);
+        }
+        .pdm-rec-title {
+          display: flex; align-items: center; justify-content: space-between; gap: 12px;
+          margin-bottom: 10px;
+        }
+        .pdm-rec-kicker {
+          font-size: 10px; font-weight: 900;
+          letter-spacing: 0.18em; text-transform: uppercase;
+          color: #0b7f78;
+        }
+        .pdm-rec-pill {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 5px 10px; border-radius: 999px;
+          background: rgba(0,176,165,0.08);
+          color: #00a79d; font-size: 10px; font-weight: 800;
+          letter-spacing: 0.08em; text-transform: uppercase;
+          border: 1px solid rgba(0,176,165,0.14);
+        }
+        .pdm-rec-row {
+          display: flex;
+          gap: 12px;
+          overflow-x: auto;
+          padding-bottom: 6px;
+          align-items: stretch;
+        }
+        .pdm-rec-item {
+          flex: 0 0 auto;
+          min-width: 240px;
+          transition: transform 0.22s ease;
+        }
+        .pdm-rec-item .pkc-card {
+          transform: scale(0.92);
+          transform-origin: top center;
+          transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+        .pdm-rec-item:hover .pkc-card {
+          transform: scale(1);
+          box-shadow: 0 18px 48px rgba(0,60,50,0.16);
+          border-color: rgba(0,176,165,0.22);
+        }
+        @media (min-width: 900px) {
+          .pdm-rec-shell { padding: 16px 18px; }
+          .pdm-rec-row { gap: 18px; }
+          .pdm-rec-item { min-width: 0; }
+          .pdm-rec-item { min-width: 220px; }
+          .pdm-rec-item .pkc-card { transform: scale(0.84); }
+          .pdm-rec-item:hover .pkc-card { transform: scale(0.92); }
+        }
       `}</style>
 
       <AnimatePresence>
@@ -332,6 +426,70 @@ const PackageDetailModal = ({ pkg, onClose }) => {
                   ← Back to packages
                 </button>
               </div>
+              <br></br>
+              {/* Recommendations */}
+              {recommendations && (
+                <>
+                  <div className="pdm-section-heading">Recommended For You</div>
+
+                  <div className="pdm-rec-shell mb-5">
+                    <div className="pdm-rec-title">
+                      <div className="pdm-rec-kicker">Personalized picks</div>
+                      <div className="pdm-rec-pill">Tailored recommendations</div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 mb-5">
+                    {/* Same Duration */}
+                    <div>
+                      <div className="text-xs font-extrabold mb-2">Same duration</div>
+                      <div className="pdm-rec-row">
+                        {(recommendations.similarByDays || []).slice(0,6).map((r, i) => (
+                          <div key={`sd-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
+                            <PackageCard pkg={r} onShowMore={handleRecommendationShowMore} index={i} showBookButton={false} showDestinationsAction={false} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Same Type */}
+                    <div>
+                      <div className="text-xs font-extrabold mb-2">Same type</div>
+                      <div className="pdm-rec-row">
+                        {(recommendations.similarByType || []).slice(0,6).map((r, i) => (
+                          <div key={`st-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
+                            <PackageCard pkg={r} onShowMore={handleRecommendationShowMore} index={i} showBookButton={false} showDestinationsAction={false} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Top Rated */}
+                    <div>
+                      <div className="text-xs font-extrabold mb-2">Top rated</div>
+                      <div className="pdm-rec-row">
+                        {(recommendations.topRated || []).slice(0,6).map((r, i) => (
+                          <div key={`tr-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
+                            <PackageCard pkg={r} onShowMore={handleRecommendationShowMore} index={i} showBookButton={false} showDestinationsAction={false} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Most Booked */}
+                    <div>
+                      <div className="text-xs font-extrabold mb-2">Most booked</div>
+                      <div className="pdm-rec-row">
+                        {(recommendations.mostBooked || []).slice(0,6).map((r, i) => (
+                          <div key={`mb-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
+                            <PackageCard pkg={r} onShowMore={handleRecommendationShowMore} index={i} showBookButton={false} showDestinationsAction={false} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </motion.div>
         </motion.div>

@@ -82,6 +82,16 @@ const VehicleCard = ({ vehicle, onView, onEdit, onDelete }) => {
                     )}
                 </div>
 
+                <div
+                    className={`mb-4 text-xs font-semibold rounded-lg px-3 py-2 border ${
+                        vehicle.insurance_expired
+                            ? 'text-red-700 bg-red-50 border-red-200'
+                            : 'text-green-700 bg-green-50 border-green-200'
+                    }`}
+                >
+                    {vehicle.insurance_expired ? 'Insurance Expired' : 'Insurance Valid'}
+                </div>
+
                 {/* Action Buttons */}
                 <div className="flex gap-2">
                     <button

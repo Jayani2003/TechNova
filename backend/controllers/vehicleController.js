@@ -31,6 +31,34 @@ const safeNumber = (value) => {
   return Number.isNaN(parsed) ? null : parsed;
 };
 
+const toDateOnly = (value) => {
+  if (!value) return null;
+
+  if (value instanceof Date) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  const asString = String(value).trim();
+  if (!asString) return null;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(asString)) {
+    return asString;
+  }
+
+  const parsed = new Date(asString);
+  if (Number.isNaN(parsed.getTime())) return null;
+
+  return parsed.toISOString().slice(0, 10);
+};
+
+const isInsuranceExpired = (endDate) => {
+  const normalizedEndDate = toDateOnly(endDate);
+  if (!normalizedEndDate) return false;
+
+  const today = new Date().toISOString().slice(0, 10);
+  return normalizedEndDate < today;
+};
+
 const mapCategory = (row) => ({
   id: row.category_id,
   name: row.category_name,
@@ -55,6 +83,11 @@ const mapVehicle = (row) => ({
   air_conditioning: Boolean(row.air_conditioning),
   luggage_capacity: row.luggage_capacity || 0,
   price_per_day: row.price_per_day != null ? Number(row.price_per_day) : null,
+  vehicle_license: row.vehicle_license || '',
+  insurance_provider: row.insurance_provider || '',
+  insurance_start_date: toDateOnly(row.insurance_start_date),
+  insurance_end_date: toDateOnly(row.insurance_end_date),
+  insurance_expired: isInsuranceExpired(row.insurance_end_date),
   status: toStatusLabel(row.vehicle_status),
   image_url: row.image_url || '',
   mileage: row.mileage || null,
@@ -230,6 +263,10 @@ exports.listVehicles = async (_req, res) => {
         v.baby_seats,
         v.luggage_capacity,
         v.price_per_day,
+        v.vehicle_license,
+        v.insurance_provider,
+        v.insurance_start_date,
+        v.insurance_end_date,
         v.image_url,
         v.vehicle_status,
         v.brand,
@@ -267,6 +304,10 @@ exports.listVehiclesByCategory = async (req, res) => {
         v.baby_seats,
         v.luggage_capacity,
         v.price_per_day,
+        v.vehicle_license,
+        v.insurance_provider,
+        v.insurance_start_date,
+        v.insurance_end_date,
         v.image_url,
         v.vehicle_status,
         v.brand,
@@ -306,6 +347,10 @@ exports.getVehicleById = async (req, res) => {
         v.baby_seats,
         v.luggage_capacity,
         v.price_per_day,
+        v.vehicle_license,
+        v.insurance_provider,
+        v.insurance_start_date,
+        v.insurance_end_date,
         v.image_url,
         v.vehicle_status,
         v.brand,
@@ -349,6 +394,10 @@ exports.createVehicle = async (req, res) => {
       adult_seats,
       luggage_capacity,
       price_per_day,
+      vehicle_license,
+      insurance_provider,
+      insurance_start_date,
+      insurance_end_date,
       image_url,
       status,
       brand,
@@ -370,8 +419,15 @@ exports.createVehicle = async (req, res) => {
     const vehicleLabel = vehicle_name || name || '';
     const plateNumber = license_plate || vehicle_number || '';
 
-    if (!vehicleLabel || !plateNumber) {
-      return res.status(400).json({ success: false, message: 'vehicle_name and license_plate are required.' });
+    if (!vehicleLabel || !plateNumber || !vehicle_license || !insurance_provider || !insurance_start_date || !insurance_end_date) {
+      return res.status(400).json({
+        success: false,
+        message: 'vehicle_name, license_plate, vehicle_license, and insurance dates are required.',
+      });
+    }
+
+    if (insurance_start_date > insurance_end_date) {
+      return res.status(400).json({ success: false, message: 'insurance_end_date must be on or after insurance_start_date.' });
     }
 
     const [categoryRows] = await db.execute('SELECT category_id FROM vehicle_category WHERE category_id = ? LIMIT 1', [resolvedCategoryId]);
@@ -390,6 +446,10 @@ exports.createVehicle = async (req, res) => {
         baby_seats,
         luggage_capacity,
         price_per_day,
+        vehicle_license,
+        insurance_provider,
+        insurance_start_date,
+        insurance_end_date,
         image_url,
         vehicle_status,
         brand,
@@ -400,7 +460,7 @@ exports.createVehicle = async (req, res) => {
         mileage,
         engine_capacity,
         features
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         resolvedCategoryId,
         plateNumber,
@@ -411,6 +471,10 @@ exports.createVehicle = async (req, res) => {
         0,
         safeNumber(luggage_capacity) || 0,
         safeNumber(price_per_day),
+        vehicle_license || null,
+        insurance_provider || null,
+        insurance_start_date || null,
+        insurance_end_date || null,
         uploadedImageUrl || image_url || null,
         normalizeStatus(status),
         brand || null,
@@ -437,6 +501,10 @@ exports.createVehicle = async (req, res) => {
         v.baby_seats,
         v.luggage_capacity,
         v.price_per_day,
+        v.vehicle_license,
+        v.insurance_provider,
+        v.insurance_start_date,
+        v.insurance_end_date,
         v.image_url,
         v.vehicle_status,
         v.brand,
@@ -480,6 +548,10 @@ exports.updateVehicle = async (req, res) => {
       adult_seats,
       luggage_capacity,
       price_per_day,
+      vehicle_license,
+      insurance_provider,
+      insurance_start_date,
+      insurance_end_date,
       image_url,
       status,
       brand,
@@ -496,6 +568,17 @@ exports.updateVehicle = async (req, res) => {
     const resolvedCategoryId = safeNumber(category_id);
     const vehicleLabel = vehicle_name || name || '';
     const plateNumber = license_plate || vehicle_number || '';
+
+    if (!vehicleLabel || !plateNumber || !vehicle_license || !insurance_provider || !insurance_start_date || !insurance_end_date) {
+      return res.status(400).json({
+        success: false,
+        message: 'vehicle_name, license_plate, vehicle_license, and insurance dates are required.',
+      });
+    }
+
+    if (insurance_start_date > insurance_end_date) {
+      return res.status(400).json({ success: false, message: 'insurance_end_date must be on or after insurance_start_date.' });
+    }
 
     const [existingRows] = await db.execute(
       'SELECT image_url FROM vehicle WHERE vehicle_id = ? LIMIT 1',
@@ -518,6 +601,10 @@ exports.updateVehicle = async (req, res) => {
         adult_seats = ?,
         luggage_capacity = ?,
         price_per_day = ?,
+        vehicle_license = ?,
+        insurance_provider = ?,
+        insurance_start_date = ?,
+        insurance_end_date = ?,
         image_url = ?,
         vehicle_status = ?,
         brand = ?,
@@ -538,6 +625,10 @@ exports.updateVehicle = async (req, res) => {
         safeNumber(seats || adult_seats),
         safeNumber(luggage_capacity),
         safeNumber(price_per_day),
+        vehicle_license || null,
+        insurance_provider || null,
+        insurance_start_date || null,
+        insurance_end_date || null,
         resolvedImageUrl,
         normalizeStatus(status),
         brand || null,
@@ -569,6 +660,10 @@ exports.updateVehicle = async (req, res) => {
         v.baby_seats,
         v.luggage_capacity,
         v.price_per_day,
+        v.vehicle_license,
+        v.insurance_provider,
+        v.insurance_start_date,
+        v.insurance_end_date,
         v.image_url,
         v.vehicle_status,
         v.brand,

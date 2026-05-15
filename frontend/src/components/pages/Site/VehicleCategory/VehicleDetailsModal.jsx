@@ -1,6 +1,12 @@
 import React, { useEffect } from 'react';
 import FeatureBadge from './FeatureBadge';
 
+const formatDate = (value) => {
+    if (!value) return 'N/A';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+};
+
 const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
     useEffect(() => {
         if (isOpen) {
@@ -138,8 +144,13 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
                                     { label: 'Model', value: vehicle.model },
                                     { label: 'Year', value: vehicle.year || 'N/A' },
                                     { label: 'Color', value: vehicle.color || 'N/A' },
+                                    { label: 'Vehicle License', value: vehicle.vehicle_license || 'N/A' },
                                     { label: 'Engine', value: vehicle.engine_capacity || 'N/A' },
                                     { label: 'Mileage', value: vehicle.mileage || 'N/A' },
+                                    { label: 'Insurance', value: vehicle.insurance_provider || 'N/A' },
+                                    { label: 'Insurance Start', value: formatDate(vehicle.insurance_start_date) },
+                                    { label: 'Insurance End', value: formatDate(vehicle.insurance_end_date) },
+                                    { label: 'Insurance Status', value: vehicle.insurance_expired ? 'Expired' : 'Valid' },
                                 ].map((item, index) => (
                                     <div key={index} className="flex justify-between items-center px-4 py-2">
                                         <span className="text-sm text-gray-500">{item.label}</span>
@@ -163,11 +174,11 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
                                         </div>
                                     </div>
                                 )}
-                                <div className="flex items-center gap-3 bg-green-50 rounded-lg p-3 border border-green-100">
-                                    <span className="text-2xl">✅</span>
+                                <div className={`flex items-center gap-3 rounded-lg p-3 border ${vehicle.insurance_expired ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'}`}>
+                                    <span className="text-2xl">{vehicle.insurance_expired ? '⚠️' : '✅'}</span>
                                     <div>
-                                        <p className="font-semibold text-gray-800">Fully Insured</p>
-                                        <p className="text-xs text-gray-500">Comprehensive coverage</p>
+                                        <p className="font-semibold text-gray-800">{vehicle.insurance_expired ? 'Insurance Expired' : 'Fully Insured'}</p>
+                                        <p className="text-xs text-gray-500">{vehicle.insurance_expired ? 'Renewal required before bookings.' : 'Comprehensive coverage'}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 bg-purple-50 rounded-lg p-3 border border-purple-100">

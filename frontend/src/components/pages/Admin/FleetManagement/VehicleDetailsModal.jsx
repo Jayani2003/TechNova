@@ -1,6 +1,12 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 
+const formatDate = (value) => {
+    if (!value) return 'N/A';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+};
+
 const VehicleDetailsModal = ({ isOpen, onClose, vehicle }) => {
     if (!isOpen || !vehicle) return null;
 
@@ -93,9 +99,14 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle }) => {
                         <div className="bg-gray-50 rounded-xl divide-y divide-gray-200">
                             {[
                                 { label: 'License Plate', value: vehicle.license_plate },
+                                { label: 'Vehicle License', value: vehicle.vehicle_license || 'N/A' },
                                 { label: 'Color', value: vehicle.color || 'N/A' },
                                 { label: 'Model', value: vehicle.model || 'N/A' },
                                 { label: 'Fuel Type', value: vehicle.fuel_type || 'N/A' },
+                                { label: 'Insurance', value: vehicle.insurance_provider || 'N/A' },
+                                { label: 'Insurance Start', value: formatDate(vehicle.insurance_start_date) },
+                                { label: 'Insurance End', value: formatDate(vehicle.insurance_end_date) },
+                                { label: 'Insurance Status', value: vehicle.insurance_expired ? 'Expired' : 'Valid' },
                                 { label: 'Air Conditioning', value: vehicle.air_conditioning ? 'Yes ❄️' : 'No' },
                             ].map((item, index) => (
                                 <div key={index} className="flex justify-between items-center px-4 py-3">

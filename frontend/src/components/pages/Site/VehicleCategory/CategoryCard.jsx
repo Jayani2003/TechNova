@@ -89,6 +89,11 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                             ❄️ A/C
                         </span>
                     )}
+                    {vehicle.insurance_expired && (
+                        <span className="text-xs bg-red-50 text-red-700 px-2 py-1 rounded-full border border-red-200">
+                            Insurance Expired
+                        </span>
+                    )}
                     {vehicle.mileage && (
                         <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full border border-green-200">
                             ⚡ {vehicle.mileage}

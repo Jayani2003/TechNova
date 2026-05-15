@@ -64,7 +64,8 @@ const OurFleet = () => {
                 response = await vehicleService.getAll();
             }
             if (response.success) {
-                setVehicles(response.data);
+                const userVisibleVehicles = (response.data || []).filter((vehicle) => !vehicle.insurance_expired);
+                setVehicles(userVisibleVehicles);
             }
         } catch (error) {
             console.error('Error fetching vehicles:', error);

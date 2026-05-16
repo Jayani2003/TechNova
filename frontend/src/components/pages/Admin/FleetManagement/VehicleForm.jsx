@@ -13,6 +13,24 @@ const toDateInputValue = (value) => {
     return date.toISOString().slice(0, 10);
 };
 
+const getInsuranceEndDate = (startDate) => {
+    const normalizedStartDate = toDateInputValue(startDate);
+    if (!normalizedStartDate) return '';
+
+    const [year, month, day] = normalizedStartDate.split('-').map((part) => Number(part));
+    const oneYearLater = new Date(Date.UTC(year + 1, month - 1, day));
+
+    if (
+        oneYearLater.getUTCFullYear() !== year + 1 ||
+        oneYearLater.getUTCMonth() !== month - 1 ||
+        oneYearLater.getUTCDate() !== day
+    ) {
+        return '';
+    }
+
+    return oneYearLater.toISOString().slice(0, 10);
+};
+
 const initialFormData = {
     category_id: '',
     vehicle_name: '',
@@ -82,14 +100,28 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value,
-        }));
+        const nextValue = type === 'checkbox' ? checked : value;
+
+        setFormData((prev) => {
+            const nextState = {
+                ...prev,
+                [name]: nextValue,
+            };
+
+            if (name === 'insurance_start_date') {
+                nextState.insurance_end_date = getInsuranceEndDate(nextValue);
+            }
+
+            return nextState;
+        });
 
         // Clear error when user types
         if (errors[name]) {
             setErrors((prev) => ({ ...prev, [name]: '' }));
+        }
+
+        if (name === 'insurance_start_date' && errors.insurance_end_date) {
+            setErrors((prev) => ({ ...prev, insurance_end_date: '' }));
         }
     };
 
@@ -119,8 +151,13 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
         if (!formData.insurance_start_date) newErrors.insurance_start_date = 'Insurance start date is required';
         if (!formData.insurance_end_date) newErrors.insurance_end_date = 'Insurance end date is required';
 
-        if (formData.insurance_start_date && formData.insurance_end_date && formData.insurance_start_date > formData.insurance_end_date) {
-            newErrors.insurance_end_date = 'End date must be on or after start date';
+        if (formData.insurance_start_date && formData.insurance_end_date) {
+            const requiredEndDate = getInsuranceEndDate(formData.insurance_start_date);
+            if (!requiredEndDate) {
+                newErrors.insurance_start_date = 'Insurance start date is not valid for a one-year period';
+            } else if (formData.insurance_end_date !== requiredEndDate) {
+                newErrors.insurance_end_date = `Insurance end date must be exactly ${requiredEndDate}`;
+            }
         }
 
         setErrors(newErrors);
@@ -255,8 +292,8 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                                     name="year"
                                     value={formData.year}
                                     onChange={handleChange}
-                                    min="2000"
-                                    max="2030"
+                                    min="1950"
+                                    max={new Date().getFullYear()}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
@@ -482,10 +519,17 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                                     name="insurance_end_date"
                                     value={formData.insurance_end_date}
                                     onChange={handleChange}
+                                    min={formData.insurance_start_date ? getInsuranceEndDate(formData.insurance_start_date) : undefined}
+                                    max={formData.insurance_start_date ? getInsuranceEndDate(formData.insurance_start_date) : undefined}
                                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                                         errors.insurance_end_date ? 'border-red-500' : 'border-gray-300'
                                     }`}
                                 />
+                                {formData.insurance_start_date && (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Insurance must end exactly 1 year later ({getInsuranceEndDate(formData.insurance_start_date)}).
+                                    </p>
+                                )}
                                 {errors.insurance_end_date && (
                                     <p className="text-red-500 text-xs mt-1">{errors.insurance_end_date}</p>
                                 )}

@@ -51,12 +51,66 @@ const toDateOnly = (value) => {
   return parsed.toISOString().slice(0, 10);
 };
 
-const isInsuranceExpired = (endDate) => {
+const addOneYearToDate = (dateOnly) => {
+  const normalizedDate = toDateOnly(dateOnly);
+  if (!normalizedDate) return null;
+
+  const [year, month, day] = normalizedDate.split('-').map((part) => Number(part));
+  const nextYearDate = new Date(Date.UTC(year + 1, month - 1, day));
+
+  if (
+    nextYearDate.getUTCFullYear() !== year + 1 ||
+    nextYearDate.getUTCMonth() !== month - 1 ||
+    nextYearDate.getUTCDate() !== day
+  ) {
+    return null;
+  }
+
+  return nextYearDate.toISOString().slice(0, 10);
+};
+
+const validateInsurancePeriod = (startDate, endDate) => {
+  const normalizedStartDate = toDateOnly(startDate);
+  if (!normalizedStartDate) {
+    return { valid: false, message: 'Valid insurance_start_date is required.' };
+  }
+
+  const requiredEndDate = addOneYearToDate(normalizedStartDate);
+  if (!requiredEndDate) {
+    return { valid: false, message: 'insurance_start_date is invalid for a one-year insurance period.' };
+  }
+
+  const normalizedEndDate = toDateOnly(endDate) || requiredEndDate;
+
+  if (normalizedEndDate !== requiredEndDate) {
+    return {
+      valid: false,
+      message: `insurance_end_date must be exactly 1 year after insurance_start_date (${requiredEndDate}).`,
+    };
+  }
+
+  return {
+    valid: true,
+    normalizedStartDate,
+    normalizedEndDate,
+  };
+};
+
+const isInsuranceExpired = (startDate, endDate) => {
+  const today = new Date().toISOString().slice(0, 10);
+
+  const normalizedStartDate = toDateOnly(startDate);
+  if (normalizedStartDate) {
+    const oneYearEndDate = addOneYearToDate(normalizedStartDate);
+    if (oneYearEndDate) {
+      return today > oneYearEndDate;
+    }
+  }
+
   const normalizedEndDate = toDateOnly(endDate);
   if (!normalizedEndDate) return false;
 
-  const today = new Date().toISOString().slice(0, 10);
-  return normalizedEndDate < today;
+  return today > normalizedEndDate;
 };
 
 const mapCategory = (row) => ({
@@ -87,7 +141,7 @@ const mapVehicle = (row) => ({
   insurance_provider: row.insurance_provider || '',
   insurance_start_date: toDateOnly(row.insurance_start_date),
   insurance_end_date: toDateOnly(row.insurance_end_date),
-  insurance_expired: isInsuranceExpired(row.insurance_end_date),
+  insurance_expired: isInsuranceExpired(row.insurance_start_date, row.insurance_end_date),
   status: toStatusLabel(row.vehicle_status),
   image_url: row.image_url || '',
   mileage: row.mileage || null,
@@ -418,16 +472,22 @@ exports.createVehicle = async (req, res) => {
 
     const vehicleLabel = vehicle_name || name || '';
     const plateNumber = license_plate || vehicle_number || '';
+    const resolvedYear = safeNumber(year || manufactured_year);
 
-    if (!vehicleLabel || !plateNumber || !vehicle_license || !insurance_provider || !insurance_start_date || !insurance_end_date) {
+    if (resolvedYear != null && resolvedYear < 1950) {
+      return res.status(400).json({ success: false, message: 'manufactured_year must be 1950 or later.' });
+    }
+
+    if (!vehicleLabel || !plateNumber || !vehicle_license || !insurance_provider || !insurance_start_date) {
       return res.status(400).json({
         success: false,
-        message: 'vehicle_name, license_plate, vehicle_license, and insurance dates are required.',
+        message: 'vehicle_name, license_plate, vehicle_license, insurance_provider, and insurance_start_date are required.',
       });
     }
 
-    if (insurance_start_date > insurance_end_date) {
-      return res.status(400).json({ success: false, message: 'insurance_end_date must be on or after insurance_start_date.' });
+    const insuranceValidation = validateInsurancePeriod(insurance_start_date, insurance_end_date);
+    if (!insuranceValidation.valid) {
+      return res.status(400).json({ success: false, message: insuranceValidation.message });
     }
 
     const [categoryRows] = await db.execute('SELECT category_id FROM vehicle_category WHERE category_id = ? LIMIT 1', [resolvedCategoryId]);
@@ -473,8 +533,8 @@ exports.createVehicle = async (req, res) => {
         safeNumber(price_per_day),
         vehicle_license || null,
         insurance_provider || null,
-        insurance_start_date || null,
-        insurance_end_date || null,
+        insuranceValidation.normalizedStartDate,
+        insuranceValidation.normalizedEndDate,
         uploadedImageUrl || image_url || null,
         normalizeStatus(status),
         brand || null,
@@ -568,16 +628,20 @@ exports.updateVehicle = async (req, res) => {
     const resolvedCategoryId = safeNumber(category_id);
     const vehicleLabel = vehicle_name || name || '';
     const plateNumber = license_plate || vehicle_number || '';
-
-    if (!vehicleLabel || !plateNumber || !vehicle_license || !insurance_provider || !insurance_start_date || !insurance_end_date) {
+    const resolvedYear = safeNumber(year || manufactured_year);
+    if (resolvedYear != null && resolvedYear < 1950) {
+      return res.status(400).json({ success: false, message: 'manufactured_year must be 1950 or later.' });
+    }
+    if (!vehicleLabel || !plateNumber || !vehicle_license || !insurance_provider || !insurance_start_date) {
       return res.status(400).json({
         success: false,
-        message: 'vehicle_name, license_plate, vehicle_license, and insurance dates are required.',
+        message: 'vehicle_name, license_plate, vehicle_license, insurance_provider, and insurance_start_date are required.',
       });
     }
 
-    if (insurance_start_date > insurance_end_date) {
-      return res.status(400).json({ success: false, message: 'insurance_end_date must be on or after insurance_start_date.' });
+    const insuranceValidation = validateInsurancePeriod(insurance_start_date, insurance_end_date);
+    if (!insuranceValidation.valid) {
+      return res.status(400).json({ success: false, message: insuranceValidation.message });
     }
 
     const [existingRows] = await db.execute(
@@ -627,8 +691,8 @@ exports.updateVehicle = async (req, res) => {
         safeNumber(price_per_day),
         vehicle_license || null,
         insurance_provider || null,
-        insurance_start_date || null,
-        insurance_end_date || null,
+        insuranceValidation.normalizedStartDate,
+        insuranceValidation.normalizedEndDate,
         resolvedImageUrl,
         normalizeStatus(status),
         brand || null,

@@ -490,7 +490,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
                     onChange={e => setShowGuidDetails(e.target.checked)}
                     disabled={!guide}
                   />
-                  <span>With guide</span>
+                  <span>See guide</span>
                 </label>
                 {!guide && <div className="pdm-guid-note">No guide is linked to this package.</div>}
                 {showGuidDetails && guide && (

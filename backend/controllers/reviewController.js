@@ -63,6 +63,11 @@ const normalizeImageUrls = (value) => {
   return [];
 };
 
+const extractUploadedImageUrl = (file) => {
+  if (!file) return null;
+  return file.path || file.url || file.secure_url || file.location || file.filename || null;
+};
+
 const getPublishedReviews = async (_req, res) => {
   try {
     const [rows] = await pool.query(
@@ -74,14 +79,17 @@ const getPublishedReviews = async (_req, res) => {
         r.driver_name,
         r.title,
         r.feedback,
-        r.tour_title,
-        r.tour_type,
-        r.verified,
         r.created_at,
         u.name AS customer_name,
-        u.country AS customer_country
+        u.email AS customer_email,
+        u.country AS customer_country,
+        b.tour_type,
+        COALESCE(p.title, b.tour_type) AS tour_title
       FROM review r
       INNER JOIN user u ON u.user_id = r.user_id
+      INNER JOIN booking b ON b.booking_id = r.booking_id
+      LEFT JOIN booking_package bp ON bp.booking_id = b.booking_id
+      LEFT JOIN package p ON p.package_id = bp.package_id
       ORDER BY r.created_at DESC
       `
     );
@@ -104,6 +112,7 @@ const getPublishedReviews = async (_req, res) => {
       bookingId: row.booking_id,
       user: {
         name: row.customer_name,
+        email: row.customer_email,
         country: row.customer_country || 'Sri Lanka',
         countryFlag: getCountryFlag(row.customer_country),
         avatar: null,
@@ -116,13 +125,46 @@ const getPublishedReviews = async (_req, res) => {
       comment: row.feedback,
       images: imagesByReviewId[row.review_id] || [],
       datePublished: new Date(row.created_at).toISOString().split('T')[0],
-      verified: Boolean(row.verified),
     }));
 
     res.json({ reviews });
   } catch (error) {
     console.error('getPublishedReviews failed:', error);
     res.status(500).json({ message: 'Failed to load reviews.' });
+  }
+};
+
+const getReviewStats = async (_req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `
+      SELECT
+        COUNT(*) AS total_reviews,
+        SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) AS five_star_reviews,
+        SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) AS four_star_reviews,
+        SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) AS three_star_reviews,
+        SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) AS two_star_reviews,
+        SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) AS one_star_reviews
+      FROM review
+      `
+    );
+
+    const row = rows[0] || {};
+    const breakdown = {
+      5: Number(row.five_star_reviews) || 0,
+      4: Number(row.four_star_reviews) || 0,
+      3: Number(row.three_star_reviews) || 0,
+      2: Number(row.two_star_reviews) || 0,
+      1: Number(row.one_star_reviews) || 0,
+    };
+
+    res.json({
+      total: Number(row.total_reviews) || 0,
+      breakdown,
+    });
+  } catch (error) {
+    console.error('getReviewStats failed:', error);
+    res.status(500).json({ message: 'Failed to load review stats.' });
   }
 };
 
@@ -182,6 +224,10 @@ const createReview = async (req, res) => {
     tourType,
     images,
   } = req.body;
+  const uploadedImageUrls = Array.isArray(req.files)
+    ? req.files.map(extractUploadedImageUrl).filter(Boolean)
+    : [];
+  const imageUrls = [...uploadedImageUrls, ...normalizeImageUrls(images)];
 
   if (!customerEmail || !bookingId || !stars || !comment) {
     return res.status(400).json({
@@ -232,11 +278,8 @@ const createReview = async (req, res) => {
         rating,
         driver_name,
         title,
-        feedback,
-        tour_title,
-        tour_type,
-        verified
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        feedback
+      ) VALUES (?, ?, ?, ?, ?, ?)
       `,
       [
         booking.user_id,
@@ -245,14 +288,11 @@ const createReview = async (req, res) => {
         driverName || null,
         title || null,
         comment,
-        tourTitle || null,
-        tourType || null,
-        1,
       ]
     );
 
     const reviewId = insertReview.insertId;
-    const imageUrls = normalizeImageUrls(images);
+    const imageUrls = [...uploadedImageUrls, ...normalizeImageUrls(images)];
 
     for (const url of imageUrls) {
       await conn.query(
@@ -262,9 +302,11 @@ const createReview = async (req, res) => {
     }
 
     await conn.commit();
+
     res.status(201).json({
       message: 'Review created successfully.',
       reviewId,
+      imageUrls,
     });
   } catch (error) {
     await conn.rollback();
@@ -277,6 +319,7 @@ const createReview = async (req, res) => {
 
 module.exports = {
   getPublishedReviews,
+  getReviewStats,
   getReviewableTours,
   createReview,
 };

@@ -1,17 +1,20 @@
 // ─────────────────────────────────────────────────────────────
-//  ADMIN PACKAGES CRUD STORE
-//  In production replace with API calls (REST/GraphQL).
-//  This module acts as the single source of truth shared
-//  between admin and user-side pages.
-//
-//  User-side PackagesPage reads from packagesData.js which
-//  in production points to the same API/database.
-//  Here we simulate that with a shared in-memory store +
-//  localStorage persistence for demo purposes.
+//  ADMIN PACKAGES CRUD STORE (API-backed)
+//  Uses backend endpoints as source of truth.
 // ─────────────────────────────────────────────────────────────
 
-import { packages as seedPackages, PACKAGE_TYPES, PACKAGE_DAYS } from '../../Site/TourBooking/Package/packagesData';
 import { buildApiUrl } from '../../../../config/api';
+
+const PACKAGE_TYPES = [
+  'Beach Side',
+  'Hill Country',
+  'Safari',
+  'Cultural Heritage',
+  'Adventure',
+  'Wellness & Ayurveda',
+];
+
+const PACKAGE_DAYS = [7, 14, 21, 28];
 
 const PACKAGES_CHANGED_EVENT = 'sl-admin-packages-changed';
 
@@ -22,10 +25,6 @@ const notify = () => _subscribers.forEach(fn => fn([..._packages]));
 
 const emitPackagesChanged = () => {
   if (typeof window !== 'undefined') window.dispatchEvent(new Event(PACKAGES_CHANGED_EVENT));
-};
-
-const savePackages = (_pkgs) => {
-  // persistence removed in favor of backend API; keep a no-op for compatibility
 };
 
 const reloadFromBackend = async () => {
@@ -41,6 +40,12 @@ const reloadFromBackend = async () => {
       description: p.description,
       image: p.image_url || p.image || '',
       destinations: Array.isArray(p.destinations) ? p.destinations : [],
+      guid: p.guid ? {
+        id: p.guid.id,
+        name: p.guid.name,
+        nic: p.guid.nic,
+        contactDetails: p.guid.contactDetails,
+      } : null,
     }));
     notify();
     emitPackagesChanged();
@@ -68,12 +73,18 @@ export const packageStore = {
             description: p.description,
             image: p.image_url || p.image_url || p.image || '',
             destinations: Array.isArray(p.destinations) ? p.destinations : [],
+            guid: p.guid ? {
+              id: p.guid.id,
+              name: p.guid.name,
+              nic: p.guid.nic,
+              contactDetails: p.guid.contactDetails,
+            } : null,
           }));
         } else {
-          _packages = [...seedPackages];
+          _packages = [];
         }
       } catch (e) {
-        _packages = [...seedPackages];
+        _packages = [];
       }
       fn([..._packages]);
     })();
@@ -90,6 +101,10 @@ export const packageStore = {
       form.append('type', data.type);
       form.append('days', String(data.days));
       form.append('description', data.description || '');
+      form.append('withGuid', String(Boolean(data.withGuid)));
+      form.append('guideName', data.guideName || '');
+      form.append('guideNic', data.guideNic || '');
+      form.append('guideContactDetails', data.guideContactDetails || '');
 
       if (data.packageImageFile) {
         form.append('packageImage', data.packageImageFile);
@@ -138,6 +153,11 @@ export const packageStore = {
         image: created.image_url || created.image || data.image || '',
         destinations: data.destinations || [],
         highlights: data.highlights || [],
+        guid: created.guid || (data.withGuid ? {
+          name: data.guideName,
+          nic: data.guideNic,
+          contactDetails: data.guideContactDetails,
+        } : null),
       };
       _packages = [newPkg, ..._packages];
       notify();
@@ -162,6 +182,10 @@ export const packageStore = {
       if (data.type != null) form.append('type', data.type);
       if (data.days != null) form.append('days', String(data.days));
       if (data.description != null) form.append('description', data.description || '');
+      form.append('withGuid', String(Boolean(data.withGuid)));
+      form.append('guideName', data.guideName || '');
+      form.append('guideNic', data.guideNic || '');
+      form.append('guideContactDetails', data.guideContactDetails || '');
       if (data.packageImageFile) form.append('packageImage', data.packageImageFile);
 
       const dests = (data.destinations || []).map((d, i) => {
@@ -213,11 +237,8 @@ export const packageStore = {
   },
 
   // ── RESET to seed data (dev utility) ────────────────────
-  reset: () => {
-    _packages = [...seedPackages];
-    savePackages(_packages);
-    notify();
-    emitPackagesChanged();
+  reset: async () => {
+    await reloadFromBackend();
   },
 };
 
@@ -249,6 +270,10 @@ export const emptyPackage = () => ({
   description:  '',
   image:        '',
   highlights:   ['', '', '', ''],
+  withGuid:     false,
+  guideName:    '',
+  guideNic:     '',
+  guideContactDetails: '',
   destinations: [
     { name: '', days: 1, description: '', image: '', imageFile: null, activities: [] },
   ],

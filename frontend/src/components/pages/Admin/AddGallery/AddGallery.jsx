@@ -1,140 +1,220 @@
-import React, { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import GalleryForm from './GalleryForm';
-import GalleryTable from './GalleryTable';
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { UploadCloud, Camera, MapPin } from "lucide-react";
+import Topbar from "./Topbar";
+import StatCards from "./StatCards";
+import UploadTab from "./UploadTab";
+import GalleryTab from "./GalleryTab";
+import LocationsTab from "./LocationsTab";
+import LightboxModal from "./LightboxModal";
+import Toast from "./Toast";
+import {
+  fetchGalleryPhotos,
+  createGalleryPhoto,
+  updateGalleryPhotoStatus,
+  deleteGalleryPhoto,
+  fetchLocations,
+  createLocation,
+  updateLocation,
+  deleteLocation,
+} from "../../../../services/galleryService";
 
-const AddGallery = () => {
-  const dark = useOutletContext()?.dark ?? false;
-  const [items, setItems] = useState([]);
-  const [editingItem, setEditingItem] = useState(null);
-  const [notification, setNotification] = useState({
-    show: false,
-    message: '',
-    type: 'success'
-  });
+export default function AddGallery() {
+  const [tab, setTab] = useState("gallery");
+  const [photos, setPhotos] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [toast, setToast] = useState({ message: "", visible: false });
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const toastTimer = useRef(null);
 
-  // 1. Load data from backend on component mount
-  useEffect(() => {
-    fetchItems();
+  const showToast = useCallback((message) => {
+    setToast({ message, visible: true });
+    if (toastTimer.current) {
+      clearTimeout(toastTimer.current);
+    }
+    toastTimer.current = setTimeout(() => setToast((t) => ({ ...t, visible: false })), 3000);
   }, []);
 
-  const fetchItems = async () => {
+  const TITLES = {
+    upload: "Publish New Tour Photograph",
+    gallery: "Tour Gallery Manager",
+    locations: "Sri Lanka Geographical Navigator",
+  };
+
+  const navItems = [
+    { key: "upload", icon: <UploadCloud className="w-4 h-4" />, label: "Upload Photos" },
+    { key: "gallery", icon: <Camera className="w-4 h-4" />, label: "All Photos", badge: photos.length },
+    { key: "locations", icon: <MapPin className="w-4 h-4" />, label: "Locations", badge: locations.length },
+  ];
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/gallery');
-      const data = await response.json();
-      setItems(data);
+      const [photoRows, locationRows] = await Promise.all([fetchGalleryPhotos(), fetchLocations()]);
+      setPhotos(photoRows);
+      setLocations(locationRows);
     } catch (error) {
-      console.error("Error fetching gallery:", error);
+      showToast(error.message || "Failed to load gallery data.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleAddPhoto = async ({ file, payload }) => {
+    try {
+      const created = await createGalleryPhoto({ file, payload });
+      setPhotos((prev) => [created, ...prev]);
+      const locationRows = await fetchLocations();
+      setLocations(locationRows);
+      setTab("gallery");
+      showToast(`"${created.title}" added to the gallery.`);
+    } catch (error) {
+      showToast(error.message || "Failed to save photo.");
+      throw error;
     }
   };
 
-  const triggerNotification = (message, type = 'success') => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 3000);
-  };
-
-  // 2. Handle Create and Update
-  const handleSubmit = async (formData) => {
-    // We use FormData to handle the physical image file
-    const data = new FormData();
-    data.append('title', formData.title);
-    data.append('category', formData.category);
-    data.append('description', formData.description);
-    
-    // Ensure 'image' matches the key your backend Multer middleware expects
-    if (formData.file) {
-      data.append('image', formData.file);
-    }
-
+  const handleToggleStatus = async (photo, e) => {
+    e?.stopPropagation();
+    const nextStatus = photo.status === "published" ? "draft" : "published";
     try {
-      const url = editingItem 
-        ? `http://localhost:5000/api/gallery/${editingItem.id}` 
-        : 'http://localhost:5000/api/gallery';
-      
-      const method = editingItem ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method: method,
-        body: data, // No JSON.stringify for FormData
-      });
-
-      if (!response.ok) throw new Error('Failed to save item');
-
-      const savedItem = await response.json();
-
-      if (editingItem) {
-        setItems(items.map(item => item.id === editingItem.id ? savedItem : item));
-        triggerNotification("Changes applied successfully!", "success");
-      } else {
-        setItems([savedItem, ...items]);
-        triggerNotification("New image published to Cloudinary!", "success");
-      }
-      setEditingItem(null);
+      const updated = await updateGalleryPhotoStatus(photo.id, nextStatus);
+      setPhotos((prev) => prev.map((item) => (item.id === photo.id ? updated : item)));
+      showToast(`"${photo.title}" changed to ${nextStatus.toUpperCase()}`);
     } catch (error) {
-      console.error("Submit error:", error);
-      triggerNotification("Error connecting to server", "error");
+      showToast(error.message || "Failed to update status.");
     }
   };
 
-  // 3. Handle Delete
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this item?")) return;
-
+  const handleDeletePhoto = async (id, e) => {
+    e?.stopPropagation();
     try {
-      const response = await fetch(`http://localhost:5000/api/gallery/${id}`, {
-        method: 'DELETE'
-      });
-
-      if (response.ok) {
-        setItems(items.filter(i => i.id !== id));
-        triggerNotification("Item removed successfully", "success");
-      } else {
-        throw new Error('Delete failed');
-      }
+      await deleteGalleryPhoto(id);
+      setPhotos((prev) => prev.filter((p) => p.id !== id));
+      const locationRows = await fetchLocations();
+      setLocations(locationRows);
+      showToast("Selected photograph has been removed.");
     } catch (error) {
-      triggerNotification("Could not delete item", "error");
+      showToast(error.message || "Failed to delete photo.");
     }
+  };
+
+  const handleCreateLocation = async (payload) => {
+    const created = await createLocation(payload);
+    setLocations((prev) => [...prev, created]);
+    return created;
+  };
+
+  const handleUpdateLocation = async (id, payload) => {
+    const updated = await updateLocation(id, payload);
+    setLocations((prev) => prev.map((item) => (item.id === id ? updated : item)));
+    return updated;
+  };
+
+  const handleDeleteLocation = async (id) => {
+    await deleteLocation(id);
+    setLocations((prev) => prev.filter((item) => item.id !== id));
   };
 
   return (
-    <div className={`min-h-screen p-6 md:p-12 font-sans relative ${dark ? 'bg-[#020617]' : 'bg-[#f8fafc]'}`}>
-      <div className="max-w-7xl mx-auto">
-        {notification.show && (
-          <div className={`fixed top-10 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-3 rounded-xl shadow-lg z-[999] animate-in fade-in slide-in-from-top-4 duration-300 border
-            ${notification.type === 'success' 
-              ? dark ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' : 'bg-[#dcfce7] border-[#bbf7d0] text-[#166534]'
-              : dark ? 'bg-red-500/15 border-red-500/30 text-red-300' : 'bg-[#fee2e2] border-[#fecaca] text-[#991b1b]'}`}>
-            <div className={`rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold text-white shadow-sm
-              ${notification.type === 'success' ? 'bg-[#22c55e]' : 'bg-[#ef4444]'}`}>
-              {notification.type === 'success' ? '✓' : '!'}
+    <div
+      className="min-h-screen bg-[#FAF9F6] text-[#1D1916] antialiased"
+      style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+    >
+      <div className="flex flex-col min-h-screen">
+        <Topbar 
+          title={TITLES[tab]}
+          searchTerm={searchTerm}
+          onSearchChange={(val) => {
+            setSearchTerm(val);
+            if (tab !== "gallery") {
+              setTab("gallery");
+            }
+          }}
+        />
+
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full flex-1">
+          <div className="mb-6 rounded-2xl border border-stone-200 bg-white p-2 sm:p-3 shadow-sm">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
+              {navItems.map((item) => (
+                <button
+                  key={item.key}
+                  onClick={() => setTab(item.key)}
+                  className="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 sm:px-4 py-2 text-xs font-bold transition-all cursor-pointer"
+                  style={{
+                    background: tab === item.key ? "#00b0a5" : "#F5F5F4",
+                    color: tab === item.key ? "#fff" : "#44403C",
+                  }}
+                >
+                  <span className={tab === item.key ? "text-white" : "text-stone-500"}>{item.icon}</span>
+                  <span>{item.label}</span>
+                  {item.badge !== undefined && (
+                    <span
+                      className="text-[10px] px-2 py-0.5 rounded-full font-extrabold"
+                      style={{
+                        background: tab === item.key ? "rgba(255,255,255,0.22)" : "#E7E5E4",
+                        color: tab === item.key ? "#fff" : "#292524",
+                      }}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              ))}
             </div>
-            <span className="text-sm font-bold tracking-tight">{notification.message}</span>
           </div>
-        )}
 
-        <div className={`mb-8 p-8 rounded-3xl border ${dark ? 'bg-gradient-to-br from-slate-800/60 to-slate-900/40 border-white/8' : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100/50'}`}>
-          <h1 className={`text-4xl font-black tracking-tight mb-2 ${dark ? 'text-slate-100' : 'text-slate-800'}`}>Manage Media Gallery</h1>
-          <p className={`text-sm font-medium ${dark ? 'text-slate-400' : 'text-slate-600'}`}>Upload and manage gallery images for your tours and packages</p>
-        </div>
+          <StatCards photos={photos} locations={locations} />
 
-        <div className="space-y-10">
-          <GalleryForm
-            dark={dark}
-            editingItem={editingItem}
-            onSubmit={handleSubmit}
-            onCancel={() => setEditingItem(null)}
-          />
+          {tab === "upload" && <UploadTab locations={locations} onToast={showToast} onAddPhoto={handleAddPhoto} />}
 
-          <GalleryTable
-            dark={dark}
-            items={items}
-            onEdit={setEditingItem}
-            onDelete={handleDelete}
-          />
+          {tab === "gallery" && (
+            <GalleryTab
+              photos={
+                searchTerm
+                  ? photos.filter(
+                      (p) =>
+                        p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        p.loc.toLowerCase().includes(searchTerm.toLowerCase())
+                    )
+                  : photos
+              }
+              onToast={showToast}
+              onViewPhoto={(p) => setSelectedPhoto(p)}
+              onDeletePhoto={handleDeletePhoto}
+              onToggleStatus={handleToggleStatus}
+            />
+          )}
+
+          {tab === "locations" && (
+            <LocationsTab
+              locations={locations}
+              onToast={showToast}
+              onCreateLocation={handleCreateLocation}
+              onUpdateLocation={handleUpdateLocation}
+              onDeleteLocation={handleDeleteLocation}
+            />
+          )}
+
+          {loading && <p className="mt-4 text-xs font-semibold text-stone-500">Loading gallery data...</p>}
         </div>
       </div>
+
+      {selectedPhoto && (
+        <LightboxModal
+          p={selectedPhoto}
+          onClose={() => setSelectedPhoto(null)}
+          onToggleStatus={handleToggleStatus}
+          onDelete={handleDeletePhoto}
+        />
+      )}
+
+      <Toast message={toast.message} visible={toast.visible} />
     </div>
   );
-};
-
-export default AddGallery;
+}

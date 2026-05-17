@@ -20,6 +20,7 @@ import TourBooking from "./components/pages/Site/TourBooking/Tours/TourBooking";
 import Customized from "./components/pages/Site/TourBooking/Customized/Customized";
 import Package from "./components/pages/Site/TourBooking/Package/Package";
 import PointToPoint from "./components/pages/Site/TourBooking/PointToPoint/PointToPoint";
+import PackageBookingForm from "./components/pages/Site/TourBooking/Booking/PackageBookingForm";
 
 //user dashboard
 import MyBookings from "./components/pages/User/MyBookings/MyBookings";
@@ -92,6 +93,7 @@ export default function App() {
       <Route path="/vehicle-category"      element={<SiteLayout><VehicleCategory /></SiteLayout>} />
       <Route path="/tour-booking"          element={<SiteLayout><TourBooking /></SiteLayout>} />
       <Route path="/tour-booking/package"  element={<SiteLayout><Package /></SiteLayout>} />
+      <Route path="/tour-booking/package/book" element={<SiteLayout><PackageBookingForm /></SiteLayout>} />
       <Route path="/tour-booking/customized" element={<SiteLayout><Customized /></SiteLayout>} />
       <Route path="/tour-booking/point"    element={<SiteLayout><PointToPoint /></SiteLayout>} />
 

@@ -24,6 +24,9 @@ router.get('/admin/packages', pkgCtrl.listAdminPackages);
 // Public list
 router.get('/', pkgCtrl.listPublicPackages);
 
+// Recommendations for a package
+router.get('/:id/recommendations', pkgCtrl.getRecommendations);
+
 // Public package detail
 router.get('/:id', pkgCtrl.getPackageDetail);
 

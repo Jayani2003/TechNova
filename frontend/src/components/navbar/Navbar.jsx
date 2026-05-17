@@ -15,6 +15,8 @@ const Navbar = () => {
     navigate('/');
   };
 
+  const isAdmin = Boolean(user?.role && typeof user.role === 'string' && user.role.toLowerCase().includes('admin'));
+
   return (
     <nav className="flex justify-between items-center px-6 py-4 bg-white/80 backdrop-blur-md shadow sticky top-0 z-50">
 
@@ -46,7 +48,7 @@ const Navbar = () => {
                           group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:scale-100 
                           transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-50">
             <div className="flex flex-col">
-              {user.role === 'admin' ? (
+                {isAdmin ? (
                  <Link to="/admin/admin-dashboard" className="px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-[#00b0a5]/10 hover:text-[#00b0a5] transition-colors rounded-lg mx-2">
                     Admin Dashboard
                  </Link>

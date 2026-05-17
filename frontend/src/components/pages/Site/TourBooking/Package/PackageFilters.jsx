@@ -1,6 +1,15 @@
-import { getTypes, getDays } from './packagesData';
+const PACKAGE_TYPES = [
+  'Beach Side',
+  'Hill Country',
+  'Safari',
+  'Cultural Heritage',
+  'Adventure',
+  'Wellness & Ayurveda',
+];
 
-// Type icons map — add a new entry when a new type is added to packagesData
+const PACKAGE_DAYS = [7, 14, 21, 28];
+
+// Type icons map — add a new entry when a new package type is introduced.
 const TYPE_ICONS = {
   'Beach Side':          '🏖️',
   'Hill Country':        '🏔️',
@@ -11,8 +20,8 @@ const TYPE_ICONS = {
 };
 
 const PackageFilters = ({ activeType, activeDays, onTypeChange, onDaysChange, total }) => {
-  const types = ['All', ...getTypes()];
-  const days  = ['All', ...getDays()];
+  const types = ['All', ...PACKAGE_TYPES];
+  const days  = ['All', ...PACKAGE_DAYS];
 
   return (
     <>

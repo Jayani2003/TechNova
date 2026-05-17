@@ -20,22 +20,11 @@ const normalizeBookingType = (tourType = '') => {
   return 'Package Tour';
 };
 
-const ReviewGrid = ({ reviews }) => {
-  const [sort,       setSort]       = useState('newest');
-  const [starFilter, setStarFilter] = useState('All');
-  const [bookingTypeFilter, setBookingTypeFilter] = useState('All');
-
-  const processed = useMemo(() => {
-    let list = [...reviews];
-    if (starFilter !== 'All') list = list.filter(r => r.stars === Number(starFilter));
-    if (bookingTypeFilter !== 'All') {
-      list = list.filter(r => normalizeBookingType(r.tourType) === bookingTypeFilter);
-    }
-    if (sort === 'newest')  list.sort((a, b) => new Date(b.datePublished) - new Date(a.datePublished));
-    if (sort === 'highest') list.sort((a, b) => b.stars - a.stars);
-    if (sort === 'lowest')  list.sort((a, b) => a.stars - b.stars);
-    return list;
-  }, [reviews, sort, starFilter, bookingTypeFilter]);
+const ReviewGrid = ({ reviews, filters = {}, setFilters }) => {
+  // Controlled: sort and filter handled in parent (backend). We only call setFilters to request changes.
+  const sort = filters.sort || 'newest';
+  const starFilter = filters.stars || 'All';
+  const bookingTypeFilter = filters.tourTypeLabel || 'All';
 
   return (
     <>
@@ -132,7 +121,7 @@ const ReviewGrid = ({ reviews }) => {
             <button
               key={s}
               className={`rvg-star-btn ${starFilter === s ? 'active' : ''}`}
-              onClick={() => setStarFilter(s)}
+              onClick={() => setFilters({ ...filters, stars: s })}
             >
               {s === 'All' ? 'All' : `${'★'.repeat(Number(s))} ${s}`}
             </button>
@@ -143,16 +132,25 @@ const ReviewGrid = ({ reviews }) => {
             <button
               key={type}
               className={`rvg-star-btn ${bookingTypeFilter === type ? 'active' : ''}`}
-              onClick={() => setBookingTypeFilter(type)}
+              onClick={() => {
+                // map UI label to backend tourType enum/value
+                const map = {
+                  'Package Tour': 'PACKAGE',
+                  'Customised Tours': 'CUSTOM',
+                  'Point to Point Tours': 'P2P',
+                  'All': ''
+                };
+                setFilters({ ...filters, tourType: map[type], tourTypeLabel: type });
+              }}
             >
               {type}
             </button>
           ))}
-          <span className="rvg-count"><span>{processed.length}</span> reviews</span>
+          <span className="rvg-count"><span>{reviews.length}</span> reviews</span>
           <select
             className="rvg-sort"
             value={sort}
-            onChange={e => setSort(e.target.value)}
+            onChange={e => setFilters({ ...filters, sort: e.target.value })}
           >
             {SORT_OPTIONS.map(o => (
               <option key={o.value} value={o.value}>{o.label}</option>
@@ -161,7 +159,7 @@ const ReviewGrid = ({ reviews }) => {
         </div>
 
         {/* Grid */}
-        {processed.length === 0 ? (
+        {reviews.length === 0 ? (
           <div className="rvg-empty">
             <div className="rvg-empty-icon">⭐</div>
             <div className="rvg-empty-title">No reviews found</div>
@@ -170,7 +168,7 @@ const ReviewGrid = ({ reviews }) => {
         ) : (
           <div className="rvg-grid">
             <AnimatePresence>
-              {processed.map((review, i) => (
+              {reviews.map((review, i) => (
                 <motion.div
                   key={review.id}
                   layout

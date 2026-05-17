@@ -1,7 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatDate } from './reviewsData';
 import { getCountryFlag } from './countryFlags';
+
+const formatDate = (dateStr) => {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+};
 
 
 
@@ -89,6 +93,7 @@ const Lightbox = ({ images, startIndex, onClose }) => {
 const ReviewCard = ({ review, index = 0 }) => {
   const cardRef = useRef(null);
   const [lightboxIdx, setLightboxIdx] = useState(null);
+  const [expandedComment, setExpandedComment] = useState(false);
 
   useEffect(() => {
     const el = cardRef.current; if (!el) return;
@@ -140,6 +145,8 @@ const ReviewCard = ({ review, index = 0 }) => {
         .rvc-name {
           font-size: 14px; font-weight: 800;
           color: #0d2b2b; letter-spacing: -0.01em;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
         .rvc-meta {
           display: flex; align-items: center; gap: 8px;
@@ -147,6 +154,8 @@ const ReviewCard = ({ review, index = 0 }) => {
         }
         .rvc-country {
           font-size: 11px; font-weight: 400; color: #5a8080;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
         .rvc-dot { width: 3px; height: 3px; border-radius: 50%; background: #c0d8d5; }
         .rvc-date {
@@ -166,22 +175,40 @@ const ReviewCard = ({ review, index = 0 }) => {
           font-size: 1rem; font-weight: 800;
           color: #0d2b2b; letter-spacing: -0.02em;
           line-height: 1.25;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         /* Comment */
+        .rvc-comment-container { display: flex; flex-direction: column; gap: 8px; }
         .rvc-comment {
           font-size: 13.5px; font-weight: 300;
           color: #4a7070; line-height: 1.78;
           position: relative;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+          white-space: normal;
         }
         .rvc-quote-mark {
           font-size: 48px; font-weight: 800;
           color: rgba(0,176,165,0.12); line-height: 0;
           position: absolute; top: 16px; left: -8px;
         }
+        .rvc-see-more-btn {
+          align-self: flex-start;
+          background: none;
+          border: none;
+          color: #00b0a5;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          padding: 0;
+          transition: color 0.2s ease;
+        }
+        .rvc-see-more-btn:hover { color: #009e94; }
 
         /* Images */
-        .rvc-images { display: flex; gap: 8px; flex-wrap: wrap; }
+        .rvc-images { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
         .rvc-img-thumb {
           width: 80px; height: 60px; border-radius: 10px;
           object-fit: cover; cursor: pointer;
@@ -191,6 +218,26 @@ const ReviewCard = ({ review, index = 0 }) => {
         .rvc-img-thumb:hover {
           transform: scale(1.05);
           box-shadow: 0 6px 18px rgba(0,60,50,0.15);
+        }
+        .rvc-image-expand-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 80px;
+          height: 60px;
+          border-radius: 10px;
+          border: 1.5px solid rgba(0,176,165,0.25);
+          background: rgba(0,176,165,0.08);
+          color: #00b0a5;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .rvc-image-expand-btn:hover {
+          background: rgba(0,176,165,0.15);
+          border-color: #00b0a5;
+          transform: scale(1.05);
         }
 
         /* Rule */
@@ -233,15 +280,31 @@ const ReviewCard = ({ review, index = 0 }) => {
         <div className="rvc-rule" />
 
         {/* Comment */}
-        <div className="rvc-comment">
-          <span className="rvc-quote-mark">"</span>
-          <span style={{ paddingLeft: '4px' }}>{review.comment}</span>
+        <div className="rvc-comment-container">
+          <div className="rvc-comment">
+            <span className="rvc-quote-mark">"</span>
+            <span style={{ paddingLeft: '4px' }}>
+              {expandedComment
+                ? review.comment
+                : review.comment.length > 200
+                ? review.comment.substring(0, 200) + '...'
+                : review.comment}
+            </span>
+          </div>
+          {review.comment.length > 200 && (
+            <button
+              className="rvc-see-more-btn"
+              onClick={() => setExpandedComment(!expandedComment)}
+            >
+              {expandedComment ? '← See Less' : 'See More →'}
+            </button>
+          )}
         </div>
 
         {/* Images */}
         {review.images?.length > 0 && (
           <div className="rvc-images">
-            {review.images.map((img, i) => (
+            {review.images.slice(0, 4).map((img, i) => (
               <img
                 key={i}
                 src={img}
@@ -250,6 +313,14 @@ const ReviewCard = ({ review, index = 0 }) => {
                 onClick={() => setLightboxIdx(i)}
               />
             ))}
+            {review.images.length > 4 && (
+              <button
+                className="rvc-image-expand-btn"
+                onClick={() => setLightboxIdx(4)}
+              >
+                +{review.images.length - 4}
+              </button>
+            )}
           </div>
         )}
       </div>

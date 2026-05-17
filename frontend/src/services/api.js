@@ -1,7 +1,7 @@
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
  
 export const buildApiUrl = (path) => {
-  return `http://localhost:5000/api${path}`;
+  return `${API_BASE}${path}`;
 };
  
 const getHeaders = (isFormData = false) => {

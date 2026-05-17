@@ -1,3 +1,5 @@
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 const getHeaders = (isFormData = false) => {
   const token = localStorage.getItem('cbt_token');
   const headers = {};
@@ -15,6 +17,7 @@ const handleResponse = async (res) => {
 export const api = {
   get:    (path)        => fetch(buildApiUrl(path), { headers: getHeaders() }).then(handleResponse),
   post:   (path, body)  => fetch(buildApiUrl(path), { method: 'POST',   headers: getHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+  put:    (path, body)  => fetch(buildApiUrl(path), { method: 'PUT',    headers: getHeaders(), body: JSON.stringify(body) }).then(handleResponse),
   patch:  (path, body)  => fetch(buildApiUrl(path), { method: 'PATCH',  headers: getHeaders(), body: JSON.stringify(body) }).then(handleResponse),
   delete: (path)        => fetch(buildApiUrl(path), { method: 'DELETE', headers: getHeaders() }).then(handleResponse),
   upload: (path, form)  => fetch(buildApiUrl(path), { method: 'POST',   headers: getHeaders(true), body: form }).then(handleResponse),
@@ -22,5 +25,5 @@ export const api = {
  
 export const buildApiUrl = (path) => {
   // Backend routes are mounted under /api (e.g. /api/gallery)
-  return `http://localhost:5000/api${path}`;
+  return `${API_BASE}${path}`;
 };

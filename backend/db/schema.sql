@@ -34,6 +34,7 @@ CREATE TABLE vehicle (
     vehicle_id       INT AUTO_INCREMENT PRIMARY KEY,
     category_id      INT NOT NULL,
     vehicle_number   VARCHAR(50) UNIQUE NOT NULL,
+    vehicle_license  VARCHAR(100),
     name	     VARCHAR(255),
     color            VARCHAR(50),
     manufactured_year INT,
@@ -41,8 +42,19 @@ CREATE TABLE vehicle (
     baby_seats       INT DEFAULT 0,
     luggage_capacity INT,
     price_per_day    DECIMAL(10,2),
+    insurance_provider VARCHAR(100),
+    insurance_start_date DATE,
+    insurance_end_date DATE,
     image_url        VARCHAR(255),
     vehicle_status   ENUM('AVAILABLE','BOOKED','MAINTENANCE') DEFAULT 'AVAILABLE',
+    brand            VARCHAR(100),
+    model            VARCHAR(100),
+    fuel_type        VARCHAR(50),
+    transmission     VARCHAR(50),
+    air_conditioning BOOLEAN DEFAULT FALSE,
+    mileage          INT,
+    engine_capacity  VARCHAR(50),
+    features         TEXT,
     FOREIGN KEY (category_id) REFERENCES vehicle_category(category_id)
 );
 
@@ -68,13 +80,24 @@ CREATE TABLE place_activity (
     FOREIGN KEY (activity_id) REFERENCES activity(activity_id)
 );
 
+CREATE TABLE guid (
+    guid_id           INT AUTO_INCREMENT PRIMARY KEY,
+    guid_name         VARCHAR(100) NOT NULL,
+    nic               VARCHAR(50) NOT NULL,
+    contact_details   TEXT NOT NULL,
+    created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 CREATE TABLE package (
     package_id  INT AUTO_INCREMENT PRIMARY KEY,
     title       VARCHAR(150) NOT NULL,
     type        ENUM('ADVENTURE','CULTURAL HERITAGE','WELLNESS & AYURVEDA','BEACH SIDE','HILL COUNTRY','SAFARI') NOT NULL,
     days        ENUM ('7 DAYS','14 DAYS','21 DAYS','28 DAYS') NOT NULL,
     description TEXT,
-    image_url   VARCHAR(255)
+    image_url   VARCHAR(255),
+    guid_id     INT NULL,
+    FOREIGN KEY (guid_id) REFERENCES guid(guid_id) ON DELETE SET NULL
 );
 
 CREATE TABLE package_place (
@@ -89,7 +112,7 @@ CREATE TABLE package_place (
 CREATE TABLE booking (
     booking_id     INT AUTO_INCREMENT PRIMARY KEY,
     user_id    INT NOT NULL,
-    customer_name  VARCHAR(100) NOT NULL,
+    customer_name  VARCHAR(100) NOT NULL, -- Mirrors user.name at booking time
     customer_phone VARCHAR(20) NOT NULL,
     tour_type      ENUM('P2P','PACKAGE','CUSTOM') NOT NULL,
     category_id    INT NOT NULL,
@@ -115,6 +138,7 @@ CREATE TABLE booking (
     quoted_price     DECIMAL(10,2) NULL,
 
     notes          TEXT,
+    tour_thoughts  TEXT,
     booking_date   DATE NOT NULL DEFAULT (CURRENT_DATE),
 
     -- status
@@ -150,12 +174,18 @@ CREATE TABLE booking_package (
     FOREIGN KEY (package_id) REFERENCES package(package_id)
 );
 
-CREATE TABLE booking_custom (
-    id             INT AUTO_INCREMENT PRIMARY KEY,
-    booking_id     INT NOT NULL UNIQUE,
-    itinerary_text TEXT,
-    itinerary_file VARCHAR(255),
-    FOREIGN KEY (booking_id) REFERENCES booking(booking_id)
+CREATE TABLE booking_custom_cities (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id INT NOT NULL,
+    city_name  VARCHAR(100) NOT NULL,
+    FOREIGN KEY (booking_id) REFERENCES booking(booking_id) ON DELETE CASCADE
+);
+
+CREATE TABLE booking_custom_activities (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id    INT NOT NULL,
+    activity_name VARCHAR(100) NOT NULL,
+    FOREIGN KEY (booking_id) REFERENCES booking(booking_id) ON DELETE CASCADE
 );
 
 CREATE TABLE payment (
@@ -192,13 +222,47 @@ CREATE TABLE review_image (
     FOREIGN KEY (review_id) REFERENCES review(review_id)
 );
 
+CREATE VIEW review_star_summary AS
+SELECT
+    COUNT(*) AS total_reviews,
+    SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) AS five_star_reviews,
+    SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) AS four_star_reviews,
+    SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) AS three_star_reviews,
+    SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) AS two_star_reviews,
+    SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) AS one_star_reviews
+FROM review;
+
+CREATE TABLE gallery_location (
+    location_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    region VARCHAR(100) NOT NULL,
+    latitude DECIMAL(10, 6) NOT NULL,
+    longitude DECIMAL(10, 6) NOT NULL,
+    description TEXT,
+    pin_color VARCHAR(7) DEFAULT '#00b0a5',
+    photo_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_location (name, region)
+);
+
 CREATE TABLE gallery (
     gallery_id  INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(100) NOT NULL,
-    category ENUM('Vehicles', 'Traveler Photos', 'Packages Photos') NOT NULL,
+    title VARCHAR(150) NOT NULL,
     image_url VARCHAR(255) NOT NULL,
     description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    location_id INT NULL,
+    season ENUM('dry', 'inter1', 'swmonsoon', 'inter2') DEFAULT 'dry',
+    mood ENUM('adventure', 'romantic', 'family', 'scenic', 'cultural', 'wildlife') DEFAULT 'adventure',
+    event VARCHAR(100),
+    tourist_name VARCHAR(150),
+    captured_date DATE,
+    tags JSON,
+    with_tourists BOOLEAN DEFAULT FALSE,
+    status ENUM('draft', 'published') DEFAULT 'draft',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (location_id) REFERENCES gallery_location(location_id) ON DELETE SET NULL
 );
 
 CREATE TABLE contact_inquiry (

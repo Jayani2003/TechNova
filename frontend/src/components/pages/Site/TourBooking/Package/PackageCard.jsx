@@ -19,7 +19,7 @@ const TYPE_ICONS = {
   'Wellness & Ayurveda': '🌿',
 };
 
-const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
+const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDestinationsAction = true }) => {
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
   const accentColor = TYPE_COLORS[pkg.type] || '#00b0a5';
   const destinations = Array.isArray(pkg.destinations) ? pkg.destinations : [];
   const highlights = Array.isArray(pkg.highlights) ? pkg.highlights : [];
-  const topDests = destinations.slice(0, 3);
+  const topDests = destinations.slice(0, 2);
 
   return (
     <>
@@ -119,18 +119,26 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
         .pkc-dest-chips {
           position: absolute; bottom: 14px; left: 12px; right: 12px;
           display: flex; gap: 6px; flex-wrap: nowrap; overflow: hidden; z-index: 2;
+          align-items: center;
+          min-width: 0;
         }
         .pkc-dest-chip {
           background: rgba(255,255,255,0.12); backdrop-filter: blur(10px);
           border: 1px solid rgba(255,255,255,0.2);
           color: #fff; font-size: 10px; font-weight: 600;
-          padding: 4px 10px; border-radius: 100px; white-space: nowrap;
+          padding: 4px 10px; border-radius: 100px;
+          flex: 1 1 auto;
+          min-width: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .pkc-dest-more {
           background: rgba(0,176,165,0.7); backdrop-filter: blur(10px);
           border: 1px solid rgba(255,255,255,0.2);
           color: #fff; font-size: 10px; font-weight: 700;
           padding: 4px 10px; border-radius: 100px; white-space: nowrap;
+          flex: 0 0 auto;
         }
 
         /* Content */
@@ -140,14 +148,17 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
           font-size: 1.25rem; font-weight: 800;
           color: #0d2b2b; letter-spacing: -0.03em;
           line-height: 1.2; margin-bottom: 8px;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         .pkc-desc {
           font-size: 13.5px; font-weight: 300;
           color: #4a7070; line-height: 1.7;
           margin-bottom: 16px;
-          display: -webkit-box; -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical; overflow: hidden;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+          white-space: normal;
         }
 
         /* Highlights */
@@ -160,6 +171,8 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
           border: 1px solid rgba(0,176,165,0.18);
           font-size: 10px; font-weight: 600; color: #00b0a5;
           letter-spacing: 0.04em;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
 
         /* Rule */
@@ -212,37 +225,53 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
           </div>
           <div className="pkc-days-badge">📅 {pkg.days} Days</div>
 
-          <div className="pkc-dest-chips">
-            {topDests.map(d => (
-              <span key={d.name} className="pkc-dest-chip">{d.name}</span>
-            ))}
-            {destinations.length > 3 && (
-              <span className="pkc-dest-more">+{destinations.length - 3} more</span>
-            )}
-          </div>
+
+          {showDestinationsAction ? (
+            <button type="button" onClick={() => onShowMore?.(pkg)}>
+              <div className="pkc-dest-chips">
+                {topDests.map(d => (
+                  <span key={d.name} className="pkc-dest-chip">{d.name}</span>
+                ))}
+                {(pkg.hidden_dest_count > 0 || destinations.length > 2) && (
+                  <span className="pkc-dest-more">+{pkg.hidden_dest_count ?? Math.max(0, destinations.length - 2)} more</span>
+                )}
+              </div>
+            </button>
+          ) : (
+            <div className="pkc-dest-chips">
+              {topDests.map(d => (
+                <span key={d.name} className="pkc-dest-chip">{d.name}</span>
+              ))}
+              {(pkg.hidden_dest_count > 0 || destinations.length > 2) && (
+                <span className="pkc-dest-more">+{pkg.hidden_dest_count ?? Math.max(0, destinations.length - 2)} more</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Content */}
         <div className="pkc-content">
           <div className="pkc-title">{pkg.title}</div>
           <div className="pkc-desc">{pkg.description}</div>
-
+{/* 
           <div className="pkc-highlights">
             {highlights.slice(0, 3).map(h => (
               <span key={h} className="pkc-hl">✦ {h}</span>
             ))}
-          </div>
+          </div> */}
 
           <div className="pkc-rule" />
 
           <div className="pkc-actions">
-            <Link to={`/tour-booking/package?id=${pkg.id}`} className="pkc-book-btn">
-              Book Now
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </Link>
-            <button className="pkc-more-btn" onClick={() => onShowMore(pkg)}>
+            {showBookButton && (
+              <Link to={`/tour-booking/package/book?packageId=${pkg.id}&packageTitle=${encodeURIComponent(pkg.title || "Package Tour")}&packageDays=${encodeURIComponent(pkg.days || "")}`} className="pkc-book-btn">
+                Book Now
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+            )}
+            <button type="button" className="pkc-more-btn" onClick={() => onShowMore?.(pkg)} style={showBookButton ? undefined : { width: '100%' }}>
               Details
             </button>
           </div>

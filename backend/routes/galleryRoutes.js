@@ -5,6 +5,7 @@ const {
 	getGallery,
 	addGalleryItem,
 	updateGalleryItem,
+	updateGalleryStatus,
 	deleteGalleryItem,
 } = require('../controllers/galleryController');
 
@@ -13,6 +14,7 @@ const router = express.Router();
 router.get('/', getGallery);
 router.post('/', upload.single('image'), addGalleryItem);
 router.put('/:id', upload.single('image'), updateGalleryItem);
+router.patch('/:id/status', updateGalleryStatus);
 router.delete('/:id', deleteGalleryItem);
 
 module.exports = router;

@@ -15,12 +15,17 @@ CREATE TABLE user (
     country VARCHAR(100) NULL,
     zipcode VARCHAR(20) NULL,
 
+    emergency_name          VARCHAR(150) NULL,
+    emergency_phone         VARCHAR(30) NULL,
+    emergency_relationship  VARCHAR(50) NULL,
+
     auth_provider ENUM('LOCAL','GOOGLE','FACEBOOK') DEFAULT 'LOCAL',
     provider_id VARCHAR(255) NULL,
 
     status ENUM('ACTIVE','BLOCKED') DEFAULT 'ACTIVE',
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE vehicle_category (
@@ -111,8 +116,8 @@ CREATE TABLE package_place (
 
 CREATE TABLE booking (
     booking_id     INT AUTO_INCREMENT PRIMARY KEY,
-    user_id    INT NOT NULL,
-    customer_name  VARCHAR(100) NOT NULL, -- Mirrors user.name at booking time
+    user_id        INT NOT NULL,
+    customer_name  VARCHAR(100) NOT NULL,
     customer_phone VARCHAR(20) NOT NULL,
     tour_type      ENUM('P2P','PACKAGE','CUSTOM') NOT NULL,
     category_id    INT NOT NULL,
@@ -121,6 +126,7 @@ CREATE TABLE booking (
     -- trip details
     start_date     DATE NOT NULL,
     end_date       DATE NOT NULL,
+    pickup_time    TIME,                   
     start_location VARCHAR(100),
     end_location   VARCHAR(100),
 
@@ -129,10 +135,14 @@ CREATE TABLE booking (
     days_required  INT NOT NULL,
 
     -- passengers
-    no_of_luggages   VARCHAR(100),
+    luggage_10kg        INT DEFAULT 0,
+    luggage_25kg        INT DEFAULT 0,
+    luggage_35kg        INT DEFAULT 0,
+    luggage_custom_count INT DEFAULT 0,
+    luggage_custom_desc VARCHAR(255) NULL,    
     no_of_adults     INT NOT NULL DEFAULT 1,
     no_of_children   INT NOT NULL DEFAULT 0,
-    ages_of_children TEXT,
+    ages_of_children TEXT NULL,
 
     -- pricing (admin sets, customer accepts or rejects)
     quoted_price     DECIMAL(10,2) NULL,

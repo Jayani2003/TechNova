@@ -3,7 +3,7 @@ import { useState } from "react";
 import {
   X, MapPin, Calendar, Users, Car, Phone, FileText, Clock,
   DollarSign, CheckCircle2, XCircle, Truck, Flag,
-  Archive, Hash, Package, Compass,
+  Archive, Hash, Package, Compass, AlertTriangle, Briefcase,
 } from "lucide-react";
 import { StatusChip, TourTypeChip } from "./BookingChips";
 import { VEHICLE_LABELS, TOUR_TYPE_CFG, formatPhone } from "./BookingConstants";
@@ -114,35 +114,53 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
             )}
             <Row icon={Calendar} label="Start Date" value={booking.startDate} />
             <Row icon={Calendar} label="End Date"   value={booking.endDate} />
-            <Row icon={Clock}    label="Pickup Time" value={
-              booking.pickupTime ||
-              (booking.notes?.match(/Pickup time: ([^|]+)/)?.[1]?.trim()) ||
-              null
-            } />
+            <Row icon={Clock}    label="Pickup Time" value={booking.pickupTime || null} />
             <Row icon={Calendar} label="Total Days" value={booking.totalDays ? `${booking.totalDays} day(s)` : null} />
           </div>
 
           {/* Passengers */}
           <SectionTitle>Passengers & Vehicle</SectionTitle>
           <div style={{ background: card, borderRadius: 14, padding: "4px 16px", border: `1px solid ${border}`, marginBottom: 16 }}>
-            <Row icon={Users}    label="Adults"             value={booking.noOfAdults} />
-            <Row icon={Users}    label="Children"           value={booking.noOfChildren > 0 ? `${booking.noOfChildren} (Ages: ${booking.agesOfChildren || "—"})` : null} />
-            <Row icon={Car}      label="Requested Category" value={booking.categoryName || VEHICLE_LABELS[booking.categoryId] || booking.categoryId} />
-            <Row icon={FileText} label="Luggage"            value={`${booking.smallLuggages || 0} small, ${booking.largeLuggages || 0} large`} />
+            <Row icon={Users}    label="Adults"   value={booking.noOfAdults} />
+            {booking.noOfChildren > 0 && <Row icon={Users} label="Children" value={`${booking.noOfChildren} (Ages: ${booking.agesOfChildren || "—"})`} />}
             {booking.babySeatNeeded && <Row icon={Users} label="Baby Seat" value="Required" />}
+            <Row icon={Car} label="Requested Category" value={booking.categoryName || VEHICLE_LABELS[booking.categoryId] || booking.categoryId} />
+            {(booking.luggage10kg > 0 || booking.luggage25kg > 0 || booking.luggage35kg > 0 || booking.luggageCustomCount > 0) ? (
+              <>
+                {booking.luggage10kg  > 0 && <Row icon={Briefcase} label="10 kg Bags"    value={`${booking.luggage10kg} piece(s)`} />}
+                {booking.luggage25kg  > 0 && <Row icon={Briefcase} label="25 kg Bags"    value={`${booking.luggage25kg} piece(s)`} />}
+                {booking.luggage35kg  > 0 && <Row icon={Briefcase} label="35 kg Bags"    value={`${booking.luggage35kg} piece(s)`} />}
+                {booking.luggageCustomCount > 0 && (
+                  <Row icon={Briefcase} label="Custom Luggage"
+                    value={booking.luggageCustomDesc || `${booking.luggageCustomCount} item(s)`} />
+                )}
+              </>
+            ) : (
+              <Row icon={Briefcase} label="Luggage" value="No luggage specified" />
+            )}
           </div>
 
           {/* Customer */}
           <SectionTitle>Customer</SectionTitle>
           <div style={{ background: card, borderRadius: 14, padding: "4px 16px", border: `1px solid ${border}`, marginBottom: 16 }}>
-            <Row icon={Phone}    label="Name"  value={booking.customerName} />
-            <Row icon={Phone}    label="Phone" value={formatPhone(booking.customerPhone)} />
-            <Row icon={FileText} label="Email" value={booking.customerEmail} />
-            {booking.notes && (() => {
-              const clean = booking.notes.replace(/Pickup time: [^|]+\|?\s*/g, '').trim();
-              return clean ? <Row icon={FileText} label="Notes" value={clean} /> : null;
-            })()}
+            <Row icon={Phone}    label="Full Name" value={booking.customerName} />
+            <Row icon={Phone}    label="Phone"     value={formatPhone(booking.customerPhone)} />
+            <Row icon={FileText} label="Email"     value={booking.customerEmail} />
+            {booking.notes        && <Row icon={FileText} label="Notes"         value={booking.notes} />}
+            {booking.tourThoughts && <Row icon={FileText} label="Tour Thoughts" value={booking.tourThoughts} />}
           </div>
+
+          {/* Emergency Contact */}
+          {(booking.emergencyName || booking.emergencyPhone) && (
+            <>
+              <SectionTitle color="#f59e0b">Emergency Contact</SectionTitle>
+              <div style={{ background: card, borderRadius: 14, padding: "4px 16px", border: `1px solid ${border}`, marginBottom: 16 }}>
+                <Row icon={AlertTriangle} label="Name"         value={booking.emergencyName} />
+                <Row icon={AlertTriangle} label="Relationship" value={booking.emergencyRelationship} />
+                <Row icon={Phone}         label="Phone"        value={formatPhone(booking.emergencyPhone)} />
+              </div>
+            </>
+          )}
 
           {/* Already assigned vehicle */}
           {booking.assignedVehicle && (

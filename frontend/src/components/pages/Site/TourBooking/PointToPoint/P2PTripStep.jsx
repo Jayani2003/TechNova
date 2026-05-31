@@ -1,157 +1,298 @@
-import { MapPin, Calendar, Clock } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { MapPin, Calendar, Clock, Search, X } from "lucide-react";
+import { SRI_LANKA_LOCATIONS } from "./sriLankaLocations.js";
 
 const inputClass =
-  "w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20";
+  "w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20";
 
-const P2PTripStep = ({ data, onChange }) => {
-  const today = new Date().toISOString().split("T")[0];
+// ─── Keyboard-accessible Location Input ───────────────────────────────────────
+// - No category grouping: flat list so users can navigate with arrow keys
+// - Keyboard: ArrowDown/Up moves highlight, Enter selects, Escape closes
+// - Free-type is allowed: if user types a custom location and presses Enter
+//   with nothing highlighted, the typed value is accepted as-is
+const LocationInput = ({ value, onChange, placeholder, pinColor, id }) => {
+  const [query,     setQuery]     = useState(value || "");
+  const [open,      setOpen]      = useState(false);
+  const [results,   setResults]   = useState([]);
+  const [activeIdx, setActiveIdx] = useState(-1);
 
-  const handleStartDate = (val) => {
-    onChange("startDate", val);
-    if (data.endDate && val > data.endDate) {
-      onChange("endDate", val);
-    }
-    // Recalculate total days
-    if (data.endDate) {
-      const diff = Math.ceil(
-        (new Date(data.endDate) - new Date(val)) / (1000 * 60 * 60 * 24)
-      ) + 1;
-      onChange("totalDays", diff > 0 ? diff : 1);
-      onChange("daysRequired", diff > 0 ? diff : 1);
+  const containerRef = useRef(null);
+  const listRef      = useRef(null);
+  const inputRef     = useRef(null);
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target))
+        setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Sync if parent value changes (e.g. clear)
+  useEffect(() => { setQuery(value || ""); }, [value]);
+
+  // Scroll active item into view
+  useEffect(() => {
+    if (!listRef.current || activeIdx < 0) return;
+    const item = listRef.current.children[activeIdx];
+    if (item) item.scrollIntoView({ block: "nearest" });
+  }, [activeIdx]);
+
+  const search = useCallback((val) => {
+    setQuery(val);
+    onChange(val);
+    if (!val.trim()) { setResults([]); setOpen(false); setActiveIdx(-1); return; }
+    const q   = val.toLowerCase();
+    const res = SRI_LANKA_LOCATIONS.filter(loc =>
+      loc.toLowerCase().includes(q)
+    ).slice(0, 15);
+    setResults(res);
+    setOpen(res.length > 0);
+    setActiveIdx(-1);
+  }, [onChange]);
+
+  const select = useCallback((loc) => {
+    setQuery(loc);
+    onChange(loc);
+    setOpen(false);
+    setResults([]);
+    setActiveIdx(-1);
+    inputRef.current?.focus();
+  }, [onChange]);
+
+  const handleKeyDown = (e) => {
+    if (!open && e.key !== "ArrowDown") return;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        if (!open && results.length > 0) { setOpen(true); return; }
+        setActiveIdx(i => Math.min(i + 1, results.length - 1));
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setActiveIdx(i => Math.max(i - 1, -1));
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (activeIdx >= 0 && results[activeIdx]) {
+          select(results[activeIdx]);
+        } else if (query.trim()) {
+          // Accept free-typed value as-is
+          onChange(query.trim());
+          setOpen(false);
+        }
+        break;
+      case "Escape":
+        setOpen(false);
+        setActiveIdx(-1);
+        break;
+      case "Tab":
+        // Accept highlighted item on Tab if one is active
+        if (activeIdx >= 0 && results[activeIdx]) {
+          select(results[activeIdx]);
+        }
+        setOpen(false);
+        break;
+      default:
+        break;
     }
   };
 
-  const handleEndDate = (val) => {
-    onChange("endDate", val);
-    if (data.startDate) {
-      const diff = Math.ceil(
-        (new Date(val) - new Date(data.startDate)) / (1000 * 60 * 60 * 24)
-      ) + 1;
-      onChange("totalDays", diff > 0 ? diff : 1);
-      onChange("daysRequired", diff > 0 ? diff : 1);
-    }
+  const clear = () => {
+    setQuery("");
+    onChange("");
+    setResults([]);
+    setOpen(false);
+    setActiveIdx(-1);
+    inputRef.current?.focus();
+  };
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div className="relative">
+        <MapPin className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${pinColor}`} />
+        <input
+          ref={inputRef}
+          id={id}
+          type="text"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={open}
+          aria-activedescendant={activeIdx >= 0 ? `${id}-opt-${activeIdx}` : undefined}
+          value={query}
+          onChange={e => search(e.target.value)}
+          onFocus={() => results.length > 0 && setOpen(true)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className={`${inputClass} pl-9 pr-9`}
+          autoComplete="off"
+        />
+        {query ? (
+          <button
+            type="button"
+            aria-label="Clear"
+            onClick={clear}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        ) : (
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
+        )}
+      </div>
+
+      {open && (
+        <ul
+          ref={listRef}
+          role="listbox"
+          id={`${id}-listbox`}
+          className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto py-1"
+        >
+          {results.map((loc, i) => (
+            <li
+              key={loc}
+              id={`${id}-opt-${i}`}
+              role="option"
+              aria-selected={i === activeIdx}
+              onMouseDown={e => { e.preventDefault(); select(loc); }}
+              onMouseEnter={() => setActiveIdx(i)}
+              className={`flex items-center gap-2.5 px-4 py-2.5 text-sm cursor-pointer transition-colors ${
+                i === activeIdx
+                  ? "bg-[#F5820D]/8 text-[#F5820D]"
+                  : "text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              <MapPin className={`w-3.5 h-3.5 flex-shrink-0 ${i === activeIdx ? "text-[#F5820D]" : "text-slate-300"}`} />
+              <span>{loc}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+// ─── Main Trip Step ────────────────────────────────────────────────────────────
+const P2PTripStep = ({ data, onChange }) => {
+  const today = new Date().toISOString().split("T")[0];
+
+  const handleDate = (val) => {
+    onChange("startDate",    val);
+    onChange("endDate",      val);
+    onChange("totalDays",    1);
+    onChange("daysRequired", 1);
   };
 
   return (
     <div className="space-y-6">
+
+      {/* ── Locations ── */}
       <div>
         <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-[#00b0a5]" /> Trip Locations
+          <MapPin className="w-5 h-5 text-[#F5820D]" /> Trip Locations
         </h3>
         <p className="text-sm text-slate-500 mb-4">
-          Enter your pickup and drop-off locations anywhere in Sri Lanka.
+          Type to search — use <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono">↑ ↓</kbd> to navigate,{" "}
+          <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono">Enter</kbd> to select,{" "}
+          <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono">Esc</kbd> to close.
+          You can also type a custom location name.
         </p>
 
         <div className="space-y-4">
-          {/* Start Location */}
-          <div className="relative">
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
+          {/* Pickup */}
+          <div>
+            <label htmlFor="pickup-location" className="block text-sm font-semibold text-slate-700 mb-1">
               Pickup Location *
             </label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#00b0a5]" />
-              <input
-                type="text"
-                value={data.startLocation}
-                onChange={(e) => onChange("startLocation", e.target.value)}
-                placeholder="E.g. Colombo Airport, Kandy Hotel..."
-                className={`${inputClass} pl-10`}
-              />
-            </div>
+            <LocationInput
+              id="pickup-location"
+              value={data.startLocation}
+              onChange={val => onChange("startLocation", val)}
+              placeholder="Search airport, city, hotel area…"
+              pinColor="text-[#F5820D]"
+            />
           </div>
 
-          {/* Arrow indicator */}
+          {/* Arrow */}
           <div className="flex items-center gap-3 px-3">
             <div className="flex-1 h-px bg-slate-200" />
             <div className="flex flex-col items-center gap-1">
-              <div className="w-8 h-8 rounded-full bg-[#00b0a5]/10 flex items-center justify-center">
-                <span className="text-[#00b0a5] text-lg">↓</span>
+              <div className="w-8 h-8 rounded-full bg-[#F5820D]/10 flex items-center justify-center">
+                <span className="text-[#F5820D] text-lg">↓</span>
               </div>
               <span className="text-xs text-slate-400">One way</span>
             </div>
             <div className="flex-1 h-px bg-slate-200" />
           </div>
 
-          {/* End Location */}
+          {/* Drop-off */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
+            <label htmlFor="dropoff-location" className="block text-sm font-semibold text-slate-700 mb-1">
               Drop-off Location *
             </label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400" />
-              <input
-                type="text"
-                value={data.endLocation}
-                onChange={(e) => onChange("endLocation", e.target.value)}
-                placeholder="E.g. Galle Fort, Ella, Sigiriya..."
-                className={`${inputClass} pl-10`}
-              />
-            </div>
+            <LocationInput
+              id="dropoff-location"
+              value={data.endLocation}
+              onChange={val => onChange("endLocation", val)}
+              placeholder="Search tourist spot, city, beach…"
+              pinColor="text-red-400"
+            />
           </div>
         </div>
       </div>
 
-      {/* Dates */}
+      {/* ── Date & Time ── */}
       <div>
         <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-[#00b0a5]" /> Travel Dates
+          <Calendar className="w-5 h-5 text-[#F5820D]" /> Travel Date & Time
         </h3>
         <p className="text-sm text-slate-500 mb-4">
-          When would you like to travel?
+          Point-to-point is a one-day hire. Select your travel date and preferred pickup time.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Start Date *
+            <label htmlFor="travel-date" className="block text-sm font-semibold text-slate-700 mb-1">
+              Travel Date *
             </label>
             <input
+              id="travel-date"
               type="date"
               min={today}
               value={data.startDate}
-              onChange={(e) => handleStartDate(e.target.value)}
+              onChange={e => handleDate(e.target.value)}
               className={inputClass}
             />
           </div>
+
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              End Date *
+            <label htmlFor="pickup-time" className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
+              <Clock className="w-4 h-4" /> Preferred Pickup Time *
             </label>
             <input
-              type="date"
-              min={data.startDate || today}
-              value={data.endDate}
-              onChange={(e) => handleEndDate(e.target.value)}
+              id="pickup-time"
+              type="time"
+              value={data.pickupTime}
+              onChange={e => onChange("pickupTime", e.target.value)}
               className={inputClass}
             />
           </div>
         </div>
 
-        {/* Pickup Time */}
-        <div className="mt-4">
-          <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-            <Clock className="w-4 h-4" /> Preferred Pickup Time *
-          </label>
-          <input
-            type="time"
-            value={data.pickupTime}
-            onChange={(e) => onChange("pickupTime", e.target.value)}
-            className={inputClass}
-          />
-        </div>
-
-        {/* Total days display */}
-        {data.totalDays > 0 && (
-          <div className="mt-4 bg-[#00b0a5]/5 border border-[#00b0a5]/20 rounded-xl p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#00b0a5]/10 rounded-full flex items-center justify-center flex-shrink-0">
-              <Calendar className="w-5 h-5 text-[#00b0a5]" />
+        {data.startDate && data.pickupTime && (
+          <div className="mt-4 bg-[#F5820D]/5 border border-[#F5820D]/20 rounded-xl p-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#F5820D]/10 rounded-full flex items-center justify-center flex-shrink-0">
+              <Calendar className="w-5 h-5 text-[#F5820D]" />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-800">
-                {data.totalDays} {data.totalDays === 1 ? "Day" : "Days"} Trip
-              </p>
-              <p className="text-xs text-slate-500">
-                {data.startDate} → {data.endDate}
+              <p className="text-sm font-bold text-slate-800">One-Day Transfer</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {data.startDate} at {data.pickupTime}
+                {data.startLocation && data.endLocation &&
+                  ` · ${data.startLocation} → ${data.endLocation}`}
               </p>
             </div>
           </div>

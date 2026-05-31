@@ -6,9 +6,10 @@ const galleryRoutes = require('./routes/galleryRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 const reviewRoutes  = require('./routes/reviewRoutes');
 const authRoutes    = require('./routes/authRoutes');
+const otpRoutes     = require('./routes/otpRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
- 
+
 
 
 const packageRoutes = require('./routes/packageRoutes');
@@ -46,6 +47,7 @@ app.get('/', (_req, res) => res.send('TechNova backend is running.'));
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 app.use('/api/auth',     authRoutes);
+app.use('/api/auth/otp',  otpRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/gallery',  galleryRoutes);
 app.use('/api/locations', locationRoutes);

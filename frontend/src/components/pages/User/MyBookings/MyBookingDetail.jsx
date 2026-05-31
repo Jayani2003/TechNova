@@ -77,6 +77,15 @@ const MyBookingDetail = ({ booking, onBack }) => {
             <span>Modify Request</span>
           </button>
         )}
+
+        {/* Payments button - navigates to profile Payments tab for this booking */}
+        <button
+          onClick={() => navigate('/user/profile', { state: { activeTab: 'payments', bookingId: booking.id } })}
+          className="ml-3 flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0d1720] text-white font-semibold text-sm hover:bg-[#0b1418] transition-all cursor-pointer"
+        >
+          <Zap className="w-4 h-4" />
+          <span>Payments</span>
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-0 pr-1">

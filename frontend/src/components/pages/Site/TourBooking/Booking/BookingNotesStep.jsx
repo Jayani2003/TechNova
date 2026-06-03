@@ -42,7 +42,7 @@ const EMERGENCY_RELATIONSHIPS = [
 ];
 
 const inputClass =
-  "w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20";
+  "w-full px-4 py-3 bg-white border border-[#F5820D]/15 rounded-xl text-[#2C2F3A] text-sm outline-none transition-all focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20";
 
 const validatePhone = (digits, code) => {
   if (!digits) return "Phone number is required.";
@@ -178,7 +178,7 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-semibold text-slate-700">
+      <label className="block text-sm font-semibold text-[#2C2F3A]">
         Phone Number <span className="text-red-500">*</span>
       </label>
 
@@ -189,13 +189,13 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
             value={countryCode}
             onChange={e => handleCountryChange(e.target.value)}
             disabled={verified}
-            className="appearance-none pl-3 pr-7 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20 cursor-pointer min-w-[160px] disabled:opacity-60"
+            className="appearance-none pl-3 pr-7 py-3 bg-white border border-[#F5820D]/15 rounded-xl text-[#2C2F3A] text-sm outline-none focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20 cursor-pointer min-w-[160px] disabled:opacity-60"
           >
             {COUNTRIES.map(c => (
               <option key={c.code} value={c.code}>{c.flag} {c.name} ({c.code})</option>
             ))}
           </select>
-          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]/70 pointer-events-none" />
         </div>
         <input
           type="tel"
@@ -204,7 +204,7 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
           onBlur={() => setTouched(true)}
           placeholder={`${country.minLen} digits`}
           disabled={verified}
-          className={`${inputClass} flex-1 disabled:opacity-60 disabled:bg-slate-50 ${
+          className={`${inputClass} flex-1 disabled:opacity-60 disabled:bg-[#FFF8F0] ${
             touched && phoneError   ? "border-red-400 focus:ring-red-400/20 focus:border-red-400"
           : verified               ? "border-green-400 bg-green-50"
           : touched && phoneValid  ? "border-green-400 focus:ring-green-400/20 focus:border-green-400"
@@ -215,7 +215,7 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
       {/* Format hint / error */}
       {touched && phoneError
         ? <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{phoneError}</p>
-        : <p className="text-xs text-slate-400">{country.name}: {country.minLen === country.maxLen ? `${country.minLen} digits` : `${country.minLen}–${country.maxLen} digits`} required</p>
+        : <p className="text-xs text-[#6B7280]/70">{country.name}: {country.minLen === country.maxLen ? `${country.minLen} digits` : `${country.minLen}–${country.maxLen} digits`} required</p>
       }
 
       {/* ── Verified state ── */}
@@ -226,7 +226,7 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
             <span className="text-sm font-semibold">Phone number verified</span>
           </div>
           <button type="button" onClick={reset}
-            className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1 underline underline-offset-2">
+            className="text-xs text-[#6B7280] hover:text-[#2C2F3A] flex items-center gap-1 underline underline-offset-2">
             <RefreshCw className="w-3 h-3" /> Change number
           </button>
         </div>
@@ -249,9 +249,9 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
 
       {/* ── OTP entry (shown after send) ── */}
       {!verified && otpSent && (
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
-          <p className="text-sm text-slate-600">
-            We sent a 6-digit code to <span className="font-bold text-slate-800">{fullPhone}</span>.
+        <div className="bg-[#FFF8F0] border border-[#F5820D]/15 rounded-xl p-4 space-y-3">
+          <p className="text-sm text-[#2C2F3A]/70">
+            We sent a 6-digit code to <span className="font-bold text-[#2C2F3A]">{fullPhone}</span>.
             Enter it below.
           </p>
 
@@ -269,7 +269,7 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
                 onKeyDown={e => handleOtpKeyDown(i, e)}
                 className={`w-11 h-12 text-center text-lg font-bold border-2 rounded-xl outline-none transition-all
                   focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20 bg-white
-                  ${verifyError ? "border-red-400" : d ? "border-[#F5820D]/40" : "border-slate-200"}`}
+                  ${verifyError ? "border-red-400" : d ? "border-[#F5820D]/40" : "border-[#F5820D]/15"}`}
               />
             ))}
           </div>
@@ -284,7 +284,7 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
               type="button"
               onClick={verifyOtp}
               disabled={!otpComplete || verifying}
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#00b0a5] hover:bg-[#00908a] disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#F0A500] hover:bg-[#C85A00] disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
             >
               {verifying ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying…</> : <>Verify Code</>}
             </button>
@@ -294,7 +294,7 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
               type="button"
               onClick={sendOtp}
               disabled={cooldown > 0 || sending}
-              className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 disabled:opacity-40"
+              className="flex items-center gap-1.5 text-sm text-[#6B7280] hover:text-[#2C2F3A] disabled:opacity-40"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
@@ -327,7 +327,7 @@ const PhoneInput = ({ value, onChange, label, required }) => {
 
   return (
     <div>
-      <label className="block text-sm font-semibold text-slate-700 mb-1">
+      <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">
         {label} {required && "*"}
       </label>
       <div className="flex gap-2">
@@ -335,11 +335,11 @@ const PhoneInput = ({ value, onChange, label, required }) => {
           <select
             value={getCode()}
             onChange={e => onChange(`${e.target.value} ${getNumber()}`)}
-            className="appearance-none pl-3 pr-7 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20 cursor-pointer min-w-[160px]"
+            className="appearance-none pl-3 pr-7 py-3 bg-white border border-[#F5820D]/15 rounded-xl text-[#2C2F3A] text-sm outline-none focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20 cursor-pointer min-w-[160px]"
           >
             {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.name} ({c.code})</option>)}
           </select>
-          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]/70 pointer-events-none" />
         </div>
         <input
           type="tel"
@@ -357,7 +357,7 @@ const PhoneInput = ({ value, onChange, label, required }) => {
         ? <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{error}</p>
         : touched && isValid
           ? <p className="text-xs text-green-600 mt-1.5">✓ Valid {country.name} number</p>
-          : <p className="text-xs text-slate-400 mt-1.5">{country.name}: {country.minLen === country.maxLen ? `${country.minLen} digits` : `${country.minLen}–${country.maxLen} digits`} required</p>
+          : <p className="text-xs text-[#6B7280]/70 mt-1.5">{country.name}: {country.minLen === country.maxLen ? `${country.minLen} digits` : `${country.minLen}–${country.maxLen} digits`} required</p>
       }
     </div>
   );
@@ -372,17 +372,17 @@ const BookingNotesStep = ({ data, onChange }) => {
 
       {/* ── Contact Details ── */}
       <div>
-        <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
+        <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
           <Phone className="w-5 h-5 text-[#F5820D]" /> Contact Details
         </h3>
-        <p className="text-sm text-slate-500 mb-4">
+        <p className="text-sm text-[#6B7280] mb-4">
           We'll use this to reach you about your booking.
         </p>
         <div className="space-y-4">
 
           {/* Full Name */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name *</label>
+            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">Full Name *</label>
             <input
               type="text"
               value={data.customerName}
@@ -405,9 +405,9 @@ const BookingNotesStep = ({ data, onChange }) => {
 
           {/* Note: OTP verification is for customer's own number only */}
           {!phoneVerified && (
-            <div className="flex items-start gap-3 bg-[#F5820D]/5 border border-[#F5820D]/15 rounded-xl px-4 py-3">
+            <div className="flex items-start gap-3 bg-[#F5820D]/8 border border-[#F5820D]/20 rounded-xl px-4 py-3">
               <Globe className="w-4 h-4 text-[#F5820D] flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-[#2C2F3A]/70 leading-relaxed">
                 We verify your phone number via a one-time code to ensure our team can reach you.
                 Emergency contact numbers are not verified.
               </p>
@@ -418,15 +418,15 @@ const BookingNotesStep = ({ data, onChange }) => {
 
       {/* ── Emergency Contact (no OTP) ── */}
       <div>
-        <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
+        <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
           <UserPlus className="w-5 h-5 text-[#F5820D]" /> Emergency Contact
         </h3>
-        <p className="text-sm text-slate-500 mb-4">
+        <p className="text-sm text-[#6B7280] mb-4">
           In case of emergency, who should we contact? This is saved to your profile.
         </p>
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-4">
+        <div className="bg-white border border-[#F5820D]/15 rounded-2xl p-4 space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Emergency Contact Name *</label>
+            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">Emergency Contact Name *</label>
             <input
               type="text"
               value={data.emergencyName || ""}
@@ -437,7 +437,7 @@ const BookingNotesStep = ({ data, onChange }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Relationship *</label>
+            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">Relationship *</label>
             <select
               value={data.emergencyRelationship || ""}
               onChange={e => onChange("emergencyRelationship", e.target.value)}
@@ -459,10 +459,10 @@ const BookingNotesStep = ({ data, onChange }) => {
 
       {/* ── Additional Notes ── */}
       <div>
-        <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
+        <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
           <FileText className="w-5 h-5 text-[#F5820D]" /> Additional Notes
         </h3>
-        <p className="text-sm text-slate-500 mb-4">
+        <p className="text-sm text-[#6B7280] mb-4">
           Any special requests, preferences, or information for the driver.
         </p>
         <textarea

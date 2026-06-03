@@ -15,13 +15,13 @@ const VEHICLE_LABELS = {
 
 const ReviewRow = ({ icon: Icon, label, value }) =>
   value ? (
-    <div className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
-      <div className="w-8 h-8 bg-[#00b0a5]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-        <Icon className="w-4 h-4 text-[#00b0a5]" />
+    <div className="flex items-start gap-3 py-3 border-b border-[#F5820D]/10 last:border-0">
+      <div className="w-8 h-8 bg-[#F0A500]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+        <Icon className="w-4 h-4 text-[#F0A500]" />
       </div>
       <div>
-        <p className="text-xs text-slate-400 font-medium">{label}</p>
-        <p className="text-sm font-semibold text-slate-800 mt-0.5">{value}</p>
+        <p className="text-xs text-[#6B7280]/70 font-medium">{label}</p>
+        <p className="text-sm font-semibold text-[#2C2F3A] mt-0.5">{value}</p>
       </div>
     </div>
   ) : null;
@@ -46,20 +46,20 @@ const P2PReviewStep = ({ data }) => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-bold text-slate-800 mb-1">Review Your Booking</h3>
-        <p className="text-sm text-slate-500">
+        <h3 className="text-lg font-bold text-[#2C2F3A] mb-1">Review Your Booking</h3>
+        <p className="text-sm text-[#6B7280]">
           Please review all details before submitting. Our team will respond with a price quote within 24 hours.
         </p>
       </div>
 
       {/* Booking type badge */}
-      <div className="inline-flex items-center gap-2 bg-[#00b0a5]/10 text-[#00b0a5] px-4 py-2 rounded-full text-sm font-bold">
+      <div className="inline-flex items-center gap-2 bg-[#F0A500]/10 text-[#F0A500] px-4 py-2 rounded-full text-sm font-bold">
         🚗 Point-to-Point Transfer
       </div>
 
       {/* Trip Details */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Trip Details</p>
+      <div className="bg-white rounded-2xl border border-[#F5820D]/10 shadow-sm p-5">
+        <p className="text-xs font-bold text-[#6B7280]/70 uppercase tracking-wider mb-3">Trip Details</p>
         <ReviewRow icon={MapPin}     label="Pickup Location"   value={data.startLocation} />
         <ReviewRow icon={MapPin}     label="Drop-off Location" value={data.endLocation} />
         <ReviewRow icon={Calendar}   label="Travel Dates"      value={`${data.startDate} → ${data.endDate}`} />
@@ -68,8 +68,8 @@ const P2PReviewStep = ({ data }) => {
       </div>
 
       {/* Passengers & Vehicle */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Passengers & Vehicle</p>
+      <div className="bg-white rounded-2xl border border-[#F5820D]/10 shadow-sm p-5">
+        <p className="text-xs font-bold text-[#6B7280]/70 uppercase tracking-wider mb-3">Passengers & Vehicle</p>
         <ReviewRow icon={Users}    label="Adults"           value={`${data.noOfAdults} adult(s)`} />
         {data.noOfChildren > 0 && (
           <ReviewRow
@@ -83,8 +83,8 @@ const P2PReviewStep = ({ data }) => {
       </div>
 
       {/* Contact Details */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Contact Details</p>
+      <div className="bg-white rounded-2xl border border-[#F5820D]/10 shadow-sm p-5">
+        <p className="text-xs font-bold text-[#6B7280]/70 uppercase tracking-wider mb-3">Contact Details</p>
         <ReviewRow icon={Phone} label="Full Name"    value={customerFullName} />
         <ReviewRow icon={Phone} label="Email"        value={user?.email || "—"} />
         <ReviewRow icon={Phone} label="Phone"        value={data.customerPhone || "—"} />
@@ -94,8 +94,8 @@ const P2PReviewStep = ({ data }) => {
       </div>
 
       {/* Emergency Contact */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+      <div className="bg-white rounded-2xl border border-[#F5820D]/10 shadow-sm p-5">
+        <p className="text-xs font-bold text-[#6B7280]/70 uppercase tracking-wider mb-3 flex items-center gap-2">
           <AlertTriangle className="w-3.5 h-3.5 text-amber-500" /> Emergency Contact
         </p>
         {data.emergencyName || data.emergencyPhone ? (
@@ -105,13 +105,13 @@ const P2PReviewStep = ({ data }) => {
             <ReviewRow icon={Phone} label="Emergency Contact Phone"        value={data.emergencyPhone || "—"} />
           </>
         ) : (
-          <p className="text-sm text-slate-400 italic py-2">No emergency contact provided.</p>
+          <p className="text-sm text-[#6B7280]/70 italic py-2">No emergency contact provided.</p>
         )}
       </div>
 
       {/* What happens next */}
-      <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-        <p className="text-sm font-bold text-slate-700 mb-3">What happens after you submit?</p>
+      <div className="bg-[#FFF8F0] rounded-2xl p-5 border border-[#F5820D]/10">
+        <p className="text-sm font-bold text-[#2C2F3A] mb-3">What happens after you submit?</p>
         {[
           "Your booking is submitted with status: PENDING",
           "Our team reviews your request within 24 hours",
@@ -120,10 +120,10 @@ const P2PReviewStep = ({ data }) => {
           "Once accepted, we confirm and assign your vehicle",
         ].map((step, i) => (
           <div key={i} className="flex items-start gap-2 mb-2">
-            <div className="w-5 h-5 rounded-full bg-[#00b0a5] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">
+            <div className="w-5 h-5 rounded-full bg-[#F0A500] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">
               {i + 1}
             </div>
-            <p className="text-sm text-slate-600">{step}</p>
+            <p className="text-sm text-[#2C2F3A]/70">{step}</p>
           </div>
         ))}
       </div>

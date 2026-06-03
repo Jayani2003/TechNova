@@ -42,17 +42,17 @@ const initialData = {
  
 // ─── Guest Guard ──────────────────────────────────────────────────────────────
 const GuestGuard = ({ navigate }) => (
-  <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+  <div className="min-h-screen bg-[#FFF8F0] flex items-center justify-center px-4">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center max-w-md w-full"
+      className="bg-white rounded-2xl border border-[#F5820D]/10 shadow-sm p-10 text-center max-w-md w-full"
     >
       <div className="w-16 h-16 bg-[#F5820D]/10 rounded-full flex items-center justify-center mx-auto mb-4">
         <Lock className="w-8 h-8 text-[#F5820D]" />
       </div>
-      <h2 className="text-2xl font-extrabold text-slate-800 mb-2">Login Required</h2>
-      <p className="text-slate-500 text-sm mb-6">
+      <h2 className="text-2xl font-extrabold text-[#2C2F3A] mb-2">Login Required</h2>
+      <p className="text-[#6B7280] text-sm mb-6">
         You need to be logged in to place a booking.
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -64,7 +64,7 @@ const GuestGuard = ({ navigate }) => (
         </button>
         <button
           onClick={() => navigate("/register")}
-          className="border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
+          className="border border-[#F5820D]/15 text-[#2C2F3A] px-6 py-3 rounded-xl font-semibold hover:bg-[#FFF8F0] transition-colors cursor-pointer"
         >
           Register
         </button>
@@ -84,18 +84,18 @@ const SuccessScreen = ({ bookingId, navigate }) => (
     <div className="w-20 h-20 bg-[#F5820D]/10 rounded-full flex items-center justify-center mx-auto mb-6">
       <CheckCircle className="w-10 h-10 text-[#F5820D]" />
     </div>
-    <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight mb-3">
+    <h2 className="text-2xl font-extrabold text-[#2C2F3A] tracking-tight mb-3">
       Booking Submitted!
     </h2>
-    <p className="text-slate-500 text-sm mb-2">Your booking reference is:</p>
+    <p className="text-[#6B7280] text-sm mb-2">Your booking reference is:</p>
     <p className="text-lg font-bold text-[#F5820D] mb-8">{bookingId}</p>
-    <div className="bg-slate-50 rounded-2xl p-5 mb-6 text-left space-y-2">
+    <div className="bg-[#FFF8F0] rounded-2xl p-5 mb-6 text-left space-y-2">
       {[
         "Your booking is now PENDING",
         "Our team will review and send a price quote within 24 hours",
         "You can track your booking status from your profile",
       ].map((s, i) => (
-        <div key={i} className="flex items-start gap-2 text-sm text-slate-600">
+        <div key={i} className="flex items-start gap-2 text-sm text-[#2C2F3A]/70">
           <span className="text-[#F5820D] font-bold flex-shrink-0">✓</span>
           {s}
         </div>
@@ -199,7 +199,7 @@ const PointToPoint = () => {
   const canProceed = validateStep(currentStep, data);
  
   return (
-    <div className="min-h-screen bg-slate-50 pb-16">
+    <div className="min-h-screen bg-[#FFF8F0] pb-16">
  
       {/* ── Page Title ── */}
       <div className="text-center py-12 px-4">
@@ -211,10 +211,10 @@ const PointToPoint = () => {
           <span className="inline-flex items-center gap-2 px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#F5820D] rounded-full">
             <MapPin className="w-3 h-3" /> Point-to-Point Transfer
           </span>
-          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-800 mb-4 tracking-tight">
+          <h1 className="text-5xl md:text-7xl font-extrabold text-[#2C2F3A] mb-4 tracking-tight">
             Book Your <span className="text-[#F5820D]">Transfer.</span>
           </h1>
-          <p className="text-lg text-slate-500 max-w-xl mx-auto font-light">
+          <p className="text-lg text-[#6B7280] max-w-xl mx-auto font-light">
             Reliable one-way transfers between any two locations in Sri Lanka with professional drivers and premium vehicles.
           </p>
         </motion.div>
@@ -233,7 +233,7 @@ const PointToPoint = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8"
+              className="bg-white rounded-2xl border border-[#F5820D]/10 shadow-sm p-8"
             >
               {submitted ? (
                 <SuccessScreen bookingId={bookingId} navigate={navigate} />
@@ -262,11 +262,11 @@ const PointToPoint = () => {
                   </AnimatePresence>
  
                   {/* Navigation */}
-                  <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
+                  <div className="flex items-center justify-between mt-8 pt-6 border-t border-[#F5820D]/10">
                     <button
                       onClick={handleBack}
                       disabled={currentStep === 0}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#F5820D]/15 text-[#2C2F3A]/70 font-semibold hover:bg-[#FFF8F0] transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                     >
                       <ChevronLeft className="w-4 h-4" /> Back
                     </button>

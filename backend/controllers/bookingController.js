@@ -1,12 +1,51 @@
 const db = require('../db/connection');
+const PDFDocument = require('pdfkit');
 
 const formatDate = (val) => {
   if (!val) return null;
   if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
-  return new Date(val).toISOString().split('T')[0];
+  const dt = new Date(val);
+  if (Number.isNaN(dt.getTime())) return null;
+  return dt.toISOString().split('T')[0];
 };
 
 const normalizeTourType = (value) => String(value || 'P2P').toUpperCase();
+
+const COMPANY_NAME = 'TechNova Tours';
+
+const getBookingReference = (tourType, bookingId) => {
+  const type = normalizeTourType(tourType);
+  const typeCode = type === 'PACKAGE' ? 'PKG' : type === 'CUSTOM' ? 'CUS' : 'P2P';
+  return `CBT-${typeCode}-${bookingId}`;
+};
+
+const formatMoney = (value) => {
+  if (value === null || value === undefined) return 'N/A';
+  const n = Number(value);
+  if (Number.isNaN(n)) return 'N/A';
+  return `LKR ${n.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
+
+const getPaymentScheduleLines = (tourType, quotedPrice) => {
+  const amount = Number(quotedPrice || 0);
+  const isP2P = normalizeTourType(tourType) === 'P2P';
+
+  if (isP2P) {
+    return [
+      `FULL: ${formatMoney(amount)} payable before trip start.`,
+    ];
+  }
+
+  const deposit = amount * 0.3;
+  const final = amount - deposit;
+
+  return [
+    `DEPOSIT (30%): ${formatMoney(deposit)} payable at confirmation.`,
+    `FINAL (70%): ${formatMoney(final)} payable before trip start.`,
+  ];
+};
+
+const PDF_ALLOWED_STATUSES = ['ACCEPTED', 'CONFIRMED', 'TOUR_STARTED', 'COMPLETED', 'CLOSED'];
 
 // ── mapBooking ────────────────────────────────────────────────────────────────
 // Maps a raw DB row to the shape expected by the frontend.
@@ -465,6 +504,120 @@ const updateBooking = async (req, res) => {
   }
 };
 
+// ── GET /api/bookings/:id/confirmation-pdf ──────────────────────────────────
+const downloadBookingConfirmationPdf = async (req, res) => {
+  const { id } = req.params;
+  const bookingId = Number(id);
+
+  if (!Number.isInteger(bookingId) || bookingId <= 0) {
+    return res.status(400).json({ message: 'Invalid booking id.' });
+  }
+
+  try {
+    const [rows] = await db.execute(
+      `SELECT b.*,
+              vc.category_name,
+              p.title AS package_name
+       FROM booking b
+       LEFT JOIN vehicle_category vc ON vc.category_id = b.category_id
+       LEFT JOIN booking_package bp ON bp.booking_id = b.booking_id
+       LEFT JOIN package p ON p.package_id = bp.package_id
+       WHERE b.booking_id = ?
+       LIMIT 1`,
+      [bookingId]
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    const booking = rows[0];
+
+    if (Number(booking.user_id) !== Number(req.user.id)) {
+      return res.status(403).json({ message: 'Unauthorized to access this booking document.' });
+    }
+
+    if (!PDF_ALLOWED_STATUSES.includes(booking.booking_status)) {
+      return res.status(400).json({ message: 'Booking confirmation PDF is available after quote acceptance.' });
+    }
+
+    const bookingRef = getBookingReference(booking.tour_type, booking.booking_id);
+    const startDate = formatDate(booking.start_date);
+    const endDate = formatDate(booking.end_date);
+    const legacySmallLuggage = Number(booking.small_luggages || 0);
+    const legacyLargeLuggage = Number(booking.large_luggages || 0);
+    const totalLuggage =
+      Number(booking.luggage_10kg || 0) +
+      Number(booking.luggage_25kg || 0) +
+      Number(booking.luggage_35kg || 0) +
+      Number(booking.luggage_custom_count || 0) +
+      legacySmallLuggage +
+      legacyLargeLuggage;
+    const quotedPrice = formatMoney(booking.quoted_price);
+    const paymentSchedule = getPaymentScheduleLines(booking.tour_type, booking.quoted_price);
+    const fileName = `booking-confirmation-${bookingRef}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+
+    const doc = new PDFDocument({ size: 'A4', margin: 50 });
+    doc.on('error', (pdfErr) => {
+      console.error('PDF stream error:', pdfErr);
+      if (!res.headersSent) {
+        res.status(500).json({ message: 'Failed to generate booking confirmation PDF.' });
+      }
+    });
+    doc.pipe(res);
+
+    doc.rect(0, 0, doc.page.width, 90).fill('#00b0a5');
+    doc.fillColor('#ffffff').fontSize(22).font('Helvetica-Bold').text(COMPANY_NAME, 50, 30);
+    doc.fontSize(11).font('Helvetica').text('Booking Confirmation', 50, 58);
+
+    doc.moveDown(4);
+    doc.fillColor('#0f172a').fontSize(11);
+
+    const writeRow = (label, value) => {
+      doc.font('Helvetica-Bold').text(`${label}: `, { continued: true });
+      doc.font('Helvetica').text(value || 'N/A');
+      doc.moveDown(0.25);
+    };
+
+    writeRow('Booking Reference', bookingRef);
+    writeRow('Customer Name', booking.customer_name);
+    writeRow('Customer Phone', booking.customer_phone);
+    writeRow('Tour Type', normalizeTourType(booking.tour_type));
+    writeRow('Selected Package', booking.package_name || 'Not applicable');
+    writeRow('Start Date', startDate || 'N/A');
+    writeRow('End Date', endDate || 'N/A');
+    writeRow('Vehicle Category', booking.category_name || 'N/A');
+    writeRow('Adults', String(booking.no_of_adults || 0));
+    writeRow('Children', String(booking.no_of_children || 0));
+    writeRow('Luggage Items', String(totalLuggage));
+    writeRow('Quoted Price', quotedPrice);
+    writeRow('Confirmed Price', quotedPrice);
+
+    doc.moveDown(0.6);
+    doc.font('Helvetica-Bold').fontSize(12).text('Payment Schedule');
+    doc.moveDown(0.3);
+    doc.font('Helvetica').fontSize(11);
+    paymentSchedule.forEach((line) => {
+      doc.text(`- ${line}`);
+    });
+
+    doc.moveDown(1.1);
+    doc.fillColor('#64748b').fontSize(9);
+    doc.text(`Issued by ${COMPANY_NAME}`);
+    doc.text(`Generated on ${new Date().toISOString().slice(0, 10)}`);
+
+    doc.end();
+  } catch (err) {
+    console.error('downloadBookingConfirmationPdf error:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ message: 'Failed to generate booking confirmation PDF.' });
+    }
+  }
+};
+
 module.exports = {
   createP2PBooking,
   getMyBookings,
@@ -472,4 +625,5 @@ module.exports = {
   setQuote,
   updateStatus,
   updateBooking,
+  downloadBookingConfirmationPdf,
 };

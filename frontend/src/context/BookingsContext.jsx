@@ -41,6 +41,18 @@ export const BookingsProvider = ({ children }) => {
   const rejectQuote    = (id) => updateBookingStatus(id, "REJECTED");
   const cancelBooking  = (id) => updateBookingStatus(id, "CANCELLED");
 
+  const downloadConfirmationPdf = useCallback(async (bookingId) => {
+    const { blob, fileName } = await api.getBlob(`/bookings/${bookingId}/confirmation-pdf`);
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName || `booking-confirmation-${bookingId}.pdf`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.URL.revokeObjectURL(url);
+  }, []);
+
   // ── Pending count for admin badge ─────────────────────────────────────────
   const getPendingCount = () => bookings.filter((b) => b.status === "PENDING").length;
 
@@ -55,6 +67,7 @@ export const BookingsProvider = ({ children }) => {
         acceptQuote,
         rejectQuote,
         cancelBooking,
+        downloadConfirmationPdf,
         getPendingCount,
       }}
     >

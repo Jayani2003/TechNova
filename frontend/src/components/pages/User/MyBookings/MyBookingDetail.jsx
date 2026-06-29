@@ -1,7 +1,7 @@
 // components/pages/User/MyBookings/MyBookingDetail.jsx
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
-import { ArrowLeft, MapPin, Calendar, Users, Car, Phone, FileText, Clock, Baby, Briefcase, Check, X, Zap, AlertTriangle } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Users, Car, Phone, FileText, Clock, Baby, Briefcase, Check, X, Zap, AlertTriangle, Download } from "lucide-react";
 import { STATUS_STYLES, TOUR_TYPE_LABEL } from "./MyBookingCard";
 import { useBookings } from "../../../../context/BookingsContext.jsx";
 
@@ -32,13 +32,22 @@ const Section = ({ title, children, accent }) => (
 
 const MyBookingDetail = ({ booking, onBack }) => {
   const navigate = useNavigate();
-  const { acceptQuote, rejectQuote, cancelBooking } = useBookings();
+  const { acceptQuote, rejectQuote, cancelBooking, downloadConfirmationPdf } = useBookings();
 
   const statusSteps = ["PENDING", "QUOTED", "ACCEPTED", "CONFIRMED", "TOUR_STARTED", "COMPLETED", "CLOSED"];
   const currentStepIndex = statusSteps.indexOf(booking.status);
 
   // Customer can cancel from ACCEPTED or CONFIRMED
   const canCancel = ["ACCEPTED", "CONFIRMED"].includes(booking.status);
+  const canDownloadPdf = ["ACCEPTED", "CONFIRMED", "TOUR_STARTED", "COMPLETED", "CLOSED"].includes(booking.status);
+
+  const handleDownloadPdf = async () => {
+    try {
+      await downloadConfirmationPdf(booking.id);
+    } catch (err) {
+      window.alert(err.message || "Failed to download booking confirmation PDF.");
+    }
+  };
 
   return (
     <motion.div
@@ -86,6 +95,16 @@ const MyBookingDetail = ({ booking, onBack }) => {
           <Zap className="w-4 h-4" />
           <span>Payments</span>
         </button>
+
+        {canDownloadPdf && (
+          <button
+            onClick={handleDownloadPdf}
+            className="ml-3 flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#00b0a5]/30 text-[#008f86] font-semibold text-sm hover:bg-[#00b0a5]/10 transition-all cursor-pointer"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download PDF</span>
+          </button>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-0 pr-1">

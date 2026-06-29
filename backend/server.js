@@ -8,6 +8,7 @@ const reviewRoutes  = require('./routes/reviewRoutes');
 const authRoutes    = require('./routes/authRoutes');
 const otpRoutes     = require('./routes/otpRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const reportRoutes  = require('./routes/reportRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
 
 
@@ -40,6 +41,7 @@ app.use(cors({
     callback(new Error(`CORS blocked origin: ${origin}`));
   },
   credentials: true,
+  exposedHeaders: ['Content-Disposition'],
 }));
 app.use(express.json({ limit: '2mb' }));
 
@@ -49,6 +51,7 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 app.use('/api/auth',     authRoutes);
 app.use('/api/auth/otp',  otpRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/reports', reportRoutes);
 app.use('/api/gallery',  galleryRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/reviews',  reviewRoutes);

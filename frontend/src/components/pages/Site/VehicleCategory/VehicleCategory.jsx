@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import CategoryHero from './CategoryHero';
 import CategoryTabs from './CategoryTabs';
 import CategoryShowcase from './CategoryShowcase';
@@ -9,6 +10,7 @@ import VehicleDetailsModal from './VehicleDetailsModal';
 import { vehicleService, categoryService } from '../../../../services/vehicleService';
 
 const OurFleet = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     // State
@@ -105,7 +107,7 @@ const OurFleet = () => {
         // Check if user is logged in
         const token = localStorage.getItem('token');
         if (!token) {
-            showToast('Please login to book a vehicle', 'info');
+            showToast(t("vehicleCategory.messages.pleaseLogin"), 'info');
             setTimeout(() => navigate('/login'), 1500);
             return;
         }
@@ -198,11 +200,11 @@ const OurFleet = () => {
                     <div className="mb-6">
                         <h2 className="text-2xl font-bold text-gray-800">
                             {selectedCategory
-                                ? `${selectedCategory.name} Vehicles`
-                                : 'All Available Vehicles'}
+                                ? t("vehicleCategory.grid.categoryVehicles", { category: selectedCategory.name })
+                                : t("vehicleCategory.grid.allAvailableVehicles")}
                         </h2>
                         <p className="text-gray-500 mt-1">
-                            Choose the perfect vehicle for your journey
+                            {t("vehicleCategory.grid.choosePerfect")}
                         </p>
                     </div>
 

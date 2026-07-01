@@ -1,4 +1,5 @@
 import { Users, Briefcase, Car, Baby, Info } from "lucide-react";
+import { useTranslation, Trans } from "react-i18next";
 
 const VEHICLE_CATEGORIES = [
   { id: "mini_car",   label: "Mini Car",   desc: "2 adults, 1 luggage",  icon: "🚗", maxAdults: 2,  maxLuggage: 1 },
@@ -36,6 +37,7 @@ const CounterInput = ({ value, onChange, min = 0 }) => (
 );
 
 const BookingPassengersStep = ({ data, onChange }) => {
+  const { t } = useTranslation();
   // Total luggage count for vehicle filter
   const totalLuggage =
     (data.luggage10kg  || 0) +
@@ -50,16 +52,16 @@ const BookingPassengersStep = ({ data, onChange }) => {
       {/* ── Passengers ── */}
       <div>
         <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <Users className="w-5 h-5 text-[#F5820D]" /> Passengers
+          <Users className="w-5 h-5 text-[#F5820D]" /> {t("bookingForm.passengersStep.title")}
         </h3>
-        <p className="text-sm text-[#6B7280] mb-4">Tell us how many people will be travelling.</p>
+        <p className="text-sm text-[#6B7280] mb-4">{t("bookingForm.passengersStep.desc")}</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Adults */}
           <div className="flex items-center justify-between bg-white border border-[#F5820D]/15 rounded-xl px-4 py-3">
             <div>
-              <p className="text-sm font-semibold text-[#2C2F3A]">Adults</p>
-              <p className="text-xs text-[#6B7280]/70">Age 18+</p>
+              <p className="text-sm font-semibold text-[#2C2F3A]">{t("bookingForm.passengersStep.adults")}</p>
+              <p className="text-xs text-[#6B7280]/70">{t("bookingForm.passengersStep.adultsDesc")}</p>
             </div>
             <CounterInput
               value={data.noOfAdults || 1}
@@ -71,8 +73,8 @@ const BookingPassengersStep = ({ data, onChange }) => {
           {/* Children */}
           <div className="flex items-center justify-between bg-white border border-[#F5820D]/15 rounded-xl px-4 py-3">
             <div>
-              <p className="text-sm font-semibold text-[#2C2F3A]">Children</p>
-              <p className="text-xs text-[#6B7280]/70">Age 0–17</p>
+              <p className="text-sm font-semibold text-[#2C2F3A]">{t("bookingForm.passengersStep.children")}</p>
+              <p className="text-xs text-[#6B7280]/70">{t("bookingForm.passengersStep.childrenDesc")}</p>
             </div>
             <CounterInput
               value={data.noOfChildren || 0}
@@ -90,14 +92,14 @@ const BookingPassengersStep = ({ data, onChange }) => {
           {/* Children ages */}
           {data.noOfChildren > 0 && (
             <div className="sm:col-span-2">
-              <label className="block text-sm font-semibold text-[#2C2F3A] mb-2">Ages of Children *</label>
+              <label className="block text-sm font-semibold text-[#2C2F3A] mb-2">{t("bookingForm.passengersStep.agesOfChildren")}</label>
               <div className="flex flex-wrap gap-3">
                 {Array.from({ length: data.noOfChildren }, (_, i) => {
                   const ages = data.agesOfChildren ? data.agesOfChildren.split(",").map(a => a.trim()) : [];
                   return (
                     <div key={i} className="flex flex-col items-center gap-1">
-                      <span className="text-[10px] font-bold text-[#6B7280]/70 uppercase tracking-wider">Child {i + 1}</span>
-                      <input type="number" min="0" max="17" value={ages[i] || ""} placeholder="Age"
+                      <span className="text-[10px] font-bold text-[#6B7280]/70 uppercase tracking-wider">{t("bookingForm.passengersStep.child")} {i + 1}</span>
+                      <input type="number" min="0" max="17" value={ages[i] || ""} placeholder={t("bookingForm.passengersStep.age")}
                         onChange={(e) => {
                           const updated = Array.from({ length: data.noOfChildren }, (_, j) =>
                             j === i ? e.target.value : (ages[j] || "")
@@ -132,9 +134,9 @@ const BookingPassengersStep = ({ data, onChange }) => {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-[#2C2F3A] flex items-center gap-1">
-                    <Baby className="w-4 h-4 text-[#F5820D]" /> Baby Seat Required
+                    <Baby className="w-4 h-4 text-[#F5820D]" /> {t("bookingForm.passengersStep.babySeatRequired")}
                   </p>
-                  <p className="text-xs text-[#6B7280]/70">Tick if any child needs a baby seat</p>
+                  <p className="text-xs text-[#6B7280]/70">{t("bookingForm.passengersStep.babySeatDesc")}</p>
                 </div>
               </label>
             </div>
@@ -145,10 +147,10 @@ const BookingPassengersStep = ({ data, onChange }) => {
       {/* ── Luggage by Weight ── */}
       <div>
         <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <Briefcase className="w-5 h-5 text-[#F5820D]" /> Luggage
+          <Briefcase className="w-5 h-5 text-[#F5820D]" /> {t("bookingForm.passengersStep.luggageTitle")}
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
-          Enter the number of bags per weight category. This helps us assign the right vehicle.
+          {t("bookingForm.passengersStep.luggageDesc")}
         </p>
 
         <div className="space-y-3">
@@ -174,8 +176,8 @@ const BookingPassengersStep = ({ data, onChange }) => {
               <div className="flex items-center gap-3">
                 <span className="text-xl">⚖️</span>
                 <div>
-                  <p className="text-sm font-semibold text-[#2C2F3A]">Custom Weight</p>
-                  <p className="text-xs text-[#6B7280]/70">Oversized or special luggage</p>
+                  <p className="text-sm font-semibold text-[#2C2F3A]">{t("bookingForm.passengersStep.customWeight")}</p>
+                  <p className="text-xs text-[#6B7280]/70">{t("bookingForm.passengersStep.customWeightDesc")}</p>
                 </div>
               </div>
               <CounterInput
@@ -186,13 +188,13 @@ const BookingPassengersStep = ({ data, onChange }) => {
             {(data.luggageCustomCount || 0) > 0 && (
               <div>
                 <label className="block text-xs font-semibold text-[#2C2F3A]/70 mb-1">
-                  Describe your custom luggage *
+                  {t("bookingForm.passengersStep.describeCustomLuggage")}
                 </label>
                 <input
                   type="text"
                   value={data.luggageCustomDesc || ""}
                   onChange={(e) => onChange("luggageCustomDesc", e.target.value)}
-                  placeholder="E.g. surfboard 8kg, bicycle 15kg, golf bag 20kg"
+                  placeholder={t("bookingForm.passengersStep.customLuggagePlaceholder")}
                   className={inputClass}
                 />
               </div>
@@ -204,7 +206,9 @@ const BookingPassengersStep = ({ data, onChange }) => {
         {totalLuggage > 0 && (
           <div className="mt-3 flex items-center gap-2 text-xs text-[#6B7280] bg-[#FFF8F0] rounded-xl px-4 py-2.5">
             <Info className="w-4 h-4 text-[#F5820D] flex-shrink-0" />
-            Total: <span className="font-bold text-[#2C2F3A]">{totalLuggage} piece{totalLuggage > 1 ? "s" : ""}</span> of luggage
+            <Trans i18nKey="bookingForm.passengersStep.totalLuggage" count={totalLuggage}>
+              Total: <span className="font-bold text-[#2C2F3A]">{{count: totalLuggage}}</span> piece(s) of luggage
+            </Trans>
             {data.luggage10kg  > 0 && ` · ${data.luggage10kg}×10kg`}
             {data.luggage25kg  > 0 && ` · ${data.luggage25kg}×25kg`}
             {data.luggage35kg  > 0 && ` · ${data.luggage35kg}×35kg`}
@@ -216,11 +220,10 @@ const BookingPassengersStep = ({ data, onChange }) => {
       {/* ── Vehicle Category ── */}
       <div>
         <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <Car className="w-5 h-5 text-[#F5820D]" /> Preferred Vehicle Category *
+          <Car className="w-5 h-5 text-[#F5820D]" /> {t("bookingForm.passengersStep.vehCategoryTitle")}
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
-          Select your preferred vehicle category.
-          Our team will assign the actual vehicle after confirmation.
+          {t("bookingForm.passengersStep.vehCategoryDesc")}
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

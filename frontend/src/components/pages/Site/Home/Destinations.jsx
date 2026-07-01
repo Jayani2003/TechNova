@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const destinations = [
-  { title: "Nuwara Eliya", location: "Hill Country", image: "https://images.unsplash.com/photo-1546708973-b339540b5162?q=80&w=800", badge: "Misty" },
-  { title: "Mirissa", location: "South Coast", image: "https://images.unsplash.com/photo-1586611292717-f828b1ad740b?q=80&w=800", badge: "Surfing" },
-  { title: "Sigiriya", location: "Cultural Triangle", image: "https://images.unsplash.com/photo-1524230507669-5ff97982bb5e?q=80&w=800", badge: "Ancient" },
-  { title: "Ella", location: "Badulla", image: "https://images.unsplash.com/photo-1516690561799-46d8f74f9abf?q=80&w=800", badge: "Hiking" },
-  { title: "Galle Fort", location: "Galle", image: "https://images.unsplash.com/photo-1620619767323-b95a89183081?q=80&w=800", badge: "Heritage" },
-  { title: "Trincomalee", location: "East Coast", image: "https://images.unsplash.com/photo-1589982840456-a228bb29550e?q=80&w=800", badge: "Diving" },
-];
+import { useTranslation } from 'react-i18next';
 
 export default function AutoSlidingDestinations() {
+  const { t } = useTranslation();
   const [index, setIndex] = useState(0);
+
+  const destinations = [
+    { title: t('home.destinations.titles.nuwaraEliya'), location: t('home.destinations.locations.hillCountry'), image: "https://images.unsplash.com/photo-1546708973-b339540b5162?q=80&w=800", badge: t('home.destinations.badges.misty') },
+    { title: t('home.destinations.titles.mirissa'), location: t('home.destinations.locations.southCoast'), image: "https://images.unsplash.com/photo-1586611292717-f828b1ad740b?q=80&w=800", badge: t('home.destinations.badges.surfing') },
+    { title: t('home.destinations.titles.sigiriya'), location: t('home.destinations.locations.culturalTriangle'), image: "https://images.unsplash.com/photo-1524230507669-5ff97982bb5e?q=80&w=800", badge: t('home.destinations.badges.ancient') },
+    { title: t('home.destinations.titles.ella'), location: t('home.destinations.locations.badulla'), image: "https://images.unsplash.com/photo-1516690561799-46d8f74f9abf?q=80&w=800", badge: t('home.destinations.badges.hiking') },
+    { title: t('home.destinations.titles.galleFort'), location: t('home.destinations.locations.galle'), image: "https://images.unsplash.com/photo-1620619767323-b95a89183081?q=80&w=800", badge: t('home.destinations.badges.heritage') },
+    { title: t('home.destinations.titles.trincomalee'), location: t('home.destinations.locations.eastCoast'), image: "https://images.unsplash.com/photo-1589982840456-a228bb29550e?q=80&w=800", badge: t('home.destinations.badges.diving') },
+  ];
 
   // Auto-slide logic: updates every 4 seconds
   useEffect(() => {
@@ -33,8 +35,8 @@ export default function AutoSlidingDestinations() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="center mb-12 flex flex-col items-center gap-4">
           <div className="text-center">
-            <h4 className="text-[#00b0a5] font-bold tracking-widest uppercase text-sm mb-2">Explore Sri Lanka</h4>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">Popular Destinations</h2>
+            <h4 className="text-[#00b0a5] font-bold tracking-widest uppercase text-sm mb-2">{t('home.destinations.exploreSriLanka')}</h4>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">{t('home.destinations.popularDestinations')}</h2>
           </div>
           
           {/* Progress Indicators */}

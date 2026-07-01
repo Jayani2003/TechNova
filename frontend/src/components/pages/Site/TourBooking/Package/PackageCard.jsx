@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const TYPE_COLORS = {
   'Beach Side':          '#0099cc',
@@ -20,6 +21,7 @@ const TYPE_ICONS = {
 };
 
 const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDestinationsAction = true }) => {
+  const { t } = useTranslation();
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -221,9 +223,9 @@ const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDe
 
           <div className="pkc-type-badge">
             <span className="pkc-type-dot" style={{ background: accentColor }} />
-            {TYPE_ICONS[pkg.type]} {pkg.type}
+            {TYPE_ICONS[pkg.type]} {t(`packageTours.filters.types.${pkg.type}`, pkg.type)}
           </div>
-          <div className="pkc-days-badge">📅 {pkg.days} Days</div>
+          <div className="pkc-days-badge">📅 {pkg.days} {t("packageTours.card.days")}</div>
 
 
           {showDestinationsAction ? (
@@ -233,7 +235,7 @@ const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDe
                   <span key={d.name} className="pkc-dest-chip">{d.name}</span>
                 ))}
                 {(pkg.hidden_dest_count > 0 || destinations.length > 2) && (
-                  <span className="pkc-dest-more">+{pkg.hidden_dest_count ?? Math.max(0, destinations.length - 2)} more</span>
+                  <span className="pkc-dest-more">+{pkg.hidden_dest_count ?? Math.max(0, destinations.length - 2)} {t("packageTours.card.more")}</span>
                 )}
               </div>
             </button>
@@ -243,7 +245,7 @@ const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDe
                 <span key={d.name} className="pkc-dest-chip">{d.name}</span>
               ))}
               {(pkg.hidden_dest_count > 0 || destinations.length > 2) && (
-                <span className="pkc-dest-more">+{pkg.hidden_dest_count ?? Math.max(0, destinations.length - 2)} more</span>
+                <span className="pkc-dest-more">+{pkg.hidden_dest_count ?? Math.max(0, destinations.length - 2)} {t("packageTours.card.more")}</span>
               )}
             </div>
           )}
@@ -265,14 +267,14 @@ const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDe
           <div className="pkc-actions">
             {showBookButton && (
               <Link to={`/tour-booking/package/book?packageId=${pkg.id}&packageTitle=${encodeURIComponent(pkg.title || "Package Tour")}&packageDays=${encodeURIComponent(pkg.days || "")}`} className="pkc-book-btn">
-                Book Now
+                {t("packageTours.card.bookBtn")}
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                   <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </Link>
             )}
             <button type="button" className="pkc-more-btn" onClick={() => onShowMore?.(pkg)} style={showBookButton ? undefined : { width: '100%' }}>
-              Details
+              {t("packageTours.card.detailsBtn")}
             </button>
           </div>
         </div>

@@ -1,7 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 import PackageCard from "./PackageCard";
+import { useTranslation } from "react-i18next";
 
 const PackageGrid = ({ packages, onShowMore }) => {
+  const { t } = useTranslation();
   if (packages.length === 0) {
     return (
       <div style={{
@@ -13,10 +15,10 @@ const PackageGrid = ({ packages, onShowMore }) => {
           fontSize: '1.4rem', fontWeight: 800,
           color: '#0d2b2b', letterSpacing: '-0.02em'
         }}>
-          No packages found
+          {t("packageTours.grid.noPackagesTitle")}
         </h3>
         <p style={{ fontSize: '15px', fontWeight: 300, color: '#5a8080', maxWidth: '320px' }}>
-          Try adjusting your filters to discover more Sri Lanka experiences.
+          {t("packageTours.grid.noPackagesSub")}
         </p>
       </div>
     );

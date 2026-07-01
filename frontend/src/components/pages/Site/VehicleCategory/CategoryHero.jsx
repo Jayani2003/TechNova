@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const CategoryHero = () => {
+	const { t } = useTranslation();
 	return (
 		<section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
 			{/* Background Image with slow zoom effect */}
@@ -25,15 +27,15 @@ const CategoryHero = () => {
 				>
 					{/* Badge styled to match your contact page */}
 					<span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
-						Our Fleet
+						{t("vehicleCategory.hero.badge")}
 					</span>
 
 					<h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 tracking-tight">
-						Vehicle <span className="text-[#00b0a5]">Categories.</span>
+						{t("vehicleCategory.hero.titlePart1")} <span className="text-[#00b0a5]">{t("vehicleCategory.hero.titlePart2")}</span>
 					</h1>
 
 					<p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light">
-						Discover the perfect class of vehicle for your lifestyle, from executive luxury to rugged utility.
+						{t("vehicleCategory.hero.desc")}
 					</p>
 				</motion.div>
 			</div>

@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
+    const { t } = useTranslation();
     const isAvailable = vehicle.status === 'Available';
 
     return (
@@ -24,7 +26,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                     {isAvailable ? (
                         <span className="bg-green-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
                             <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                            Available
+                            {t("vehicleCategory.card.available")}
                         </span>
                     ) : (
                         <span className="bg-red-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-md">
@@ -42,10 +44,10 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
 
                 {/* Price Tag */}
                 <div className="absolute bottom-3 right-3 bg-white rounded-xl px-4 py-2 shadow-lg">
-                    <p className="text-xs text-gray-500">Starting at</p>
+                    <p className="text-xs text-gray-500">{t("vehicleCategory.card.startingAt")}</p>
                     <p className="text-xl font-bold text-blue-600">
                         ${vehicle.price_per_day}
-                        <span className="text-xs text-gray-500 font-normal">/day</span>
+                        <span className="text-xs text-gray-500 font-normal">{t("vehicleCategory.card.perDay")}</span>
                     </p>
                 </div>
             </div>
@@ -66,7 +68,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                 <div className="grid grid-cols-2 gap-2 mb-4">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span className="text-lg">👥</span>
-                        <span>{vehicle.seats} Seats</span>
+                        <span>{t("vehicleCategory.card.seats", { count: vehicle.seats })}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span className="text-lg">⛽</span>
@@ -78,7 +80,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span className="text-lg">🧳</span>
-                        <span>{vehicle.luggage_capacity} Bags</span>
+                        <span>{t("vehicleCategory.card.bags", { count: vehicle.luggage_capacity })}</span>
                     </div>
                 </div>
 
@@ -91,7 +93,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                     )}
                     {vehicle.insurance_expired && (
                         <span className="text-xs bg-red-50 text-red-700 px-2 py-1 rounded-full border border-red-200">
-                            Insurance Expired
+                            {t("vehicleCategory.card.insuranceExpired")}
                         </span>
                     )}
                     {vehicle.mileage && (
@@ -113,7 +115,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                         className="flex-1 font-medium py-2.5 rounded-lg transition-colors text-sm hover:shadow-md"
                         style={{ backgroundColor: '#ffffff', color: '#374151', border: '1px solid #d1d5db' }}
                     >
-                        View Details
+                        {t("vehicleCategory.card.viewDetails")}
                     </button>
                     <button
                         onClick={() => onBookNow(vehicle)}
@@ -124,7 +126,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                             : { backgroundColor: '#ffffff', color: '#9ca3af', cursor: 'not-allowed', border: '1px solid #d1d5db' }
                         }
                     >
-                        {isAvailable ? 'Book Now' : 'Not Available'}
+                        {isAvailable ? t("vehicleCategory.card.bookNow") : t("vehicleCategory.card.notAvailable")}
                     </button>
                 </div>
             </div>

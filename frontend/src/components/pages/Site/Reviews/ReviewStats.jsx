@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 const StarIcon = ({ filled }) => (
   <svg width="18" height="18" viewBox="0 0 18 18" fill={filled ? '#00b0a5' : 'none'} stroke="#00b0a5" strokeWidth="1.5">
     <path d="M9 1.5l2.1 4.3 4.7.7-3.4 3.3.8 4.7L9 12.1l-4.2 2.4.8-4.7-3.4-3.3 4.7-.7L9 1.5z"/>
@@ -18,16 +20,17 @@ const getAggregateStats = (reviews = []) => {
 };
 
 const ReviewStats = ({ reviews, stats }) => {
+  const { t } = useTranslation();
   const fallback = getAggregateStats(reviews);
   const total = stats?.total ?? fallback.total;
   const breakdown = stats?.breakdown ?? fallback.breakdown;
 
   const starLabel = (star) => {
-    if (star === 1) return 'one star reviews';
-    if (star === 2) return 'two star reviews';
-    if (star === 3) return 'three star reviews';
-    if (star === 4) return 'four star reviews';
-    return 'five star reviews';
+    if (star === 1) return t("reviews.stats.s1");
+    if (star === 2) return t("reviews.stats.s2");
+    if (star === 3) return t("reviews.stats.s3");
+    if (star === 4) return t("reviews.stats.s4");
+    return t("reviews.stats.s5");
   };
 
   return (
@@ -108,8 +111,8 @@ const ReviewStats = ({ reviews, stats }) => {
       <div className="rs-wrap">
         <div className="rs-card">
           <div className="rs-header">
-            <div className="rs-title">Review summary</div>
-            <div className="rs-total">{total} total reviews</div>
+            <div className="rs-title">{t("reviews.stats.summary")}</div>
+            <div className="rs-total">{total} {t("reviews.stats.total")}</div>
           </div>
 
           <div className="rs-bars">

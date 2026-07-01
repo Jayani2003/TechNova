@@ -1,19 +1,19 @@
 export const navLinks = [
-  { name: 'Home', path: '/' },
+  { nameKey: 'nav.home', path: '/' },
 
   {
-    name: 'Tour Booking',
+    nameKey: 'nav.tourBooking',
     path: '/tour-booking',
     children: [
-      { name: 'Point-to-Point', path: '/tour-booking/point' },
-      { name: 'Package Tours', path: '/tour-booking/package' },
-      { name: 'Customized Tours', path: '/tour-booking/customized' },
+      { nameKey: 'nav.pointToPoint', path: '/tour-booking/point' },
+      { nameKey: 'nav.packageTours', path: '/tour-booking/package' },
+      { nameKey: 'nav.customizedTours', path: '/tour-booking/customized' },
     ],
   },
 
-  { name: 'Vehicle Category', path: '/vehicle-category' },
-  { name: 'Reviews', path: '/reviews' },
-  { name: 'About Us', path: '/about' },
-  { name: 'Contact Us', path: '/contact' },
-  { name: 'Gallery', path: '/gallery' },
+  { nameKey: 'nav.vehicleCategory', path: '/vehicle-category' },
+  { nameKey: 'nav.reviews', path: '/reviews' },
+  { nameKey: 'nav.aboutUs', path: '/about' },
+  { nameKey: 'nav.contactUs', path: '/contact' },
+  { nameKey: 'nav.gallery', path: '/gallery' },
 ];

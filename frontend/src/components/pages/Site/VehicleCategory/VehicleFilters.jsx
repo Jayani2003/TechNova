@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const VehicleFilters = ({ filters, onFilterChange, totalCount }) => {
+    const { t } = useTranslation();
     const handleChange = (key, value) => {
         onFilterChange({ ...filters, [key]: value });
     };
@@ -23,7 +25,7 @@ const VehicleFilters = ({ filters, onFilterChange, totalCount }) => {
                 {/* Top row: Results count and Reset */}
                 <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-600">
-                        Showing <strong className="text-gray-800">{totalCount}</strong> vehicles
+                        {t("vehicleCategory.filters.showing")} <strong className="text-gray-800">{totalCount}</strong> {t("vehicleCategory.filters.vehicles")}
                     </p>
                     {hasActiveFilters && (
                         <button
@@ -33,7 +35,7 @@ const VehicleFilters = ({ filters, onFilterChange, totalCount }) => {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                            Reset Filters
+                            {t("vehicleCategory.filters.reset")}
                         </button>
                     )}
                 </div>
@@ -43,7 +45,7 @@ const VehicleFilters = ({ filters, onFilterChange, totalCount }) => {
                     {/* Search */}
                     <div className="flex flex-col gap-1.5">
                         <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                            Search
+                            {t("vehicleCategory.filters.search")}
                         </label>
                         <div className="relative">
                             <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,7 +53,7 @@ const VehicleFilters = ({ filters, onFilterChange, totalCount }) => {
                             </svg>
                             <input
                                 type="text"
-                                placeholder="Search vehicles..."
+                                placeholder={t("vehicleCategory.filters.searchPlaceholder")}
                                 value={filters.search}
                                 onChange={(e) => handleChange('search', e.target.value)}
                                 className="h-11 w-full rounded-lg border border-gray-300 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 bg-white"
@@ -62,52 +64,52 @@ const VehicleFilters = ({ filters, onFilterChange, totalCount }) => {
                     {/* Transmission Filter */}
                     <div className="flex flex-col gap-1.5">
                         <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                            Transmission
+                            {t("vehicleCategory.filters.transmission")}
                         </label>
                         <select
                             value={filters.transmission}
                             onChange={(e) => handleChange('transmission', e.target.value)}
                             className="h-11 w-full rounded-lg border border-gray-300 px-3 text-sm text-gray-900 font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500 bg-white"
                         >
-                            <option value="">All transmissions</option>
-                            <option value="Automatic">Automatic</option>
-                            <option value="Manual">Manual</option>
+                            <option value="">{t("vehicleCategory.filters.allTransmissions")}</option>
+                            <option value="Automatic">{t("vehicleCategory.filters.automatic")}</option>
+                            <option value="Manual">{t("vehicleCategory.filters.manual")}</option>
                         </select>
                     </div>
 
                     {/* Fuel Type Filter */}
                     <div className="flex flex-col gap-1.5">
                         <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                            Fuel Type
+                            {t("vehicleCategory.filters.fuelType")}
                         </label>
                         <select
                             value={filters.fuel_type}
                             onChange={(e) => handleChange('fuel_type', e.target.value)}
                             className="h-11 w-full rounded-lg border border-gray-300 px-3 text-sm text-gray-900 font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500 bg-white"
                         >
-                            <option value="">All fuel types</option>
-                            <option value="Petrol">Petrol</option>
-                            <option value="Diesel">Diesel</option>
-                            <option value="Electric">Electric</option>
-                            <option value="Hybrid">Hybrid</option>
+                            <option value="">{t("vehicleCategory.filters.allFuelTypes")}</option>
+                            <option value="Petrol">{t("vehicleCategory.filters.petrol")}</option>
+                            <option value="Diesel">{t("vehicleCategory.filters.diesel")}</option>
+                            <option value="Electric">{t("vehicleCategory.filters.electric")}</option>
+                            <option value="Hybrid">{t("vehicleCategory.filters.hybrid")}</option>
                         </select>
                     </div>
 
                     {/* Sort By */}
                     <div className="flex flex-col gap-1.5">
                         <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                            Sort By
+                            {t("vehicleCategory.filters.sortBy")}
                         </label>
                         <select
                             value={filters.sortBy}
                             onChange={(e) => handleChange('sortBy', e.target.value)}
                             className="h-11 w-full rounded-lg border border-gray-300 px-3 text-sm text-gray-900 font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500 bg-white"
                         >
-                            <option value="default">Default</option>
-                            <option value="price_low">Price: Low to High</option>
-                            <option value="price_high">Price: High to Low</option>
-                            <option value="seats_low">Seats: Low to High</option>
-                            <option value="seats_high">Seats: High to Low</option>
+                            <option value="default">{t("vehicleCategory.filters.sortDefault")}</option>
+                            <option value="price_low">{t("vehicleCategory.filters.priceLowHigh")}</option>
+                            <option value="price_high">{t("vehicleCategory.filters.priceHighLow")}</option>
+                            <option value="seats_low">{t("vehicleCategory.filters.seatsLowHigh")}</option>
+                            <option value="seats_high">{t("vehicleCategory.filters.seatsHighLow")}</option>
                         </select>
                     </div>
                 </div>

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from "react-i18next";
 
 const MAX_IMAGES = 5;
 
@@ -28,10 +29,11 @@ const StarPicker = ({ value, onChange }) => {
   );
 };
 
-const STAR_LABELS = { 1: 'Poor', 2: 'Fair', 3: 'Good', 4: 'Very Good', 5: 'Excellent' };
-
 const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
+  const { t } = useTranslation();
   const fileInputRef = useRef(null);
+
+  const STAR_LABELS = { 1: t("reviews.form.labels.poor"), 2: t("reviews.form.labels.fair"), 3: t("reviews.form.labels.good"), 4: t("reviews.form.labels.veryGood"), 5: t("reviews.form.labels.excellent") };
 
   const [form, setForm] = useState({
     tourId:  reviewableTours[0]?.id || '',
@@ -73,10 +75,10 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
 
   const validate = () => {
     const e = {};
-    if (!form.tourId)              e.tourId  = 'Please select a tour.';
-    if (form.stars === 0)          e.stars   = 'Please give a star rating.';
-    if (!form.title.trim())        e.title   = 'Please add a review title.';
-    if (form.comment.trim().length < 20) e.comment = 'Comment must be at least 20 characters.';
+    if (!form.tourId)              e.tourId  = t("reviews.form.errors.tour");
+    if (form.stars === 0)          e.stars   = t("reviews.form.errors.stars");
+    if (!form.title.trim())        e.title   = t("reviews.form.errors.title");
+    if (form.comment.trim().length < 20) e.comment = t("reviews.form.errors.comment");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -104,11 +106,10 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
       <div style={{ textAlign: 'center', padding: '48px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
         <div style={{ fontSize: '48px' }}>🗓️</div>
         <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0d2b2b', letterSpacing: '-0.02em' }}>
-          No completed tours yet
+          {t("reviews.form.noToursTitle")}
         </h3>
         <p style={{ fontSize: '14px', fontWeight: 300, color: '#5a8080', maxWidth: '320px', lineHeight: 1.7 }}>
-          Reviews become available once our team marks your tour as <strong>Completed</strong>.
-          Check back after your journey ends!
+          {t("reviews.form.noToursSub1")} <strong>{t("reviews.form.noToursSub2")}</strong>{t("reviews.form.noToursSub3")}
         </p>
         <button
           onClick={onCancel}
@@ -119,7 +120,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
             letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
           }}
         >
-          Close
+          {t("reviews.form.closeBtn")}
         </button>
       </div>
     );
@@ -131,10 +132,10 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
       <div style={{ textAlign: 'center', padding: '48px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
         <div style={{ fontSize: '56px' }}>🎉</div>
         <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0d2b2b', letterSpacing: '-0.03em' }}>
-          Thank you for your review!
+          {t("reviews.form.successTitle")}
         </h3>
         <p style={{ fontSize: '15px', fontWeight: 300, color: '#5a8080', maxWidth: '360px', lineHeight: 1.7 }}>
-          Your review has been published and can be found on the reviews page and in <strong>My Reviews</strong> in your dashboard.
+          {t("reviews.form.successSub1")} <strong>{t("reviews.form.successSub2")}</strong> {t("reviews.form.successSub3")}
         </p>
         <button
           onClick={onCancel}
@@ -146,7 +147,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
             boxShadow: '0 6px 24px -4px rgba(0,176,165,0.45)',
           }}
         >
-          Done
+          {t("reviews.form.doneBtn")}
         </button>
       </div>
     );
@@ -285,7 +286,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
 
         {/* Tour selector */}
         <div className="rvf-field">
-          <label className="rvf-label">Your Completed Tour</label>
+          <label className="rvf-label">{t("reviews.form.fields.tour")}</label>
           {selectedTour ? (
             <div style={{
               padding: '14px 16px',
@@ -301,7 +302,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
             }}>
               <strong>{selectedTour.packageTitle}</strong>
               <span style={{ fontSize: '12px', color: '#5a8080', fontWeight: 400 }}>
-                {selectedTour.packageType} • Completed {selectedTour.completedDate}
+                {selectedTour.packageType} • {t("reviews.form.fields.completed")} {selectedTour.completedDate}
               </span>
             </div>
           ) : (
@@ -314,7 +315,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
               fontSize: '14px',
               fontWeight: 400,
             }}>
-              Loading tour information...
+              {t("reviews.form.fields.loading")}
             </div>
           )}
           {errors.tourId && <span className="rvf-error">{errors.tourId}</span>}
@@ -322,10 +323,10 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
 
         {/* Stars */}
         <div className="rvf-field">
-          <label className="rvf-label">Overall Rating</label>
+          <label className="rvf-label">{t("reviews.form.fields.rating")}</label>
           <StarPicker value={form.stars} onChange={v => set('stars', v)} />
           <div className="rvf-star-label">
-            {form.stars ? `${STAR_LABELS[form.stars]} — ${form.stars}/5` : 'Tap a star to rate'}
+            {form.stars ? `${STAR_LABELS[form.stars]} — ${form.stars}/5` : t("reviews.form.fields.tapToRate")}
           </div>
           {errors.stars && <span className="rvf-error">{errors.stars}</span>}
         </div>
@@ -334,11 +335,11 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
 
         {/* Driver name */}
         <div className="rvf-field">
-          <label className="rvf-label">Driver Name</label>
+          <label className="rvf-label">{t("reviews.form.fields.driver")}</label>
           <input
             type="text"
             className="rvf-input"
-            placeholder="Type your driver's name (optional)"
+            placeholder={t("reviews.form.fields.driverPlaceholder")}
             value={form.driverName}
             maxLength={100}
             onChange={e => set('driverName', e.target.value)}
@@ -347,11 +348,11 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
 
         {/* Title */}
         <div className="rvf-field">
-          <label className="rvf-label">Review Title</label>
+          <label className="rvf-label">{t("reviews.form.fields.title")}</label>
           <input
             type="text"
             className={`rvf-input ${errors.title ? 'error' : ''}`}
-            placeholder="Summarise your experience in a sentence…"
+            placeholder={t("reviews.form.fields.titlePlaceholder")}
             value={form.title}
             maxLength={100}
             onChange={e => set('title', e.target.value)}
@@ -361,10 +362,10 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
 
         {/* Comment */}
         <div className="rvf-field">
-          <label className="rvf-label">Your Review</label>
+          <label className="rvf-label">{t("reviews.form.fields.comment")}</label>
           <textarea
             className={`rvf-textarea ${errors.comment ? 'error' : ''}`}
-            placeholder="Tell others about your experience — what made it special, what you loved, what surprised you…"
+            placeholder={t("reviews.form.fields.commentPlaceholder")}
             value={form.comment}
             maxLength={1000}
             onChange={e => set('comment', e.target.value)}
@@ -375,7 +376,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
 
         {/* Images */}
         <div className="rvf-field">
-          <label className="rvf-label">Photos (up to {MAX_IMAGES})</label>
+          <label className="rvf-label">{t("reviews.form.fields.photos")} {MAX_IMAGES})</label>
           <div className="rvf-img-row">
             {images.map((img, i) => (
               <div key={i} className="rvf-img-thumb-wrap">
@@ -388,7 +389,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
-                Add Photo
+                {t("reviews.form.fields.addPhoto")}
               </div>
             )}
             <input
@@ -400,7 +401,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
               onChange={handleImages}
             />
           </div>
-          <div className="rvf-img-hint">{images.length}/{MAX_IMAGES} photos added</div>
+          <div className="rvf-img-hint">{images.length}/{MAX_IMAGES} {t("reviews.form.fields.photosAdded")}</div>
         </div>
 
         <div className="rvf-rule" />
@@ -411,10 +412,10 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M2 8l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            {submitting ? 'Submitting...' : 'Submit Review'}
+            {submitting ? t("reviews.form.actions.submitting") : t("reviews.form.actions.submit")}
           </button>
           <button className="rvf-clear" onClick={handleClear} title="Clear form">
-            Clear
+            {t("reviews.form.actions.clear")}
           </button>
         </div>
 

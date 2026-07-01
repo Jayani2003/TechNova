@@ -1,5 +1,6 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Send, Lock, MapPin, CheckCircle } from "lucide-react";
 import { AuthContext } from "../../../../../context/AuthContext";
@@ -41,7 +42,10 @@ const initialData = {
 };
  
 // ─── Guest Guard ──────────────────────────────────────────────────────────────
-const GuestGuard = ({ navigate }) => (
+// ─── Guest Guard ──────────────────────────────────────────────────────────────
+const GuestGuard = ({ navigate }) => {
+  const { t } = useTranslation();
+  return (
   <div className="min-h-screen bg-[#FFF8F0] flex items-center justify-center px-4">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -51,30 +55,34 @@ const GuestGuard = ({ navigate }) => (
       <div className="w-16 h-16 bg-[#F5820D]/10 rounded-full flex items-center justify-center mx-auto mb-4">
         <Lock className="w-8 h-8 text-[#F5820D]" />
       </div>
-      <h2 className="text-2xl font-extrabold text-[#2C2F3A] mb-2">Login Required</h2>
+      <h2 className="text-2xl font-extrabold text-[#2C2F3A] mb-2">{t("p2pBooking.guestGuard.title")}</h2>
       <p className="text-[#6B7280] text-sm mb-6">
-        You need to be logged in to place a booking.
+        {t("p2pBooking.guestGuard.desc")}
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button
           onClick={() => navigate("/login")}
           className="bg-[#F5820D] hover:bg-[#C85A00] text-white px-6 py-3 rounded-xl font-semibold transition-colors cursor-pointer"
         >
-          Login
+          {t("p2pBooking.guestGuard.login")}
         </button>
         <button
           onClick={() => navigate("/register")}
           className="border border-[#F5820D]/15 text-[#2C2F3A] px-6 py-3 rounded-xl font-semibold hover:bg-[#FFF8F0] transition-colors cursor-pointer"
         >
-          Register
+          {t("p2pBooking.guestGuard.register")}
         </button>
       </div>
     </motion.div>
   </div>
-);
+  );
+};
  
 // ─── Success Screen ───────────────────────────────────────────────────────────
-const SuccessScreen = ({ bookingId, navigate }) => (
+// ─── Success Screen ───────────────────────────────────────────────────────────
+const SuccessScreen = ({ bookingId, navigate }) => {
+  const { t } = useTranslation();
+  return (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -85,15 +93,15 @@ const SuccessScreen = ({ bookingId, navigate }) => (
       <CheckCircle className="w-10 h-10 text-[#F5820D]" />
     </div>
     <h2 className="text-2xl font-extrabold text-[#2C2F3A] tracking-tight mb-3">
-      Booking Submitted!
+      {t("p2pBooking.success.title")}
     </h2>
-    <p className="text-[#6B7280] text-sm mb-2">Your booking reference is:</p>
+    <p className="text-[#6B7280] text-sm mb-2">{t("p2pBooking.success.ref")}</p>
     <p className="text-lg font-bold text-[#F5820D] mb-8">{bookingId}</p>
     <div className="bg-[#FFF8F0] rounded-2xl p-5 mb-6 text-left space-y-2">
       {[
-        "Your booking is now PENDING",
-        "Our team will review and send a price quote within 24 hours",
-        "You can track your booking status from your profile",
+        t("p2pBooking.success.step1"),
+        t("p2pBooking.success.step2"),
+        t("p2pBooking.success.step3"),
       ].map((s, i) => (
         <div key={i} className="flex items-start gap-2 text-sm text-[#2C2F3A]/70">
           <span className="text-[#F5820D] font-bold flex-shrink-0">✓</span>
@@ -105,10 +113,11 @@ const SuccessScreen = ({ bookingId, navigate }) => (
       onClick={() => navigate("/user/profile")}
       className="w-full bg-[#F5820D] hover:bg-[#C85A00] text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 tracking-wide cursor-pointer"
     >
-      View My Bookings
+      {t("p2pBooking.success.viewBookings")}
     </button>
   </motion.div>
-);
+  );
+};
  
 // ─── Validation ───────────────────────────────────────────────────────────────
 const validateStep = (step, data) => {
@@ -123,6 +132,7 @@ const validateStep = (step, data) => {
  
 // ─── Main Component ───────────────────────────────────────────────────────────
 const PointToPoint = () => {
+  const { t } = useTranslation();
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -209,13 +219,13 @@ const PointToPoint = () => {
           transition={{ duration: 0.6 }}
         >
           <span className="inline-flex items-center gap-2 px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#F5820D] rounded-full">
-            <MapPin className="w-3 h-3" /> Point-to-Point Transfer
+            <MapPin className="w-3 h-3" /> {t("p2pBooking.form.title")}
           </span>
           <h1 className="text-5xl md:text-7xl font-extrabold text-[#2C2F3A] mb-4 tracking-tight">
-            Book Your <span className="text-[#F5820D]">Transfer.</span>
+            {t("p2pBooking.form.mainTitle1")} <span className="text-[#F5820D]">{t("p2pBooking.form.mainTitle2")}</span>
           </h1>
           <p className="text-lg text-[#6B7280] max-w-xl mx-auto font-light">
-            Reliable one-way transfers between any two locations in Sri Lanka with professional drivers and premium vehicles.
+            {t("p2pBooking.form.mainDesc")}
           </p>
         </motion.div>
       </div>
@@ -240,7 +250,7 @@ const PointToPoint = () => {
               ) : (
                 <>
                   <BookingStepIndicator
-                    steps={STEPS}
+                    steps={t("p2pBooking.form.steps", { returnObjects: true })}
                     currentStep={currentStep}
                     maxReachedStep={maxReachedStep}
                     onStepClick={(idx) => setCurrentStep(idx)}
@@ -268,7 +278,7 @@ const PointToPoint = () => {
                       disabled={currentStep === 0}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#F5820D]/15 text-[#2C2F3A]/70 font-semibold hover:bg-[#FFF8F0] transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                     >
-                      <ChevronLeft className="w-4 h-4" /> Back
+                      <ChevronLeft className="w-4 h-4" /> {t("p2pBooking.form.backBtn")}
                     </button>
  
                     {currentStep < STEPS.length - 1 ? (
@@ -277,7 +287,7 @@ const PointToPoint = () => {
                         disabled={!canProceed}
                         className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#F5820D] hover:bg-[#C85A00] text-white font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                       >
-                        Next <ChevronRight className="w-4 h-4" />
+                        {t("p2pBooking.form.nextBtn")} <ChevronRight className="w-4 h-4" />
                       </button>
                     ) : (
                       <>
@@ -290,9 +300,9 @@ const PointToPoint = () => {
                           className="w-full bg-[#F5820D] hover:bg-[#C85A00] disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 tracking-wide cursor-pointer"
                         >
                           {submitting ? (
-                            <><span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block" /> Submitting...</>
+                            <><span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block" /> {t("p2pBooking.form.submitting")}</>
                           ) : (
-                            <><Send className="w-4 h-4" /> Submit Booking</>
+                            <><Send className="w-4 h-4" /> {t("p2pBooking.form.submitBtn")}</>
                           )}
                         </button>
                       </>

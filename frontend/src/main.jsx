@@ -6,7 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { MessagesProvider } from './context/MessagesContext';
 import { BookingsProvider } from './context/BookingsContext.jsx';
-
+import './i18n';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

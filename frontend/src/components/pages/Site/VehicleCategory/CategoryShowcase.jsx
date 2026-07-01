@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const categoryDescriptions = {
     'Mini Car': {
@@ -44,13 +45,36 @@ const categoryDescriptions = {
 };
 
 const CategoryShowcase = ({ category }) => {
+    const { t } = useTranslation();
     if (!category) return null;
 
     const info = categoryDescriptions[category.name] || {
         icon: '🚗',
-        description: category.description || 'Quality vehicles for your journey.',
-        bestFor: 'All travelers',
+        description: category.description || t("vehicleCategory.showcase.defaultDesc"),
+        bestFor: t("vehicleCategory.showcase.defaultBestFor"),
     };
+
+    const getDescKey = (name) => {
+        const map = {
+            'Mini Car': 'miniCarDesc', 'Normal Car': 'normalCarDesc', 'Sedan Car': 'sedanCarDesc',
+            'MPV': 'mpvDesc', 'SUV': 'suvDesc', 'Mini Van': 'miniVanDesc', 'Van': 'vanDesc', 'Large Van': 'largeVanDesc'
+        };
+        return map[name];
+    };
+
+    const getBestForKey = (name) => {
+        const map = {
+            'Mini Car': 'miniCarBest', 'Normal Car': 'normalCarBest', 'Sedan Car': 'sedanCarBest',
+            'MPV': 'mpvBest', 'SUV': 'suvBest', 'Mini Van': 'miniVanBest', 'Van': 'vanBest', 'Large Van': 'largeVanBest'
+        };
+        return map[name];
+    };
+
+    const descKey = getDescKey(category.name);
+    const bestForKey = getBestForKey(category.name);
+
+    const translatedDesc = descKey ? t(`vehicleCategory.showcase.${descKey}`) : info.description;
+    const translatedBestFor = bestForKey ? t(`vehicleCategory.showcase.${bestForKey}`) : info.bestFor;
 
     return (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 mb-8 border border-blue-100">
@@ -70,13 +94,13 @@ const CategoryShowcase = ({ category }) => {
                     <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
                         {category.name}
                     </h2>
-                    <p className="text-gray-600 mb-3">{info.description}</p>
+                    <p className="text-gray-600 mb-3">{translatedDesc}</p>
                     <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                         <span className="bg-white px-3 py-1.5 rounded-full text-sm border border-blue-200 text-blue-700">
-                            ✨ Best for: {info.bestFor}
+                            {t("vehicleCategory.showcase.bestFor", { bestFor: translatedBestFor })}
                         </span>
                         <span className="bg-white px-3 py-1.5 rounded-full text-sm border border-green-200 text-green-700">
-                            🚗 {category.vehicle_count || 0} Available
+                            {t("vehicleCategory.showcase.availableCount", { count: category.vehicle_count || 0 })}
                         </span>
                     </div>
                 </div>

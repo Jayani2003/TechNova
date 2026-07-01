@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { navLinks } from '../../config/navConfig';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const MobileNav = () => {
   const [open, setOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const { t } = useTranslation();
 
   return (
     <div className="lg:hidden">
@@ -22,7 +24,7 @@ const MobileNav = () => {
         <div className="p-5 space-y-4">
 
           {navLinks.map((link, index) => (
-            <div key={link.name}>
+            <div key={link.nameKey}>
 
               {/* Main */}
               <div
@@ -34,7 +36,7 @@ const MobileNav = () => {
                 }
               >
                 <Link to={link.path} className="text-[#00b0a5] hover:text-[#188c85] font-semibold">
-                  {link.name}
+                  {t(link.nameKey)}
                 </Link>
                 {link.children && <span>▼</span>}
               </div>
@@ -44,12 +46,12 @@ const MobileNav = () => {
                 <div className="ml-4 mt-2 space-y-2 animate-fadeIn">
                   {link.children.map((child) => (
                     <Link
-                      key={child.name}
+                      key={child.nameKey}
                       to={child.path}
                       onClick={() => setOpen(false)}
                       className="block text-sm text-[#00b0a5] hover:text-[#188c85]"
                     >
-                      {child.name}
+                      {t(child.nameKey)}
                     </Link>
                   ))}
                 </div>

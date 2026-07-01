@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Phone, FileText, ChevronDown, Globe, AlertCircle, UserPlus, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
+import { useTranslation, Trans } from "react-i18next";
 import { api } from "../../../../../config/api";
 
 const COUNTRIES = [
@@ -63,6 +64,7 @@ const validatePhone = (digits, code) => {
 //  5. On success: field is locked, green "Verified" badge shown
 //  6. "Change number" resets the flow
 const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
+  const { t } = useTranslation();
   // Phone sub-state
   const [touched,    setTouched]    = useState(false);
   const [countryCode, setCountryCode] = useState("+94");
@@ -179,7 +181,7 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
   return (
     <div className="space-y-3">
       <label className="block text-sm font-semibold text-[#2C2F3A]">
-        Phone Number <span className="text-red-500">*</span>
+        {t("bookingForm.notesStep.phoneNum")}
       </label>
 
       {/* Phone row */}
@@ -223,11 +225,11 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
         <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3">
           <div className="flex items-center gap-2 text-green-700">
             <CheckCircle2 className="w-4 h-4" />
-            <span className="text-sm font-semibold">Phone number verified</span>
+            <span className="text-sm font-semibold">{t("bookingForm.notesStep.phoneVerified")}</span>
           </div>
           <button type="button" onClick={reset}
             className="text-xs text-[#6B7280] hover:text-[#2C2F3A] flex items-center gap-1 underline underline-offset-2">
-            <RefreshCw className="w-3 h-3" /> Change number
+            <RefreshCw className="w-3 h-3" /> {t("bookingForm.notesStep.changeNum")}
           </button>
         </div>
       )}
@@ -241,7 +243,7 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
             disabled={sending || !phoneValid}
             className="flex items-center gap-2 px-4 py-2.5 bg-[#F5820D] hover:bg-[#C85A00] disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors"
           >
-            {sending ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</> : <><Phone className="w-4 h-4" /> Send OTP</>}
+            {sending ? <><Loader2 className="w-4 h-4 animate-spin" /> {t("bookingForm.notesStep.sending")}</> : <><Phone className="w-4 h-4" /> {t("bookingForm.notesStep.sendOtp")}</>}
           </button>
           {sendError && <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{sendError}</p>}
         </div>
@@ -251,8 +253,9 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
       {!verified && otpSent && (
         <div className="bg-[#FFF8F0] border border-[#F5820D]/15 rounded-xl p-4 space-y-3">
           <p className="text-sm text-[#2C2F3A]/70">
-            We sent a 6-digit code to <span className="font-bold text-[#2C2F3A]">{fullPhone}</span>.
-            Enter it below.
+            <Trans i18nKey="bookingForm.notesStep.weSentOtp" values={{ phone: fullPhone }}>
+              We sent a 6-digit code to <span className="font-bold text-[#2C2F3A]">{{phone: fullPhone}}</span>. Enter it below.
+            </Trans>
           </p>
 
           {/* Six digit boxes */}
@@ -286,7 +289,7 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
               disabled={!otpComplete || verifying}
               className="flex items-center gap-2 px-4 py-2.5 bg-[#F0A500] hover:bg-[#C85A00] disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors"
             >
-              {verifying ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying…</> : <>Verify Code</>}
+              {verifying ? <><Loader2 className="w-4 h-4 animate-spin" /> {t("bookingForm.notesStep.verifying")}</> : <>{t("bookingForm.notesStep.verifyCode")}</>}
             </button>
 
             {/* Resend */}
@@ -297,7 +300,7 @@ const OtpPhoneInput = ({ value, onChange, onVerified, verified }) => {
               className="flex items-center gap-1.5 text-sm text-[#6B7280] hover:text-[#2C2F3A] disabled:opacity-40"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
+              {cooldown > 0 ? t("bookingForm.notesStep.resendIn", { s: cooldown }) : t("bookingForm.notesStep.resendCode")}
             </button>
           </div>
         </div>
@@ -365,6 +368,7 @@ const PhoneInput = ({ value, onChange, label, required }) => {
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 const BookingNotesStep = ({ data, onChange }) => {
+  const { t } = useTranslation();
   const [phoneVerified, setPhoneVerified] = useState(false);
 
   return (
@@ -373,25 +377,25 @@ const BookingNotesStep = ({ data, onChange }) => {
       {/* ── Contact Details ── */}
       <div>
         <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <Phone className="w-5 h-5 text-[#F5820D]" /> Contact Details
+          <Phone className="w-5 h-5 text-[#F5820D]" /> {t("bookingForm.notesStep.contactDetails")}
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
-          We'll use this to reach you about your booking.
+          {t("bookingForm.notesStep.contactDesc")}
         </p>
         <div className="space-y-4">
 
           {/* Full Name */}
           <div>
-            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">Full Name *</label>
+            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">{t("bookingForm.notesStep.fullName")}</label>
             <input
               type="text"
               value={data.customerName}
               onChange={e => onChange("customerName", e.target.value)}
-              placeholder="Your full name"
+              placeholder={t("bookingForm.notesStep.fullNamePlaceholder")}
               className={inputClass}
             />
             {data.customerName && (
-              <p className="text-xs text-[#F5820D] mt-1">✓ Pre-filled from your account — you can edit this</p>
+              <p className="text-xs text-[#F5820D] mt-1">{t("bookingForm.notesStep.prefilled")}</p>
             )}
           </div>
 
@@ -408,8 +412,7 @@ const BookingNotesStep = ({ data, onChange }) => {
             <div className="flex items-start gap-3 bg-[#F5820D]/8 border border-[#F5820D]/20 rounded-xl px-4 py-3">
               <Globe className="w-4 h-4 text-[#F5820D] flex-shrink-0 mt-0.5" />
               <p className="text-xs text-[#2C2F3A]/70 leading-relaxed">
-                We verify your phone number via a one-time code to ensure our team can reach you.
-                Emergency contact numbers are not verified.
+                {t("bookingForm.notesStep.otpNotice")}
               </p>
             </div>
           )}
@@ -419,31 +422,31 @@ const BookingNotesStep = ({ data, onChange }) => {
       {/* ── Emergency Contact (no OTP) ── */}
       <div>
         <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <UserPlus className="w-5 h-5 text-[#F5820D]" /> Emergency Contact
+          <UserPlus className="w-5 h-5 text-[#F5820D]" /> {t("bookingForm.notesStep.emergencyContact")}
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
-          In case of emergency, who should we contact? This is saved to your profile.
+          {t("bookingForm.notesStep.emergencyDesc")}
         </p>
         <div className="bg-white border border-[#F5820D]/15 rounded-2xl p-4 space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">Emergency Contact Name *</label>
+            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">{t("bookingForm.notesStep.emergencyName")}</label>
             <input
               type="text"
               value={data.emergencyName || ""}
               onChange={e => onChange("emergencyName", e.target.value)}
-              placeholder="Full name of emergency contact"
+              placeholder={t("bookingForm.notesStep.emergencyNamePlaceholder")}
               className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">Relationship *</label>
+            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">{t("bookingForm.notesStep.relationship")}</label>
             <select
               value={data.emergencyRelationship || ""}
               onChange={e => onChange("emergencyRelationship", e.target.value)}
               className={inputClass}
             >
-              <option value="" disabled>Select relationship</option>
+              <option value="" disabled>{t("bookingForm.notesStep.selectRelationship")}</option>
               {EMERGENCY_RELATIONSHIPS.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
@@ -451,7 +454,7 @@ const BookingNotesStep = ({ data, onChange }) => {
           <PhoneInput
             value={data.emergencyPhone || ""}
             onChange={val => onChange("emergencyPhone", val)}
-            label="Emergency Contact Phone"
+            label={t("bookingForm.notesStep.emergencyPhone")}
             required
           />
         </div>
@@ -460,15 +463,15 @@ const BookingNotesStep = ({ data, onChange }) => {
       {/* ── Additional Notes ── */}
       <div>
         <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <FileText className="w-5 h-5 text-[#F5820D]" /> Additional Notes
+          <FileText className="w-5 h-5 text-[#F5820D]" /> {t("bookingForm.notesStep.additionalNotes")}
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
-          Any special requests, preferences, or information for the driver.
+          {t("bookingForm.notesStep.notesDesc")}
         </p>
         <textarea
           value={data.notes}
           onChange={e => onChange("notes", e.target.value)}
-          placeholder="E.g. early morning pickup, wheelchair access needed, stop at airport first…"
+          placeholder={t("bookingForm.notesStep.notesPlaceholder")}
           rows={4}
           className={`${inputClass} resize-none`}
         />

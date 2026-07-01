@@ -2,7 +2,7 @@
 import { useState } from "react";
 import {
   X, MapPin, Calendar, Users, Car, Phone, FileText, Clock,
-  DollarSign, CheckCircle2, XCircle, Truck, Flag,
+  Banknote, CheckCircle2, XCircle, Truck, Flag,
   Archive, Hash, Package, Compass, AlertTriangle, Briefcase,
 } from "lucide-react";
 import { StatusChip, TourTypeChip } from "./BookingChips";
@@ -180,9 +180,9 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
               <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 800, color: "#6366f1" }}>💰 Set Price & Assign Vehicle</p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Price (USD) *</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Price (LKR) *</label>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, background: card, border: `1px solid ${border}`, borderRadius: 10, padding: "9px 12px" }}>
-                    <DollarSign size={14} color="#00b0a5" />
+                    <Banknote size={14} color="#00b0a5" />
                     <input type="number" value={price} onChange={e => { setPrice(e.target.value); setErr(""); }} placeholder="0.00"
                       style={{ border: "none", outline: "none", background: "transparent", fontSize: 13, color: tm, width: "100%", fontWeight: 600 }} />
                   </div>

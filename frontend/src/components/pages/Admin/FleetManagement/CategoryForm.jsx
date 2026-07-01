@@ -3,13 +3,19 @@ import React, { useEffect, useState } from 'react';
 const initialFormData = {
     name: '',
     description: '',
+    passenger_capacity: '',
+    luggage_capacity: '',
+    best_for: '',
+    comfort_level: '',
+    ideal_trip_types: '',
+    ac_available: false,
 };
 
 const CategoryForm = ({ isOpen, onClose, onSubmit, category, loading }) => {
     const [formData, setFormData] = useState(initialFormData);
     const [errors, setErrors] = useState({});
-    const [imageFile, setImageFile] = useState(null);
-    const [imagePreview, setImagePreview] = useState('');
+    const [imageFiles, setImageFiles] = useState([]);
+    const [imagePreviews, setImagePreviews] = useState([]);
 
     const isEditing = !!category;
 
@@ -18,20 +24,30 @@ const CategoryForm = ({ isOpen, onClose, onSubmit, category, loading }) => {
             setFormData({
                 name: category.name || '',
                 description: category.description || '',
+                passenger_capacity: category.passenger_capacity || '',
+                luggage_capacity: category.luggage_capacity || '',
+                best_for: category.best_for || '',
+                comfort_level: category.comfort_level || '',
+                ideal_trip_types: category.ideal_trip_types || '',
+                ac_available: category.ac_available || false,
             });
-            setImageFile(null);
-            setImagePreview(category.image_url || '');
+            setImageFiles([]);
+            const initialImages = category.images || (category.image_url ? [category.image_url] : []);
+            setImagePreviews(initialImages);
         } else {
             setFormData(initialFormData);
-            setImageFile(null);
-            setImagePreview('');
+            setImageFiles([]);
+            setImagePreviews([]);
         }
         setErrors({});
     }, [category, isOpen]);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData((prev) => ({ 
+            ...prev, 
+            [name]: type === 'checkbox' ? checked : value 
+        }));
 
         if (errors[name]) {
             setErrors((prev) => ({ ...prev, [name]: '' }));
@@ -39,13 +55,15 @@ const CategoryForm = ({ isOpen, onClose, onSubmit, category, loading }) => {
     };
 
     const handleImageChange = (e) => {
-        const file = e.target.files?.[0] || null;
-        setImageFile(file);
+        const files = Array.from(e.target.files || []);
+        setImageFiles(files);
 
-        if (file) {
-            setImagePreview(URL.createObjectURL(file));
+        if (files.length > 0) {
+            const previews = files.map(file => URL.createObjectURL(file));
+            setImagePreviews(previews);
         } else {
-            setImagePreview(category?.image_url || '');
+            const initialImages = category?.images || (category?.image_url ? [category.image_url] : []);
+            setImagePreviews(initialImages);
         }
     };
 
@@ -62,7 +80,7 @@ const CategoryForm = ({ isOpen, onClose, onSubmit, category, loading }) => {
         e.preventDefault();
 
         if (validate()) {
-            onSubmit({ ...formData, imageFile });
+            onSubmit({ ...formData, imageFiles });
         }
     };
 
@@ -70,7 +88,7 @@ const CategoryForm = ({ isOpen, onClose, onSubmit, category, loading }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-            <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+            <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto no-scrollbar rounded-2xl bg-white shadow-2xl">
                 <div className="sticky top-0 flex items-center justify-between rounded-t-2xl border-b border-gray-200 bg-white px-6 py-4">
                     <h2 className="text-xl font-bold text-gray-800">
                         {isEditing ? 'Edit Category' : 'Add Category'}
@@ -83,49 +101,129 @@ const CategoryForm = ({ isOpen, onClose, onSubmit, category, loading }) => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5 p-6">
-                    <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
-                            Category Name <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            placeholder="e.g., Luxury SUV"
-                            className={`w-full rounded-lg border px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 ${
-                                errors.name ? 'border-red-500' : 'border-gray-300'
-                            }`}
-                        />
-                        {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
-                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="md:col-span-2">
+                            <label className="mb-1 block text-sm font-medium text-gray-700">
+                                Category Name <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                placeholder="e.g., Luxury SUV"
+                                className={`w-full rounded-lg border px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 ${
+                                    errors.name ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            />
+                            {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
+                        </div>
 
-                    <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>
-                        <textarea
-                            name="description"
-                            value={formData.description}
-                            onChange={handleChange}
-                            rows="3"
-                            placeholder="Short description about this category"
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Passenger Capacity</label>
+                            <input
+                                type="text"
+                                name="passenger_capacity"
+                                value={formData.passenger_capacity}
+                                onChange={handleChange}
+                                placeholder="e.g., 2-3 passengers"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
 
-                    <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">Category Image</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">Choose an image from your PC for this category.</p>
-                        {imagePreview && (
-                            <div className="mt-3 overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
-                                <img src={imagePreview} alt="Category preview" className="h-40 w-full object-cover" />
-                            </div>
-                        )}
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Luggage Capacity</label>
+                            <input
+                                type="text"
+                                name="luggage_capacity"
+                                value={formData.luggage_capacity}
+                                onChange={handleChange}
+                                placeholder="e.g., 2-3 luggages"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Best For</label>
+                            <input
+                                type="text"
+                                name="best_for"
+                                value={formData.best_for}
+                                onChange={handleChange}
+                                placeholder="e.g., Families, Couples"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Comfort Level</label>
+                            <input
+                                type="text"
+                                name="comfort_level"
+                                value={formData.comfort_level}
+                                onChange={handleChange}
+                                placeholder="e.g., Premium, Standard"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Ideal Trip Types</label>
+                            <input
+                                type="text"
+                                name="ideal_trip_types"
+                                value={formData.ideal_trip_types}
+                                onChange={handleChange}
+                                placeholder="e.g., City Tours, Airport Transfers"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    name="ac_available"
+                                    checked={formData.ac_available}
+                                    onChange={handleChange}
+                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4"
+                                />
+                                AC Available
+                            </label>
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>
+                            <textarea
+                                name="description"
+                                value={formData.description}
+                                onChange={handleChange}
+                                rows="3"
+                                placeholder="Short description about this category"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Category Images</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleImageChange}
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                            />
+                            <p className="mt-1 text-xs text-gray-500">Choose images from your PC for this category.</p>
+                            {imagePreviews.length > 0 && (
+                                <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    {imagePreviews.map((preview, index) => (
+                                        <div key={index} className="overflow-hidden rounded-xl border border-gray-200 bg-gray-50 h-24">
+                                            <img src={preview} alt={`Preview ${index + 1}`} className="h-full w-full object-cover" />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">

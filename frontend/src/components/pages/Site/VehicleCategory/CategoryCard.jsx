@@ -1,23 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
     const { t } = useTranslation();
     const isAvailable = vehicle.status === 'Available';
+    const [currentImageIdx, setCurrentImageIdx] = useState(0);
+    const images = vehicle?.images && vehicle.images.length > 0 ? vehicle.images : (vehicle?.image_url ? [vehicle.image_url] : []);
+
+    useEffect(() => {
+        if (images.length <= 1) return;
+        const timer = setInterval(() => {
+            setCurrentImageIdx((prev) => (prev + 1) % images.length);
+        }, 3500); // slightly different delay than modal
+        return () => clearInterval(timer);
+    }, [images.length]);
 
     return (
         <div className="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group transform hover:-translate-y-1">
             {/* Image Section */}
             <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                {vehicle.image_url ? (
+                {images.length > 0 ? (
                     <img
-                        src={vehicle.image_url}
+                        src={images[currentImageIdx]}
                         alt={vehicle.vehicle_name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500"
                     />
                 ) : (
                     <div className="flex items-center justify-center h-full">
                         <span className="text-7xl">🚗</span>
+                    </div>
+                )}
+                
+                {images.length > 1 && (
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+                        {images.map((_, idx) => (
+                            <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all ${currentImageIdx === idx ? 'bg-white scale-125' : 'bg-white/50'}`} />
+                        ))}
                     </div>
                 )}
 
@@ -46,7 +64,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                 <div className="absolute bottom-3 right-3 bg-white rounded-xl px-4 py-2 shadow-lg">
                     <p className="text-xs text-gray-500">{t("vehicleCategory.card.startingAt")}</p>
                     <p className="text-xl font-bold text-blue-600">
-                        ${vehicle.price_per_day}
+                        Rs. {vehicle.price_per_day}
                         <span className="text-xs text-gray-500 font-normal">{t("vehicleCategory.card.perDay")}</span>
                     </p>
                 </div>

@@ -29,7 +29,7 @@ const initialMessages = [
         id: "r002",
         from: "admin",
         fromName: "Lanka Wheels Support",
-        message: "Thank you for contacting us! Our weekly rates start from $280 for economy vehicles. Would you like a detailed quote?",
+        message: "Thank you for contacting us! Our weekly rates start from Rs. 84,000 for economy vehicles. Would you like a detailed quote?",
         timestamp: "2026-03-05 14:30",
       },
       {

@@ -32,7 +32,13 @@ CREATE TABLE vehicle_category (
     category_id      INT AUTO_INCREMENT PRIMARY KEY,
     category_name    VARCHAR(50) NOT NULL,
     description      TEXT,
-    image_url        VARCHAR(255)
+    image_url        TEXT,
+    passenger_capacity VARCHAR(50),
+    luggage_capacity   VARCHAR(50),
+    best_for         VARCHAR(255),
+    comfort_level    VARCHAR(100),
+    ac_available     BOOLEAN DEFAULT FALSE,
+    ideal_trip_types VARCHAR(255)
 );
 
 CREATE TABLE vehicle (

@@ -493,10 +493,65 @@ const generateCustomerReviewAnalysisPdf = async (_req, res) => {
   }
 };
 
+const getBusinessOverviewJSON = async (_req, res) => {
+  try {
+    const data = await getBusinessOverviewData();
+    res.json(data);
+  } catch (error) {
+    console.error('getBusinessOverviewJSON error:', error);
+    res.status(500).json({ message: 'Failed to fetch business overview data.' });
+  }
+};
+
+const getEarningsReportJSON = async (_req, res) => {
+  try {
+    const data = await getMonthlyEarningsData();
+    res.json(data);
+  } catch (error) {
+    console.error('getEarningsReportJSON error:', error);
+    res.status(500).json({ message: 'Failed to fetch earnings report data.' });
+  }
+};
+
+const getBookingAnalysisJSON = async (_req, res) => {
+  try {
+    const data = await getBookingAnalysisData();
+    res.json(data);
+  } catch (error) {
+    console.error('getBookingAnalysisJSON error:', error);
+    res.status(500).json({ message: 'Failed to fetch booking analysis data.' });
+  }
+};
+
+const getVehicleAnalysisJSON = async (_req, res) => {
+  try {
+    const data = await getVehicleAnalysisData();
+    res.json(data);
+  } catch (error) {
+    console.error('getVehicleAnalysisJSON error:', error);
+    res.status(500).json({ message: 'Failed to fetch vehicle analysis data.' });
+  }
+};
+
+const getCustomerReviewAnalysisJSON = async (_req, res) => {
+  try {
+    const data = await getCustomerReviewData();
+    res.json(data);
+  } catch (error) {
+    console.error('getCustomerReviewAnalysisJSON error:', error);
+    res.status(500).json({ message: 'Failed to fetch customer review analysis data.' });
+  }
+};
+
 module.exports = {
   generateBusinessOverviewPdf,
   generateEarningsReportPdf,
   generateBookingAnalysisPdf,
   generateVehicleAnalysisPdf,
   generateCustomerReviewAnalysisPdf,
+  getBusinessOverviewJSON,
+  getEarningsReportJSON,
+  getBookingAnalysisJSON,
+  getVehicleAnalysisJSON,
+  getCustomerReviewAnalysisJSON,
 };

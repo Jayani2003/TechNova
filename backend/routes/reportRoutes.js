@@ -10,4 +10,10 @@ router.get('/booking-analysis/pdf', verifyToken, adminOnly, reportCtrl.generateB
 router.get('/vehicle-analysis/pdf', verifyToken, adminOnly, reportCtrl.generateVehicleAnalysisPdf);
 router.get('/customer-review-analysis/pdf', verifyToken, adminOnly, reportCtrl.generateCustomerReviewAnalysisPdf);
 
+router.get('/business-overview/data', verifyToken, adminOnly, reportCtrl.getBusinessOverviewJSON);
+router.get('/earnings/data', verifyToken, adminOnly, reportCtrl.getEarningsReportJSON);
+router.get('/booking-analysis/data', verifyToken, adminOnly, reportCtrl.getBookingAnalysisJSON);
+router.get('/vehicle-analysis/data', verifyToken, adminOnly, reportCtrl.getVehicleAnalysisJSON);
+router.get('/customer-review-analysis/data', verifyToken, adminOnly, reportCtrl.getCustomerReviewAnalysisJSON);
+
 module.exports = router;

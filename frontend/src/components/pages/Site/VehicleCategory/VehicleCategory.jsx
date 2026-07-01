@@ -27,8 +27,10 @@ const OurFleet = () => {
     // Filter state
     const [filters, setFilters] = useState({
         search: '',
-        transmission: '',
-        fuel_type: '',
+        passenger_capacity: '',
+        luggage_capacity: '',
+        trip_type: '',
+        comfort_level: '',
         sortBy: 'default',
     });
 
@@ -123,22 +125,55 @@ const OurFleet = () => {
         // Search filter
         if (filters.search) {
             const searchLower = filters.search.toLowerCase();
-            result = result.filter(
-                (v) =>
+            result = result.filter((v) => {
+                const cat = categories.find(c => c.id === v.category_id);
+                return (
                     v.vehicle_name.toLowerCase().includes(searchLower) ||
                     v.brand.toLowerCase().includes(searchLower) ||
-                    v.model.toLowerCase().includes(searchLower)
-            );
+                    v.model.toLowerCase().includes(searchLower) ||
+                    (cat?.name && cat.name.toLowerCase().includes(searchLower)) ||
+                    (cat?.ideal_trip_types && cat.ideal_trip_types.toLowerCase().includes(searchLower)) ||
+                    (cat?.best_for && cat.best_for.toLowerCase().includes(searchLower))
+                );
+            });
         }
 
-        // Transmission filter
-        if (filters.transmission) {
-            result = result.filter((v) => v.transmission === filters.transmission);
+        // Passenger Capacity
+        if (filters.passenger_capacity) {
+            const val = filters.passenger_capacity.toLowerCase();
+            result = result.filter((v) => {
+                const cat = categories.find(c => c.id === v.category_id);
+                return (cat?.passenger_capacity && cat.passenger_capacity.toLowerCase().includes(val)) || 
+                       (v.adult_seats && v.adult_seats.toString().includes(val));
+            });
         }
 
-        // Fuel type filter
-        if (filters.fuel_type) {
-            result = result.filter((v) => v.fuel_type === filters.fuel_type);
+        // Luggage Capacity
+        if (filters.luggage_capacity) {
+            const val = filters.luggage_capacity.toLowerCase();
+            result = result.filter((v) => {
+                const cat = categories.find(c => c.id === v.category_id);
+                return (cat?.luggage_capacity && cat.luggage_capacity.toLowerCase().includes(val)) ||
+                       (v.luggage_capacity && v.luggage_capacity.toString().includes(val));
+            });
+        }
+
+        // Trip Type
+        if (filters.trip_type) {
+            const val = filters.trip_type.toLowerCase();
+            result = result.filter((v) => {
+                const cat = categories.find(c => c.id === v.category_id);
+                return cat?.ideal_trip_types && cat.ideal_trip_types.toLowerCase().includes(val);
+            });
+        }
+
+        // Comfort Level
+        if (filters.comfort_level) {
+            const val = filters.comfort_level.toLowerCase();
+            result = result.filter((v) => {
+                const cat = categories.find(c => c.id === v.category_id);
+                return cat?.comfort_level && cat.comfort_level.toLowerCase().includes(val);
+            });
         }
 
         // Sort
@@ -149,18 +184,51 @@ const OurFleet = () => {
             case 'price_high':
                 result.sort((a, b) => parseFloat(b.price_per_day) - parseFloat(a.price_per_day));
                 break;
-            case 'seats_low':
-                result.sort((a, b) => a.seats - b.seats);
+            case 'name_asc':
+                result.sort((a, b) => a.vehicle_name.localeCompare(b.vehicle_name));
                 break;
-            case 'seats_high':
-                result.sort((a, b) => b.seats - a.seats);
+            case 'name_desc':
+                result.sort((a, b) => b.vehicle_name.localeCompare(a.vehicle_name));
                 break;
             default:
                 break;
         }
 
         return result;
-    }, [vehicles, filters]);
+    }, [vehicles, filters, categories]);
+
+    // Compute unique options for filters based on current data
+    const filterOptions = useMemo(() => {
+        const passenger = new Set();
+        const luggage = new Set();
+        const tripType = new Set();
+        const comfort = new Set();
+
+        categories.forEach(cat => {
+            if (cat.passenger_capacity) passenger.add(cat.passenger_capacity.trim());
+            if (cat.luggage_capacity) luggage.add(cat.luggage_capacity.trim());
+            if (cat.comfort_level) comfort.add(cat.comfort_level.trim());
+            if (cat.ideal_trip_types) {
+                cat.ideal_trip_types.split(',').forEach(t => {
+                    const trimmed = t.trim();
+                    if (trimmed) tripType.add(trimmed);
+                });
+            }
+        });
+
+        // Also add numeric vehicle values just in case they aren't covered by categories
+        vehicles.forEach(v => {
+            if (v.adult_seats) passenger.add(v.adult_seats.toString());
+            if (v.luggage_capacity && typeof v.luggage_capacity === 'number') luggage.add(v.luggage_capacity.toString());
+        });
+
+        return {
+            passenger_capacities: [...passenger].sort(),
+            luggage_capacities: [...luggage].sort(),
+            trip_types: [...tripType].sort(),
+            comfort_levels: [...comfort].sort(),
+        };
+    }, [categories, vehicles]);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -194,6 +262,7 @@ const OurFleet = () => {
                         filters={filters}
                         onFilterChange={setFilters}
                         totalCount={filteredVehicles.length}
+                        filterOptions={filterOptions}
                     />
 
                     {/* Section Title */}

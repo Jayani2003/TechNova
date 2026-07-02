@@ -565,8 +565,42 @@ exports.listPublicPackages = async (req, res) => {
       ORDER BY p.package_id DESC
     `, params);
 
+    const packageIds = packages.map((p) => p.package_id);
+    let ratingsByPackage = {};
+    let bookingsByPackage = {};
+
+    if (packageIds.length > 0) {
+      const [ratingRows] = await db.execute(`
+        SELECT bp.package_id, AVG(r.rating) AS avg_rating, COUNT(r.review_id) AS reviews_count
+        FROM booking_package bp
+        INNER JOIN review r ON r.booking_id = bp.booking_id
+        WHERE bp.package_id IN (${packageIds.map(() => '?').join(',')})
+        GROUP BY bp.package_id
+      `, packageIds);
+
+      ratingsByPackage = ratingRows.reduce((acc, row) => {
+        acc[row.package_id] = {
+          avg_rating: row.avg_rating != null ? Number(row.avg_rating) : 0,
+          reviews_count: row.reviews_count != null ? Number(row.reviews_count) : 0,
+        };
+        return acc;
+      }, {});
+
+      const [bookingRows] = await db.execute(`
+        SELECT package_id, COUNT(*) AS bookings_count
+        FROM booking_package
+        WHERE package_id IN (${packageIds.map(() => '?').join(',')})
+        GROUP BY package_id
+      `, packageIds);
+
+      bookingsByPackage = bookingRows.reduce((acc, row) => {
+        acc[row.package_id] = Number(row.bookings_count) || 0;
+        return acc;
+      }, {});
+    }
+
     // For performance, load up to first 2 destinations per package and include hidden count
-    const pkgIds = packages.map(p => p.package_id);
+    const pkgIds = packageIds;
     let placesByPkg = {};
     let placeCountByPkg = {};
     if (pkgIds.length > 0) {
@@ -618,6 +652,9 @@ exports.listPublicPackages = async (req, res) => {
       highlights: [],
       destinations: placesByPkg[p.package_id] || [],
       hidden_dest_count: hidden,
+      avg_rating: ratingsByPackage[p.package_id]?.avg_rating || 0,
+      reviews_count: ratingsByPackage[p.package_id]?.reviews_count || 0,
+      bookings_count: bookingsByPackage[p.package_id] || 0,
       availability: buildAvailabilityPayload(p.availability_status),
       });
     });

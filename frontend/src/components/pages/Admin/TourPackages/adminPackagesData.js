@@ -21,6 +21,33 @@ const PACKAGES_CHANGED_EVENT = 'sl-admin-packages-changed';
 let _packages = [];
 const _subscribers = new Set();
 
+const normalizeAvailability = (availability = {}) => {
+  const status = String(availability.status || availability.availability_status || 'AVAILABLE').toUpperCase();
+  const normalizedStatus = status === 'UNAVAILABLE' ? 'UNAVAILABLE' : 'AVAILABLE';
+  return {
+    status: normalizedStatus,
+    isAvailable: normalizedStatus !== 'UNAVAILABLE',
+  };
+};
+
+const mapBackendPackage = (p) => ({
+  id: `pkg-${p.package_id || p.id || Math.random().toString(36).slice(2, 9)}`,
+  title: p.title,
+  type: p.type,
+  days: Number(p.days) || (p.days ? Number(p.days) : 0),
+  description: p.description,
+  image: p.image_url || p.image || '',
+  destinations: Array.isArray(p.destinations) ? p.destinations : [],
+  guid: p.guid ? {
+    id: p.guid.id,
+    name: p.guid.name,
+    nic: p.guid.nic,
+    contactDetails: p.guid.contactDetails,
+  } : null,
+  availability: normalizeAvailability(p.availability || { status: p.availability_status }),
+  availability_status: normalizeAvailability(p.availability || { status: p.availability_status }).status,
+});
+
 const notify = () => _subscribers.forEach(fn => fn([..._packages]));
 
 const emitPackagesChanged = () => {
@@ -32,21 +59,7 @@ const reloadFromBackend = async () => {
     const res = await fetch(buildApiUrl('/packages/admin/packages'));
     if (!res.ok) return;
     const data = await res.json();
-    _packages = data.map(p => ({
-      id: `pkg-${p.package_id || p.id || Math.random().toString(36).slice(2,9)}`,
-      title: p.title,
-      type: p.type,
-      days: Number(p.days) || (p.days ? Number(p.days) : 0),
-      description: p.description,
-      image: p.image_url || p.image || '',
-      destinations: Array.isArray(p.destinations) ? p.destinations : [],
-      guid: p.guid ? {
-        id: p.guid.id,
-        name: p.guid.name,
-        nic: p.guid.nic,
-        contactDetails: p.guid.contactDetails,
-      } : null,
-    }));
+    _packages = data.map(mapBackendPackage);
     notify();
     emitPackagesChanged();
   } catch (e) {
@@ -65,21 +78,7 @@ export const packageStore = {
         if (res.ok) {
           const data = await res.json();
           // map backend shape to frontend store shape
-          _packages = data.map(p => ({
-            id: `pkg-${p.package_id || p.id || Math.random().toString(36).slice(2,9)}`,
-            title: p.title,
-            type: p.type,
-            days: Number(p.days) || (p.days ? Number(p.days) : 0),
-            description: p.description,
-            image: p.image_url || p.image_url || p.image || '',
-            destinations: Array.isArray(p.destinations) ? p.destinations : [],
-            guid: p.guid ? {
-              id: p.guid.id,
-              name: p.guid.name,
-              nic: p.guid.nic,
-              contactDetails: p.guid.contactDetails,
-            } : null,
-          }));
+          _packages = data.map(mapBackendPackage);
         } else {
           _packages = [];
         }
@@ -158,6 +157,8 @@ export const packageStore = {
           nic: data.guideNic,
           contactDetails: data.guideContactDetails,
         } : null),
+        availability: normalizeAvailability(created.availability || { status: created.availability_status }),
+        availability_status: normalizeAvailability(created.availability || { status: created.availability_status }).status,
       };
       _packages = [newPkg, ..._packages];
       notify();
@@ -234,6 +235,45 @@ export const packageStore = {
       console.error('package delete failed', err);
       throw err;
     }
+  },
+
+  refresh: async () => {
+    await reloadFromBackend();
+  },
+
+  getAvailability: async (id) => {
+    const m = String(id).match(/(\d+)/);
+    if (!m) throw new Error('Invalid package id');
+    const pkgId = m[1];
+    const res = await fetch(buildApiUrl(`/packages/admin/packages/${pkgId}/availability`));
+    if (!res.ok) {
+      let msg = 'Failed to load package availability';
+      try { const body = await res.json(); msg = body.error || body.message || msg; } catch {}
+      throw new Error(msg);
+    }
+    return res.json();
+  },
+
+  setAvailability: async (id, status) => {
+    const m = String(id).match(/(\d+)/);
+    if (!m) throw new Error('Invalid package id');
+    const pkgId = m[1];
+    const res = await fetch(buildApiUrl(`/packages/admin/packages/${pkgId}/availability`), {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(localStorage.getItem('cbt_token') ? { Authorization: `Bearer ${localStorage.getItem('cbt_token')}` } : {}),
+      },
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) {
+      let msg = 'Failed to update package availability';
+      try { const body = await res.json(); msg = body.error || body.message || msg; } catch {}
+      throw new Error(msg);
+    }
+    const updated = await res.json();
+    await reloadFromBackend();
+    return updated;
   },
 
   // ── RESET to seed data (dev utility) ────────────────────

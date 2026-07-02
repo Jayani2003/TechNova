@@ -483,6 +483,8 @@
     "card": {
       "more": "more",
       "days": "Days",
+      "available": "Available",
+      "unavailable": "Unavailable",
       "bookBtn": "Book Now",
       "detailsBtn": "Details"
     },

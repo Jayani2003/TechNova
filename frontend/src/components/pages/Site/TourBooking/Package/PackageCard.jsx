@@ -1,6 +1,7 @@
 import { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { CalendarDays } from "lucide-react";
 
 const TYPE_COLORS = {
   'Beach Side':          '#0099cc',
@@ -37,6 +38,8 @@ const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDe
   const destinations = Array.isArray(pkg.destinations) ? pkg.destinations : [];
   const highlights = Array.isArray(pkg.highlights) ? pkg.highlights : [];
   const topDests = destinations.slice(0, 2);
+  const availability = pkg.availability || {};
+  const isAvailable = availability.status !== 'UNAVAILABLE';
 
   return (
     <>
@@ -108,13 +111,37 @@ const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDe
 
         /* Days badge */
         .pkc-days-badge {
-          position: absolute; top: 14px; right: 14px; z-index: 2;
+          display: inline-flex; align-items: center; gap: 5px;
           background: rgba(0,176,165,0.92); backdrop-filter: blur(8px);
           border: 1px solid rgba(255,255,255,0.25);
           color: #fff; font-size: 9px; font-weight: 800;
           letter-spacing: 0.15em; text-transform: uppercase;
           padding: 5px 12px; border-radius: 100px;
           box-shadow: 0 4px 12px rgba(0,176,165,0.35);
+        }
+        .pkc-availability-badge {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 6px 10px; border-radius: 100px;
+          border: 1px solid rgba(255,255,255,0.2);
+          background: rgba(0,0,0,0.44); backdrop-filter: blur(10px);
+          color: #fff; font-size: 9px; font-weight: 900;
+          letter-spacing: 0.15em; text-transform: uppercase;
+          box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+        }
+        .pkc-availability-badge.available {
+          background: rgba(16,185,129,0.92);
+          box-shadow: 0 6px 14px rgba(16,185,129,0.25);
+        }
+        .pkc-availability-badge.unavailable {
+          background: rgba(204,51,68,0.92);
+          box-shadow: 0 6px 14px rgba(204,51,68,0.25);
+        }
+        .pkc-availability-icon {
+          display: inline-flex; align-items: center; justify-content: center;
+        }
+        .pkc-badge-stack {
+          position: absolute; top: 14px; right: 14px; z-index: 2;
+          display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
         }
 
         /* Destination mini-chips on image bottom */
@@ -225,7 +252,13 @@ const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDe
             <span className="pkc-type-dot" style={{ background: accentColor }} />
             {TYPE_ICONS[pkg.type]} {t(`packageTours.filters.types.${pkg.type}`, pkg.type)}
           </div>
-          <div className="pkc-days-badge">📅 {pkg.days} {t("packageTours.card.days")}</div>
+          <div className="pkc-badge-stack">
+            <div className={`pkc-availability-badge ${isAvailable ? 'available' : 'unavailable'}`}>
+              <span className="pkc-availability-icon"><CalendarDays size={11} /></span>
+              <span>{isAvailable ? t('packageTours.card.available') : t('packageTours.card.unavailable')}</span>
+            </div>
+            <div className="pkc-days-badge">📅 {pkg.days} {t("packageTours.card.days")}</div>
+          </div>
 
 
           {showDestinationsAction ? (

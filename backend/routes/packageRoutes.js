@@ -15,6 +15,10 @@ router.put('/admin/packages/:id', upload.fields([
   { name: 'destImages', maxCount: 20 }
 ]), pkgCtrl.updatePackage);
 
+// Admin package availability calendar
+router.get('/admin/packages/:id/availability', pkgCtrl.getPackageAvailability);
+router.put('/admin/packages/:id/availability', pkgCtrl.updatePackageAvailability);
+
 // Admin delete package
 router.delete('/admin/packages/:id', pkgCtrl.deletePackage);
 

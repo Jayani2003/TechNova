@@ -1,3 +1,7 @@
+import { useState } from 'react';
+import { CalendarDays } from 'lucide-react';
+import AdminPackageAvailabilityModal from './AdminPackageAvailabilityModal';
+
 const TYPE_COLORS = {
   'Beach Side':          { bg: 'rgba(0,153,204,0.1)',  color: '#0099cc',  border: 'rgba(0,153,204,0.25)'  },
   'Hill Country':        { bg: 'rgba(92,138,60,0.1)',   color: '#5c8a3c',  border: 'rgba(92,138,60,0.25)'  },
@@ -13,6 +17,8 @@ const TYPE_ICONS = {
 };
 
 const AdminPackageTable = ({ packages, onEdit, onDelete, dark = false }) => {
+  const [availabilityPackage, setAvailabilityPackage] = useState(null);
+
   if (packages.length === 0) {
     return (
       <div style={{
@@ -166,6 +172,23 @@ const AdminPackageTable = ({ packages, onEdit, onDelete, dark = false }) => {
 
         /* Actions */
         .apt-actions { display: flex; gap: 8px; justify-content: flex-end; }
+        .apt-availability-btn {
+          display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+          padding: 7px 12px; border-radius: 8px;
+          background: rgba(0,176,165,0.08);
+          border: 1px solid rgba(0,176,165,0.2);
+          color: #00b0a5; font-size: 11px; font-weight: 800;
+          letter-spacing: 0.05em; text-transform: uppercase;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .apt-availability-btn:hover { background: #00b0a5; color: #fff; border-color: #00b0a5; }
+        .apt-availability-btn.unavailable {
+          background: rgba(204,51,68,0.06);
+          border-color: rgba(204,51,68,0.2);
+          color: #cc3344;
+        }
+        .apt-availability-btn.unavailable:hover { background: #cc3344; color: #fff; border-color: #cc3344; }
         .apt-edit-btn {
           display: inline-flex; align-items: center; gap: 6px;
           padding: 7px 14px; border-radius: 8px;
@@ -215,6 +238,7 @@ const AdminPackageTable = ({ packages, onEdit, onDelete, dark = false }) => {
               {packages.map(pkg => {
                 const tc = TYPE_COLORS[pkg.type] || TYPE_COLORS['Beach Side'];
                 const destNames = pkg.destinations.map(d => d.name).filter(Boolean).join(', ');
+                const isAvailable = pkg.availability?.status !== 'UNAVAILABLE';
                 return (
                   <tr key={pkg.id} className="apt-row">
                     {/* Package identity */}
@@ -254,6 +278,15 @@ const AdminPackageTable = ({ packages, onEdit, onDelete, dark = false }) => {
                     {/* Actions */}
                     <td className="apt-td">
                       <div className="apt-actions">
+                        <button
+                          type="button"
+                          className={`apt-availability-btn ${isAvailable ? '' : 'unavailable'}`}
+                          onClick={() => setAvailabilityPackage(pkg)}
+                          title="Manage availability"
+                        >
+                          <CalendarDays size={13} />
+                          {isAvailable ? 'Available' : 'Unavailable'}
+                        </button>
                         <button className="apt-edit-btn" onClick={() => onEdit(pkg)}>
                           <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
                             <path d="M11.5 2.5a1.5 1.5 0 0 1 2 2l-9 9-3 1 1-3 9-9z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
@@ -274,6 +307,12 @@ const AdminPackageTable = ({ packages, onEdit, onDelete, dark = false }) => {
             </tbody>
           </table>
         </div>
+
+        <AdminPackageAvailabilityModal
+          pkg={availabilityPackage}
+          dark={dark}
+          onClose={() => setAvailabilityPackage(null)}
+        />
       </div>
     </>
   );

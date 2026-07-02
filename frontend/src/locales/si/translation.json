@@ -483,6 +483,8 @@
     "card": {
       "more": "තවත්",
       "days": "දින",
+      "available": "ලබා ගත හැක",
+      "unavailable": "ලබා ගත නොහැක",
       "bookBtn": "වෙන්කරවා ගන්න",
       "detailsBtn": "විස්තර"
     },

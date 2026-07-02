@@ -107,6 +107,7 @@ CREATE TABLE package (
     days        ENUM ('7 DAYS','14 DAYS','21 DAYS','28 DAYS') NOT NULL,
     description TEXT,
     image_url   VARCHAR(255),
+    availability_status ENUM('AVAILABLE','UNAVAILABLE') NOT NULL DEFAULT 'AVAILABLE',
     guid_id     INT NULL,
     FOREIGN KEY (guid_id) REFERENCES guid(guid_id) ON DELETE SET NULL
 );

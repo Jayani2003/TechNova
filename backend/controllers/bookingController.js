@@ -8,15 +8,14 @@ const formatDate = (val) => {
 
 const normalizeTourType = (value) => String(value || 'P2P').toUpperCase();
 
-// ── mapBooking ────────────────────────────────────────────────────────────────
-// Maps a raw DB row to the shape expected by the frontend.
-// Matches the actual schema: new luggage columns, pickup_time column,
-// tour_thoughts column, no emergency_* on booking (those are on user).
 const mapBooking = (row) => ({
   id:             row.booking_id,
   userId:         row.user_id,
   customerName:   row.customer_name,
-  customerPhone:  row.customer_phone,
+  contactPlatform:  row.contact_platform  || null,
+  contactNumber:    row.contact_number    || null,
+  contactPlatform2: row.contact_platform2 || null,
+  contactNumber2:   row.contact_number2   || null,
   customerEmail:  row.email || null,
   tourType:       row.tour_type,
   categoryId:     row.category_id,
@@ -102,7 +101,10 @@ const createP2PBooking = async (req, res) => {
     luggageCustomCount,
     luggageCustomItems,   // array of { weight: "12" }
     customerName,
-    customerPhone,
+    contactPlatform,
+    contactNumber,
+    contactPlatform2,
+    contactNumber2,
     notes,
     tourThoughts,
   } = req.body;
@@ -112,7 +114,7 @@ const createP2PBooking = async (req, res) => {
   const selectedCityList = Array.isArray(selectedCities) ? selectedCities.filter(Boolean) : [];
   const activityList     = Array.isArray(activities)     ? activities.filter(Boolean)     : [];
 
-  if (!startDate || !endDate || !categoryId || !customerName || !customerPhone)
+  if (!startDate || !endDate || !categoryId || !customerName || !(contactNumber || '').trim())
     return res.status(400).json({ message: 'Missing required fields.' });
 
   if (!isPackageBooking && !isCustomBooking && (!startLocation || !endLocation))
@@ -147,7 +149,7 @@ const createP2PBooking = async (req, res) => {
 
     const [result] = await conn.execute(
       `INSERT INTO booking
-        (user_id, customer_name, customer_phone,
+        (user_id, customer_name, contact_platform, contact_number, contact_platform2, contact_number2,
          tour_type, category_id,
          start_date, end_date, pickup_time,
          start_location, end_location,
@@ -157,11 +159,14 @@ const createP2PBooking = async (req, res) => {
          no_of_adults, no_of_children, ages_of_children,
          notes, tour_thoughts,
          booking_status, booking_date)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', CURDATE())`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', CURDATE())`,
       [
         req.user.id,
         customerName,
-        customerPhone,
+        contactPlatform  || 'mobile',
+        contactNumber,
+        contactPlatform2 || null,
+        contactNumber2   || null,
         isPackageBooking ? 'PACKAGE' : isCustomBooking ? 'CUSTOM' : 'P2P',
         resolvedCategoryId,
         startDate,
@@ -411,7 +416,7 @@ const updateBooking = async (req, res) => {
 
     await conn.execute(
       `UPDATE booking
-       SET customer_name = ?, customer_phone = ?,
+       SET customer_name = ?, contact_platform = ?, contact_number = ?, contact_platform2 = ?, contact_number2 = ?,
            category_id = ?,
            start_date = ?, end_date = ?, pickup_time = ?,
            start_location = ?, end_location = ?,
@@ -422,7 +427,7 @@ const updateBooking = async (req, res) => {
            notes = ?, tour_thoughts = ?
        WHERE booking_id = ?`,
       [
-        customerName, customerPhone,
+        customerName, contactPlatform  || 'mobile', contactNumber, contactPlatform2 || null, contactNumber2 || null,
         resolvedCategoryId,
         startDate, endDate, pickupTime || null,
         startLocation || null, endLocation || null,

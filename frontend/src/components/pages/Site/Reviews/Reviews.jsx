@@ -197,6 +197,13 @@ const Reviews = () => {
 
       const serverReviews = await fetchPublishedReviews();
       setReviews(serverReviews.length ? serverReviews : [newReview, ...reviews]);
+      try {
+        const refreshedStats = await fetchReviewStats();
+        setStats(refreshedStats);
+      } catch (statsError) {
+        console.warn('Failed to refresh review stats after submit:', statsError.message);
+        setStats(null);
+      }
       const tours = user?.email ? await fetchReviewableTours(user.email) : [];
       setServerReviewableTours(tours);
       setModalOpen(false);
@@ -207,6 +214,7 @@ const Reviews = () => {
       console.error('Review submit failed:', e);
       // Fallback keeps UX working when backend is unavailable for this request.
       setReviews(prev => [newReview, ...prev]);
+      setStats(null);
       setModalOpen(false);
       try { window.dispatchEvent(new Event('reviews:updated')); } catch (err) { /* ignore */ }
       return true;

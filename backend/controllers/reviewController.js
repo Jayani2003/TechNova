@@ -140,6 +140,8 @@ const getReviewStats = async (_req, res) => {
       `
       SELECT
         COUNT(*) AS total_reviews,
+        COALESCE(SUM(rating), 0) AS rating_sum,
+        COALESCE(AVG(rating), 0) AS average_rating,
         SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) AS five_star_reviews,
         SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) AS four_star_reviews,
         SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) AS three_star_reviews,
@@ -157,9 +159,14 @@ const getReviewStats = async (_req, res) => {
       2: Number(row.two_star_reviews) || 0,
       1: Number(row.one_star_reviews) || 0,
     };
+    const total = Number(row.total_reviews) || 0;
+    const average = Number(row.average_rating) || 0;
 
     res.json({
-      total: Number(row.total_reviews) || 0,
+      total,
+      ratingSum: Number(row.rating_sum) || 0,
+      avg: average,
+      average,
       breakdown,
     });
   } catch (error) {

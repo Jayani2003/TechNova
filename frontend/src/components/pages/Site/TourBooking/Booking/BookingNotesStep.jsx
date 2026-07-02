@@ -133,6 +133,7 @@ const PlatformRow = ({ index, platform, number, onChange, onRemove, required, us
 // ── Main Component ─────────────────────────────────────────────────────────────
 const BookingNotesStep = ({ data, onChange }) => {
   const { user } = useContext(AuthContext);
+  const { t } = useTranslation();
   const [showSecond, setShowSecond] = useState(!!(data.contactPlatform2 && data.contactNumber2));
   const [emergencyPhoneTouched, setEmergencyPhoneTouched] = useState(false);
 

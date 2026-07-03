@@ -1,61 +1,9 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { X, CloudRain, Wind } from "lucide-react";
+import { getWeatherInfo, parseForecast, formatHour } from "../../../../../services/weatherService";
 
-/* ─── Weather code → label, icon ───────────────────────────────────────────── */
-export const getWeatherInfo = (code) => {
-  if (code === 0)                            return { label: "Sunny",           icon: "☀️" };
-  if (code >= 1  && code <= 3)               return { label: "Partly Cloudy",   icon: "⛅" };
-  if (code === 45 || code === 48)            return { label: "Foggy",           icon: "🌫️" };
-  if (code >= 51  && code <= 55)             return { label: "Drizzle",         icon: "🌦️" };
-  if (code === 56 || code === 57)            return { label: "Freezing Drizzle",icon: "🌨️" };
-  if (code >= 61  && code <= 65)             return { label: "Rainy",           icon: "🌧️" };
-  if (code === 66 || code === 67)            return { label: "Freezing Rain",   icon: "🌨️" };
-  if (code >= 71  && code <= 77)             return { label: "Snowy",           icon: "❄️" };
-  if (code >= 80  && code <= 82)             return { label: "Showers",         icon: "🌧️" };
-  if (code === 85 || code === 86)            return { label: "Snow Showers",    icon: "❄️" };
-  if (code >= 95  && code <= 99)             return { label: "Thunderstorm",    icon: "⛈️" };
-  return { label: "Unknown", icon: "❓" };
-};
-
-/* ─── Format "2025-07-03T14:00" → "2 PM" ───────────────────────────────────── */
-const formatHour = (timeStr = "") => {
-  const timePart = timeStr.split("T")[1] || "";
-  const h = parseInt(timePart.split(":")[0], 10);
-  if (isNaN(h)) return timeStr;
-  const suffix = h >= 12 ? "PM" : "AM";
-  const display = h % 12 === 0 ? 12 : h % 12;
-  return `${display}:00 ${suffix}`;
-};
-
-/* ─── Parse flat hourly arrays → 7 day buckets ─────────────────────────────── */
-const parseForecast = (hourly) => {
-  const days = [];
-  if (!hourly?.time) return days;
-  for (let d = 0; d < 7; d++) {
-    const baseIdx = d * 24;
-    const dateStr = hourly.time[baseIdx];
-    if (!dateStr) break;
-    const dateObj = new Date(dateStr);
-    const label = dateObj.toLocaleDateString("en-US", {
-      weekday: "short", month: "short", day: "numeric",
-    });
-    const hours = [];
-    for (let h = 0; h < 24; h++) {
-      const i = baseIdx + h;
-      if (i >= hourly.time.length) break;
-      hours.push({
-        time:       hourly.time[i],
-        temp:       hourly.temperature_2m[i],
-        weatherCode:hourly.weather_code[i],
-        precipProb: hourly.precipitation_probability[i],
-        windSpeed:  hourly.wind_speed_10m[i],
-      });
-    }
-    days.push({ label, hours });
-  }
-  return days;
-};
+export { getWeatherInfo, parseForecast, formatHour };
 
 /* ─── Modal (portalled to document.body to escape framer-motion transforms) ── */
 const WeatherModal = ({ locationName, forecastHourly, onClose }) => {

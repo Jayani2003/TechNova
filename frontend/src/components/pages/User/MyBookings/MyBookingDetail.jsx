@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { ArrowLeft, MapPin, Calendar, Users, Car, Phone, FileText, Clock, Baby, Briefcase, Check, X, Zap, AlertTriangle, Download } from "lucide-react";
 import { STATUS_STYLES, TOUR_TYPE_LABEL } from "./MyBookingCard";
 import { useBookings } from "../../../../context/BookingsContext.jsx";
+import BookingWeatherPanel from "./BookingWeatherPanel";
 
 const VEHICLE_LABELS = {
   mini_car: "Mini Car", normal_car: "Normal Car", sedan_car: "Sedan Car",
@@ -267,8 +268,14 @@ const MyBookingDetail = ({ booking, onBack }) => {
         {/* Booking info */}
         <Section title="Booking Info">
           <DetailRow icon={Calendar}  label="Submitted On"        value={booking.bookingDate} />
-          <DetailRow icon={FileText}  label="Booking Reference"   value={`CBT-P2P-${booking.id}`} />
+          <DetailRow icon={FileText}  label="Booking Reference"   value={`CBT-${booking.tourType === "PACKAGE" ? "PKG" : booking.tourType === "CUSTOM" ? "CUS" : "P2P"}-${booking.id}`} />
+          {booking.tourType === "PACKAGE" && booking.packageName && (
+            <DetailRow icon={FileText} label="Package" value={booking.packageName} />
+          )}
         </Section>
+
+        {/* Package tour weather — not shown for P2P or customized tours */}
+        <BookingWeatherPanel booking={booking} />
 
       </div>
     </motion.div>

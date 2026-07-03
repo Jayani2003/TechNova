@@ -21,6 +21,7 @@ const handleResponse = async (res) => {
 export const api = {
   get:    (path)       => fetch(buildApiUrl(path), { headers: getHeaders() }).then(handleResponse),
   post:   (path, body) => fetch(buildApiUrl(path), { method: 'POST',   headers: getHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+  put:    (path, body) => fetch(buildApiUrl(path), { method: 'PUT',    headers: getHeaders(), body: JSON.stringify(body) }).then(handleResponse),
   patch:  (path, body) => fetch(buildApiUrl(path), { method: 'PATCH',  headers: getHeaders(), body: JSON.stringify(body) }).then(handleResponse),
   delete: (path)       => fetch(buildApiUrl(path), { method: 'DELETE', headers: getHeaders() }).then(handleResponse),
   upload: (path, form) => fetch(buildApiUrl(path), { method: 'POST',   headers: getHeaders(true), body: form }).then(handleResponse),

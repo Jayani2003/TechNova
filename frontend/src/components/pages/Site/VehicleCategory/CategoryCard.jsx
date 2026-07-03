@@ -1,21 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
+    const { t } = useTranslation();
     const isAvailable = vehicle.status === 'Available';
+    const [currentImageIdx, setCurrentImageIdx] = useState(0);
+    const images = vehicle?.images && vehicle.images.length > 0 ? vehicle.images : (vehicle?.image_url ? [vehicle.image_url] : []);
+
+    useEffect(() => {
+        if (images.length <= 1) return;
+        const timer = setInterval(() => {
+            setCurrentImageIdx((prev) => (prev + 1) % images.length);
+        }, 3500); // slightly different delay than modal
+        return () => clearInterval(timer);
+    }, [images.length]);
 
     return (
         <div className="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group transform hover:-translate-y-1">
             {/* Image Section */}
             <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                {vehicle.image_url ? (
+                {images.length > 0 ? (
                     <img
-                        src={vehicle.image_url}
+                        src={images[currentImageIdx]}
                         alt={vehicle.vehicle_name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500"
                     />
                 ) : (
                     <div className="flex items-center justify-center h-full">
                         <span className="text-7xl">🚗</span>
+                    </div>
+                )}
+                
+                {images.length > 1 && (
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+                        {images.map((_, idx) => (
+                            <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all ${currentImageIdx === idx ? 'bg-white scale-125' : 'bg-white/50'}`} />
+                        ))}
                     </div>
                 )}
 
@@ -24,7 +44,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                     {isAvailable ? (
                         <span className="bg-green-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
                             <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                            Available
+                            {t("vehicleCategory.card.available")}
                         </span>
                     ) : (
                         <span className="bg-red-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-md">
@@ -42,10 +62,10 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
 
                 {/* Price Tag */}
                 <div className="absolute bottom-3 right-3 bg-white rounded-xl px-4 py-2 shadow-lg">
-                    <p className="text-xs text-gray-500">Starting at</p>
+                    <p className="text-xs text-gray-500">{t("vehicleCategory.card.startingAt")}</p>
                     <p className="text-xl font-bold text-blue-600">
-                        ${vehicle.price_per_day}
-                        <span className="text-xs text-gray-500 font-normal">/day</span>
+                        Rs. {vehicle.price_per_day}
+                        <span className="text-xs text-gray-500 font-normal">{t("vehicleCategory.card.perDay")}</span>
                     </p>
                 </div>
             </div>
@@ -66,7 +86,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                 <div className="grid grid-cols-2 gap-2 mb-4">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span className="text-lg">👥</span>
-                        <span>{vehicle.seats} Seats</span>
+                        <span>{t("vehicleCategory.card.seats", { count: vehicle.seats })}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span className="text-lg">⛽</span>
@@ -78,7 +98,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span className="text-lg">🧳</span>
-                        <span>{vehicle.luggage_capacity} Bags</span>
+                        <span>{t("vehicleCategory.card.bags", { count: vehicle.luggage_capacity })}</span>
                     </div>
                 </div>
 
@@ -91,7 +111,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                     )}
                     {vehicle.insurance_expired && (
                         <span className="text-xs bg-red-50 text-red-700 px-2 py-1 rounded-full border border-red-200">
-                            Insurance Expired
+                            {t("vehicleCategory.card.insuranceExpired")}
                         </span>
                     )}
                     {vehicle.mileage && (
@@ -113,7 +133,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                         className="flex-1 font-medium py-2.5 rounded-lg transition-colors text-sm hover:shadow-md"
                         style={{ backgroundColor: '#ffffff', color: '#374151', border: '1px solid #d1d5db' }}
                     >
-                        View Details
+                        {t("vehicleCategory.card.viewDetails")}
                     </button>
                     <button
                         onClick={() => onBookNow(vehicle)}
@@ -124,7 +144,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                             : { backgroundColor: '#ffffff', color: '#9ca3af', cursor: 'not-allowed', border: '1px solid #d1d5db' }
                         }
                     >
-                        {isAvailable ? 'Book Now' : 'Not Available'}
+                        {isAvailable ? t("vehicleCategory.card.bookNow") : t("vehicleCategory.card.notAvailable")}
                     </button>
                 </div>
             </div>

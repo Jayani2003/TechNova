@@ -5,6 +5,7 @@ const BookingsContext = createContext();
 
 export const BookingsProvider = ({ children }) => {
   const [bookings, setBookings] = useState([]);
+  const [payments, setPayments] = useState([]);
 
   // ── Fetch customer's own bookings ──────────────────────────────────────────
   const getCustomerBookings = useCallback(async () => {
@@ -41,13 +42,64 @@ export const BookingsProvider = ({ children }) => {
   const rejectQuote    = (id) => updateBookingStatus(id, "REJECTED");
   const cancelBooking  = (id) => updateBookingStatus(id, "CANCELLED");
 
+  const downloadConfirmationPdf = useCallback(async (bookingId) => {
+    const { blob, fileName } = await api.getBlob(`/bookings/${bookingId}/confirmation-pdf`);
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName || `booking-confirmation-${bookingId}.pdf`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.URL.revokeObjectURL(url);
+  }, []);
+
+  // ── Payments Integration ──────────────────────────────────────────────────
+  const getPaymentsForBooking = useCallback(async (bookingId) => {
+    return await api.get(`/payments/booking/${bookingId}`);
+  }, []);
+
+  const getAllPayments = useCallback(async () => {
+    const data = await api.get(`/payments`);
+    setPayments(data.payments || []);
+    return data.payments;
+  }, []);
+
+  const recordPayment = useCallback(async (paymentData) => {
+    const res = await api.post(`/payments`, paymentData);
+    await getAllPayments();
+    try { await getAllBookings(); } catch { await getCustomerBookings(); }
+    return res;
+  }, [getAllBookings, getCustomerBookings, getAllPayments]);
+
+  const uploadPaymentSlip = useCallback(async (formData) => {
+    const res = await api.upload('/payments/upload-slip', formData);
+    await getAllPayments();
+    try { await getAllBookings(); } catch { await getCustomerBookings(); }
+    return res;
+  }, [getAllBookings, getCustomerBookings, getAllPayments]);
+
+  const approvePayment = useCallback(async (paymentId, notes) => {
+    const res = await api.patch(`/payments/${paymentId}/approve`, { notes });
+    await getAllPayments();
+    return res;
+  }, [getAllPayments]);
+
+  const rejectPayment = useCallback(async (paymentId, notes) => {
+    const res = await api.patch(`/payments/${paymentId}/reject`, { notes });
+    await getAllPayments();
+    return res;
+  }, [getAllPayments]);
+
   // ── Pending count for admin badge ─────────────────────────────────────────
   const getPendingCount = () => bookings.filter((b) => b.status === "PENDING").length;
+  const getPendingPaymentsCount = () => payments.filter((p) => p.status === "pending").length;
 
   return (
     <BookingsContext.Provider
       value={{
         bookings,
+        payments,
         getCustomerBookings,
         getAllBookings,
         setQuotedPrice,
@@ -55,7 +107,15 @@ export const BookingsProvider = ({ children }) => {
         acceptQuote,
         rejectQuote,
         cancelBooking,
+        downloadConfirmationPdf,
         getPendingCount,
+        getPendingPaymentsCount,
+        getPaymentsForBooking,
+        recordPayment,
+        getAllPayments,
+        uploadPaymentSlip,
+        approvePayment,
+        rejectPayment,
       }}
     >
       {children}

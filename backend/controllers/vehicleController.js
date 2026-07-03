@@ -117,7 +117,29 @@ const mapCategory = (row) => ({
   id: row.category_id,
   name: row.category_name,
   description: row.description || '',
-  image_url: row.image_url || null,
+  image_url: (() => {
+    try {
+      const parsed = JSON.parse(row.image_url);
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : (row.image_url || null);
+    } catch (e) {
+      return row.image_url || null;
+    }
+  })(),
+  images: (() => {
+    if (!row.image_url) return [];
+    try {
+      const parsed = JSON.parse(row.image_url);
+      return Array.isArray(parsed) ? parsed : [row.image_url];
+    } catch (e) {
+      return [row.image_url];
+    }
+  })(),
+  passenger_capacity: row.passenger_capacity || '',
+  luggage_capacity: row.luggage_capacity || '',
+  best_for: row.best_for || '',
+  comfort_level: row.comfort_level || '',
+  ac_available: Boolean(row.ac_available),
+  ideal_trip_types: row.ideal_trip_types || '',
   vehicle_count: Number(row.vehicle_count || 0),
 });
 
@@ -143,7 +165,23 @@ const mapVehicle = (row) => ({
   insurance_end_date: toDateOnly(row.insurance_end_date),
   insurance_expired: isInsuranceExpired(row.insurance_start_date, row.insurance_end_date),
   status: toStatusLabel(row.vehicle_status),
-  image_url: row.image_url || '',
+  image_url: (() => {
+    try {
+      const parsed = JSON.parse(row.image_url);
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : (row.image_url || '');
+    } catch (e) {
+      return row.image_url || '';
+    }
+  })(),
+  images: (() => {
+    if (!row.image_url) return [];
+    try {
+      const parsed = JSON.parse(row.image_url);
+      return Array.isArray(parsed) ? parsed : [row.image_url];
+    } catch (e) {
+      return [row.image_url];
+    }
+  })(),
   mileage: row.mileage || null,
   engine_capacity: row.engine_capacity || '',
   features: row.features || '',
@@ -174,10 +212,16 @@ exports.listCategories = async (_req, res) => {
         vc.category_name,
         vc.description,
         vc.image_url,
+        vc.passenger_capacity,
+        vc.luggage_capacity,
+        vc.best_for,
+        vc.comfort_level,
+        vc.ac_available,
+        vc.ideal_trip_types,
         COUNT(v.vehicle_id) AS vehicle_count
       FROM vehicle_category vc
       LEFT JOIN vehicle v ON v.category_id = vc.category_id
-      GROUP BY vc.category_id, vc.category_name, vc.description, vc.image_url
+      GROUP BY vc.category_id, vc.category_name, vc.description, vc.image_url, vc.passenger_capacity, vc.luggage_capacity, vc.best_for, vc.comfort_level, vc.ac_available, vc.ideal_trip_types
       ORDER BY vc.category_id ASC
     `);
 
@@ -196,11 +240,17 @@ exports.getCategoryById = async (req, res) => {
         vc.category_name,
         vc.description,
         vc.image_url,
+        vc.passenger_capacity,
+        vc.luggage_capacity,
+        vc.best_for,
+        vc.comfort_level,
+        vc.ac_available,
+        vc.ideal_trip_types,
         COUNT(v.vehicle_id) AS vehicle_count
       FROM vehicle_category vc
       LEFT JOIN vehicle v ON v.category_id = vc.category_id
       WHERE vc.category_id = ?
-      GROUP BY vc.category_id, vc.category_name, vc.description, vc.image_url
+      GROUP BY vc.category_id, vc.category_name, vc.description, vc.image_url, vc.passenger_capacity, vc.luggage_capacity, vc.best_for, vc.comfort_level, vc.ac_available, vc.ideal_trip_types
       LIMIT 1`,
       [req.params.id]
     );
@@ -218,17 +268,37 @@ exports.getCategoryById = async (req, res) => {
 
 exports.createCategory = async (req, res) => {
   try {
-    const { name, description = '', image_url = null } = req.body;
-    const uploadedImageUrl = req.file?.path || req.file?.url || req.file?.secure_url || req.file?.location || req.file?.filename || null;
-    const resolvedImageUrl = uploadedImageUrl || image_url || null;
+    const { name, description = '', image_url, passenger_capacity, luggage_capacity, best_for, comfort_level, ac_available, ideal_trip_types } = req.body;
+    const uploadedImageUrls = req.files ? req.files.map(file => file.path || file.url || file.secure_url || file.location || file.filename) : [];
+    let existingUrls = [];
+    if (image_url) {
+      try {
+        const parsed = JSON.parse(image_url);
+        existingUrls = Array.isArray(parsed) ? parsed : [image_url];
+      } catch(e) {
+        existingUrls = [image_url];
+      }
+    }
+    const allUrls = [...existingUrls, ...uploadedImageUrls].filter(Boolean);
+    const resolvedImageUrl = allUrls.length > 0 ? JSON.stringify(allUrls) : null;
 
     if (!name) {
       return res.status(400).json({ success: false, message: 'Category name is required.' });
     }
 
     const [result] = await db.execute(
-      'INSERT INTO vehicle_category (category_name, description, image_url) VALUES (?, ?, ?)',
-      [name, description || null, resolvedImageUrl]
+      'INSERT INTO vehicle_category (category_name, description, image_url, passenger_capacity, luggage_capacity, best_for, comfort_level, ac_available, ideal_trip_types) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        name,
+        description || null,
+        resolvedImageUrl,
+        passenger_capacity || null,
+        luggage_capacity || null,
+        best_for || null,
+        comfort_level || null,
+        (ac_available === 'true' || ac_available === true) ? 1 : 0,
+        ideal_trip_types || null
+      ]
     );
 
     res.status(201).json({
@@ -238,6 +308,12 @@ exports.createCategory = async (req, res) => {
         name,
         description: description || '',
         image_url: resolvedImageUrl,
+        passenger_capacity: passenger_capacity || '',
+        luggage_capacity: luggage_capacity || '',
+        best_for: best_for || '',
+        comfort_level: comfort_level || '',
+        ac_available: ac_available === 'true' || ac_available === true,
+        ideal_trip_types: ideal_trip_types || '',
         vehicle_count: 0,
       },
     });
@@ -249,8 +325,8 @@ exports.createCategory = async (req, res) => {
 
 exports.updateCategory = async (req, res) => {
   try {
-    const { name, description = '', image_url } = req.body;
-    const uploadedImageUrl = req.file?.path || req.file?.url || req.file?.secure_url || req.file?.location || req.file?.filename || null;
+    const { name, description = '', image_url, passenger_capacity, luggage_capacity, best_for, comfort_level, ac_available, ideal_trip_types } = req.body;
+    const uploadedImageUrls = req.files ? req.files.map(file => file.path || file.url || file.secure_url || file.location || file.filename) : [];
 
     if (!name) {
       return res.status(400).json({ success: false, message: 'Category name is required.' });
@@ -265,11 +341,35 @@ exports.updateCategory = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Category not found.' });
     }
 
-    const resolvedImageUrl = uploadedImageUrl || image_url || existingRows[0].image_url || null;
+    let newUrls = [];
+    if (image_url) {
+      try {
+        const parsed = JSON.parse(image_url);
+        newUrls = Array.isArray(parsed) ? parsed : [image_url];
+      } catch(e) {
+        newUrls = [image_url];
+      }
+    }
+    const allUrls = [...newUrls, ...uploadedImageUrls].filter(Boolean);
+    let resolvedImageUrl = allUrls.length > 0 ? JSON.stringify(allUrls) : null;
+    if (!resolvedImageUrl && existingRows[0].image_url) {
+        resolvedImageUrl = existingRows[0].image_url;
+    }
 
     const [result] = await db.execute(
-      'UPDATE vehicle_category SET category_name = ?, description = ?, image_url = ? WHERE category_id = ?',
-      [name, description || null, resolvedImageUrl, req.params.id]
+      'UPDATE vehicle_category SET category_name = ?, description = ?, image_url = ?, passenger_capacity = ?, luggage_capacity = ?, best_for = ?, comfort_level = ?, ac_available = ?, ideal_trip_types = ? WHERE category_id = ?',
+      [
+        name,
+        description || null,
+        resolvedImageUrl,
+        passenger_capacity || null,
+        luggage_capacity || null,
+        best_for || null,
+        comfort_level || null,
+        (ac_available === 'true' || ac_available === true) ? 1 : 0,
+        ideal_trip_types || null,
+        req.params.id
+      ]
     );
 
     if (result.affectedRows === 0) {
@@ -463,7 +563,18 @@ exports.createVehicle = async (req, res) => {
       engine_capacity,
       features,
     } = req.body;
-    const uploadedImageUrl = req.file?.path || req.file?.url || req.file?.secure_url || req.file?.location || req.file?.filename || null;
+    const uploadedImageUrls = req.files ? req.files.map(file => file.path || file.url || file.secure_url || file.location || file.filename) : [];
+    let existingUrls = [];
+    if (image_url) {
+      try {
+        const parsed = JSON.parse(image_url);
+        existingUrls = Array.isArray(parsed) ? parsed : [image_url];
+      } catch(e) {
+        existingUrls = [image_url];
+      }
+    }
+    const allUrls = [...existingUrls, ...uploadedImageUrls].filter(Boolean);
+    const resolvedImageUrl = allUrls.length > 0 ? JSON.stringify(allUrls) : null;
 
     const resolvedCategoryId = safeNumber(category_id);
     if (!resolvedCategoryId) {
@@ -535,7 +646,7 @@ exports.createVehicle = async (req, res) => {
         insurance_provider || null,
         insuranceValidation.normalizedStartDate,
         insuranceValidation.normalizedEndDate,
-        uploadedImageUrl || image_url || null,
+        resolvedImageUrl,
         normalizeStatus(status),
         brand || null,
         model || null,
@@ -623,7 +734,7 @@ exports.updateVehicle = async (req, res) => {
       engine_capacity,
       features,
     } = req.body;
-    const uploadedImageUrl = req.file?.path || req.file?.url || req.file?.secure_url || req.file?.location || req.file?.filename || null;
+    const uploadedImageUrls = req.files ? req.files.map(file => file.path || file.url || file.secure_url || file.location || file.filename) : [];
 
     const resolvedCategoryId = safeNumber(category_id);
     const vehicleLabel = vehicle_name || name || '';
@@ -653,7 +764,20 @@ exports.updateVehicle = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Vehicle not found.' });
     }
 
-    const resolvedImageUrl = uploadedImageUrl || image_url || existingRows[0].image_url || null;
+    let newUrls = [];
+    if (image_url) {
+      try {
+        const parsed = JSON.parse(image_url);
+        newUrls = Array.isArray(parsed) ? parsed : [image_url];
+      } catch(e) {
+        newUrls = [image_url];
+      }
+    }
+    const allUrls = [...newUrls, ...uploadedImageUrls].filter(Boolean);
+    let resolvedImageUrl = allUrls.length > 0 ? JSON.stringify(allUrls) : null;
+    if (!resolvedImageUrl && existingRows[0].image_url) {
+        resolvedImageUrl = existingRows[0].image_url;
+    }
 
     const [result] = await db.execute(
       `UPDATE vehicle SET

@@ -1,42 +1,25 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import CategoryHero from './CategoryHero';
-import CategoryTabs from './CategoryTabs';
 import CategoryShowcase from './CategoryShowcase';
 import VehicleFilters from './VehicleFilters';
-import VehicleGrid from './VehicleGrid';
-import VehicleDetailsModal from './VehicleDetailsModal';
-import { vehicleService, categoryService } from '../../../../services/vehicleService';
+import { categoryService, vehicleService } from '../../../../services/vehicleService';
 
 const OurFleet = () => {
-    const navigate = useNavigate();
-
     // State
     const [categories, setCategories] = useState([]);
     const [vehicles, setVehicles] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null);
-    const [selectedVehicle, setSelectedVehicle] = useState(null);
-    const [showDetails, setShowDetails] = useState(false);
-
     // Loading states
     const [categoriesLoading, setCategoriesLoading] = useState(true);
-    const [vehiclesLoading, setVehiclesLoading] = useState(true);
 
     // Filter state
     const [filters, setFilters] = useState({
         search: '',
-        transmission: '',
-        fuel_type: '',
+        passenger_capacity: '',
+        luggage_capacity: '',
+        trip_type: '',
+        comfort_level: '',
         sortBy: 'default',
     });
-
-    // Toast notification
-    const [toast, setToast] = useState(null);
-
-    const showToast = (message, type = 'info') => {
-        setToast({ message, type });
-        setTimeout(() => setToast(null), 3000);
-    };
 
     // Fetch categories
     const fetchCategories = useCallback(async () => {
@@ -54,23 +37,15 @@ const OurFleet = () => {
     }, []);
 
     // Fetch vehicles
-    const fetchVehicles = useCallback(async (categoryId = null) => {
+    const fetchVehicles = useCallback(async () => {
         try {
-            setVehiclesLoading(true);
-            let response;
-            if (categoryId) {
-                response = await vehicleService.getByCategory(categoryId);
-            } else {
-                response = await vehicleService.getAll();
-            }
+            const response = await vehicleService.getAll();
             if (response.success) {
                 const userVisibleVehicles = (response.data || []).filter((vehicle) => !vehicle.insurance_expired);
                 setVehicles(userVisibleVehicles);
             }
         } catch (error) {
             console.error('Error fetching vehicles:', error);
-        } finally {
-            setVehiclesLoading(false);
         }
     }, []);
 
@@ -80,153 +55,121 @@ const OurFleet = () => {
         fetchVehicles();
     }, [fetchCategories, fetchVehicles]);
 
-    // Handle category selection
-    const handleCategorySelect = (category) => {
-        setSelectedCategory(category);
-        fetchVehicles(category?.id);
 
-        // Smooth scroll to vehicle list
-        setTimeout(() => {
-            const vehicleSection = document.getElementById('vehicles-section');
-            if (vehicleSection) {
-                vehicleSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }, 100);
-    };
 
-    // Handle view details
-    const handleViewDetails = (vehicle) => {
-        setSelectedVehicle(vehicle);
-        setShowDetails(true);
-    };
+    // Filter categories based on the same filters
+    const filteredCategories = useMemo(() => {
+        let result = [...categories];
 
-    // Handle book now
-    const handleBookNow = (vehicle) => {
-        // Check if user is logged in
-        const token = localStorage.getItem('token');
-        if (!token) {
-            showToast('Please login to book a vehicle', 'info');
-            setTimeout(() => navigate('/login'), 1500);
-            return;
-        }
-
-        // Navigate to booking page with vehicle ID
-        navigate(`/booking/${vehicle.id}`);
-    };
-
-    // Apply filters and sorting
-    const filteredVehicles = useMemo(() => {
-        let result = [...vehicles];
-
-        // Search filter
         if (filters.search) {
             const searchLower = filters.search.toLowerCase();
-            result = result.filter(
-                (v) =>
-                    v.vehicle_name.toLowerCase().includes(searchLower) ||
-                    v.brand.toLowerCase().includes(searchLower) ||
-                    v.model.toLowerCase().includes(searchLower)
-            );
+            result = result.filter((cat) => {
+                return (
+                    (cat.name && cat.name.toLowerCase().includes(searchLower)) ||
+                    (cat.ideal_trip_types && cat.ideal_trip_types.toLowerCase().includes(searchLower)) ||
+                    (cat.best_for && cat.best_for.toLowerCase().includes(searchLower)) ||
+                    (cat.description && cat.description.toLowerCase().includes(searchLower))
+                );
+            });
         }
 
-        // Transmission filter
-        if (filters.transmission) {
-            result = result.filter((v) => v.transmission === filters.transmission);
+        if (filters.passenger_capacity) {
+            const val = filters.passenger_capacity.toLowerCase();
+            result = result.filter((cat) => cat.passenger_capacity && cat.passenger_capacity.toLowerCase().includes(val));
         }
 
-        // Fuel type filter
-        if (filters.fuel_type) {
-            result = result.filter((v) => v.fuel_type === filters.fuel_type);
+        if (filters.luggage_capacity) {
+            const val = filters.luggage_capacity.toLowerCase();
+            result = result.filter((cat) => cat.luggage_capacity && cat.luggage_capacity.toLowerCase().includes(val));
         }
 
-        // Sort
-        switch (filters.sortBy) {
-            case 'price_low':
-                result.sort((a, b) => parseFloat(a.price_per_day) - parseFloat(b.price_per_day));
-                break;
-            case 'price_high':
-                result.sort((a, b) => parseFloat(b.price_per_day) - parseFloat(a.price_per_day));
-                break;
-            case 'seats_low':
-                result.sort((a, b) => a.seats - b.seats);
-                break;
-            case 'seats_high':
-                result.sort((a, b) => b.seats - a.seats);
-                break;
-            default:
-                break;
+        if (filters.trip_type) {
+            const val = filters.trip_type.toLowerCase();
+            result = result.filter((cat) => cat.ideal_trip_types && cat.ideal_trip_types.toLowerCase().includes(val));
+        }
+
+        if (filters.comfort_level) {
+            const val = filters.comfort_level.toLowerCase();
+            result = result.filter((cat) => cat.comfort_level && cat.comfort_level.toLowerCase().includes(val));
+        }
+
+        if (filters.sortBy === 'name_asc') {
+            result.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (filters.sortBy === 'name_desc') {
+            result.sort((a, b) => b.name.localeCompare(a.name));
         }
 
         return result;
-    }, [vehicles, filters]);
+    }, [categories, filters]);
+
+    // Compute unique options for filters based on current data
+    const filterOptions = useMemo(() => {
+        const passenger = new Set();
+        const luggage = new Set();
+        const tripType = new Set();
+        const comfort = new Set();
+
+        categories.forEach(cat => {
+            if (cat.passenger_capacity) passenger.add(cat.passenger_capacity.trim());
+            if (cat.luggage_capacity) luggage.add(cat.luggage_capacity.trim());
+            if (cat.comfort_level) comfort.add(cat.comfort_level.trim());
+            if (cat.ideal_trip_types) {
+                cat.ideal_trip_types.split(',').forEach(t => {
+                    const trimmed = t.trim();
+                    if (trimmed) tripType.add(trimmed);
+                });
+            }
+        });
+
+        return {
+            passenger_capacities: [...passenger].sort(),
+            luggage_capacities: [...luggage].sort(),
+            trip_types: [...tripType].sort(),
+            comfort_levels: [...comfort].sort(),
+        };
+    }, [categories]);
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Toast */}
-            {toast && (
-                <div className="fixed top-4 right-4 z-[60] px-6 py-3 rounded-lg shadow-lg bg-blue-500 text-white font-medium animate-slide-in">
-                    {toast.message}
-                </div>
-            )}
 
             {/* Hero Section */}
             <CategoryHero />
 
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                {/* Category Tabs */}
-                <CategoryTabs
-                    categories={categories}
-                    selectedCategory={selectedCategory}
-                    onCategorySelect={handleCategorySelect}
-                    loading={categoriesLoading}
-                />
-
-                {/* Category Showcase (when category is selected) */}
-                {selectedCategory && <CategoryShowcase category={selectedCategory} />}
-
-                {/* Vehicles Section */}
-                <div id="vehicles-section">
-                    {/* Filters */}
+                {/* Filters */}
+                <div className="mb-8">
                     <VehicleFilters
                         filters={filters}
                         onFilterChange={setFilters}
-                        totalCount={filteredVehicles.length}
-                    />
-
-                    {/* Section Title */}
-                    <div className="mb-6">
-                        <h2 className="text-2xl font-bold text-gray-800">
-                            {selectedCategory
-                                ? `${selectedCategory.name} Vehicles`
-                                : 'All Available Vehicles'}
-                        </h2>
-                        <p className="text-gray-500 mt-1">
-                            Choose the perfect vehicle for your journey
-                        </p>
-                    </div>
-
-                    {/* Vehicle Grid */}
-                    <VehicleGrid
-                        vehicles={filteredVehicles}
-                        loading={vehiclesLoading}
-                        onViewDetails={handleViewDetails}
-                        onBookNow={handleBookNow}
-                        categoryName={selectedCategory?.name}
+                        totalCount={filteredCategories.length}
+                        filterOptions={filterOptions}
                     />
                 </div>
+
+                {/* Category Showcase Display */}
+                <div className="space-y-8">
+                    {filteredCategories.map((category) => {
+                        const categoryVehicles = vehicles.filter(v => v.category_id === category.id);
+                        return (
+                            <CategoryShowcase 
+                                key={category.id} 
+                                category={category} 
+                                vehicles={categoryVehicles} 
+                            />
+                        );
+                    })}
+                    {filteredCategories.length === 0 && !categoriesLoading && (
+                        <div className="text-center py-12 text-gray-500">
+                            No categories match your selected filters.
+                        </div>
+                    )}
+                </div>
+
+
             </div>
 
-            {/* Vehicle Details Modal */}
-            <VehicleDetailsModal
-                isOpen={showDetails}
-                onClose={() => {
-                    setShowDetails(false);
-                    setSelectedVehicle(null);
-                }}
-                vehicle={selectedVehicle}
-                onBookNow={handleBookNow}
-            />
+
         </div>
     );
 };

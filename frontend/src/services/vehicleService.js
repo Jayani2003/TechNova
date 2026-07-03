@@ -14,18 +14,43 @@ const toVehiclePayload = (vehicleData) => {
         return vehicleData;
     }
 
-    const imageFile = vehicleData?.imageFile || vehicleData?.image;
-    if (imageFile instanceof File) {
+    const imageFiles = vehicleData?.imageFiles || vehicleData?.images;
+    const hasFiles = Array.isArray(imageFiles) ? imageFiles.some(f => f instanceof File) : (imageFiles instanceof File);
+    const legacyImage = vehicleData?.imageFile || vehicleData?.image;
+    const hasLegacy = legacyImage instanceof File;
+
+    if (hasFiles || hasLegacy) {
         const formData = new FormData();
         Object.entries(vehicleData).forEach(([key, value]) => {
             if (value == null) return;
-            if (key === 'imageFile' || key === 'image') {
-                if (value instanceof File) {
-                    formData.append('image', value);
+            if (key === 'imageFiles' || key === 'images') {
+                if (Array.isArray(value)) {
+                    value.forEach(file => {
+                        if (file instanceof File) {
+                            formData.append('images', file);
+                        }
+                    });
+                } else if (value instanceof File) {
+                    formData.append('images', value);
                 }
                 return;
             }
-            formData.append(key, value);
+            if (key === 'imageFile' || key === 'image') {
+                if (value instanceof File) {
+                    formData.append('images', value); // append to images array for backend
+                }
+                return;
+            }
+            // Ignore pre-existing image strings if we don't want them overriding, or append them if they are strings
+            if (key === 'image_url' && Array.isArray(value)) {
+                formData.append('image_url', JSON.stringify(value));
+                return;
+            }
+            if (typeof value === 'object' && !Array.isArray(value) && !(value instanceof File)) {
+                formData.append(key, JSON.stringify(value));
+            } else {
+                formData.append(key, value);
+            }
         });
         return formData;
     }
@@ -38,21 +63,34 @@ const toCategoryPayload = (categoryData) => {
         return categoryData;
     }
 
-    const imageFile = categoryData?.image || categoryData?.imageFile || (categoryData?.image_url instanceof File ? categoryData.image_url : null);
-
-    if (imageFile instanceof File) {
+    const imageFiles = categoryData?.imageFiles || categoryData?.images || categoryData?.imageFile;
+    const hasFiles = Array.isArray(imageFiles) ? imageFiles.some(f => f instanceof File) : (imageFiles instanceof File);
+    
+    if (hasFiles) {
         const formData = new FormData();
         Object.entries(categoryData).forEach(([key, value]) => {
             if (value == null) return;
-            if (key === 'image' || key === 'imageFile' || key === 'image_url') {
-                if (value instanceof File) {
-                    formData.append('image', value);
-                } else {
-                    formData.append(key, value);
+            if (key === 'imageFiles' || key === 'images' || key === 'imageFile') {
+                if (Array.isArray(value)) {
+                    value.forEach(file => {
+                        if (file instanceof File) {
+                            formData.append('images', file);
+                        }
+                    });
+                } else if (value instanceof File) {
+                    formData.append('images', value);
                 }
                 return;
             }
-            formData.append(key, value);
+            if (key === 'image_url' && Array.isArray(value)) {
+                formData.append('image_url', JSON.stringify(value));
+                return;
+            }
+            if (typeof value === 'object' && !Array.isArray(value) && !(value instanceof File)) {
+                formData.append(key, JSON.stringify(value));
+            } else {
+                formData.append(key, value);
+            }
         });
         return formData;
     }

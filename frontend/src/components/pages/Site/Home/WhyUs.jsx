@@ -1,26 +1,28 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   Wifi, Ticket, Droplets, MapPinned, CalendarDays, 
   UserCheck, Fuel, ShieldCheck, Bed, Umbrella 
 } from 'lucide-react';
 
-const allServices = [
-  { title: "Connected", subtitle: "Free Wi-Fi", icon: Wifi },
-  { title: "Convenience", subtitle: "Tolls & Parking", icon: Ticket },
-  { title: "Refreshment", subtitle: "Free Water", icon: Droplets },
-  { title: "Security", subtitle: "GPS Tracking", icon: MapPinned },
-  { title: "Planning", subtitle: "Itinerary Support", icon: CalendarDays },
-  { title: "Professional", subtitle: "Expert Driver", icon: UserCheck },
-  { title: "Transparent", subtitle: "Fuel Included", icon: Fuel },
-  { title: "Protected", subtitle: "Passenger Insurance", icon: ShieldCheck },
-  { title: "Hospitality", subtitle: "Driver Housing", icon: Bed },
-  { title: "Prepared", subtitle: "Umbrella", icon: Umbrella },
-];
-
 export default function LuxuryServiceSlider() {
   const brandColor = "#00b0a5";
+  const { t } = useTranslation();
   
+  const allServices = [
+    { title: t('home.whyUs.services.connected'), subtitle: t('home.whyUs.services.freeWifi'), icon: Wifi },
+    { title: t('home.whyUs.services.convenience'), subtitle: t('home.whyUs.services.tollsParking'), icon: Ticket },
+    { title: t('home.whyUs.services.refreshment'), subtitle: t('home.whyUs.services.freeWater'), icon: Droplets },
+    { title: t('home.whyUs.services.security'), subtitle: t('home.whyUs.services.gpsTracking'), icon: MapPinned },
+    { title: t('home.whyUs.services.planning'), subtitle: t('home.whyUs.services.itinerarySupport'), icon: CalendarDays },
+    { title: t('home.whyUs.services.professional'), subtitle: t('home.whyUs.services.expertDriver'), icon: UserCheck },
+    { title: t('home.whyUs.services.transparent'), subtitle: t('home.whyUs.services.fuelIncluded'), icon: Fuel },
+    { title: t('home.whyUs.services.protected'), subtitle: t('home.whyUs.services.passengerInsurance'), icon: ShieldCheck },
+    { title: t('home.whyUs.services.hospitality'), subtitle: t('home.whyUs.services.driverHousing'), icon: Bed },
+    { title: t('home.whyUs.services.prepared'), subtitle: t('home.whyUs.services.umbrella'), icon: Umbrella },
+  ];
+
   // Tripling the array ensures that even on very wide screens (4K), there's no "gap"
   const duplicatedServices = [...allServices, ...allServices, ...allServices];
 
@@ -29,10 +31,10 @@ export default function LuxuryServiceSlider() {
       {/* Header */}
       <div className="max-w-7xl mx-auto px-6 mb-20 border-l-2 border-[#00b0a5] pl-8">
         <h2 className="text-xs uppercase tracking-[0.5em] text-[#00b0a5] mb-2 font-bold">
-          The Gold Standard
+          {t('home.whyUs.goldStandard')}
         </h2>
         <p className="text-3xl md:text-5xl font-extralight tracking-tight">
-          Our <span className="font-semibold italic">Signature</span> Amenities.
+          {t('home.whyUs.our')} <span className="font-semibold italic">{t('home.whyUs.signature')}</span> {t('home.whyUs.amenities')}
         </p>
       </div>
 
@@ -82,7 +84,7 @@ export default function LuxuryServiceSlider() {
       <div className="max-w-7xl mx-auto px-6 mt-20 flex justify-between items-center opacity-40">
          
          <div className="h-[1px] flex-1 mx-12 bg-white/5" />
-         <span className="text-[9px] uppercase tracking-[0.4em] text-[#00b0a5]">All-Inclusive Fleet</span>
+         <span className="text-[9px] uppercase tracking-[0.4em] text-[#00b0a5]">{t('home.whyUs.allInclusiveFleet')}</span>
       </div>
     </section>
   );

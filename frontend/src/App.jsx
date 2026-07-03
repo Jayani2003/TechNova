@@ -38,7 +38,7 @@ import ApproveBookings   from "./components/pages/Admin/ApproveBookings/ApproveB
 import Customers         from "./components/pages/Admin/Customers/Customer";
 import FleetManagement   from "./components/pages/Admin/FleetManagement/FleetManagement";
 import Messages          from "./components/pages/Admin/Messages/Messages";
-import SeasonalPricing   from "./components/pages/Admin/SeasonalPricing/SeasonalPricing";
+import Payment   from "./components/pages/Admin/Payments/Payment";
 import TourPackages      from "./components/pages/Admin/TourPackages/TourPackages";
 import AddGallery        from "./components/pages/Admin/AddGallery/AddGallery";
 import Report            from "./components/pages/Admin/Report/Report";
@@ -71,7 +71,7 @@ export default function App() {
         <Route path="customers"          element={<Customers />} />
         <Route path="fleet-management"   element={<FleetManagement />} />
         <Route path="messages"           element={<Messages />} />
-        <Route path="seasonal-pricing"   element={<SeasonalPricing />} />
+        <Route path="seasonal-pricing"   element={<Payment />} />
         <Route path="tour-packages"      element={<TourPackages />} />
         <Route path="add-gallery"        element={<AddGallery />} />
         <Route path="report"             element={<Report />} />

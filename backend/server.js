@@ -6,10 +6,11 @@ const galleryRoutes = require('./routes/galleryRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 const reviewRoutes  = require('./routes/reviewRoutes');
 const authRoutes    = require('./routes/authRoutes');
+const otpRoutes     = require('./routes/otpRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const reportRoutes  = require('./routes/reportRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
- 
-
+const paymentRoutes = require('./routes/paymentRoutes');
 
 const packageRoutes = require('./routes/packageRoutes');
 
@@ -39,6 +40,7 @@ app.use(cors({
     callback(new Error(`CORS blocked origin: ${origin}`));
   },
   credentials: true,
+  exposedHeaders: ['Content-Disposition'],
 }));
 app.use(express.json({ limit: '2mb' }));
 
@@ -46,11 +48,14 @@ app.get('/', (_req, res) => res.send('TechNova backend is running.'));
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 app.use('/api/auth',     authRoutes);
+app.use('/api/auth/otp',  otpRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/reports', reportRoutes);
 app.use('/api/gallery',  galleryRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/reviews',  reviewRoutes);
 app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/payments', paymentRoutes);
  
 // ── Global error handler ──────────────────────────────────────────────────────
 
@@ -64,4 +69,4 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ message: 'Internal server error.' });
 });
 
-app.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Backend running on ${FRONTEND_ORIGIN}:${PORT}`));

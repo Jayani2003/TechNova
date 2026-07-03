@@ -1,12 +1,12 @@
-// components/pages/Admin/ApproveBookings/BookingModal.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   X, MapPin, Calendar, Users, Car, Phone, FileText, Clock,
-  DollarSign, CheckCircle2, XCircle, Truck, Flag,
-  Archive, Hash, Package, Compass,
+  Banknote, CheckCircle2, XCircle, Truck, Flag,
+  Archive, Hash, Package, Compass, AlertTriangle, Briefcase,
 } from "lucide-react";
 import { StatusChip, TourTypeChip } from "./BookingChips";
 import { VEHICLE_LABELS, TOUR_TYPE_CFG, formatPhone } from "./BookingConstants";
+import { useBookings } from "../../../../context/BookingsContext";
 
 export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpdateStatus }) {
   const [price,  setPrice]  = useState(booking.quotedPrice ?? "");
@@ -15,6 +15,18 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
   const [vType,  setVType]  = useState(booking.assignedVehicle?.type ?? (booking.categoryName || VEHICLE_LABELS[booking.categoryId] || ""));
   const [err,    setErr]    = useState("");
 
+  const { getPaymentsForBooking, recordPayment } = useBookings();
+  const [paymentsData, setPaymentsData] = useState(null);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
+  const [recInstallment, setRecInstallment] = useState("");
+  const [recAmount, setRecAmount] = useState("");
+  const [recMethod, setRecMethod] = useState("CASH");
+  const [recDate, setRecDate] = useState(new Date().toISOString().split("T")[0]);
+  const [recNotes, setRecNotes] = useState("");
+  const [recError, setRecError] = useState("");
+  const [recSuccess, setRecSuccess] = useState("");
+  const [recSubmitting, setRecSubmitting] = useState(false);
+
   const bg     = dark ? "#0f172a" : "#f8fafc";
   const card   = dark ? "#1e293b" : "#ffffff";
   const border = dark ? "rgba(255,255,255,0.08)" : "#e2e8f0";
@@ -22,6 +34,67 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
   const ts     = dark ? "#64748b" : "#94a3b8";
 
   const tourCfg = TOUR_TYPE_CFG[booking.tourType] || {};
+
+  const loadPayments = () => {
+    if (!booking.id) return;
+    setPaymentsLoading(true);
+    getPaymentsForBooking(booking.id)
+      .then(data => {
+        setPaymentsData(data);
+        if (data && data.remainingAmount > 0) {
+          const nextPending = data.installments.find(i => i.status === 'PENDING' || i.status === 'OVERDUE');
+          if (nextPending) {
+            setRecInstallment(nextPending.type === 'Deposit' ? 'DEPOSIT' : nextPending.type === 'Final Payment' ? 'FINAL' : 'FULL');
+            setRecAmount(nextPending.rawAmount || "");
+          } else {
+            setRecInstallment(booking.tourType === 'P2P' ? 'FULL' : 'DEPOSIT');
+            setRecAmount(data.remainingAmount);
+          }
+        } else {
+          setRecInstallment("");
+          setRecAmount("");
+        }
+      })
+      .catch(err => console.error("Error fetching booking payments:", err))
+      .finally(() => setPaymentsLoading(false));
+  };
+
+  useEffect(() => {
+    loadPayments();
+    setRecNotes("");
+    setRecError("");
+    setRecSuccess("");
+  }, [booking.id]);
+
+  const handleRecordPayment = async (e) => {
+    e.preventDefault();
+    if (!recInstallment) { setRecError("Select installment type"); return; }
+    const amt = parseFloat(recAmount);
+    if (isNaN(amt) || amt <= 0) { setRecError("Enter a valid amount"); return; }
+    if (!recDate) { setRecError("Select received date"); return; }
+
+    setRecSubmitting(true);
+    setRecError("");
+    setRecSuccess("");
+    try {
+      await recordPayment({
+        booking_id: booking.id,
+        installment: recInstallment,
+        amount: amt,
+        payment_method: recMethod,
+        received_date: recDate,
+        notes: recNotes.trim() || null
+      });
+      setRecSuccess("Payment recorded successfully!");
+      setRecNotes("");
+      loadPayments();
+    } catch (err) {
+      console.error(err);
+      setRecError(err.message || "Failed to record payment");
+    } finally {
+      setRecSubmitting(false);
+    }
+  };
 
   const handleSendQuote = () => {
     const p = parseFloat(price);
@@ -114,35 +187,53 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
             )}
             <Row icon={Calendar} label="Start Date" value={booking.startDate} />
             <Row icon={Calendar} label="End Date"   value={booking.endDate} />
-            <Row icon={Clock}    label="Pickup Time" value={
-              booking.pickupTime ||
-              (booking.notes?.match(/Pickup time: ([^|]+)/)?.[1]?.trim()) ||
-              null
-            } />
+            <Row icon={Clock}    label="Pickup Time" value={booking.pickupTime || null} />
             <Row icon={Calendar} label="Total Days" value={booking.totalDays ? `${booking.totalDays} day(s)` : null} />
           </div>
 
           {/* Passengers */}
           <SectionTitle>Passengers & Vehicle</SectionTitle>
           <div style={{ background: card, borderRadius: 14, padding: "4px 16px", border: `1px solid ${border}`, marginBottom: 16 }}>
-            <Row icon={Users}    label="Adults"             value={booking.noOfAdults} />
-            <Row icon={Users}    label="Children"           value={booking.noOfChildren > 0 ? `${booking.noOfChildren} (Ages: ${booking.agesOfChildren || "—"})` : null} />
-            <Row icon={Car}      label="Requested Category" value={booking.categoryName || VEHICLE_LABELS[booking.categoryId] || booking.categoryId} />
-            <Row icon={FileText} label="Luggage"            value={`${booking.smallLuggages || 0} small, ${booking.largeLuggages || 0} large`} />
+            <Row icon={Users}    label="Adults"   value={booking.noOfAdults} />
+            {booking.noOfChildren > 0 && <Row icon={Users} label="Children" value={`${booking.noOfChildren} (Ages: ${booking.agesOfChildren || "—"})`} />}
             {booking.babySeatNeeded && <Row icon={Users} label="Baby Seat" value="Required" />}
+            <Row icon={Car} label="Requested Category" value={booking.categoryName || VEHICLE_LABELS[booking.categoryId] || booking.categoryId} />
+            {(booking.luggage10kg > 0 || booking.luggage25kg > 0 || booking.luggage35kg > 0 || booking.luggageCustomCount > 0) ? (
+              <>
+                {booking.luggage10kg  > 0 && <Row icon={Briefcase} label="10 kg Bags"    value={`${booking.luggage10kg} piece(s)`} />}
+                {booking.luggage25kg  > 0 && <Row icon={Briefcase} label="25 kg Bags"    value={`${booking.luggage25kg} piece(s)`} />}
+                {booking.luggage35kg  > 0 && <Row icon={Briefcase} label="35 kg Bags"    value={`${booking.luggage35kg} piece(s)`} />}
+                {booking.luggageCustomCount > 0 && (
+                  <Row icon={Briefcase} label="Custom Luggage"
+                    value={booking.luggageCustomDesc || `${booking.luggageCustomCount} item(s)`} />
+                )}
+              </>
+            ) : (
+              <Row icon={Briefcase} label="Luggage" value="No luggage specified" />
+            )}
           </div>
 
           {/* Customer */}
           <SectionTitle>Customer</SectionTitle>
           <div style={{ background: card, borderRadius: 14, padding: "4px 16px", border: `1px solid ${border}`, marginBottom: 16 }}>
-            <Row icon={Phone}    label="Name"  value={booking.customerName} />
-            <Row icon={Phone}    label="Phone" value={formatPhone(booking.customerPhone)} />
-            <Row icon={FileText} label="Email" value={booking.customerEmail} />
-            {booking.notes && (() => {
-              const clean = booking.notes.replace(/Pickup time: [^|]+\|?\s*/g, '').trim();
-              return clean ? <Row icon={FileText} label="Notes" value={clean} /> : null;
-            })()}
+            <Row icon={Phone}    label="Full Name" value={booking.customerName} />
+            <Row icon={Phone}    label="Phone"     value={formatPhone(booking.customerPhone)} />
+            <Row icon={FileText} label="Email"     value={booking.customerEmail} />
+            {booking.notes        && <Row icon={FileText} label="Notes"         value={booking.notes} />}
+            {booking.tourThoughts && <Row icon={FileText} label="Tour Thoughts" value={booking.tourThoughts} />}
           </div>
+
+          {/* Emergency Contact */}
+          {(booking.emergencyName || booking.emergencyPhone) && (
+            <>
+              <SectionTitle color="#f59e0b">Emergency Contact</SectionTitle>
+              <div style={{ background: card, borderRadius: 14, padding: "4px 16px", border: `1px solid ${border}`, marginBottom: 16 }}>
+                <Row icon={AlertTriangle} label="Name"         value={booking.emergencyName} />
+                <Row icon={AlertTriangle} label="Relationship" value={booking.emergencyRelationship} />
+                <Row icon={Phone}         label="Phone"        value={formatPhone(booking.emergencyPhone)} />
+              </div>
+            </>
+          )}
 
           {/* Already assigned vehicle */}
           {booking.assignedVehicle && (
@@ -162,9 +253,9 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
               <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 800, color: "#6366f1" }}>💰 Set Price & Assign Vehicle</p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Price (USD) *</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Price (LKR) *</label>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, background: card, border: `1px solid ${border}`, borderRadius: 10, padding: "9px 12px" }}>
-                    <DollarSign size={14} color="#00b0a5" />
+                    <Banknote size={14} color="#00b0a5" />
                     <input type="number" value={price} onChange={e => { setPrice(e.target.value); setErr(""); }} placeholder="0.00"
                       style={{ border: "none", outline: "none", background: "transparent", fontSize: 13, color: tm, width: "100%", fontWeight: 600 }} />
                   </div>
@@ -208,6 +299,140 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                 style={{ background: "#10b981", color: "white", border: "none", borderRadius: 12, padding: "10px 28px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
                 <CheckCircle2 size={15} /> Confirm Booking
               </button>
+            </div>
+          )}
+
+          {/* ── Payments Section (Admins) ── */}
+          {booking.quotedPrice && (
+            <div style={{ background: card, borderRadius: 16, border: `1px solid ${border}`, padding: 20, marginBottom: 16 }}>
+              <SectionTitle color="#0d9488">💳 Payment History & Record</SectionTitle>
+              
+              {/* Payment Summary Indicators */}
+              {paymentsData && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, margin: "10px 0 15px", background: bg, padding: 12, borderRadius: 12 }}>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 9, color: ts, fontWeight: 700, textTransform: "uppercase" }}>Total Price</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 13, fontWeight: 800, color: tm }}>
+                      LKR {paymentsData.totalAmount.toLocaleString('en-LK')}
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 9, color: ts, fontWeight: 700, textTransform: "uppercase" }}>Paid Amount</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 13, fontWeight: 800, color: "#10b981" }}>
+                      LKR {paymentsData.paidAmount.toLocaleString('en-LK')}
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 9, color: ts, fontWeight: 700, textTransform: "uppercase" }}>Remaining</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 13, fontWeight: 800, color: paymentsData.remainingAmount > 0 ? "#f59e0b" : "#10b981" }}>
+                      LKR {paymentsData.remainingAmount.toLocaleString('en-LK')}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Transactions List */}
+              {paymentsLoading ? (
+                <p style={{ fontSize: 12, color: ts }}>Loading payment records...</p>
+              ) : paymentsData && paymentsData.transactions.length > 0 ? (
+                <div style={{ marginBottom: 15 }}>
+                  <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: tm }}>Recorded Payments:</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {paymentsData.transactions.map((tx) => (
+                      <div key={tx.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: bg, padding: "8px 12px", borderRadius: 8, border: `1px solid ${border}`, fontSize: 12 }}>
+                        <div>
+                          <strong style={{ color: tm }}>{tx.type} ({tx.method})</strong>
+                          <p style={{ margin: 0, fontSize: 10, color: ts }}>Received {tx.date} · Rec: {tx.recordedBy}</p>
+                          {tx.notes && <p style={{ margin: "2px 0 0", fontSize: 10, color: ts, fontStyle: "italic" }}>"{tx.notes}"</p>}
+                        </div>
+                        <span style={{ fontWeight: 700, color: "#10b981" }}>{tx.amount}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p style={{ fontSize: 12, color: ts, fontStyle: "italic", marginBottom: 15 }}>No payments recorded yet.</p>
+              )}
+
+              {/* Record Form */}
+              {paymentsData && paymentsData.remainingAmount > 0 ? (
+                <form onSubmit={handleRecordPayment} style={{ borderTop: `1px solid ${border}`, paddingTop: 15 }}>
+                  <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 800, color: tm }}>✍️ Record Received Payment</p>
+                  
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                    <div>
+                      <label style={{ fontSize: 10, fontWeight: 700, color: ts, display: "block", marginBottom: 4 }}>Installment Type *</label>
+                      <select 
+                        value={recInstallment} 
+                        onChange={e => {
+                          setRecInstallment(e.target.value);
+                          if (e.target.value === 'DEPOSIT') setRecAmount(paymentsData.totalAmount * 0.5);
+                          else if (e.target.value === 'FINAL') setRecAmount(paymentsData.totalAmount * 0.5);
+                          else if (e.target.value === 'FULL') setRecAmount(paymentsData.remainingAmount);
+                        }} 
+                        style={inputStyle}
+                      >
+                        <option value="">-- Select --</option>
+                        {booking.tourType !== 'P2P' && <option value="DEPOSIT">DEPOSIT (50%)</option>}
+                        {booking.tourType !== 'P2P' && <option value="FINAL">FINAL (50%)</option>}
+                        <option value="FULL">FULL PAYMENT</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label style={{ fontSize: 10, fontWeight: 700, color: ts, display: "block", marginBottom: 4 }}>Amount Received (LKR) *</label>
+                      <input 
+                        type="number" 
+                        value={recAmount} 
+                        onChange={e => setRecAmount(e.target.value)} 
+                        placeholder="0.00" 
+                        style={inputStyle} 
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: 10, fontWeight: 700, color: ts, display: "block", marginBottom: 4 }}>Payment Method *</label>
+                      <select value={recMethod} onChange={e => setRecMethod(e.target.value)} style={inputStyle}>
+                        <option value="CASH">CASH</option>
+                        <option value="BANK_TRANSFER">BANK TRANSFER</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: 10, fontWeight: 700, color: ts, display: "block", marginBottom: 4 }}>Date Received *</label>
+                      <input type="date" value={recDate} onChange={e => setRecDate(e.target.value)} style={inputStyle} />
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: 10 }}>
+                    <label style={{ fontSize: 10, fontWeight: 700, color: ts, display: "block", marginBottom: 4 }}>Notes (Optional)</label>
+                    <textarea 
+                      value={recNotes} 
+                      onChange={e => setRecNotes(e.target.value)} 
+                      placeholder="e.g. 50% deposit received in cash" 
+                      rows={2} 
+                      style={{ ...inputStyle, resize: "none" }} 
+                    />
+                  </div>
+
+                  {recError && <p style={{ margin: "0 0 10px", fontSize: 12, color: "#ef4444", fontWeight: 600 }}>{recError}</p>}
+                  {recSuccess && <p style={{ margin: "0 0 10px", fontSize: 12, color: "#10b981", fontWeight: 600 }}>{recSuccess}</p>}
+
+                  <button 
+                    type="submit" 
+                    disabled={recSubmitting}
+                    style={{ width: "100%", background: "#0d9488", color: "white", border: "none", borderRadius: 10, padding: 10, fontWeight: 700, fontSize: 13, cursor: "pointer" }}
+                  >
+                    {recSubmitting ? "Recording..." : "💾 Record Payment"}
+                  </button>
+                </form>
+              ) : (
+                paymentsData && paymentsData.remainingAmount <= 0 && (
+                  <p style={{ margin: 0, fontSize: 12, color: "#10b981", fontWeight: 700, textAlign: "center" }}>
+                    🎉 Booking is fully paid.
+                  </p>
+                )
+              )}
             </div>
           )}
 

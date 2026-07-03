@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getCountryFlag } from './countryFlags';
+import { useTranslation } from "react-i18next";
 
 const formatDate = (dateStr) => {
   const d = new Date(dateStr);
@@ -91,6 +92,7 @@ const Lightbox = ({ images, startIndex, onClose }) => {
 
 // ── Main card ────────────────────────────────────────────────
 const ReviewCard = ({ review, index = 0 }) => {
+  const { t } = useTranslation();
   const cardRef = useRef(null);
   const [lightboxIdx, setLightboxIdx] = useState(null);
   const [expandedComment, setExpandedComment] = useState(false);
@@ -266,7 +268,7 @@ const ReviewCard = ({ review, index = 0 }) => {
               <span className="rvc-date">{formatDate(review.datePublished)}</span>
             </div>
             {review.driverName && (
-              <div className="rvc-driver">Driver: {review.driverName}</div>
+              <div className="rvc-driver">{t("reviews.card.driver")} {review.driverName}</div>
             )}
           </div>
         </div>
@@ -296,7 +298,7 @@ const ReviewCard = ({ review, index = 0 }) => {
               className="rvc-see-more-btn"
               onClick={() => setExpandedComment(!expandedComment)}
             >
-              {expandedComment ? '← See Less' : 'See More →'}
+              {expandedComment ? t("reviews.card.seeLess") : t("reviews.card.seeMore")}
             </button>
           )}
         </div>

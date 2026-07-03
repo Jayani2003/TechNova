@@ -33,6 +33,7 @@ const toPackageTypeLabel = (value) => {
 
 let packageSchemaCache = null;
 let guidSchemaCache = null;
+let availabilityStatusColumnReady = null;
 const PACKAGE_TYPE_META_PREFIX = '[[PKG_TYPE:';
 
 cloudinary.config({
@@ -42,7 +43,9 @@ cloudinary.config({
 });
 
 const getPackageSchemaMeta = async () => {
-  if (packageSchemaCache) return packageSchemaCache;
+  if (packageSchemaCache && packageSchemaCache.hasAvailabilityStatus) return packageSchemaCache;
+
+  await ensureAvailabilityStatusColumn();
 
   const [columns] = await db.execute('SHOW COLUMNS FROM package');
   const byName = columns.reduce((acc, col) => {
@@ -57,9 +60,29 @@ const getPackageSchemaMeta = async () => {
     hasImageUrl: Boolean(byName.image_url),
     hasDescription: Boolean(byName.description),
     hasGuidId: Boolean(byName.guid_id),
+    hasAvailabilityStatus: Boolean(byName.availability_status),
   };
 
+  packageSchemaCache.hasAvailabilityStatus = true;
+
   return packageSchemaCache;
+};
+
+const ensureAvailabilityStatusColumn = async () => {
+  if (availabilityStatusColumnReady) return availabilityStatusColumnReady;
+
+  availabilityStatusColumnReady = (async () => {
+    const [columns] = await db.execute("SHOW COLUMNS FROM package LIKE 'availability_status'");
+    if (!columns.length) {
+      await db.execute(
+        "ALTER TABLE package ADD COLUMN availability_status ENUM('AVAILABLE','UNAVAILABLE') NOT NULL DEFAULT 'AVAILABLE' AFTER image_url"
+      );
+    }
+  })().finally(() => {
+    availabilityStatusColumnReady = null;
+  });
+
+  return availabilityStatusColumnReady;
 };
 
 const getGuidSchemaMeta = async () => {
@@ -134,6 +157,16 @@ const toBoolean = (value) => {
   return normalized === 'true' || normalized === '1' || normalized === 'on' || normalized === 'yes';
 };
 
+const normalizeAvailabilityStatus = (value) => {
+  const normalized = String(value || '').trim().toUpperCase();
+  return normalized === 'UNAVAILABLE' ? 'UNAVAILABLE' : 'AVAILABLE';
+};
+
+const buildAvailabilityPayload = (status) => ({
+  status: normalizeAvailabilityStatus(status),
+  isAvailable: normalizeAvailabilityStatus(status) !== 'UNAVAILABLE',
+});
+
 const normalizeGuidInput = (body = {}) => ({
   withGuid: toBoolean(body.withGuid),
   guideName: String(body.guideName || '').trim(),
@@ -187,6 +220,17 @@ const upsertPackageGuid = async (conn, packageId, existingGuidId, guidInput) => 
     await conn.execute('UPDATE package SET guid_id = ? WHERE package_id = ?', [guidId, packageId]);
   }
   return guidId;
+};
+
+const extractAvailabilityStatus = (body = {}, defaultStatus = null) => {
+  const hasAvailabilityField = ['availabilityStatus', 'status', 'packageStatus', 'availability']
+    .some((key) => Object.prototype.hasOwnProperty.call(body, key));
+
+  if (!hasAvailabilityField) {
+    return defaultStatus == null ? null : normalizeAvailabilityStatus(defaultStatus);
+  }
+
+  return normalizeAvailabilityStatus(body.availabilityStatus || body.status || body.packageStatus || body.availability);
 };
 
 const uploadBufferToCloudinary = (file, folder) => new Promise((resolve) => {
@@ -257,6 +301,7 @@ exports.createPackage = async (req, res) => {
     }
 
     const schemaMeta = await getPackageSchemaMeta();
+    const availabilityStatus = extractAvailabilityStatus(req.body, 'AVAILABLE');
 
     const packageDaysLabel = toPackageDaysLabel(days);
     if (!packageDaysLabel) {
@@ -318,6 +363,10 @@ exports.createPackage = async (req, res) => {
         insertColumns.push('image_url');
         insertValues.push(packageImage);
       }
+      if (schemaMeta.hasAvailabilityStatus) {
+        insertColumns.push('availability_status');
+        insertValues.push(availabilityStatus);
+      }
 
       const insertPkgSql = `INSERT INTO package (${insertColumns.join(', ')}) VALUES (${insertColumns.map(() => '?').join(', ')})`;
       console.debug('INSERT statement:', insertPkgSql);
@@ -356,6 +405,7 @@ exports.createPackage = async (req, res) => {
         days: toPackageDaysNumber(packageDaysLabel),
         description: description || null,
         image_url: packageImage,
+        availability_status: availabilityStatus,
         guid: guidId ? {
           id: guidId,
           name: guidInput.guideName,
@@ -391,7 +441,8 @@ exports.listAdminPackages = async (req, res) => {
         ${schemaMeta.hasType ? 'p.type' : 'NULL AS type'},
         ${schemaMeta.hasDays ? 'p.days' : 'NULL AS days'},
         ${schemaMeta.hasDescription ? 'p.description' : 'NULL AS description'},
-        ${schemaMeta.hasImageUrl ? 'p.image_url' : 'NULL AS image_url'}
+        ${schemaMeta.hasImageUrl ? 'p.image_url' : 'NULL AS image_url'},
+        ${schemaMeta.hasAvailabilityStatus ? 'p.availability_status' : "'AVAILABLE' AS availability_status"}
         ${guidSelect}
       FROM package p
       ${guidJoin}
@@ -448,6 +499,7 @@ exports.listAdminPackages = async (req, res) => {
       destinations: destinationsByPackage[r.package_id] || [],
       places_count: (destinationsByPackage[r.package_id] || []).length,
       hidden_dest_count: hidden,
+      availability: buildAvailabilityPayload(r.availability_status),
       });
     }));
   } catch (error) {
@@ -504,15 +556,51 @@ exports.listPublicPackages = async (req, res) => {
         ${schemaMeta.hasType ? 'p.type' : 'NULL AS type'},
         ${schemaMeta.hasDays ? 'p.days' : 'NULL AS days'},
         ${schemaMeta.hasDescription ? 'p.description' : 'NULL AS description'},
-        ${schemaMeta.hasImageUrl ? 'p.image_url' : 'NULL AS image_url'}
+        ${schemaMeta.hasImageUrl ? 'p.image_url' : 'NULL AS image_url'},
+        ${schemaMeta.hasAvailabilityStatus ? 'p.availability_status' : "'AVAILABLE' AS availability_status"}
         ${guidSelect}
       FROM package p
       ${guidJoin}
       ${whereSql}
       ORDER BY p.package_id DESC
     `, params);
+
+    const packageIds = packages.map((p) => p.package_id);
+    let ratingsByPackage = {};
+    let bookingsByPackage = {};
+
+    if (packageIds.length > 0) {
+      const [ratingRows] = await db.execute(`
+        SELECT bp.package_id, AVG(r.rating) AS avg_rating, COUNT(r.review_id) AS reviews_count
+        FROM booking_package bp
+        INNER JOIN review r ON r.booking_id = bp.booking_id
+        WHERE bp.package_id IN (${packageIds.map(() => '?').join(',')})
+        GROUP BY bp.package_id
+      `, packageIds);
+
+      ratingsByPackage = ratingRows.reduce((acc, row) => {
+        acc[row.package_id] = {
+          avg_rating: row.avg_rating != null ? Number(row.avg_rating) : 0,
+          reviews_count: row.reviews_count != null ? Number(row.reviews_count) : 0,
+        };
+        return acc;
+      }, {});
+
+      const [bookingRows] = await db.execute(`
+        SELECT package_id, COUNT(*) AS bookings_count
+        FROM booking_package
+        WHERE package_id IN (${packageIds.map(() => '?').join(',')})
+        GROUP BY package_id
+      `, packageIds);
+
+      bookingsByPackage = bookingRows.reduce((acc, row) => {
+        acc[row.package_id] = Number(row.bookings_count) || 0;
+        return acc;
+      }, {});
+    }
+
     // For performance, load up to first 2 destinations per package and include hidden count
-    const pkgIds = packages.map(p => p.package_id);
+    const pkgIds = packageIds;
     let placesByPkg = {};
     let placeCountByPkg = {};
     if (pkgIds.length > 0) {
@@ -564,6 +652,10 @@ exports.listPublicPackages = async (req, res) => {
       highlights: [],
       destinations: placesByPkg[p.package_id] || [],
       hidden_dest_count: hidden,
+      avg_rating: ratingsByPackage[p.package_id]?.avg_rating || 0,
+      reviews_count: ratingsByPackage[p.package_id]?.reviews_count || 0,
+      bookings_count: bookingsByPackage[p.package_id] || 0,
+      availability: buildAvailabilityPayload(p.availability_status),
       });
     });
     res.json(result);
@@ -590,7 +682,8 @@ exports.getPackageDetail = async (req, res) => {
         ${schemaMeta.hasType ? 'p.type' : 'NULL AS type'},
         ${schemaMeta.hasDays ? 'p.days' : 'NULL AS days'},
         ${schemaMeta.hasDescription ? 'p.description' : 'NULL AS description'},
-        ${schemaMeta.hasImageUrl ? 'p.image_url' : 'NULL AS image_url'}
+        ${schemaMeta.hasImageUrl ? 'p.image_url' : 'NULL AS image_url'},
+        ${schemaMeta.hasAvailabilityStatus ? 'p.availability_status' : "'AVAILABLE' AS availability_status"}
         ${guidSelect}
       FROM package p
       ${guidJoin}
@@ -643,6 +736,7 @@ exports.getPackageDetail = async (req, res) => {
       image: pkgRow.image_url,
       destinations: detailedPlaces,
       guid: guidRowToPayload(pkgRow),
+      availability: buildAvailabilityPayload(pkgRow.availability_status),
     });
   } catch (error) {
     console.error('getPackageDetail failed:', error);
@@ -723,6 +817,7 @@ exports.updatePackage = async (req, res) => {
     const { title, type, days, description } = req.body;
     const guidInput = normalizeGuidInput(req.body);
     const packageType = type ? toPackageTypeEnum(type) : null;
+    const availabilityStatus = extractAvailabilityStatus(req.body);
 
     const packageImageFile = req.files && req.files.packageImage && req.files.packageImage[0];
     const packageImage = await uploadBufferToCloudinary(packageImageFile, 'package_uploads');
@@ -770,6 +865,11 @@ exports.updatePackage = async (req, res) => {
       // image handling: if a new image was uploaded, use it; otherwise keep existing
       if (schemaMeta.hasImageUrl && packageImage) {
         updateCols.push('image_url = ?'); updateVals.push(packageImage);
+      }
+
+      if (schemaMeta.hasAvailabilityStatus && availabilityStatus) {
+        updateCols.push('availability_status = ?');
+        updateVals.push(availabilityStatus);
       }
 
       if (schemaMeta.hasGuidId && guidMeta.hasTable) {
@@ -853,6 +953,54 @@ exports.updatePackage = async (req, res) => {
   } catch (error) {
     console.error('updatePackage failed:', error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getPackageAvailability = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [packageRows] = await db.execute('SELECT package_id, availability_status FROM package WHERE package_id = ? LIMIT 1', [id]);
+    if (!packageRows.length) {
+      return res.status(404).json({ error: 'Package not found.' });
+    }
+
+    res.json({
+      packageId: Number(id),
+      ...buildAvailabilityPayload(packageRows[0].availability_status),
+    });
+  } catch (error) {
+    console.error('getPackageAvailability failed:', error);
+    res.status(500).json({ error: 'Failed to load package availability.' });
+  }
+};
+
+exports.updatePackageAvailability = async (req, res) => {
+  const { id } = req.params;
+  const availabilityStatus = extractAvailabilityStatus(req.body, 'AVAILABLE');
+
+  try {
+    const schemaMeta = await getPackageSchemaMeta();
+    if (!schemaMeta.hasAvailabilityStatus) {
+      return res.status(500).json({ error: 'Package availability status is not configured.' });
+    }
+
+    const [packageRows] = await db.execute('SELECT package_id FROM package WHERE package_id = ? LIMIT 1', [id]);
+    if (!packageRows.length) {
+      return res.status(404).json({ error: 'Package not found.' });
+    }
+
+    await db.execute(
+      'UPDATE package SET availability_status = ? WHERE package_id = ?',
+      [availabilityStatus, id]
+    );
+
+    res.json({
+      packageId: Number(id),
+      ...buildAvailabilityPayload(availabilityStatus),
+    });
+  } catch (error) {
+    console.error('updatePackageAvailability failed:', error);
+    res.status(500).json({ error: 'Failed to update package availability.' });
   }
 };
 

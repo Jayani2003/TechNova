@@ -1,5 +1,6 @@
 import { useState, useContext } from "react";
 import { useNavigate, useLocation } from "react-router";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft,
@@ -63,7 +64,9 @@ const initialData = {
 };
 
 // ─── Guest Guard ──────────────────────────────────────────────────────────────
-const GuestGuard = ({ navigate }) => (
+const GuestGuard = ({ navigate }) => {
+  const { t } = useTranslation();
+  return (
   <div className="min-h-screen bg-[#f7fffe] flex items-center justify-center px-4">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -73,30 +76,33 @@ const GuestGuard = ({ navigate }) => (
       <div className="w-20 h-20 bg-[#00b0a5]/10 rounded-full flex items-center justify-center mx-auto mb-6">
         <Lock className="w-10 h-10 text-[#00b0a5]" />
       </div>
-      <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tighter uppercase">Login Required</h2>
+      <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tighter uppercase">{t("customBooking.guestGuard.title")}</h2>
       <p className="text-slate-500 text-base mb-8">
-        You need to be logged in to design and book your own customized Sri Lankan adventure.
+        {t("customBooking.guestGuard.desc")}
       </p>
       <div className="flex flex-col gap-3">
         <button
           onClick={() => navigate("/login")}
           className="bg-[#00b0a5] hover:bg-[#008f86] text-white px-8 py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#00b0a5]/20 cursor-pointer"
         >
-          Sign In
+          {t("customBooking.guestGuard.signIn")}
         </button>
         <button
           onClick={() => navigate("/register")}
           className="border-2 border-[#00b0a5]/20 text-slate-700 px-8 py-4 rounded-xl font-bold hover:bg-[#00b0a5]/5 transition-all cursor-pointer"
         >
-          Create Account
+          {t("customBooking.guestGuard.createAccount")}
         </button>
       </div>
     </motion.div>
   </div>
-);
+  );
+};
 
 // ─── Success Screen ───────────────────────────────────────────────────────────
-const SuccessScreen = ({ bookingRef, navigate }) => (
+const SuccessScreen = ({ bookingRef, navigate }) => {
+  const { t } = useTranslation();
+  return (
   <motion.div
     initial={{ opacity: 0, scale: 0.95 }}
     animate={{ opacity: 1, scale: 1 }}
@@ -112,18 +118,18 @@ const SuccessScreen = ({ bookingRef, navigate }) => (
       />
     </div>
     <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter mb-4 uppercase">
-      Your Journey Awaits!
+      {t("customBooking.success.title")}
     </h2>
-    <p className="text-slate-500 text-lg mb-2 font-medium">Booking Reference:</p>
+    <p className="text-slate-500 text-lg mb-2 font-medium">{t("customBooking.success.ref")}</p>
     <p className="text-2xl font-black text-[#00b0a5] mb-10 tracking-widest bg-[#00b0a5]/5 inline-block px-6 py-2 rounded-full border border-[#00b0a5]/20">{bookingRef}</p>
     
     <div className="bg-[#f7fffe] rounded-3xl p-8 mb-10 text-left border border-[#00b0a5]/10 shadow-sm space-y-4 max-w-lg mx-auto">
-      <h4 className="font-bold text-slate-800 uppercase tracking-widest text-xs mb-2">Next Steps:</h4>
+      <h4 className="font-bold text-slate-800 uppercase tracking-widest text-xs mb-2">{t("customBooking.success.nextSteps")}</h4>
       {[
-        "Our travel experts will review your custom itinerary",
-        "A personalized price quote will be sent to your profile",
-        "You'll receive an email notification once reviewed",
-        "Accept the quote to finalize your dream vacation"
+        t("customBooking.success.step1"),
+        t("customBooking.success.step2"),
+        t("customBooking.success.step3"),
+        t("customBooking.success.step4")
       ].map((s, i) => (
         <div key={i} className="flex items-start gap-4">
           <div className="w-6 h-6 bg-[#00b0a5] rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
@@ -139,17 +145,18 @@ const SuccessScreen = ({ bookingRef, navigate }) => (
         onClick={() => navigate("/user/profile")}
         className="bg-[#00b0a5] hover:bg-[#008f86] text-white px-10 py-4 rounded-2xl font-black transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#00b0a5]/20 flex items-center justify-center gap-2 tracking-widest cursor-pointer uppercase text-sm"
       >
-        View My Bookings
+        {t("customBooking.success.viewBookings")}
       </button>
       <button
         onClick={() => window.location.href = "/"}
         className="bg-white border-2 border-slate-100 text-slate-600 px-10 py-4 rounded-2xl font-black transition-all hover:bg-slate-50 flex items-center justify-center gap-2 tracking-widest cursor-pointer uppercase text-sm"
       >
-        Back to Home
+        {t("customBooking.success.backHome")}
       </button>
     </div>
   </motion.div>
-);
+  );
+};
 
 const validateStep = (step, data) => {
   switch (step) {
@@ -184,6 +191,7 @@ const validateStep = (step, data) => {
 };
 
 const CustomReviewStep = ({ data }) => {
+  const { t } = useTranslation();
   const VEHICLE_LABELS = {
     mini_car: "Mini Car",
     normal_car: "Normal Car",
@@ -212,42 +220,41 @@ const CustomReviewStep = ({ data }) => {
     <div className="space-y-8">
       <div className="text-center mb-10">
         <div className="inline-flex items-center gap-2 bg-[#00b0a5]/10 text-[#00b0a5] px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-4">
-          <Compass className="w-4 h-4" /> Customized Itinerary
+          <Compass className="w-4 h-4" /> {t("customBooking.review.badge")}
         </div>
-        <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Review Your Plan</h3>
+        <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">{t("customBooking.review.title")}</h3>
         <p className="text-sm text-slate-500 mt-2">
-          Almost there! Please verify your travel details before submitting.
+          {t("customBooking.review.desc")}
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 hover:shadow-md transition-shadow">
-          <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-6 border-b border-[#00b0a5]/10 pb-4">Destinations & Dates</p>
-          <ReviewRow icon={MapPin} label="Route" value={data.selectedCities.join(" → ")} />
-          <ReviewRow icon={Zap} label="Activities" value={data.activities.length > 0 ? data.activities.join(", ") : "Sightseeing"} />
-          <ReviewRow icon={Calendar} label="Travel Period" value={`${data.startDate} to ${data.endDate}`} />
-          <ReviewRow icon={Clock} label="Pickup Time" value={data.pickupTime} />
+          <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-6 border-b border-[#00b0a5]/10 pb-4">{t("customBooking.review.destDates")}</p>
+          <ReviewRow icon={MapPin} label={t("customBooking.review.route")} value={data.selectedCities.join(" → ")} />
+          <ReviewRow icon={Zap} label={t("customBooking.review.activities")} value={data.activities.length > 0 ? data.activities.join(", ") : "Sightseeing"} />
+          <ReviewRow icon={Calendar} label={t("customBooking.review.travelPeriod")} value={`${data.startDate} to ${data.endDate}`} />
+          <ReviewRow icon={Clock} label={t("customBooking.review.pickupTime")} value={data.pickupTime} />
         </div>
 
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 hover:shadow-md transition-shadow">
-          <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-6 border-b border-[#00b0a5]/10 pb-4">Passengers & Vehicle</p>
-          <ReviewRow icon={Users} label="Travelers" value={`${data.noOfAdults} Adults${data.noOfChildren > 0 ? `, ${data.noOfChildren} Children` : ""}`} />
-          <ReviewRow icon={Car} label="Vehicle Type" value={VEHICLE_LABELS[data.categoryId] || "Not Selected"} />
-          <ReviewRow icon={Briefcase} label="Luggage" value={`${data.smallLuggages || 0} Small, ${data.largeLuggages || 0} Large`} />
-          <ReviewRow icon={Phone} label="Contact Name" value={data.customerName} />
+          <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-6 border-b border-[#00b0a5]/10 pb-4">{t("customBooking.review.passVeh")}</p>
+          <ReviewRow icon={Users} label={t("customBooking.review.travelers")} value={`${data.noOfAdults} Adults${data.noOfChildren > 0 ? `, ${data.noOfChildren} Children` : ""}`} />
+          <ReviewRow icon={Car} label={t("customBooking.review.vehType")} value={VEHICLE_LABELS[data.categoryId] || "Not Selected"} />
+          <ReviewRow icon={Briefcase} label={t("customBooking.review.luggage")} value={`${data.smallLuggages || 0} Small, ${data.largeLuggages || 0} Large`} />
+          <ReviewRow icon={Phone} label={t("customBooking.review.contactName")} value={data.customerName} />
         </div>
       </div>
 
       {data.tourThoughts && (
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
-           <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-4">Traveler's Thoughts</p>
+           <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-4">{t("customBooking.review.thoughts")}</p>
            <p className="text-slate-600 font-medium italic leading-relaxed mb-4">"{data.tourThoughts}"</p>
            <div className="bg-[#f7fffe] p-4 rounded-2xl border border-[#00b0a5]/10 flex items-center gap-3">
              <div className="w-8 h-8 bg-[#00b0a5]/10 rounded-full flex items-center justify-center flex-shrink-0">
                <Zap className="w-4 h-4 text-[#00b0a5]" />
              </div>
-             <p className="text-xs text-slate-500 font-medium italic">
-               Note: These details will be carefully reviewed by the <strong>Ceylon Best Tour</strong> team. We will plan the most efficient route and handle all necessary arrangements (hotels, permits, etc.) based on your ideas.
+             <p className="text-xs text-slate-500 font-medium italic" dangerouslySetInnerHTML={{ __html: t("customBooking.review.thoughtsNote") }}>
              </p>
            </div>
         </div>
@@ -255,24 +262,24 @@ const CustomReviewStep = ({ data }) => {
 
       {data.notes && (
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
-           <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-4">Special Requests</p>
+           <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-4">{t("customBooking.review.specialReq")}</p>
            <p className="text-slate-600 font-medium italic">"{data.notes}"</p>
         </div>
       )}
 
       <div className="bg-[#00b0a5]/5 rounded-3xl p-8 border border-[#00b0a5]/10">
-        <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4">Submission Notice</h4>
+        <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4">{t("customBooking.review.subNoticeTitle")}</h4>
         <p className="text-sm text-slate-600 leading-relaxed">
-          By clicking "Submit Booking", your request will be sent to our team for manual review. 
-          We will calculate the best possible price based on your route and requirements. 
-          No payment is required at this stage.
+          {t("customBooking.review.subNoticeDesc")}
         </p>
       </div>
     </div>
   );
 };
 
-const CustomSidePanel = () => (
+const CustomSidePanel = () => {
+  const { t } = useTranslation();
+  return (
   <motion.div
     initial={{ opacity: 0, x: 20 }}
     animate={{ opacity: 1, x: 0 }}
@@ -280,12 +287,12 @@ const CustomSidePanel = () => (
     className="space-y-6"
   >
     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
-      <h2 className="text-2xl font-black text-slate-900 mb-8 uppercase tracking-tighter">Your Process</h2>
+      <h2 className="text-2xl font-black text-slate-900 mb-8 uppercase tracking-tighter">{t("customBooking.side.processTitle")}</h2>
       <div className="space-y-8">
         {[
-          { title: "Design", desc: "Pick your stops and activities.", icon: <MapPin className="w-4 h-4" /> },
-          { title: "Review", desc: "Our team crafts the best price.", icon: <Clock className="w-4 h-4" /> },
-          { title: "Embark", desc: "Approve and start your tour.", icon: <CheckCircle className="w-4 h-4" /> },
+          { title: t("customBooking.side.step1Title"), desc: t("customBooking.side.step1Desc"), icon: <MapPin className="w-4 h-4" /> },
+          { title: t("customBooking.side.step2Title"), desc: t("customBooking.side.step2Desc"), icon: <Clock className="w-4 h-4" /> },
+          { title: t("customBooking.side.step3Title"), desc: t("customBooking.side.step3Desc"), icon: <CheckCircle className="w-4 h-4" /> },
         ].map(({ title, desc, icon }, idx) => (
           <div key={title} className="flex gap-5 relative">
             {idx < 2 && <div className="absolute left-6 top-10 bottom-[-32px] w-0.5 bg-slate-100" />}
@@ -305,31 +312,33 @@ const CustomSidePanel = () => (
       <div className="absolute top-0 right-0 p-4 opacity-10">
         <Phone className="w-24 h-24 rotate-12" />
       </div>
-      <h3 className="text-xl font-black mb-2 uppercase tracking-tighter">Need Assistance?</h3>
+      <h3 className="text-xl font-black mb-2 uppercase tracking-tighter">{t("customBooking.side.assistTitle")}</h3>
       <p className="text-sm text-white/80 mb-6 font-medium leading-relaxed">
-        Let our travel consultants help you build the perfect itinerary.
+        {t("customBooking.side.assistDesc")}
       </p>
       <a
         href="tel:+94778619582"
         className="inline-flex items-center gap-3 bg-white text-[#00b0a5] px-6 py-3 rounded-xl font-black hover:bg-slate-50 transition-all text-sm tracking-widest uppercase shadow-lg shadow-black/10"
       >
-        <Phone className="w-4 h-4" /> Call Experts
+        <Phone className="w-4 h-4" /> {t("customBooking.side.callBtn")}
       </a>
     </div>
 
     <div className="bg-slate-900 rounded-3xl p-8 text-white">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-2 h-2 bg-[#00b0a5] rounded-full animate-pulse" />
-        <p className="text-xs font-black uppercase tracking-widest text-[#00b0a5]">Booking Policy</p>
+        <p className="text-xs font-black uppercase tracking-widest text-[#00b0a5]">{t("customBooking.side.policyTitle")}</p>
       </div>
       <p className="text-xs text-white/60 leading-relaxed font-medium">
-        Custom tours require manual quotation. Quotes are typically ready within 24 hours. No upfront payment required to submit.
+        {t("customBooking.side.policyDesc")}
       </p>
     </div>
   </motion.div>
-);
+  );
+};
 
 const Customized = () => {
+  const { t } = useTranslation();
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -515,13 +524,13 @@ const Customized = () => {
                   <SuccessScreen bookingRef={bookingRef} navigate={navigate} />
                 ) : (
                   <>
-                    <BookingStepIndicator steps={STEPS} currentStep={currentStep} />
+                    <BookingStepIndicator steps={t("customBooking.form.steps", { returnObjects: true })} currentStep={currentStep} />
                     
                     {editBooking && (
                       <div className="mb-6 flex items-center justify-between bg-amber-50 border border-amber-100 rounded-2xl px-6 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
-                          <p className="text-sm font-bold text-amber-800">Editing Booking: <span className="font-mono">{editBooking.id}</span></p>
+                          <p className="text-sm font-bold text-amber-800">{t("customBooking.form.editing")} <span className="font-mono">{editBooking.id}</span></p>
                         </div>
                         <button 
                           onClick={() => {
@@ -531,7 +540,7 @@ const Customized = () => {
                           }}
                           className="text-xs font-black uppercase tracking-widest text-amber-600 hover:text-amber-700 transition-colors cursor-pointer"
                         >
-                          Cancel Edit
+                          {t("customBooking.form.cancelEdit")}
                         </button>
                       </div>
                     )}
@@ -553,21 +562,21 @@ const Customized = () => {
                                   <MapPin className="w-6 h-6" />
                                 </div>
                                 <div>
-                                  <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Pick Your Stops</h3>
-                                  <p className="text-sm text-slate-500">Add cities and landmarks to your personal route.</p>
+                                  <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">{t("customBooking.form.pickStops")}</h3>
+                                  <p className="text-sm text-slate-500">{t("customBooking.form.pickStopsDesc")}</p>
                                 </div>
                               </div>
 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
                                 <div className="space-y-2">
-                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Add Destination <span className="text-[#00b0a5]">(Max 7)</span></label>
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">{t("customBooking.form.addDest")} <span className="text-[#00b0a5]">{t("customBooking.form.max7")}</span></label>
                                   <div className="flex gap-2">
                                     <select
                                       value={selectedCity}
                                       onChange={(e) => setSelectedCity(e.target.value)}
                                       className="flex-1 px-4 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold"
                                     >
-                                      <option value="">Select a city...</option>
+                                      <option value="">{t("customBooking.form.selectCity")}</option>
                                       {PLACE_OPTIONS.map((p) => <option key={p} value={p}>{p}</option>)}
                                     </select>
                                     <button
@@ -575,20 +584,20 @@ const Customized = () => {
                                       onClick={handleAddCity}
                                       className="bg-[#00b0a5] text-white px-6 rounded-2xl font-black hover:bg-[#008f86] transition-all hover:scale-105 active:scale-95 text-xs uppercase tracking-widest shadow-lg shadow-[#00b0a5]/20"
                                     >
-                                      Add
+                                      {t("customBooking.form.addBtn")}
                                     </button>
                                   </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Add Activity <span className="text-[#00b0a5]">(Max 7)</span></label>
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">{t("customBooking.form.addActivity")} <span className="text-[#00b0a5]">{t("customBooking.form.max7")}</span></label>
                                   <div className="flex gap-2">
                                     <select
                                       value={selectedActivity}
                                       onChange={(e) => setSelectedActivity(e.target.value)}
                                       className="flex-1 px-4 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold"
                                     >
-                                      <option value="">Select an activity...</option>
+                                      <option value="">{t("customBooking.form.selectActivity")}</option>
                                       {ACTIVITY_OPTIONS.map((a) => <option key={a} value={a}>{a}</option>)}
                                     </select>
                                     <button
@@ -596,14 +605,14 @@ const Customized = () => {
                                       onClick={handleAddActivity}
                                       className="bg-[#00b0a5] text-white px-6 rounded-2xl font-black hover:bg-[#008f86] transition-all hover:scale-105 active:scale-95 text-xs uppercase tracking-widest shadow-lg shadow-[#00b0a5]/20"
                                     >
-                                      Add
+                                      {t("customBooking.form.addBtn")}
                                     </button>
                                   </div>
                                 </div>
 
                                 <div className="md:col-span-2 space-y-6 mt-4">
                                   <div>
-                                    <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-3 ml-1">Route Itinerary</p>
+                                    <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-3 ml-1">{t("customBooking.form.routeItinerary")}</p>
                                     <div className="flex flex-wrap gap-2">
                                       {data.selectedCities.length > 0 ? (
                                         data.selectedCities.map((city) => (
@@ -619,13 +628,13 @@ const Customized = () => {
                                           </motion.span>
                                         ))
                                       ) : (
-                                        <div className="w-full py-4 text-center border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 text-sm font-medium">Select up to 7 destinations for your route</div>
+                                        <div className="w-full py-4 text-center border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 text-sm font-medium">{t("customBooking.form.selectUpTo7Dest")}</div>
                                       )}
                                     </div>
                                   </div>
 
                                   <div>
-                                    <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-3 ml-1">Selected Activities</p>
+                                    <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-3 ml-1">{t("customBooking.form.selectedActivities")}</p>
                                     <div className="flex flex-wrap gap-2">
                                       {data.activities.length > 0 ? (
                                         data.activities.map((act) => (
@@ -641,7 +650,7 @@ const Customized = () => {
                                           </motion.span>
                                         ))
                                       ) : (
-                                        <div className="w-full py-4 text-center border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 text-sm font-medium">Choose up to 7 adventure activities</div>
+                                        <div className="w-full py-4 text-center border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 text-sm font-medium">{t("customBooking.form.selectUpTo7Act")}</div>
                                       )}
                                     </div>
                                   </div>
@@ -655,14 +664,14 @@ const Customized = () => {
                                   <Calendar className="w-6 h-6" />
                                 </div>
                                 <div>
-                                  <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Travel Dates</h3>
-                                  <p className="text-sm text-slate-500">When would you like to start your journey?</p>
+                                  <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">{t("customBooking.form.travelDates")}</h3>
+                                  <p className="text-sm text-slate-500">{t("customBooking.form.travelDatesDesc")}</p>
                                 </div>
                               </div>
 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-8 rounded-[2rem] border-2 border-[#f7fffe] shadow-sm">
                                 <div className="space-y-2">
-                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Departure Date *</label>
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">{t("customBooking.form.depDate")}</label>
                                   <input
                                     type="date"
                                     min={today}
@@ -672,7 +681,7 @@ const Customized = () => {
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Return Date *</label>
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">{t("customBooking.form.retDate")}</label>
                                   <input
                                     type="date"
                                     min={data.startDate || today}
@@ -682,7 +691,7 @@ const Customized = () => {
                                   />
                                 </div>
                                 <div className="md:col-span-2 space-y-2">
-                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">Pickup Time *</label>
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">{t("customBooking.form.pickupTimeLabel")}</label>
                                   <div className="relative">
                                     <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
                                     <input
@@ -701,11 +710,11 @@ const Customized = () => {
                                     className="md:col-span-2 bg-[#00b0a5] rounded-2xl p-6 text-white flex items-center justify-between shadow-xl shadow-[#00b0a5]/20"
                                   >
                                     <div>
-                                      <p className="text-xs font-black uppercase tracking-widest opacity-80">Total Duration</p>
-                                      <p className="text-2xl font-black">{data.totalDays} {data.totalDays === 1 ? "Full Day" : "Incredible Days"}</p>
+                                      <p className="text-xs font-black uppercase tracking-widest opacity-80">{t("customBooking.form.totalDuration")}</p>
+                                      <p className="text-2xl font-black">{data.totalDays} {data.totalDays === 1 ? t("customBooking.form.fullDay") : t("customBooking.form.incDays")}</p>
                                     </div>
                                     <div className="text-right">
-                                      <p className="text-xs font-black uppercase tracking-widest opacity-80">Trip Range</p>
+                                      <p className="text-xs font-black uppercase tracking-widest opacity-80">{t("customBooking.form.tripRange")}</p>
                                       <p className="text-sm font-bold">{data.startDate} — {data.endDate}</p>
                                     </div>
                                   </motion.div>
@@ -718,20 +727,20 @@ const Customized = () => {
                                   <FileText className="w-6 h-6" />
                                 </div>
                                 <div>
-                                  <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Your Dream Itinerary</h3>
-                                  <p className="text-sm text-slate-500">Share your thoughts, experiences, or specific ideas for this tour.</p>
+                                  <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">{t("customBooking.form.dreamItinerary")}</h3>
+                                  <p className="text-sm text-slate-500">{t("customBooking.form.dreamDesc")}</p>
                                 </div>
                               </div>
                               <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
                                 <textarea
                                   value={data.tourThoughts}
                                   onChange={(e) => handleChange("tourThoughts", e.target.value)}
-                                  placeholder="E.g. I saw a video about the Nine Arch Bridge and would love to experience it at sunrise... I'm a big fan of Ceylon tea and want to visit a factory..."
+                                  placeholder={t("customBooking.form.dreamPlaceholder")}
                                   rows={4}
                                   className="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-medium resize-none"
                                 />
                                 <p className="text-xs text-slate-400 mt-3 italic">
-                                  Don't worry about the specifics - just tell us what you're dreaming of!
+                                  {t("customBooking.form.dreamHint")}
                                 </p>
                               </div>
                             </section>
@@ -760,7 +769,7 @@ const Customized = () => {
                         disabled={currentStep === 0}
                         className="flex items-center gap-2 px-8 py-4 rounded-xl border-2 border-slate-100 text-slate-500 font-black uppercase tracking-widest text-xs hover:bg-slate-50 hover:text-slate-700 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                       >
-                        <ChevronLeft className="w-4 h-4" /> Back
+                        <ChevronLeft className="w-4 h-4" /> {t("customBooking.form.backBtn")}
                       </button>
                       {currentStep < STEPS.length - 1 ? (
                         <button
@@ -768,7 +777,7 @@ const Customized = () => {
                           disabled={!canProceed}
                           className="flex items-center gap-2 px-10 py-4 rounded-xl bg-[#00b0a5] hover:bg-[#008f86] text-white font-black uppercase tracking-widest text-xs transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-[#00b0a5]/20"
                         >
-                          Next Step <ChevronRight className="w-4 h-4" />
+                          {t("customBooking.form.nextBtn")} <ChevronRight className="w-4 h-4" />
                         </button>
                       ) : (
                         <button
@@ -782,10 +791,10 @@ const Customized = () => {
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                               </svg>
-                              Processing...
+                              {t("customBooking.form.processing")}
                             </>
                           ) : (
-                            <><Send className="w-4 h-4 mr-2" /> Submit Booking</>
+                            <><Send className="w-4 h-4 mr-2" /> {t("customBooking.form.submitBtn")}</>
                           )}
                         </button>
                       )}

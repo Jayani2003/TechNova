@@ -1,246 +1,328 @@
-import { useState } from "react";
-import { Phone, FileText, ChevronDown, Globe } from "lucide-react";
+import { useState, useRef, useEffect, useContext } from "react";
+import {
+  Phone,
+  FileText,
+  ChevronDown,
+  Globe,
+  AlertCircle,
+  UserPlus,
+  CheckCircle2,
+  Loader2,
+  RefreshCw,
+  Plus,
+  X,
+} from "lucide-react";
+import { useTranslation, Trans } from "react-i18next";
+import { api } from "../../../../../config/api";
+import { AuthContext } from "../../../../../context/AuthContext";
 
-// ── Country data with phone rules ─────────────────────────────────────────────
-const COUNTRIES = [
-  { code: "+94",  flag: "🇱🇰", name: "Sri Lanka",      iso: "LK", minLen: 9,  maxLen: 9  },
-  { code: "+1",   flag: "🇺🇸", name: "United States",  iso: "US", minLen: 10, maxLen: 10 },
-  { code: "+1",   flag: "🇨🇦", name: "Canada",         iso: "CA", minLen: 10, maxLen: 10 },
-  { code: "+44",  flag: "🇬🇧", name: "United Kingdom", iso: "GB", minLen: 10, maxLen: 10 },
-  { code: "+61",  flag: "🇦🇺", name: "Australia",      iso: "AU", minLen: 9,  maxLen: 9  },
-  { code: "+49",  flag: "🇩🇪", name: "Germany",        iso: "DE", minLen: 10, maxLen: 11 },
-  { code: "+33",  flag: "🇫🇷", name: "France",         iso: "FR", minLen: 9,  maxLen: 9  },
-  { code: "+81",  flag: "🇯🇵", name: "Japan",          iso: "JP", minLen: 10, maxLen: 10 },
-  { code: "+86",  flag: "🇨🇳", name: "China",          iso: "CN", minLen: 11, maxLen: 11 },
-  { code: "+91",  flag: "🇮🇳", name: "India",          iso: "IN", minLen: 10, maxLen: 10 },
-  { code: "+65",  flag: "🇸🇬", name: "Singapore",      iso: "SG", minLen: 8,  maxLen: 8  },
-  { code: "+60",  flag: "🇲🇾", name: "Malaysia",       iso: "MY", minLen: 9,  maxLen: 10 },
-  { code: "+971", flag: "🇦🇪", name: "UAE",            iso: "AE", minLen: 9,  maxLen: 9  },
-  { code: "+966", flag: "🇸🇦", name: "Saudi Arabia",   iso: "SA", minLen: 9,  maxLen: 9  },
-  { code: "+82",  flag: "🇰🇷", name: "South Korea",    iso: "KR", minLen: 9,  maxLen: 10 },
-  { code: "+39",  flag: "🇮🇹", name: "Italy",          iso: "IT", minLen: 9,  maxLen: 10 },
-  { code: "+34",  flag: "🇪🇸", name: "Spain",          iso: "ES", minLen: 9,  maxLen: 9  },
-  { code: "+31",  flag: "🇳🇱", name: "Netherlands",    iso: "NL", minLen: 9,  maxLen: 9  },
-  { code: "+46",  flag: "🇸🇪", name: "Sweden",         iso: "SE", minLen: 9,  maxLen: 9  },
-  { code: "+47",  flag: "🇳🇴", name: "Norway",         iso: "NO", minLen: 8,  maxLen: 8  },
-  { code: "+41",  flag: "🇨🇭", name: "Switzerland",    iso: "CH", minLen: 9,  maxLen: 9  },
-  { code: "+43",  flag: "🇦🇹", name: "Austria",        iso: "AT", minLen: 10, maxLen: 11 },
-  { code: "+32",  flag: "🇧🇪", name: "Belgium",        iso: "BE", minLen: 9,  maxLen: 9  },
-  { code: "+351", flag: "🇵🇹", name: "Portugal",       iso: "PT", minLen: 9,  maxLen: 9  },
-  { code: "+45",  flag: "🇩🇰", name: "Denmark",        iso: "DK", minLen: 8,  maxLen: 8  },
-  { code: "+358", flag: "🇫🇮", name: "Finland",        iso: "FI", minLen: 9,  maxLen: 10 },
-  { code: "+7",   flag: "🇷🇺", name: "Russia",         iso: "RU", minLen: 10, maxLen: 10 },
-  { code: "+55",  flag: "🇧🇷", name: "Brazil",         iso: "BR", minLen: 10, maxLen: 11 },
-  { code: "+52",  flag: "🇲🇽", name: "Mexico",         iso: "MX", minLen: 10, maxLen: 10 },
-  { code: "+27",  flag: "🇿🇦", name: "South Africa",   iso: "ZA", minLen: 9,  maxLen: 9  },
-  { code: "+20",  flag: "🇪🇬", name: "Egypt",          iso: "EG", minLen: 10, maxLen: 10 },
-  { code: "+62",  flag: "🇮🇩", name: "Indonesia",      iso: "ID", minLen: 9,  maxLen: 12 },
-  { code: "+63",  flag: "🇵🇭", name: "Philippines",    iso: "PH", minLen: 10, maxLen: 10 },
-  { code: "+66",  flag: "🇹🇭", name: "Thailand",       iso: "TH", minLen: 9,  maxLen: 9  },
-  { code: "+84",  flag: "🇻🇳", name: "Vietnam",        iso: "VN", minLen: 9,  maxLen: 10 },
-  { code: "+92",  flag: "🇵🇰", name: "Pakistan",       iso: "PK", minLen: 10, maxLen: 10 },
-  { code: "+880", flag: "🇧🇩", name: "Bangladesh",     iso: "BD", minLen: 10, maxLen: 10 },
-  { code: "+64",  flag: "🇳🇿", name: "New Zealand",    iso: "NZ", minLen: 8,  maxLen: 10 },
-  { code: "+353", flag: "🇮🇪", name: "Ireland",        iso: "IE", minLen: 9,  maxLen: 9  },
-  { code: "+48",  flag: "🇵🇱", name: "Poland",         iso: "PL", minLen: 9,  maxLen: 9  },
+const PLATFORMS = [
+  { id: "mobile",    label: "Mobile",    placeholder: "e.g. +94771234567",          hint: "Mobile number with country code",             numeric: true  },
+  { id: "whatsapp",  label: "WhatsApp",  placeholder: "e.g. +94771234567",          hint: "WhatsApp number with country code",           numeric: true  },
+  { id: "telegram",  label: "Telegram",  placeholder: "e.g. @yourusername",         hint: "Your Telegram username starting with @",      numeric: false },
+  { id: "wechat",    label: "WeChat",    placeholder: "e.g. WeChat ID",             hint: "Your WeChat ID or phone number",              numeric: false },
+  { id: "line",      label: "LINE",      placeholder: "e.g. LINE ID",               hint: "Your LINE ID",                                numeric: false },
+  { id: "kakao",     label: "KakaoTalk", placeholder: "e.g. KakaoTalk ID",          hint: "Your KakaoTalk ID",                           numeric: false },
+  { id: "viber",     label: "Viber",     placeholder: "e.g. +94771234567",          hint: "Viber number with country code",              numeric: true  },
+  { id: "signal",    label: "Signal",    placeholder: "e.g. +44701234567",          hint: "Signal number with country code",             numeric: true  },
+  { id: "messenger", label: "Messenger", placeholder: "e.g. facebook.com/yourname", hint: "Your Facebook profile URL or username",       numeric: false },
+  { id: "imessage",  label: "iMessage",  placeholder: "e.g. +1234567890",           hint: "Apple ID email or phone number",              numeric: false },
+  { id: "other",     label: "Other",     placeholder: "e.g. platform + handle",     hint: "Specify your platform and contact handle",    numeric: false },
 ];
 
-const inputClass =
-  "w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20";
+const EMERGENCY_RELATIONSHIPS = [
+  "Spouse", "Parent", "Sibling", "Child", "Friend",
+  "Colleague", "Hotel Concierge", "Tour Guide", "Other",
+];
 
-// ── Per-country validation ────────────────────────────────────────────────────
-const validatePhoneNumber = (digits, countryCode) => {
-  if (!digits) return "Phone number is required.";
-  if (!/^\d+$/.test(digits)) return "Only digits are allowed — no spaces or dashes.";
-  const country = COUNTRIES.find(c => c.code === countryCode);
-  if (!country) {
-    if (digits.length < 7)  return "Too short — enter at least 7 digits.";
-    if (digits.length > 15) return "Too long — maximum 15 digits.";
-    return "";
+const inputClass = "w-full px-4 py-3 bg-white border border-[#F5820D]/15 rounded-xl text-[#2C2F3A] text-sm outline-none transition-all focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20";
+
+// Validate based on platform type
+const validateContact = (value, platform) => {
+  if (!value.trim()) return "This field is required.";
+  const p = PLATFORMS.find(p => p.id === platform);
+  if (p?.numeric) {
+    // Allow + at start, then only digits, spaces, dashes
+    const cleaned = value.replace(/[\s\-]/g, "");
+    if (!/^\+?\d+$/.test(cleaned)) return "Only numbers allowed — no letters or special characters.";
+    if (cleaned.replace("+", "").length < 7) return "Number too short — include country code e.g. +94771234567.";
   }
-  if (digits.length < country.minLen)
-    return `Too short for ${country.name} — need ${country.minLen} digits (you entered ${digits.length}).`;
-  if (digits.length > country.maxLen)
-    return `Too long for ${country.name} — maximum ${country.maxLen} digits (you entered ${digits.length}).`;
+  if (value.trim().length < 3) return "Too short.";
   return "";
 };
 
-// ── Component ─────────────────────────────────────────────────────────────────
-const BookingNotesStep = ({ data, onChange }) => {
-  const [phoneError,   setPhoneError]   = useState("");
-  const [phoneTouched, setPhoneTouched] = useState(false);
+// Validate emergency phone — always numeric
+const validatePhone = (value) => {
+  if (!value.trim()) return "This field is required.";
+  const cleaned = value.replace(/[\s\-]/g, "");
+  if (!/^\+?\d+$/.test(cleaned)) return "Only numbers allowed — no letters or special characters.";
+  if (cleaned.replace("+", "").length < 7) return "Too short — include country code e.g. +94771234567.";
+  return "";
+};
 
-  const getCountryCode = () => {
-    if (!data.customerPhone) return "+94";
-    const match = COUNTRIES.find(c => data.customerPhone.startsWith(c.code + " "));
-    return match ? match.code : "+94";
-  };
+// ── Single platform row ───────────────────────────────────────────────────────
+const PlatformRow = ({ index, platform, number, onChange, onRemove, required, usedPlatforms }) => {
+  const [touched, setTouched] = useState(false);
+  const selected = PLATFORMS.find(p => p.id === platform) || PLATFORMS[0];
+  const error    = touched ? validateContact(number, platform) : "";
+  const isValid  = !validateContact(number, platform) && number.trim().length > 0;
+  const available = PLATFORMS.filter(p => !usedPlatforms.includes(p.id) || p.id === platform);
 
-  const getPhoneNumber = () => {
-    if (!data.customerPhone) return "";
-    const code = getCountryCode();
-    return data.customerPhone.startsWith(code + " ")
-      ? data.customerPhone.slice(code.length + 1)
-      : data.customerPhone;
-  };
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <label className="text-sm font-semibold text-[#2C2F3A]">
+          {index === 0
+            ? <>{`Primary Contact `}<span className="text-red-500">*</span></>
+            : "Alternative Contact"}
+          <span className="ml-2 text-[10px] font-normal text-[#6B7280]">
+            {index === 0 ? "Required" : "Optional"}
+          </span>
+        </label>
+        {index === 1 && (
+          <button type="button" onClick={onRemove}
+            className="flex items-center gap-1 text-xs text-[#6B7280] hover:text-red-500 transition-colors">
+            <X className="w-3.5 h-3.5" /> Remove
+          </button>
+        )}
+      </div>
 
-  const selectedCountry = COUNTRIES.find(c => c.code === getCountryCode()) || COUNTRIES[0];
+      <div className="flex gap-2">
+        {/* Platform dropdown — text only, no emojis */}
+        <div className="relative flex-shrink-0">
+          <select
+            value={platform}
+            onChange={e => onChange("platform", e.target.value)}
+            className="appearance-none pl-3 pr-7 py-3 bg-white border border-[#F5820D]/15 rounded-xl text-[#2C2F3A] text-sm font-medium outline-none focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20 cursor-pointer min-w-[130px]"
+          >
+            {available.map(p => (
+              <option key={p.id} value={p.id}>{p.label}</option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#6B7280]/70 pointer-events-none" />
+        </div>
 
-  const handleCountryChange = (code) => {
-    const num = getPhoneNumber();
-    onChange("customerPhone", `${code} ${num}`);
-    if (phoneTouched)
-      setPhoneError(validatePhoneNumber(num.replace(/\s/g, ""), code));
-  };
+        {/* Handle / number input */}
+        <div className="relative flex-1">
+          <input
+            type={selected.numeric ? "tel" : "text"}
+            value={number}
+            onChange={e => onChange("number", e.target.value)}
+            onBlur={() => setTouched(true)}
+            placeholder={selected.placeholder}
+            className={`${inputClass} pr-9 ${
+              error    ? "border-red-400 focus:ring-red-400/20 focus:border-red-400"
+              : isValid ? "border-green-400 focus:ring-green-400/20 focus:border-green-400"
+              : ""
+            }`}
+          />
+          {isValid && (
+            <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+          )}
+        </div>
+      </div>
 
-  const handleNumberChange = (value) => {
-    const cleaned = value.replace(/[^\d\s]/g, "");
-    onChange("customerPhone", `${getCountryCode()} ${cleaned}`);
-    if (phoneTouched)
-      setPhoneError(validatePhoneNumber(cleaned.replace(/\s/g, ""), getCountryCode()));
-  };
-
-  const handleNumberBlur = () => {
-    setPhoneTouched(true);
-    const digits = getPhoneNumber().replace(/\s/g, "");
-    setPhoneError(validatePhoneNumber(digits, getCountryCode()));
-  };
-
-  const isPhoneValid = !validatePhoneNumber(
-    getPhoneNumber().replace(/\s/g, ""), getCountryCode()
+      {error
+        ? <p className="text-xs text-red-500 flex items-center gap-1 ml-1"><AlertCircle className="w-3 h-3" />{error}</p>
+        : <p className="text-xs text-[#6B7280]/70 ml-1">{selected.hint}</p>
+      }
+    </div>
   );
+};
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+const BookingNotesStep = ({ data, onChange }) => {
+  const { user } = useContext(AuthContext);
+  const { t } = useTranslation();
+  const [showSecond, setShowSecond] = useState(!!(data.contactPlatform2 && data.contactNumber2));
+  const [emergencyPhoneTouched, setEmergencyPhoneTouched] = useState(false);
+
+  const nameValue = data.customerName || user?.name || "";
+  const emergencyPhoneError = emergencyPhoneTouched ? validatePhone(data.emergencyPhone || "") : "";
+
+  const handlePlatform1 = (field, val) => {
+    if (field === "platform") onChange("contactPlatform", val);
+    if (field === "number")   onChange("contactNumber",   val);
+  };
+
+  const handlePlatform2 = (field, val) => {
+    if (field === "platform") onChange("contactPlatform2", val);
+    if (field === "number")   onChange("contactNumber2",   val);
+  };
+
+  const addSecond = () => {
+    const first = data.contactPlatform || "mobile";
+    const next  = PLATFORMS.find(p => p.id !== first)?.id || "whatsapp";
+    onChange("contactPlatform2", next);
+    onChange("contactNumber2", "");
+    setShowSecond(true);
+  };
+
+  const removeSecond = () => {
+    onChange("contactPlatform2", "");
+    onChange("contactNumber2", "");
+    setShowSecond(false);
+  };
+
+  const usedPlatforms = [
+    data.contactPlatform || "mobile",
+    showSecond ? (data.contactPlatform2 || "whatsapp") : null,
+  ].filter(Boolean);
 
   return (
     <div className="space-y-6">
+
       {/* ── Contact Details ── */}
       <div>
-        <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
-          <Phone className="w-5 h-5 text-[#00b0a5]" /> Contact Details
+        <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
+          <Phone className="w-5 h-5 text-[#F5820D]" /> {t("bookingForm.notesStep.contactDetails")}
         </h3>
-        <p className="text-sm text-slate-500 mb-4">
-          We'll use this to reach you about your booking.
+        <p className="text-sm text-[#6B7280] mb-4">
+          Choose how you prefer us to reach you about this booking.
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
+
           {/* Full Name */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Full Name *
+            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">
+              Full Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              value={data.customerName}
-              onChange={(e) => onChange("customerName", e.target.value)}
-              placeholder="Your full name"
+              value={nameValue}
+              onChange={e => onChange("customerName", e.target.value)}
+              placeholder={t("bookingForm.notesStep.fullNamePlaceholder")}
               className={inputClass}
             />
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Phone Number *
-            </label>
-            <div className="flex gap-2">
-              {/* Country selector */}
-              <div className="relative">
-                <select
-                  value={getCountryCode()}
-                  onChange={(e) => handleCountryChange(e.target.value)}
-                  className="appearance-none pl-3 pr-8 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20 cursor-pointer min-w-[180px]"
-                >
-                  {COUNTRIES.map((c, i) => (
-                    <option key={`${c.iso}-${i}`} value={c.code}>
-                      {c.flag} {c.name} ({c.code})
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              </div>
-
-              {/* Number input */}
-              <input
-                type="tel"
-                value={getPhoneNumber()}
-                onChange={(e) => handleNumberChange(e.target.value)}
-                onBlur={handleNumberBlur}
-                placeholder={`${selectedCountry.minLen} digits`}
-                className={`${inputClass} flex-1 ${
-                  phoneTouched && phoneError
-                    ? "border-red-400 focus:ring-red-400/20 focus:border-red-400"
-                    : phoneTouched && isPhoneValid
-                    ? "border-green-400 focus:ring-green-400/20 focus:border-green-400"
-                    : ""
-                }`}
-              />
-            </div>
-
-            {/* Live feedback */}
-            {phoneTouched && phoneError ? (
-              <p className="text-xs text-red-500 mt-1.5 font-medium">⚠ {phoneError}</p>
-            ) : phoneTouched && isPhoneValid ? (
-              <p className="text-xs text-green-600 mt-1.5 font-medium">✓ Valid {selectedCountry.name} number</p>
-            ) : (
-              <p className="text-xs text-slate-400 mt-1.5">
-                {selectedCountry.name}: {selectedCountry.minLen === selectedCountry.maxLen
-                  ? `${selectedCountry.minLen} digits required`
-                  : `${selectedCountry.minLen}–${selectedCountry.maxLen} digits required`}
+            {user?.name && (
+              <p className="text-xs text-[#F5820D] mt-1 ml-1">
+                ✓ Auto-filled from your profile — you can edit this
               </p>
             )}
           </div>
 
-          {/* Country note for admin context */}
-          <div className="flex items-start gap-3 bg-[#00b0a5]/5 border border-[#00b0a5]/15 rounded-xl px-4 py-3">
-            <Globe className="w-4 h-4 text-[#00b0a5] flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Your selected country{" "}
-              <span className="font-bold text-[#00b0a5]">
-                {selectedCountry.flag} {selectedCountry.name}
-              </span>{" "}
-              will be shared with our team so we can prepare for your arrival and communicate in the most convenient way.
-            </p>
+          {/* Primary platform */}
+          <PlatformRow
+            index={0}
+            platform={data.contactPlatform || "mobile"}
+            number={data.contactNumber || ""}
+            onChange={handlePlatform1}
+            required
+            usedPlatforms={usedPlatforms}
+          />
+
+          {/* Second platform or add button */}
+          {showSecond ? (
+            <PlatformRow
+              index={1}
+              platform={data.contactPlatform2 || "whatsapp"}
+              number={data.contactNumber2 || ""}
+              onChange={handlePlatform2}
+              onRemove={removeSecond}
+              required={false}
+              usedPlatforms={usedPlatforms}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={addSecond}
+              className="flex items-center gap-2 text-sm text-[#F5820D] font-semibold hover:text-[#C85A00] transition-colors"
+            >
+              <div className="w-7 h-7 rounded-full border-2 border-dashed border-[#F5820D]/40 flex items-center justify-center">
+                <Plus className="w-3.5 h-3.5" />
+              </div>
+              Add alternative contact method
+            </button>
+          )}
+
+        </div>
+      </div>
+
+      {/* ── Emergency Contact ── */}
+      <div>
+        <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
+          <UserPlus className="w-5 h-5 text-[#F5820D]" /> {t("bookingForm.notesStep.emergencyContact")}
+        </h3>
+        <p className="text-sm text-[#6B7280] mb-4">
+          In case of emergency during the trip. Saved to your profile.
+        </p>
+        <div className="bg-white border border-[#F5820D]/15 rounded-2xl p-4 space-y-4">
+
+          <div>
+            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">Name *</label>
+            <input
+              type="text"
+              value={data.emergencyName || ""}
+              onChange={e => onChange("emergencyName", e.target.value)}
+              placeholder={t("bookingForm.notesStep.emergencyNamePlaceholder")}
+              className={inputClass}
+            />
           </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">Relationship *</label>
+            <div className="relative">
+              <select
+                value={data.emergencyRelationship || ""}
+                onChange={e => onChange("emergencyRelationship", e.target.value)}
+                className={`${inputClass} appearance-none pr-8`}
+              >
+                <option value="" disabled>Select relationship</option>
+                {EMERGENCY_RELATIONSHIPS.map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]/70 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Emergency phone — numeric validation */}
+          <div>
+            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">Phone Number *</label>
+            <div className="relative">
+              <input
+                type="tel"
+                value={data.emergencyPhone || ""}
+                onChange={e => onChange("emergencyPhone", e.target.value)}
+                onBlur={() => setEmergencyPhoneTouched(true)}
+                placeholder="e.g. +94771234567"
+                className={`${inputClass} ${
+                  emergencyPhoneError
+                    ? "border-red-400 focus:ring-red-400/20 focus:border-red-400"
+                    : data.emergencyPhone && !emergencyPhoneError
+                      ? "border-green-400 focus:ring-green-400/20 focus:border-green-400"
+                      : ""
+                }`}
+              />
+              {data.emergencyPhone && !emergencyPhoneError && (
+                <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+              )}
+            </div>
+            {emergencyPhoneError
+              ? <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{emergencyPhoneError}</p>
+              : <p className="text-xs text-[#6B7280]/70 mt-1.5">Include country code e.g. +94771234567</p>
+            }
+          </div>
+
         </div>
       </div>
 
       {/* ── Additional Notes ── */}
       <div>
-        <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
-          <FileText className="w-5 h-5 text-[#00b0a5]" /> Additional Notes
+        <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
+          <FileText className="w-5 h-5 text-[#F5820D]" /> {t("bookingForm.notesStep.additionalNotes")}
         </h3>
-        <p className="text-sm text-slate-500 mb-4">
-          Any special requests, preferences, or information for the driver.
+        <p className="text-sm text-[#6B7280] mb-4">
+          {t("bookingForm.notesStep.notesDesc")}
         </p>
         <textarea
-          value={data.notes}
-          onChange={(e) => onChange("notes", e.target.value)}
-          placeholder="E.g. early morning pickup, wheelchair access needed, stop at airport first..."
-          rows={5}
+          value={data.notes || ""}
+          onChange={e => onChange("notes", e.target.value)}
+          placeholder={t("bookingForm.notesStep.notesPlaceholder")}
+          rows={4}
           className={`${inputClass} resize-none`}
         />
       </div>
 
-      {/* ── Included Services ── */}
-      <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-        <p className="text-sm font-bold text-slate-700 mb-3">✅ Included with every booking:</p>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            "Free Wi-Fi in vehicle",
-            "Parking & Highway Tolls",
-            "Water Bottles",
-            "GPS Tracking",
-            "Experienced Driver",
-            "All Fuel Costs",
-            "Foreign Passenger Insurance",
-            "Driver Accommodation",
-          ].map((service) => (
-            <div key={service} className="flex items-center gap-2 text-xs text-slate-600">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#00b0a5] flex-shrink-0" />
-              {service}
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };

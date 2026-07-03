@@ -25,7 +25,7 @@ export const fetchPublishedReviews = async (filters = {}) => {
 export const fetchReviewStats = async () => {
   const res = await fetch(buildApiUrl('/reviews/stats'));
   const data = await getJson(res);
-  return data || { avg: null, total: 0, breakdown: {} };
+  return data || { avg: 0, average: 0, total: 0, ratingSum: 0, breakdown: {} };
 };
 
 export const fetchReviewableTours = async (email) => {

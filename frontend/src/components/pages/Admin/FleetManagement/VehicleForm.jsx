@@ -208,9 +208,8 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                                     name="category_id"
                                     value={formData.category_id}
                                     onChange={handleChange}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.category_id ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.category_id ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                 >
                                     <option value="">Select Category</option>
                                     {categories.map((cat) => (
@@ -235,9 +234,8 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                                     value={formData.vehicle_name}
                                     onChange={handleChange}
                                     placeholder="e.g., Toyota Corolla 2024"
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.vehicle_name ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.vehicle_name ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                 />
                                 {errors.vehicle_name && (
                                     <p className="text-red-500 text-xs mt-1">{errors.vehicle_name}</p>
@@ -255,9 +253,8 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                                     value={formData.brand}
                                     onChange={handleChange}
                                     placeholder="e.g., Toyota"
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.brand ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.brand ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                 />
                                 {errors.brand && (
                                     <p className="text-red-500 text-xs mt-1">{errors.brand}</p>
@@ -275,9 +272,8 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                                     value={formData.model}
                                     onChange={handleChange}
                                     placeholder="e.g., Corolla"
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.model ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.model ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                 />
                                 {errors.model && (
                                     <p className="text-red-500 text-xs mt-1">{errors.model}</p>
@@ -322,9 +318,8 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                                     value={formData.license_plate}
                                     onChange={handleChange}
                                     placeholder="e.g., ABC-1234"
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.license_plate ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.license_plate ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                 />
                                 {errors.license_plate && (
                                     <p className="text-red-500 text-xs mt-1">{errors.license_plate}</p>
@@ -342,9 +337,8 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                                     value={formData.vehicle_license}
                                     onChange={handleChange}
                                     placeholder="e.g., VH-2024-001"
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.vehicle_license ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.vehicle_license ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                 />
                                 {errors.vehicle_license && (
                                     <p className="text-red-500 text-xs mt-1">{errors.vehicle_license}</p>
@@ -364,9 +358,8 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                                     min="0"
                                     step="0.01"
                                     placeholder="e.g., 50.00"
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.price_per_day ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.price_per_day ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                 />
                                 {errors.price_per_day && (
                                     <p className="text-red-500 text-xs mt-1">{errors.price_per_day}</p>
@@ -393,9 +386,8 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                                     onChange={handleChange}
                                     min="1"
                                     max="50"
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.seats ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.seats ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                 />
                                 {errors.seats && (
                                     <p className="text-red-500 text-xs mt-1">{errors.seats}</p>
@@ -482,9 +474,8 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                                     value={formData.insurance_provider}
                                     onChange={handleChange}
                                     placeholder="e.g., Sri Lanka Insurance"
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.insurance_provider ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.insurance_provider ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                 />
                                 {errors.insurance_provider && (
                                     <p className="text-red-500 text-xs mt-1">{errors.insurance_provider}</p>
@@ -501,9 +492,8 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                                     name="insurance_start_date"
                                     value={formData.insurance_start_date}
                                     onChange={handleChange}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.insurance_start_date ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.insurance_start_date ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                 />
                                 {errors.insurance_start_date && (
                                     <p className="text-red-500 text-xs mt-1">{errors.insurance_start_date}</p>
@@ -521,9 +511,8 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                                     onChange={handleChange}
                                     min={formData.insurance_start_date ? getInsuranceEndDate(formData.insurance_start_date) : undefined}
                                     max={formData.insurance_start_date ? getInsuranceEndDate(formData.insurance_start_date) : undefined}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.insurance_end_date ? 'border-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.insurance_end_date ? 'border-red-500' : 'border-gray-300'
+                                        }`}
                                 />
                                 {formData.insurance_start_date && (
                                     <p className="text-xs text-gray-500 mt-1">

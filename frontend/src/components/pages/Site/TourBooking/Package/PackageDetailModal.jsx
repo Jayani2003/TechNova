@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from 'react';
 import { buildApiUrl } from '../../../../../config/api';
 import PackageCard from './PackageCard';
+import { useTranslation } from "react-i18next";
+import LocationWeather from "./LocationWeather";
 
 const TYPE_ICONS = {
   'Beach Side':          '🏖️',
@@ -14,7 +16,7 @@ const TYPE_ICONS = {
 };
 
 const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
-  if (!pkg) return null;
+  const { t } = useTranslation();
   const [recommendations, setRecommendations] = useState(null);
   const [showGuidDetails, setShowGuidDetails] = useState(false);
 
@@ -402,11 +404,11 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
               <button className="pdm-close" onClick={onClose}>✕</button>
               <div className="pdm-hero-content">
                 <div className="pdm-type-badge">
-                  {TYPE_ICONS[pkg.type]} {pkg.type}
+                  {TYPE_ICONS[pkg.type]} {t(`packageTours.filters.types.${pkg.type}`, pkg.type)}
                 </div>
                 <div className="pdm-title">{pkg.title}</div>
                 <div className="pdm-days-badge">
-                  📅 {pkg.days} Days · {destinations.length} Destinations
+                  📅 {pkg.days} {t("packageTours.modal.days")} · {destinations.length} {t("packageTours.modal.destinations")}
                 </div>
               </div>
             </div>
@@ -423,7 +425,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
               </div> */}
 
               {/* Destinations */}
-              <div className="pdm-section-heading">Destinations & Itinerary</div>
+              <div className="pdm-section-heading">{t("packageTours.modal.destinationsItinerary")}</div>
               <div className="pdm-dest-grid">
                 {destinations.map((dest, i) => {
                   const activities = Array.isArray(dest.activities) ? dest.activities : [];
@@ -432,7 +434,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
                       <div className="pdm-dest-img">
                         <img src={dest.image} alt={dest.name} />
                         <div className="pdm-dest-img-overlay" />
-                        <span className="pdm-dest-days">{dest.days} {dest.days === 1 ? 'day' : 'days'}</span>
+                        <span className="pdm-dest-days">{dest.days} {dest.days === 1 ? t("packageTours.modal.day") : t("packageTours.modal.days")}</span>
                       </div>
                       <div className="pdm-dest-info">
                         <div className="pdm-dest-name">
@@ -440,11 +442,12 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
                           {dest.name}
                         </div>
                         <div className="pdm-dest-desc">{dest.description}</div>
+                        <LocationWeather locationName={dest.name} />
 
                         {/* Activities */}
                         {activities.length > 0 && (
                           <div className="pdm-activities">
-                            <span className="pdm-activities-label">📍 Activities</span>
+                            <span className="pdm-activities-label">📍 {t("packageTours.modal.activities")}</span>
                             {activities.map((act, ai) => (
                               <div key={ai} className="pdm-activity-item">
                                 <div className="pdm-activity-name">{act.name}</div>
@@ -472,13 +475,13 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
                   to={`/tour-booking/package/book?packageId=${pkg.id}&packageTitle=${encodeURIComponent(pkg.title || "Package Tour")}&packageDays=${encodeURIComponent(pkg.days || "")}`}
                   className="pdm-book-btn"
                 >
-                  <span>Book This Package</span>
+                  <span>{t("packageTours.modal.bookBtn")}</span>
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </Link>
                 <button className="pdm-close-btn" onClick={onClose}>
-                  ← Back to packages
+                  {t("packageTours.modal.backBtn")}
                 </button>
               </div>
 
@@ -490,9 +493,9 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
                     onChange={e => setShowGuidDetails(e.target.checked)}
                     disabled={!guide}
                   />
-                  <span>See guide</span>
+                  <span>{t("packageTours.modal.seeGuide")}</span>
                 </label>
-                {!guide && <div className="pdm-guid-note">No guide is linked to this package.</div>}
+                {!guide && <div className="pdm-guid-note">{t("packageTours.modal.noGuide")}</div>}
                 {showGuidDetails && guide && (
                   <motion.div
                     className="pdm-guid-card"
@@ -502,16 +505,16 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
                   >
                     <div className="pdm-guid-grid">
                       <div className="pdm-guid-field">
-                        <span className="pdm-guid-label">Guide Name</span>
+                        <span className="pdm-guid-label">{t("packageTours.modal.guideName")}</span>
                         <span className="pdm-guid-value">{guide.name}</span>
                       </div>
                       <div className="pdm-guid-field">
-                        <span className="pdm-guid-label">NIC</span>
+                        <span className="pdm-guid-label">{t("packageTours.modal.nic")}</span>
                         <span className="pdm-guid-value">{guide.nic}</span>
                       </div>
                     </div>
                     <div className="pdm-guid-field">
-                      <span className="pdm-guid-label">Contact Details</span>
+                      <span className="pdm-guid-label">{t("packageTours.modal.contactDetails")}</span>
                       <span className="pdm-guid-value">{guide.contactDetails}</span>
                     </div>
                   </motion.div>
@@ -521,18 +524,18 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
               {/* Recommendations */}
               {recommendations && (
                 <>
-                  <div className="pdm-section-heading">Recommended For You</div>
+                  <div className="pdm-section-heading">{t("packageTours.modal.recommendedTitle")}</div>
 
                   <div className="pdm-rec-shell mb-5">
                     <div className="pdm-rec-title">
-                      <div className="pdm-rec-kicker">Personalized picks</div>
-                      <div className="pdm-rec-pill">Tailored recommendations</div>
+                      <div className="pdm-rec-kicker">{t("packageTours.modal.personalizedPicks")}</div>
+                      <div className="pdm-rec-pill">{t("packageTours.modal.tailoredRecs")}</div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 mb-5">
                     {/* Same Duration */}
                     <div>
-                      <div className="text-xs font-extrabold mb-2">Same duration</div>
+                      <div className="text-xs font-extrabold mb-2">{t("packageTours.modal.sameDuration")}</div>
                       <div className="pdm-rec-row">
                         {(recommendations.similarByDays || []).slice(0,6).map((r, i) => (
                           <div key={`sd-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
@@ -544,7 +547,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
 
                     {/* Same Type */}
                     <div>
-                      <div className="text-xs font-extrabold mb-2">Same type</div>
+                      <div className="text-xs font-extrabold mb-2">{t("packageTours.modal.sameType")}</div>
                       <div className="pdm-rec-row">
                         {(recommendations.similarByType || []).slice(0,6).map((r, i) => (
                           <div key={`st-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
@@ -556,7 +559,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
 
                     {/* Top Rated */}
                     <div>
-                      <div className="text-xs font-extrabold mb-2">Top rated</div>
+                      <div className="text-xs font-extrabold mb-2">{t("packageTours.modal.topRated")}</div>
                       <div className="pdm-rec-row">
                         {(recommendations.topRated || []).slice(0,6).map((r, i) => (
                           <div key={`tr-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
@@ -568,7 +571,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
 
                     {/* Most Booked */}
                     <div>
-                      <div className="text-xs font-extrabold mb-2">Most booked</div>
+                      <div className="text-xs font-extrabold mb-2">{t("packageTours.modal.mostBooked")}</div>
                       <div className="pdm-rec-row">
                         {(recommendations.mostBooked || []).slice(0,6).map((r, i) => (
                           <div key={`mb-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">

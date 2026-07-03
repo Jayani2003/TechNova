@@ -1,7 +1,7 @@
 // components/pages/User/MyBookings/MyBookingDetail.jsx
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
-import { ArrowLeft, MapPin, Calendar, Users, Car, Phone, FileText, Clock, Baby, Briefcase, Check, X, Zap } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Users, Car, Phone, FileText, Clock, Baby, Briefcase, Check, X, Zap, AlertTriangle, Download } from "lucide-react";
 import { STATUS_STYLES, TOUR_TYPE_LABEL } from "./MyBookingCard";
 import { useBookings } from "../../../../context/BookingsContext.jsx";
 
@@ -32,13 +32,22 @@ const Section = ({ title, children, accent }) => (
 
 const MyBookingDetail = ({ booking, onBack }) => {
   const navigate = useNavigate();
-  const { acceptQuote, rejectQuote, cancelBooking } = useBookings();
+  const { acceptQuote, rejectQuote, cancelBooking, downloadConfirmationPdf } = useBookings();
 
   const statusSteps = ["PENDING", "QUOTED", "ACCEPTED", "CONFIRMED", "TOUR_STARTED", "COMPLETED", "CLOSED"];
   const currentStepIndex = statusSteps.indexOf(booking.status);
 
   // Customer can cancel from ACCEPTED or CONFIRMED
   const canCancel = ["ACCEPTED", "CONFIRMED"].includes(booking.status);
+  const canDownloadPdf = ["ACCEPTED", "CONFIRMED", "TOUR_STARTED", "COMPLETED", "CLOSED"].includes(booking.status);
+
+  const handleDownloadPdf = async () => {
+    try {
+      await downloadConfirmationPdf(booking.id);
+    } catch (err) {
+      window.alert(err.message || "Failed to download booking confirmation PDF.");
+    }
+  };
 
   return (
     <motion.div
@@ -75,6 +84,25 @@ const MyBookingDetail = ({ booking, onBack }) => {
           >
             <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
             <span>Modify Request</span>
+          </button>
+        )}
+
+        {/* Payments button - navigates to profile Payments tab for this booking */}
+        <button
+          onClick={() => navigate('/user/profile', { state: { activeTab: 'payments', bookingId: booking.id } })}
+          className="ml-3 flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0d1720] text-white font-semibold text-sm hover:bg-[#0b1418] transition-all cursor-pointer"
+        >
+          <Zap className="w-4 h-4" />
+          <span>Payments</span>
+        </button>
+
+        {canDownloadPdf && (
+          <button
+            onClick={handleDownloadPdf}
+            className="ml-3 flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#00b0a5]/30 text-[#008f86] font-semibold text-sm hover:bg-[#00b0a5]/10 transition-all cursor-pointer"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download PDF</span>
           </button>
         )}
       </div>
@@ -191,11 +219,7 @@ const MyBookingDetail = ({ booking, onBack }) => {
           )}
           <DetailRow icon={Calendar} label="Start Date"   value={booking.startDate} />
           <DetailRow icon={Calendar} label="End Date"     value={booking.endDate} />
-          <DetailRow icon={Clock}    label="Pickup Time"  value={
-            booking.pickupTime ||
-            (booking.notes?.match(/Pickup time: ([^|]+)/)?.[1]?.trim()) ||
-            null
-          } />
+          <DetailRow icon={Clock}    label="Pickup Time"  value={booking.pickupTime || null} />
           <DetailRow icon={Calendar} label="Total Days"   value={booking.totalDays ? `${booking.totalDays} day(s)` : null} />
         </Section>
 
@@ -206,22 +230,39 @@ const MyBookingDetail = ({ booking, onBack }) => {
             <DetailRow icon={Users} label="Children" value={`${booking.noOfChildren} child(ren) — Ages: ${booking.agesOfChildren || "not specified"}`} />
           )}
           {booking.babySeatNeeded && <DetailRow icon={Baby} label="Baby Seat" value="Required" />}
-          <DetailRow icon={Briefcase} label="Luggage"
-            value={(booking.smallLuggages !== undefined || booking.largeLuggages !== undefined)
-              ? `${booking.smallLuggages || 0} small, ${booking.largeLuggages || 0} large`
-              : booking.noOfLuggages || null} />
+          {(booking.luggage10kg > 0 || booking.luggage25kg > 0 || booking.luggage35kg > 0 || booking.luggageCustomCount > 0) ? (
+            <>
+              {booking.luggage10kg  > 0 && <DetailRow icon={Briefcase} label="10 kg Bags"    value={`${booking.luggage10kg} piece(s)`} />}
+              {booking.luggage25kg  > 0 && <DetailRow icon={Briefcase} label="25 kg Bags"    value={`${booking.luggage25kg} piece(s)`} />}
+              {booking.luggage35kg  > 0 && <DetailRow icon={Briefcase} label="35 kg Bags"    value={`${booking.luggage35kg} piece(s)`} />}
+              {booking.luggageCustomCount > 0 && (
+                <DetailRow icon={Briefcase} label="Custom Luggage"
+                  value={booking.luggageCustomDesc || `${booking.luggageCustomCount} item(s)`} />
+              )}
+            </>
+          ) : (
+            <DetailRow icon={Briefcase} label="Luggage" value="No luggage specified" />
+          )}
           <DetailRow icon={Car} label="Requested Category" value={booking.categoryName || VEHICLE_LABELS[booking.categoryId] || booking.categoryId} />
         </Section>
 
         {/* Contact */}
         <Section title="Contact Details">
-          <DetailRow icon={Phone}    label="Name"  value={booking.customerName} />
-          <DetailRow icon={Phone}    label="Phone" value={booking.customerPhone} />
-          {booking.notes && (() => {
-            const clean = booking.notes.replace(/Pickup time: [^|]+\|?\s*/g, '').trim();
-            return clean ? <DetailRow icon={FileText} label="Notes" value={clean} /> : null;
-          })()}
+          <DetailRow icon={Phone}    label="Full Name"   value={booking.customerName} />
+          <DetailRow icon={Phone}    label="Phone"       value={booking.customerPhone} />
+          <DetailRow icon={FileText} label="Email"       value={booking.customerEmail} />
+          {booking.notes        && <DetailRow icon={FileText} label="Notes"         value={booking.notes} />}
+          {booking.tourThoughts && <DetailRow icon={FileText} label="Tour Thoughts" value={booking.tourThoughts} />}
         </Section>
+
+        {/* Emergency Contact */}
+        {(booking.emergencyName || booking.emergencyPhone) && (
+          <Section title="Emergency Contact">
+            <DetailRow icon={AlertTriangle} label="Name"         value={booking.emergencyName} />
+            <DetailRow icon={AlertTriangle} label="Relationship" value={booking.emergencyRelationship} />
+            <DetailRow icon={Phone}         label="Phone"        value={booking.emergencyPhone} />
+          </Section>
+        )}
 
         {/* Booking info */}
         <Section title="Booking Info">

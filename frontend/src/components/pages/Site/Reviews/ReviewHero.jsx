@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
-const ReviewHero = ({ onAddReview, isLoggedIn }) => (
+const ReviewHero = ({ onAddReview, isLoggedIn }) => {
+  const { t } = useTranslation();
+  return (
   <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
     <motion.img
       initial={{ scale: 1.1 }}
@@ -19,16 +22,16 @@ const ReviewHero = ({ onAddReview, isLoggedIn }) => (
         transition={{ duration: 0.8 }}
       >
         <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
-          Amazing Traveller Experiences
+          {t("reviews.hero.badge")}
         </span>
         <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 tracking-tight">
-          Guest <span className="text-[#00b0a5]">Reviews.</span>
+          {t("reviews.hero.title1")} <span className="text-[#00b0a5]">{t("reviews.hero.title2")}</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light mb-3">
-          Real stories from real travellers who explored Sri Lanka with us.
+          {t("reviews.hero.desc")}
         </p>
         <p className="text-sm text-white/60 font-light mb-8 tracking-wide">
-          ✦ Reviews are available only after your tour is marked complete by our team.
+          {t("reviews.hero.note")}
         </p>
 
         <motion.button
@@ -62,7 +65,7 @@ const ReviewHero = ({ onAddReview, isLoggedIn }) => (
             boxShadow: '0 0 8px #00ddd0',
             flexShrink: 0,
           }} />
-          {isLoggedIn ? 'Write a Review' : 'Log In to Write a Review'}
+          {isLoggedIn ? t("reviews.hero.writeBtn") : t("reviews.hero.loginBtn")}
           {/* Arrow */}
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style={{ opacity: 0.8 }}>
             <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -71,7 +74,8 @@ const ReviewHero = ({ onAddReview, isLoggedIn }) => (
       </motion.div>
     </div>
   </section>
-);
+  );
+};
 
 export default ReviewHero;
 

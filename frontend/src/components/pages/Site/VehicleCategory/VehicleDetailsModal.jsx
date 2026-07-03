@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import FeatureBadge from './FeatureBadge';
 
 const formatDate = (value) => {
@@ -8,9 +9,14 @@ const formatDate = (value) => {
 };
 
 const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
+    const { t } = useTranslation();
+    const [currentImageIdx, setCurrentImageIdx] = useState(0);
+    const images = vehicle?.images && vehicle.images.length > 0 ? vehicle.images : (vehicle?.image_url ? [vehicle.image_url] : []);
+
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
+            setCurrentImageIdx(0);
         } else {
             document.body.style.overflow = 'auto';
         }
@@ -18,6 +24,14 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
             document.body.style.overflow = 'auto';
         };
     }, [isOpen]);
+
+    useEffect(() => {
+        if (!isOpen || images.length <= 1) return;
+        const timer = setInterval(() => {
+            setCurrentImageIdx((prev) => (prev + 1) % images.length);
+        }, 3000);
+        return () => clearInterval(timer);
+    }, [isOpen, images.length]);
 
     if (!isOpen || !vehicle) return null;
 
@@ -39,12 +53,11 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
             `}</style>
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-hidden p-6 md:p-8 flex items-center justify-center">
                 <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 ring-1 ring-black/5 w-full max-w-3xl max-h-[calc(100vh-3rem)] overflow-y-auto modal-hide-scrollbar">
-                {/* Image Header */}
-                <div className="relative h-56 md:h-72 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden rounded-t-2xl">
-                    {vehicle.image_url ? (
-                        <div className="absolute inset-0 flex items-center justify-center p-4 md:p-6">
+                <div className="relative h-56 md:h-72 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden rounded-t-2xl group">
+                    {images.length > 0 ? (
+                        <div className="absolute inset-0 flex items-center justify-center p-4 md:p-6 transition-opacity duration-500">
                             <img
-                                src={vehicle.image_url}
+                                src={images[currentImageIdx]}
                                 alt={vehicle.vehicle_name}
                                 className="max-h-full max-w-full object-contain object-center drop-shadow-lg"
                             />
@@ -53,6 +66,17 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
                         <div className="flex items-center justify-center h-full">
                             <span className="text-9xl">🚗</span>
                         </div>
+                    )}
+                    
+                    {images.length > 1 && (
+                        <>
+                            <div onClick={(e) => { e.stopPropagation(); setCurrentImageIdx((prev) => (prev - 1 + images.length) % images.length); }} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-black/40 hover:bg-black/60 text-white rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
+                            </div>
+                            <div onClick={(e) => { e.stopPropagation(); setCurrentImageIdx((prev) => (prev + 1) % images.length); }} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-black/40 hover:bg-black/60 text-white rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
+                            </div>
+                        </>
                     )}
 
                     {/* Close Button */}
@@ -82,7 +106,7 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
                             {isAvailable ? (
                                 <span className="bg-green-500 text-white text-sm font-semibold px-4 py-2 rounded-full flex items-center gap-2">
                                     <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                                    Available
+                                    {t("vehicleCategory.card.available")}
                                 </span>
                             ) : (
                                 <span className="bg-red-500 text-white text-sm font-semibold px-4 py-2 rounded-full">
@@ -95,14 +119,29 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
 
                 {/* Content */}
                 <div className="p-5 md:p-6">
+                    {/* Slideshow Indicators */}
+                    {images.length > 1 && (
+                        <div className="flex justify-center gap-2 mb-5">
+                            {images.map((_, idx) => (
+                                <div
+                                    key={idx}
+                                    onClick={() => setCurrentImageIdx(idx)}
+                                    className={`w-2.5 h-2.5 rounded-full cursor-pointer transition-all ${
+                                        currentImageIdx === idx ? 'bg-blue-600 scale-125 shadow-sm' : 'bg-gray-300 hover:bg-gray-400'
+                                    }`}
+                                />
+                            ))}
+                        </div>
+                    )}
+
                     {/* Price Section */}
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-5 mb-5 border border-blue-100">
                         <div className="flex flex-col md:flex-row items-center justify-between gap-5">
                             <div className="text-center md:text-left">
-                                <p className="text-sm text-gray-500">Daily Rental Price</p>
+                                <p className="text-sm text-gray-500">{t("vehicleCategory.modal.dailyRentalPrice")}</p>
                                 <p className="text-4xl font-bold text-blue-600">
-                                    ${vehicle.price_per_day}
-                                    <span className="text-lg text-gray-500 font-normal">/day</span>
+                                    Rs. {vehicle.price_per_day}
+                                    <span className="text-lg text-gray-500 font-normal">{t("vehicleCategory.card.perDay")}</span>
                                 </p>
                             </div>
                             <button
@@ -114,7 +153,7 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
                                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 }`}
                             >
-                                {isAvailable ? '🎯 Book This Vehicle' : 'Not Available'}
+                                {isAvailable ? t("vehicleCategory.modal.bookThisVehicle") : t("vehicleCategory.card.notAvailable")}
                             </button>
                         </div>
                     </div>
@@ -122,13 +161,13 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
                     {/* Quick Features */}
                     <div className="mb-5">
                         <h3 className="text-lg font-bold text-gray-800 mb-3">
-                            Vehicle Specifications
+                            {t("vehicleCategory.modal.vehicleSpecs")}
                         </h3>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <FeatureBadge icon="👥" label="Seats" value={vehicle.seats} />
-                            <FeatureBadge icon="⛽" label="Fuel" value={vehicle.fuel_type} />
-                            <FeatureBadge icon="⚙️" label="Transmission" value={vehicle.transmission} />
-                            <FeatureBadge icon="🧳" label="Luggage" value={`${vehicle.luggage_capacity} Bags`} />
+                            <FeatureBadge icon="👥" label={t("vehicleCategory.card.seats", { count: '' }).trim()} value={vehicle.seats} />
+                            <FeatureBadge icon="⛽" label={t("vehicleCategory.filters.fuelType")} value={vehicle.fuel_type} />
+                            <FeatureBadge icon="⚙️" label={t("vehicleCategory.filters.transmission")} value={vehicle.transmission} />
+                            <FeatureBadge icon="🧳" label={t("vehicleCategory.card.bags", { count: '' }).trim()} value={`${vehicle.luggage_capacity} ${t("vehicleCategory.card.bags", { count: '' }).trim()}`} />
                         </div>
                     </div>
 
@@ -136,21 +175,21 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                         <div>
                             <h3 className="text-lg font-bold text-gray-800 mb-3">
-                                Vehicle Details
+                                {t("vehicleCategory.modal.vehicleDetails")}
                             </h3>
                             <div className="bg-gray-50 rounded-xl divide-y divide-gray-200 border border-gray-200 overflow-hidden">
                                 {[
-                                    { label: 'Brand', value: vehicle.brand },
-                                    { label: 'Model', value: vehicle.model },
-                                    { label: 'Year', value: vehicle.year || 'N/A' },
-                                    { label: 'Color', value: vehicle.color || 'N/A' },
-                                    { label: 'Vehicle License', value: vehicle.vehicle_license || 'N/A' },
-                                    { label: 'Engine', value: vehicle.engine_capacity || 'N/A' },
-                                    { label: 'Mileage', value: vehicle.mileage || 'N/A' },
-                                    { label: 'Insurance', value: vehicle.insurance_provider || 'N/A' },
-                                    { label: 'Insurance Start', value: formatDate(vehicle.insurance_start_date) },
-                                    { label: 'Insurance End', value: formatDate(vehicle.insurance_end_date) },
-                                    { label: 'Insurance Status', value: vehicle.insurance_expired ? 'Expired' : 'Valid' },
+                                    { label: t("vehicleCategory.modal.brand"), value: vehicle.brand },
+                                    { label: t("vehicleCategory.modal.model"), value: vehicle.model },
+                                    { label: t("vehicleCategory.modal.year"), value: vehicle.year || 'N/A' },
+                                    { label: t("vehicleCategory.modal.color"), value: vehicle.color || 'N/A' },
+                                    { label: t("vehicleCategory.modal.license"), value: vehicle.vehicle_license || 'N/A' },
+                                    { label: t("vehicleCategory.modal.engine"), value: vehicle.engine_capacity || 'N/A' },
+                                    { label: t("vehicleCategory.modal.mileage"), value: vehicle.mileage || 'N/A' },
+                                    { label: t("vehicleCategory.modal.insurance"), value: vehicle.insurance_provider || 'N/A' },
+                                    { label: t("vehicleCategory.modal.insuranceStart"), value: formatDate(vehicle.insurance_start_date) },
+                                    { label: t("vehicleCategory.modal.insuranceEnd"), value: formatDate(vehicle.insurance_end_date) },
+                                    { label: t("vehicleCategory.modal.insuranceStatus"), value: vehicle.insurance_expired ? t("vehicleCategory.modal.expired") : t("vehicleCategory.modal.valid") },
                                 ].map((item, index) => (
                                     <div key={index} className="flex justify-between items-center px-4 py-2">
                                         <span className="text-sm text-gray-500">{item.label}</span>
@@ -162,30 +201,30 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
 
                         <div>
                             <h3 className="text-lg font-bold text-gray-800 mb-3">
-                                Comfort & Convenience
+                                {t("vehicleCategory.modal.comfortConv")}
                             </h3>
                             <div className="space-y-3">
                                 {vehicle.air_conditioning && (
                                         <div className="flex items-center gap-3 bg-blue-50 rounded-lg p-3 border border-blue-100">
                                         <span className="text-2xl">❄️</span>
                                         <div>
-                                            <p className="font-semibold text-gray-800">Air Conditioning</p>
-                                            <p className="text-xs text-gray-500">Climate control system</p>
+                                            <p className="font-semibold text-gray-800">{t("vehicleCategory.modal.airCond")}</p>
+                                            <p className="text-xs text-gray-500">{t("vehicleCategory.modal.climateControl")}</p>
                                         </div>
                                     </div>
                                 )}
                                 <div className={`flex items-center gap-3 rounded-lg p-3 border ${vehicle.insurance_expired ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'}`}>
                                     <span className="text-2xl">{vehicle.insurance_expired ? '⚠️' : '✅'}</span>
                                     <div>
-                                        <p className="font-semibold text-gray-800">{vehicle.insurance_expired ? 'Insurance Expired' : 'Fully Insured'}</p>
-                                        <p className="text-xs text-gray-500">{vehicle.insurance_expired ? 'Renewal required before bookings.' : 'Comprehensive coverage'}</p>
+                                        <p className="font-semibold text-gray-800">{vehicle.insurance_expired ? t("vehicleCategory.card.insuranceExpired") : t("vehicleCategory.modal.fullyInsured")}</p>
+                                        <p className="text-xs text-gray-500">{vehicle.insurance_expired ? t("vehicleCategory.modal.renewalReq") : t("vehicleCategory.modal.compCoverage")}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 bg-purple-50 rounded-lg p-3 border border-purple-100">
                                     <span className="text-2xl">🛟</span>
                                     <div>
-                                        <p className="font-semibold text-gray-800">24/7 Support</p>
-                                        <p className="text-xs text-gray-500">Roadside assistance</p>
+                                        <p className="font-semibold text-gray-800">{t("vehicleCategory.modal.support")}</p>
+                                        <p className="text-xs text-gray-500">{t("vehicleCategory.modal.roadside")}</p>
                                     </div>
                                 </div>
                             </div>
@@ -196,7 +235,7 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
                     {features.length > 0 && (
                         <div className="mb-5">
                             <h3 className="text-lg font-bold text-gray-800 mb-3">
-                                Additional Features
+                                {t("vehicleCategory.modal.addFeatures")}
                             </h3>
                             <div className="flex flex-wrap gap-2">
                                 {features.map((feature, index) => (
@@ -218,7 +257,7 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
                             className="flex-1 px-6 py-2.5 font-medium rounded-xl transition-colors"
                             style={{ backgroundColor: '#ffffff', color: '#374151', border: '1px solid #d1d5db' }}
                         >
-                            Close
+                            {t("vehicleCategory.modal.close")}
                         </button>
                         <button
                             onClick={() => onBookNow(vehicle)}
@@ -229,7 +268,7 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onBookNow }) => {
                                 : { backgroundColor: '#ffffff', color: '#9ca3af', cursor: 'not-allowed', border: '1px solid #d1d5db' }
                             }
                         >
-                            {isAvailable ? '🎯 Book Now' : 'Not Available'}
+                            {isAvailable ? t("vehicleCategory.modal.bookThisVehicle") : t("vehicleCategory.card.notAvailable")}
                         </button>
                     </div>
                 </div>

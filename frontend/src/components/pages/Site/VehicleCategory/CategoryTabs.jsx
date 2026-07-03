@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 
 const categoryIcons = {
     'Mini Car': '🚗',
@@ -12,6 +13,7 @@ const categoryIcons = {
 };
 
 const CategoryTabs = ({ categories, selectedCategory, onCategorySelect, loading }) => {
+    const { t } = useTranslation();
     if (loading) {
         return (
             <div className="flex gap-3 overflow-x-auto pb-2">
@@ -29,10 +31,10 @@ const CategoryTabs = ({ categories, selectedCategory, onCategorySelect, loading 
         <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-gray-800">
-                    Browse by Category
+                    {t("vehicleCategory.tabs.browseByCategory")}
                 </h2>
                 <p className="text-sm text-gray-500 hidden md:block">
-                    Click any category to see vehicles
+                    {t("vehicleCategory.tabs.clickToSee")}
                 </p>
             </div>
 
@@ -49,9 +51,9 @@ const CategoryTabs = ({ categories, selectedCategory, onCategorySelect, loading 
                 >
                     <div className="flex flex-col items-center text-center">
                         <span className="text-4xl mb-2">📋</span>
-                        <h3 className="font-bold text-sm">All</h3>
+                        <h3 className="font-bold text-sm">{t("vehicleCategory.tabs.all")}</h3>
                         <p className={`text-xs mt-1 ${!selectedCategory ? 'text-blue-100' : 'text-gray-500'}`}>
-                            View All
+                            {t("vehicleCategory.tabs.viewAll")}
                         </p>
                     </div>
                 </button>
@@ -59,7 +61,20 @@ const CategoryTabs = ({ categories, selectedCategory, onCategorySelect, loading 
                 {categories.map((category) => {
                     const isSelected = selectedCategory?.id === category.id;
                     const icon = categoryIcons[category.name] || '🚗';
-                    const hasImage = Boolean(category.image_url);
+                    
+                    let firstImage = null;
+                    if (Array.isArray(category.images) && category.images.length > 0) {
+                        firstImage = category.images[0];
+                    } else if (category.image_url) {
+                        try {
+                            const parsed = JSON.parse(category.image_url);
+                            if (Array.isArray(parsed) && parsed.length > 0) firstImage = parsed[0];
+                            else firstImage = category.image_url;
+                        } catch {
+                            firstImage = category.image_url;
+                        }
+                    }
+                    const hasImage = Boolean(firstImage);
 
                     return (
                         <button
@@ -77,7 +92,7 @@ const CategoryTabs = ({ categories, selectedCategory, onCategorySelect, loading 
                                 <div className="mb-2 h-16 w-16 overflow-hidden rounded-xl border border-white/30 bg-white/20 shadow-sm flex items-center justify-center">
                                     {hasImage ? (
                                         <img
-                                            src={category.image_url}
+                                            src={firstImage}
                                             alt={category.name}
                                             className="h-full w-full object-cover"
                                         />
@@ -87,7 +102,9 @@ const CategoryTabs = ({ categories, selectedCategory, onCategorySelect, loading 
                                 </div>
                                 <h3 className="font-bold text-sm">{category.name}</h3>
                                 <p className={`text-xs mt-1 ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
-                                    {category.vehicle_count || 0} vehicles
+                                    <Trans i18nKey="vehicleCategory.tabs.vehiclesCount" count={category.vehicle_count || 0}>
+                                        <span className="font-bold">{{count: category.vehicle_count || 0}}</span> vehicles
+                                    </Trans>
                                 </p>
                             </div>
                         </button>

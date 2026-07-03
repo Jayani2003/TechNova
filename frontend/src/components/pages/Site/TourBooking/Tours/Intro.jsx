@@ -1,45 +1,49 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const slides = [
-  {
-    id: 0,
-    tag: "Premium Travel Services",
-    headlineWhite: "Discover",
-    headlineTeal: "Sri Lanka.",
-    sub: "Curated journeys across the pearl of the Indian Ocean.",
-    image: "https://images.unsplash.com/photo-1646894232861-a0ad84f1ad5d?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    isIntro: true,
-  },
-  {
-    id: 1,
-    tag: "Package Tours",
-    headlineWhite: "Golden",
-    headlineTeal: "Triangle.",
-    sub: "Ancient temples, misty highlands & sun-drenched shores — curated journeys through Sri Lanka's most iconic destinations.",
-    image: "https://plus.unsplash.com/premium_photo-1730145749791-28fc538d7203?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    id: 2,
-    tag: "Customized Tours",
-    headlineWhite: "Your Perfect",
-    headlineTeal: "Journey.",
-    sub: "Tell us your dream — we craft a bespoke itinerary with hidden gems, private experiences & expert local guides.",
-    image: "https://images.unsplash.com/photo-1566299597203-225f611b865f?q=80&w=2155&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    id: 3,
-    tag: "Point to Point",
-    headlineWhite: "Seamless",
-    headlineTeal: "Transfers.",
-    sub: "Premium air-conditioned vehicles and professional drivers ensure you arrive at every destination in comfort.",
-    image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-];
+import { useTranslation } from "react-i18next";
 
 const SLIDE_DURATION = 5000;
 
 export default function Intro() {
+  const { t } = useTranslation();
+
+  const slides = [
+    {
+      id: 0,
+      tag: t("tours.intro.slides.0.tag"),
+      headlineWhite: t("tours.intro.slides.0.headlineWhite"),
+      headlineTeal: t("tours.intro.slides.0.headlineTeal"),
+      sub: t("tours.intro.slides.0.sub"),
+      image: "https://images.unsplash.com/photo-1646894232861-a0ad84f1ad5d?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      isIntro: true,
+      labels: t("tours.intro.slides.0.labels", { returnObjects: true })
+    },
+    {
+      id: 1,
+      tag: t("tours.intro.slides.1.tag"),
+      headlineWhite: t("tours.intro.slides.1.headlineWhite"),
+      headlineTeal: t("tours.intro.slides.1.headlineTeal"),
+      sub: t("tours.intro.slides.1.sub"),
+      image: "https://plus.unsplash.com/premium_photo-1730145749791-28fc538d7203?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      id: 2,
+      tag: t("tours.intro.slides.2.tag"),
+      headlineWhite: t("tours.intro.slides.2.headlineWhite"),
+      headlineTeal: t("tours.intro.slides.2.headlineTeal"),
+      sub: t("tours.intro.slides.2.sub"),
+      image: "https://images.unsplash.com/photo-1566299597203-225f611b865f?q=80&w=2155&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      id: 3,
+      tag: t("tours.intro.slides.3.tag"),
+      headlineWhite: t("tours.intro.slides.3.headlineWhite"),
+      headlineTeal: t("tours.intro.slides.3.headlineTeal"),
+      sub: t("tours.intro.slides.3.sub"),
+      image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+  ];
+
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState(0);
   const startTimeRef = useRef(Date.now());
@@ -114,9 +118,9 @@ export default function Intro() {
               </p>
 
               {/* Pills only on intro slide */}
-              {slide.isIntro && (
+              {slide.isIntro && slide.labels && (
                 <div className="flex flex-wrap justify-center gap-2">
-                  {["Package Tours", "Customized Tours", "Point to Point"].map((label) => (
+                  {slide.labels.map((label) => (
                     <span
                       key={label}
                       className="px-4 py-1 rounded-full text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5]/20 border border-[#00b0a5]/50 cursor-pointer hover:bg-[#00b0a5]/40 hover:border-[#00b0a5] transition-all duration-200"

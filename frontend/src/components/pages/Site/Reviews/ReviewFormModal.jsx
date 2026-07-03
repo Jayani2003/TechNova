@@ -1,9 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ReviewForm from './ReviewForm';
+import { useTranslation } from "react-i18next";
 
 // ── Auth gate shown when user is not logged in ───────────────
-const AuthGate = ({ onClose }) => (
+const AuthGate = ({ onClose, t }) => (
   <>
     <style>{`
       .rvm-auth {
@@ -61,12 +62,12 @@ const AuthGate = ({ onClose }) => (
 
     <div className="rvm-auth">
       <div className="rvm-auth-icon">🔐</div>
-      <div className="rvm-auth-title">Log in to write a review</div>
+      <div className="rvm-auth-title">{t("reviews.modal.loginTitle")}</div>
       <div className="rvm-auth-sub">
-        Share your Sri Lanka experience with fellow travellers. Sign in to get started.
+        {t("reviews.modal.loginSub")}
       </div>
       <div className="rvm-auth-note">
-        <strong>✦ Note:</strong> Reviews are only available once our team marks your tour status as <strong>Completed</strong>. You will be notified when you can leave a review.
+        <strong>{t("reviews.modal.note1")}</strong> {t("reviews.modal.note2")} <strong>{t("reviews.modal.note3")}</strong>{t("reviews.modal.note4")}
       </div>
       <div className="rvm-auth-btns">
         <Link
@@ -74,7 +75,7 @@ const AuthGate = ({ onClose }) => (
           className="rvm-login-btn"
           onClick={onClose}
         >
-          Log In
+          {t("reviews.modal.loginBtn")}
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -84,7 +85,7 @@ const AuthGate = ({ onClose }) => (
           className="rvm-signup-btn"
           onClick={onClose}
         >
-          Create Account
+          {t("reviews.modal.createBtn")}
         </Link>
       </div>
     </div>
@@ -92,7 +93,9 @@ const AuthGate = ({ onClose }) => (
 );
 
 // ── Modal shell ──────────────────────────────────────────────
-const ReviewFormModal = ({ isOpen, isLoggedIn, reviewableTours, onClose, onSubmit }) => (
+const ReviewFormModal = ({ isOpen, isLoggedIn, reviewableTours, onClose, onSubmit }) => {
+  const { t } = useTranslation();
+  return (
   <>
     <style>{`
       .rvm-backdrop {
@@ -166,9 +169,9 @@ const ReviewFormModal = ({ isOpen, isLoggedIn, reviewableTours, onClose, onSubmi
             {/* Header */}
             <div className="rvm-header">
               <div className="rvm-header-left">
-                <span className="rvm-header-tag">✦ Share Your Experience</span>
+                <span className="rvm-header-tag">{t("reviews.modal.tag")}</span>
                 <div className="rvm-header-title">
-                  {isLoggedIn ? 'Write a Review' : 'Login Required'}
+                  {isLoggedIn ? t("reviews.modal.writeTitle") : t("reviews.modal.reqTitle")}
                 </div>
               </div>
               <button className="rvm-close" onClick={onClose}>✕</button>
@@ -179,7 +182,7 @@ const ReviewFormModal = ({ isOpen, isLoggedIn, reviewableTours, onClose, onSubmi
             <div className="rvm-body">
               {isLoggedIn
                 ? <ReviewForm reviewableTours={reviewableTours} onSubmit={onSubmit} onCancel={onClose} />
-                : <AuthGate onClose={onClose} />
+                : <AuthGate onClose={onClose} t={t} />
               }
             </div>
           </motion.div>
@@ -187,6 +190,7 @@ const ReviewFormModal = ({ isOpen, isLoggedIn, reviewableTours, onClose, onSubmi
       )}
     </AnimatePresence>
   </>
-);
+  );
+};
 
 export default ReviewFormModal;

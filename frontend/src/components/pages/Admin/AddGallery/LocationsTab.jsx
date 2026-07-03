@@ -47,15 +47,118 @@ export default function LocationsTab({ locations, onToast, onCreateLocation, onU
     setShowForm(true);
   };
 
+  const normalizeProvince = (regionName) => {
+    if (!regionName) return "";
+    const name = regionName.toLowerCase();
+    
+    if (name.includes("western")) return "Western Province";
+    if (name.includes("central") && !name.includes("north")) return "Central Province";
+    if (name.includes("southern")) return "Southern Province";
+    if (name.includes("eastern")) return "Eastern Province";
+    if (name.includes("sabaragamuwa")) return "Sabaragamuwa";
+    if (name.includes("uva")) return "Uva Province";
+    if (name.includes("north central")) return "North Central";
+    if (name.includes("northern")) return "Northern Province";
+    if (name.includes("north western")) return "North Western";
+    
+    return regionName;
+  };
+
   const handleMapPin = ({ lat, lng, name, region }) => {
     setMapPoint({ lat, lng });
+    const normalized = normalizeProvince(region);
     setForm((f) => ({
       ...f,
       name: name || f.name,
-      region: region || f.region,
+      region: normalized || f.region,
       lat: String(lat),
       lng: String(lng),
     }));
+  };
+
+  const handleLatChange = (val) => {
+    setForm((f) => ({ ...f, lat: val }));
+    const l = parseFloat(val);
+    if (!isNaN(l)) {
+      setMapPoint((prev) => ({ lat: l, lng: prev ? prev.lng : 80.7718 }));
+    }
+  };
+
+  const handleLngChange = (val) => {
+    setForm((f) => ({ ...f, lng: val }));
+    const l = parseFloat(val);
+    if (!isNaN(l)) {
+      setMapPoint((prev) => ({ lat: prev ? prev.lat : 7.8731, lng: l }));
+    }
+  };
+
+  const handleCoordsBlur = async () => {
+    const latNum = parseFloat(form.lat);
+    const lngNum = parseFloat(form.lng);
+    if (isNaN(latNum) || isNaN(lngNum)) return;
+
+    if (latNum < 5.0 || latNum > 10.5 || lngNum < 79.0 || lngNum > 82.5) {
+      onToast("Coordinates are outside Sri Lanka bounding area.");
+      return;
+    }
+
+    try {
+      setMapPoint({ lat: latNum, lng: lngNum });
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(latNum)}&lon=${encodeURIComponent(lngNum)}&zoom=12&addressdetails=1`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        const address = data?.address || {};
+        const rawName = data?.name || address?.tourism || address?.city || address?.town || address?.village || "";
+        const rawRegion = address?.state || address?.province || address?.state_district || "";
+        const province = normalizeProvince(rawRegion);
+        
+        setForm((f) => ({
+          ...f,
+          name: rawName ? String(rawName).split(",")[0].trim() : f.name,
+          region: province || f.region
+        }));
+        
+        onToast(`Verified coordinates. Auto-detected province: ${province || "Unknown"}`);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleNameBlur = async () => {
+    const query = form.name.trim();
+    if (!query) return;
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ", Sri Lanka")}&limit=1&addressdetails=1`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const result = data[0];
+          const latVal = parseFloat(result.lat);
+          const lngVal = parseFloat(result.lon);
+          
+          const rawRegion = result.address?.state || result.address?.province || result.address?.state_district || "";
+          const province = normalizeProvince(rawRegion);
+
+          setMapPoint({ lat: latVal, lng: lngVal });
+          setForm((f) => ({
+            ...f,
+            lat: String(latVal.toFixed(6)),
+            lng: String(lngVal.toFixed(6)),
+            region: province || f.region,
+          }));
+
+          onToast(`Found "${query}" on map! Auto-detected province: ${province || "Unknown"}`);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const save = async () => {
@@ -204,6 +307,7 @@ export default function LocationsTab({ locations, onToast, onCreateLocation, onU
                     <input
                       value={form.name}
                       onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                      onBlur={handleNameBlur}
                       className="w-full px-3 py-2 rounded-xl text-xs bg-stone-50 border border-stone-200 outline-none focus:border-teal-600 focus:bg-white text-stone-800 font-semibold"
                       placeholder="e.g. Knuckles Forest Range"
                     />
@@ -223,13 +327,15 @@ export default function LocationsTab({ locations, onToast, onCreateLocation, onU
                       ))}
                       <option value="North Central">North Central Province</option>
                       <option value="Northern Province">Northern Province</option>
+                      <option value="North Western">North Western Province</option>
                     </select>
                   </div>
                   <div>
                     <label className="text-xs font-bold text-stone-600 mb-1 block">Latitude (°N)</label>
                     <input
                       value={form.lat}
-                      onChange={(e) => setForm((f) => ({ ...f, lat: e.target.value }))}
+                      onChange={(e) => handleLatChange(e.target.value)}
+                      onBlur={handleCoordsBlur}
                       className="w-full px-3 py-2 rounded-xl text-xs bg-stone-50 border border-stone-200 outline-none text-stone-800 font-mono"
                       placeholder="e.g. 7.4500"
                     />
@@ -238,7 +344,8 @@ export default function LocationsTab({ locations, onToast, onCreateLocation, onU
                     <label className="text-xs font-bold text-stone-600 mb-1 block">Longitude (°E)</label>
                     <input
                       value={form.lng}
-                      onChange={(e) => setForm((f) => ({ ...f, lng: e.target.value }))}
+                      onChange={(e) => handleLngChange(e.target.value)}
+                      onBlur={handleCoordsBlur}
                       className="w-full px-3 py-2 rounded-xl text-xs bg-stone-50 border border-stone-200 outline-none text-stone-800 font-mono"
                       placeholder="e.g. 80.7900"
                     />

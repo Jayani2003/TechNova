@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../../context/AuthContext';
 import DesktopNav from './DesktopNav';
 import MobileNav from './MobileNav';
+import NotificationBell from './NotificationBell';
 import logo from '../../assets/logo4.png';
 
 const FLAGS = {
@@ -69,6 +70,9 @@ const Navbar = () => {
             </div>
           </div>
         </div>
+
+      {/* Weather notifications — logged-in customers only */}
+      {user && !isAdmin && <NotificationBell />}
 
       {/* Authentication Section */}
       {user ? (

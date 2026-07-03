@@ -289,7 +289,9 @@
       "loginBtn": "Log In to Write a Review"
     },
     "stats": {
-      "summary": "Review summary",
+      "summary": "Average rating",
+      "basedOn": "Based on",
+      "travelers": "travelers",
       "total": "total reviews",
       "s1": "one star reviews",
       "s2": "two star reviews",
@@ -481,6 +483,8 @@
     "card": {
       "more": "more",
       "days": "Days",
+      "available": "Available",
+      "unavailable": "Unavailable",
       "bookBtn": "Book Now",
       "detailsBtn": "Details"
     },

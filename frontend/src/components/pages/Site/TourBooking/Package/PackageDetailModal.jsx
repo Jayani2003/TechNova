@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { buildApiUrl } from '../../../../../config/api';
 import PackageCard from './PackageCard';
 import { useTranslation } from "react-i18next";
+import LocationWeather from "./LocationWeather";
 
 const TYPE_ICONS = {
   'Beach Side':          '🏖️',
@@ -441,6 +442,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
                           {dest.name}
                         </div>
                         <div className="pdm-dest-desc">{dest.description}</div>
+                        <LocationWeather locationName={dest.name} />
 
                         {/* Activities */}
                         {activities.length > 0 && (

@@ -34,7 +34,10 @@ const initialData = {
   luggageCustomCount: 0,
   luggageCustomItems: [],
   customerName: "",
-  customerPhone: "",
+  contactPlatform:  "mobile",
+  contactNumber:   "",
+  contactPlatform2: "",
+  contactNumber2:  "",
   emergencyName: "",
   emergencyPhone: "",
   emergencyRelationship: "",
@@ -124,7 +127,7 @@ const validateStep = (step, data) => {
   switch (step) {
     case 0: return data.startLocation.trim() && data.endLocation.trim() && data.startDate && data.endDate && data.pickupTime;
     case 1: return data.noOfAdults >= 1 && data.categoryId;
-    case 2: return data.customerName.trim() && data.customerPhone.trim();
+    case 2: return data.customerName.trim() && (data.contactNumber || '').trim();
     case 3: return true;
     default: return false;
   }
@@ -190,7 +193,10 @@ const PointToPoint = () => {
         luggageCustomCount: data.luggageCustomCount || 0,
         luggageCustomItems: data.luggageCustomItems || [],
         customerName: data.customerName,
-        customerPhone: data.customerPhone,
+        contactPlatform:  data.contactPlatform  || "whatsapp",
+        contactNumber:    data.contactNumber,
+        contactPlatform2: data.contactPlatform2 || null,
+        contactNumber2:   data.contactNumber2   || null,
         customerEmail: user.email,
         emergencyName: data.emergencyName,
         emergencyPhone: data.emergencyPhone,

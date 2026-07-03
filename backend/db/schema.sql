@@ -107,6 +107,7 @@ CREATE TABLE package (
     days        ENUM ('7 DAYS','14 DAYS','21 DAYS','28 DAYS') NOT NULL,
     description TEXT,
     image_url   VARCHAR(255),
+    availability_status ENUM('AVAILABLE','UNAVAILABLE') NOT NULL DEFAULT 'AVAILABLE',
     guid_id     INT NULL,
     FOREIGN KEY (guid_id) REFERENCES guid(guid_id) ON DELETE SET NULL
 );
@@ -124,7 +125,10 @@ CREATE TABLE booking (
     booking_id     INT AUTO_INCREMENT PRIMARY KEY,
     user_id        INT NOT NULL,
     customer_name  VARCHAR(100) NOT NULL,
-    customer_phone VARCHAR(20) NOT NULL,
+    contact_platform  VARCHAR(30)  NOT NULL DEFAULT 'mobile',
+    contact_number    VARCHAR(150) NOT NULL,
+    contact_platform2 VARCHAR(30)  NULL,
+    contact_number2   VARCHAR(150) NULL,
     tour_type      ENUM('P2P','PACKAGE','CUSTOM') NOT NULL,
     category_id    INT NOT NULL,
     vehicle_id     INT NULL,

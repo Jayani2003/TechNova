@@ -12,13 +12,31 @@ async function main() {
 
         console.log('Connected to database.');
 
-        await connection.execute(`
-            ALTER TABLE vehicle_category
-            MODIFY COLUMN passenger_capacity VARCHAR(50),
-            MODIFY COLUMN luggage_capacity VARCHAR(50);
-        `);
+        const columnsToAdd = [
+            { name: 'passenger_capacity', sql: 'VARCHAR(50)' },
+            { name: 'luggage_capacity', sql: 'VARCHAR(50)' },
+            { name: 'best_for', sql: 'VARCHAR(255)' },
+            { name: 'comfort_level', sql: 'VARCHAR(100)' },
+            { name: 'ac_available', sql: 'BOOLEAN DEFAULT FALSE' },
+            { name: 'ideal_trip_types', sql: 'VARCHAR(255)' },
+        ];
 
-        console.log('Columns modified successfully.');
+        const [existingColumns] = await connection.execute(
+            `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'vehicle_category'`,
+            [process.env.DB_NAME || 'tours']
+        );
+
+        const existingNames = new Set(existingColumns.map(col => col.COLUMN_NAME));
+        for (const column of columnsToAdd) {
+            if (!existingNames.has(column.name)) {
+                await connection.execute(
+                    `ALTER TABLE vehicle_category ADD COLUMN ${column.name} ${column.sql}`
+                );
+                console.log(`Added column ${column.name}`);
+            }
+        }
+
+        console.log('Columns updated successfully.');
         await connection.end();
     } catch (error) {
         console.error('Error:', error);

@@ -6,14 +6,20 @@ import {
 } from "lucide-react";
 import { StatusChip, TourTypeChip } from "./BookingChips";
 import { VEHICLE_LABELS, TOUR_TYPE_CFG, formatPhone } from "./BookingConstants";
+import { api } from "../../../../config/api";
 import { useBookings } from "../../../../context/BookingsContext";
 
 export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpdateStatus }) {
   const [price,  setPrice]  = useState(booking.quotedPrice ?? "");
-  const [vName,  setVName]  = useState(booking.assignedVehicle?.name ?? "");
   const [vPlate, setVPlate] = useState(booking.assignedVehicle?.plateNumber ?? "");
   const [vType,  setVType]  = useState(booking.assignedVehicle?.type ?? (booking.categoryName || VEHICLE_LABELS[booking.categoryId] || ""));
+  const [selectedCategoryId, setSelectedCategoryId] = useState(booking.categoryId ? String(booking.categoryId) : "");
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [err,    setErr]    = useState("");
+  const [vehicles, setVehicles] = useState([]);
+  const [vehiclesLoading, setVehiclesLoading] = useState(false);
+  const [selectedVehicleId, setSelectedVehicleId] = useState(booking.vehicleId ? String(booking.vehicleId) : "");
 
   const { getPaymentsForBooking, recordPayment } = useBookings();
   const [paymentsData, setPaymentsData] = useState(null);
@@ -59,12 +65,102 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
       .finally(() => setPaymentsLoading(false));
   };
 
+  const getBookingDays = () => {
+    if (booking.totalDays && Number(booking.totalDays) > 0) {
+      return Number(booking.totalDays);
+    }
+    if (booking.startDate && booking.endDate) {
+      const start = new Date(booking.startDate);
+      const end = new Date(booking.endDate);
+      const diff = Math.round((end - start) / (1000 * 60 * 60 * 24));
+      return diff > 0 ? diff : 1;
+    }
+    return 1;
+  };
+
+  const loadVehicles = async (categoryId) => {
+    if (!categoryId) {
+      setVehicles([]);
+      return;
+    }
+    setVehiclesLoading(true);
+    try {
+      const data = await api.get(`/vehicles/category/${categoryId}`);
+      setVehicles(data.data || []);
+      if (booking.vehicleId) setSelectedVehicleId(booking.vehicleId);
+    } catch (err) {
+      console.error('Error loading vehicles:', err);
+      setVehicles([]);
+    } finally {
+      setVehiclesLoading(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    setCategoriesLoading(true);
+    try {
+      const data = await api.get('/vehicles/categories');
+      setCategories(data.data || []);
+    } catch (err) {
+      console.error('Error loading categories:', err);
+      setCategories([]);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
   useEffect(() => {
+    setPrice(booking.quotedPrice ?? "");
+    setVPlate(booking.assignedVehicle?.plateNumber ?? "");
+    setVType(booking.assignedVehicle?.type ?? (booking.categoryName || VEHICLE_LABELS[booking.categoryId] || ""));
+    setSelectedCategoryId(booking.categoryId ? String(booking.categoryId) : "");
+    setSelectedVehicleId(booking.vehicleId ? String(booking.vehicleId) : "");
+
     loadPayments();
+    loadCategories();
+    loadVehicles(booking.categoryId);
     setRecNotes("");
     setRecError("");
     setRecSuccess("");
-  }, [booking.id]);
+  }, [booking]);
+
+  useEffect(() => {
+    if (categories.length) {
+      if (!selectedCategoryId && booking.categoryName) {
+        const match = categories.find(c => String(c.name).trim().toLowerCase() === String(booking.categoryName).trim().toLowerCase());
+        if (match) {
+          setSelectedCategoryId(String(match.id));
+          setVType(match.name || booking.categoryName);
+          return;
+        }
+      }
+
+      if (selectedCategoryId) {
+        const selectedCategory = categories.find(c => String(c.id) === String(selectedCategoryId));
+        if (selectedCategory) {
+          setVType(selectedCategory.name);
+        }
+      }
+    }
+  }, [categories, selectedCategoryId, booking.categoryName]);
+
+  useEffect(() => {
+    if (selectedCategoryId) {
+      loadVehicles(selectedCategoryId);
+    } else {
+      setVehicles([]);
+    }
+  }, [selectedCategoryId]);
+
+  useEffect(() => {
+    if (selectedVehicleId && vehicles.length) {
+      const selectedVehicle = vehicles.find((v) => String(v.id) === String(selectedVehicleId));
+      const days = getBookingDays();
+      if (selectedVehicle && selectedVehicle.price_per_day != null) {
+        setPrice((Number(selectedVehicle.price_per_day) * days).toFixed(2));
+      }
+    }
+  }, [selectedVehicleId, vehicles]);
 
   const handleRecordPayment = async (e) => {
     e.preventDefault();
@@ -99,9 +195,12 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
   const handleSendQuote = () => {
     const p = parseFloat(price);
     if (!price || isNaN(p) || p <= 0) { setErr("Enter a valid price"); return; }
-    if (!vName.trim())  { setErr("Enter vehicle name"); return; }
+    if (!selectedVehicleId) { setErr("Select a vehicle"); return; }
+    const selectedVehicle = vehicles.find((v) => String(v.id) === String(selectedVehicleId));
+    if (!selectedVehicle) { setErr("Selected vehicle not found"); return; }
     if (!vPlate.trim()) { setErr("Enter plate number"); return; }
-    onSetQuote(booking.id, p, { name: vName.trim(), plateNumber: vPlate.trim(), type: vType.trim() });
+    const vehicleName = selectedVehicle.vehicle_name || selectedVehicle.name || "";
+    onSetQuote(booking.id, p, { id: selectedVehicle.id, name: vehicleName, plateNumber: vPlate.trim(), type: vType.trim() });
     setErr("");
   };
 
@@ -250,10 +349,10 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
           {/* ── Quote + vehicle assignment (PENDING or QUOTED) ── */}
           {(booking.status === "PENDING" || booking.status === "QUOTED") && (
             <div style={{ background: dark ? "rgba(99,102,241,0.07)" : "rgba(99,102,241,0.04)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
-              <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 800, color: "#6366f1" }}>💰 Set Price & Assign Vehicle</p>
+              <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 800, color: "#6366f1" }}>Set Price & Assign Vehicle</p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Price (LKR) *</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Price (USD) *</label>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, background: card, border: `1px solid ${border}`, borderRadius: 10, padding: "9px 12px" }}>
                     <Banknote size={14} color="#00b0a5" />
                     <input type="number" value={price} onChange={e => { setPrice(e.target.value); setErr(""); }} placeholder="0.00"
@@ -261,12 +360,46 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                   </div>
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Vehicle Type *</label>
-                  <input value={vType} onChange={e => { setVType(e.target.value); setErr(""); }} placeholder="e.g. SUV, Van" style={inputStyle} />
+                  <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Vehicle Category *</label>
+                  <select value={selectedCategoryId} onChange={e => {
+                    const categoryId = e.target.value;
+                    setSelectedCategoryId(categoryId);
+                    setErr("");
+                    const category = categories.find(c => String(c.id) === String(categoryId));
+                    if (category) {
+                      setVType(category.name);
+                    } else {
+                      setVType(booking.categoryName || VEHICLE_LABELS[booking.categoryId] || "");
+                    }
+                    setSelectedVehicleId("");
+                    setVPlate("");
+                    setPrice(booking.quotedPrice ?? "");
+                  }} style={inputStyle}>
+                    <option value="">{categoriesLoading ? "Loading categories..." : "Select vehicle category"}</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>{category.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Vehicle Name *</label>
-                  <input value={vName} onChange={e => { setVName(e.target.value); setErr(""); }} placeholder="e.g. Toyota Hiace" style={inputStyle} />
+                  <select value={selectedVehicleId} onChange={e => {
+                    const vehicleId = e.target.value;
+                    setSelectedVehicleId(vehicleId);
+                    setErr("");
+                    const vehicle = vehicles.find(v => String(v.id) === String(vehicleId));
+                    if (vehicle) {
+                      setVPlate(vehicle.vehicle_number || vehicle.license_plate || "");
+                      setVType(vehicle.category_name || booking.categoryName || VEHICLE_LABELS[booking.categoryId] || "");
+                    }
+                  }} style={inputStyle}>
+                    <option value="">{vehiclesLoading ? "Loading vehicles..." : "Select a vehicle"}</option>
+                    {vehicles.map(v => (
+                      <option key={v.id} value={v.id}>
+                        {v.vehicle_name ? `${v.vehicle_name} (${v.vehicle_number || v.license_plate || 'No plate'})` : `${v.vehicle_number || v.license_plate || 'Unnamed vehicle'}`}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Plate Number *</label>

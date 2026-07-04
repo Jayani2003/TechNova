@@ -48,13 +48,22 @@ export default function ApproveBookings() {
   // Apply filters
   const filtered = bookings.filter(b => {
     const q = search.toLowerCase();
+    const bookingId = b.id != null ? String(b.id).toLowerCase() : "";
+    const bookingRef = b.booking_id != null ? String(b.booking_id).toLowerCase() : "";
+    const customerName = b.customerName?.toLowerCase() || "";
+    const pickupLocation = (b.pickupLocation || b.startLocation || "").toLowerCase();
+    const dropoffLocation = (b.dropoffLocation || b.endLocation || "").toLowerCase();
+    const packageName = (b.packageName || "").toLowerCase();
+    const destination = (b.destination || "").toLowerCase();
+
     const matchSearch = !q ||
-      b.id?.toLowerCase().includes(q) ||
-      b.customerName?.toLowerCase().includes(q) ||
-      (b.pickupLocation || b.startLocation || "").toLowerCase().includes(q) ||
-      (b.dropoffLocation || b.endLocation || "").toLowerCase().includes(q) ||
-      (b.packageName || "").toLowerCase().includes(q) ||
-      (b.destination || "").toLowerCase().includes(q);
+      bookingId.includes(q) ||
+      bookingRef.includes(q) ||
+      customerName.includes(q) ||
+      pickupLocation.includes(q) ||
+      dropoffLocation.includes(q) ||
+      packageName.includes(q) ||
+      destination.includes(q);
     const matchStatus = statusFilter === "ALL" || b.status === statusFilter;
     const matchType   = typeFilter   === "ALL" || b.tourType === typeFilter;
     return matchSearch && matchStatus && matchType;

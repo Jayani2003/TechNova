@@ -10,8 +10,6 @@ import {
   MessageCircle,
 } from "lucide-react";
 import {FaTripadvisor} from "react-icons/fa";
-import { useTranslation } from "react-i18next";
-
 const InfoItem = ({ href, target, icon, title, lines, delay }) => (
   <motion.a
     href={href}
@@ -35,7 +33,7 @@ const InfoItem = ({ href, target, icon, title, lines, delay }) => (
 );
 
 const ContactInfo = () => {
-  const { t } = useTranslation();
+  
 
   return (
   <div className="space-y-4">
@@ -48,23 +46,23 @@ const ContactInfo = () => {
     >
       <div className="mb-4">
         <span className="inline-block px-3 py-1 mb-2 text-xs font-semibold tracking-widest text-white uppercase rounded-full" style={{ backgroundColor: "#00b0a5" }}>
-          {t("contact.info.badge")}
+          {"Contact"}
         </span>
-        <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">{t("contact.info.getInTouch")}</h2>
+        <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">{"Get in Touch"}</h2>
       </div>
 
       <InfoItem
         href="https://share.google/xOzAOaynrrGNRAfcD"
         target="_blank"
         icon={<MapPin className="w-5 h-5" />}
-        title={t("contact.info.ourLocation")}
-        lines={[t("contact.info.locationLine1"), t("contact.info.locationLine2")]}
+        title={"Our Location"}
+        lines={["No.214, Kirinda Hospital Road,", "Kirinda, Tissamaharama, Sri Lanka."]}
         delay={0.1}
       />
       <InfoItem
         href="tel:+94778619582"
         icon={<Phone className="w-5 h-5" />}
-        title={t("contact.info.phone")}
+        title={"Phone"}
         lines={["+94 77 861 9582"]}
         delay={0.2}
       />
@@ -72,21 +70,21 @@ const ContactInfo = () => {
         href="https://wa.me/94778619582?text=Hello%20Ceylon%20Best%20Tours%2C%20I%20would%20like%20to%20inquire%20about%20your%20services"
         target="_blank"
         icon={<MessageCircle className="w-5 h-5" />}
-        title={t("contact.info.whatsapp")}
+        title={"WhatsApp"}
         lines={["+94 77 861 9582"]}
         delay={0.3}
       />
       <InfoItem
         href="mailto:ceylonbesttours05@gmail.com"
         icon={<Mail className="w-5 h-5" />}
-        title={t("contact.info.email")}
+        title={"Email"}
         lines={["ceylonbesttours05@gmail.com"]}
         delay={0.4}
       />
       <InfoItem
         icon={<Clock className="w-5 h-5" />}
-        title={t("contact.info.businessHours")}
-        lines={[t("contact.info.hours")]}
+        title={"Business Hours"}
+        lines={["24/7 Monday - Sunday"]}
         delay={0.5}
       />
     </motion.div>
@@ -99,8 +97,8 @@ const ContactInfo = () => {
       className="rounded-2xl border p-6"
       style={{ backgroundColor: "#00b0a510", borderColor: "#00b0a530" }}
     >
-      <h3 className="font-extrabold text-slate-800 tracking-tight mb-1">{t("contact.info.emergency")}</h3>
-      <p className="text-sm text-slate-600 mb-3">{t("contact.info.emergencyDesc")}</p>
+      <h3 className="font-extrabold text-slate-800 tracking-tight mb-1">{"Emergency Assistance"}</h3>
+      <p className="text-sm text-slate-600 mb-3">{"24/7 roadside assistance for all our customers."}</p>
       <a
         href="tel:+94778619582"
         className="flex items-center gap-2 font-semibold transition-colors"
@@ -120,7 +118,7 @@ const ContactInfo = () => {
       transition={{ duration: 0.5, delay: 0.3 }}
       className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6"
     >
-      <h3 className="font-extrabold text-slate-800 tracking-tight mb-4">{t("contact.info.followUs")}</h3>
+      <h3 className="font-extrabold text-slate-800 tracking-tight mb-4">{"Follow Us"}</h3>
       <div className="flex gap-3">
         <a
           href="https://www.facebook.com/ceylonbesttours"

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Quote, ChevronRight } from 'lucide-react'; // Added ChevronRight
-import { useTranslation } from 'react-i18next';
-
 const reviews = [
   { id: 1, name: "Michael Chen", date: "2026-03-01", service: "Customized Tour", rating: 5, text: "Outstanding! This was the highlight of our Sri Lanka trip. Highly recommended!" },
   { id: 2, name: "David Martinez", date: "2026-02-28", service: "Vehicle Rental - Toyota Prius", rating: 5, text: "Amazing experience! Best car rental service in Sri Lanka. Professional drivers and clean vehicles." },
@@ -12,7 +10,7 @@ const reviews = [
 ];
 
 const ReviewSliderDark = () => {
-  const { t } = useTranslation();
+  
   const [index, setIndex] = useState(0);
   const [itemsToShow, setItemsToShow] = useState(3);
   const [isPaused, setIsPaused] = useState(false);
@@ -51,10 +49,10 @@ const ReviewSliderDark = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-4">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-center md:text-left">
-            {t('home.reviews.whatOur')} <span className="text-[#00b0a5]">{t('home.reviews.customers')}</span> {t('home.reviews.say')}
+            {"What Our"} <span className="text-[#00b0a5]">{"Customers"}</span> {"Say"}
           </h2>
           <div className="hidden md:block h-[1px] flex-grow mx-8 bg-gray-800"></div>
-          <p className="text-gray-500 text-sm font-medium uppercase tracking-[0.2em]">{t('home.reviews.trustedReviews')}</p>
+          <p className="text-gray-500 text-sm font-medium uppercase tracking-[0.2em]">{"Trusted Reviews"}</p>
         </div>
 
         {/* Slider Area */}
@@ -136,7 +134,7 @@ const ReviewSliderDark = () => {
             href="/reviews" 
             className="group flex items-center gap-2 px-8 py-4 border border-[#00b0a5]/30 rounded-full text-white font-bold hover:bg-[#00b0a5] hover:border-[#00b0a5] transition-all duration-300 shadow-xl hover:shadow-[#00b0a5]/20"
           >
-            <span>{t('home.reviews.seeMoreReviews')}</span>
+            <span>{"SEE MORE REVIEWS"}</span>
             <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </a>
         </div>

@@ -1,9 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from "react-i18next";
-
 const Packagec = () => {
-  const { t } = useTranslation();
+  
   const cardRef = useRef(null);
   useEffect(() => {
     const c = cardRef.current; if (!c) return;
@@ -185,7 +183,7 @@ const Packagec = () => {
           </div> */}
 
           <div className="pkg-img-wrap">
-  <span className="pkg-badge">{t("tours.package.badge")}</span>
+  <span className="pkg-badge">{"Tour Packages"}</span>
   <img className="pkg-img"
     src="https://images.unsplash.com/photo-1701857438297-a162c2584739?q=80&w=2072&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     alt="Tour Packages"
@@ -193,7 +191,20 @@ const Packagec = () => {
   <div className="pkg-overlay" />
   <div className="pkg-shimmer" />
   <div className="pkg-stats">
-    {t("tours.package.stats", { returnObjects: true }).map(([n, l]) => (
+    {[
+  [
+    "12+",
+    "Packages"
+  ],
+  [
+    "5★",
+    "Top Rated"
+  ],
+  [
+    "100%",
+    "Guided"
+  ]
+].map(([n, l]) => (
       <div key={l} className="pkg-stat">
         <span className="pkg-stat-num">{n}</span>
         <span className="pkg-stat-label">{l}</span>
@@ -204,11 +215,11 @@ const Packagec = () => {
 
           {/* Content */}
           <div className="pkg-content">
-            <span className="pkg-eyebrow">{t("tours.package.eyebrow")}</span>
-            <h2 className="pkg-title">{t("tours.package.title1")} <span className="teal">{t("tours.package.title2")}</span></h2>
+            <span className="pkg-eyebrow">{"Handpicked Journeys"}</span>
+            <h2 className="pkg-title">{"Tour"} <span className="teal">{"Packages."}</span></h2>
             <div className="pkg-rule" />
             <p className="pkg-desc">
-              {t("tours.package.desc")}
+              {"Choose from our expertly crafted itineraries. From the Hill Country mist to the Golden Beaches, our fixed packages offer the best value with a dedicated driver."}
             </p>
             {/* <ul className="pkg-features">
               {['Dedicated personal driver', 'All-inclusive pricing', 'Flexible departure times'].map(f => (
@@ -216,7 +227,11 @@ const Packagec = () => {
               ))}
             </ul> */}
              <div className="cst-steps">
-              {t("tours.package.steps", { returnObjects: true }).map((s, i, arr) => (
+              {[
+  "Pick a Package",
+  "Set Dates",
+  "Start Itinerary"
+].map((s, i, arr) => (
                 <div key={s} className="cst-step">
                   {i < arr.length - 1 && <div className="cst-step-line" />}
                   <div className="cst-step-num">{i + 1}</div>
@@ -225,7 +240,7 @@ const Packagec = () => {
               ))}
             </div>
             <Link to="/tour-booking/package" className="pkg-btn">
-              <span>{t("tours.package.btn")}</span>
+              <span>{"Explore Packages"}</span>
               <svg className="pkg-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>

@@ -1,25 +1,19 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import CategoryHero from './CategoryHero';
-import CategoryShowcase from './CategoryShowcase';
-import VehicleFilters from './VehicleFilters';
+import CategoryTabs from './CategoryTabs';
+import VehicleGrid from './VehicleGrid';
+import VehicleDetailsModal from './VehicleDetailsModal';
 import { categoryService, vehicleService } from '../../../../services/vehicleService';
 
 const OurFleet = () => {
     // State
     const [categories, setCategories] = useState([]);
     const [vehicles, setVehicles] = useState([]);
+    const [selectedVehicle, setSelectedVehicle] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState(null);
     // Loading states
     const [categoriesLoading, setCategoriesLoading] = useState(true);
-
-    // Filter state
-    const [filters, setFilters] = useState({
-        search: '',
-        passenger_capacity: '',
-        luggage_capacity: '',
-        trip_type: '',
-        comfort_level: '',
-        sortBy: 'default',
-    });
+    const [vehiclesLoading, setVehiclesLoading] = useState(true);
 
     // Fetch categories
     const fetchCategories = useCallback(async () => {
@@ -39,13 +33,15 @@ const OurFleet = () => {
     // Fetch vehicles
     const fetchVehicles = useCallback(async () => {
         try {
+            setVehiclesLoading(true);
             const response = await vehicleService.getAll();
             if (response.success) {
-                const userVisibleVehicles = (response.data || []).filter((vehicle) => !vehicle.insurance_expired);
-                setVehicles(userVisibleVehicles);
+                setVehicles(response.data || []);
             }
         } catch (error) {
             console.error('Error fetching vehicles:', error);
+        } finally {
+            setVehiclesLoading(false);
         }
     }, []);
 
@@ -57,77 +53,27 @@ const OurFleet = () => {
 
 
 
-    // Filter categories based on the same filters
-    const filteredCategories = useMemo(() => {
-        let result = [...categories];
-
-        if (filters.search) {
-            const searchLower = filters.search.toLowerCase();
-            result = result.filter((cat) => {
-                return (
-                    (cat.name && cat.name.toLowerCase().includes(searchLower)) ||
-                    (cat.ideal_trip_types && cat.ideal_trip_types.toLowerCase().includes(searchLower)) ||
-                    (cat.best_for && cat.best_for.toLowerCase().includes(searchLower)) ||
-                    (cat.description && cat.description.toLowerCase().includes(searchLower))
-                );
-            });
+    const filteredVehicles = useMemo(() => {
+        if (!selectedCategory) {
+            return vehicles;
         }
 
-        if (filters.passenger_capacity) {
-            const val = filters.passenger_capacity.toLowerCase();
-            result = result.filter((cat) => cat.passenger_capacity && cat.passenger_capacity.toLowerCase().includes(val));
-        }
+        return vehicles.filter((vehicle) => String(vehicle.category_id) === String(selectedCategory.id));
+    }, [vehicles, selectedCategory]);
 
-        if (filters.luggage_capacity) {
-            const val = filters.luggage_capacity.toLowerCase();
-            result = result.filter((cat) => cat.luggage_capacity && cat.luggage_capacity.toLowerCase().includes(val));
-        }
+    const selectedCategoryName = selectedCategory?.name || 'All categories';
 
-        if (filters.trip_type) {
-            const val = filters.trip_type.toLowerCase();
-            result = result.filter((cat) => cat.ideal_trip_types && cat.ideal_trip_types.toLowerCase().includes(val));
-        }
+    const handleViewDetails = useCallback((vehicle) => {
+        setSelectedVehicle(vehicle);
+    }, []);
 
-        if (filters.comfort_level) {
-            const val = filters.comfort_level.toLowerCase();
-            result = result.filter((cat) => cat.comfort_level && cat.comfort_level.toLowerCase().includes(val));
-        }
+    const handleCloseDetails = useCallback(() => {
+        setSelectedVehicle(null);
+    }, []);
 
-        if (filters.sortBy === 'name_asc') {
-            result.sort((a, b) => a.name.localeCompare(b.name));
-        } else if (filters.sortBy === 'name_desc') {
-            result.sort((a, b) => b.name.localeCompare(a.name));
-        }
-
-        return result;
-    }, [categories, filters]);
-
-    // Compute unique options for filters based on current data
-    const filterOptions = useMemo(() => {
-        const passenger = new Set();
-        const luggage = new Set();
-        const tripType = new Set();
-        const comfort = new Set();
-
-        categories.forEach(cat => {
-            if (cat.passenger_capacity) passenger.add(cat.passenger_capacity.trim());
-            if (cat.luggage_capacity) luggage.add(cat.luggage_capacity.trim());
-            if (cat.comfort_level) comfort.add(cat.comfort_level.trim());
-            if (cat.ideal_trip_types) {
-                cat.ideal_trip_types.split(',').forEach(t => {
-                    const trimmed = t.trim();
-                    if (trimmed) tripType.add(trimmed);
-                });
-            }
-        });
-
-        return {
-            passenger_capacities: [...passenger].sort(),
-            luggage_capacities: [...luggage].sort(),
-            trip_types: [...tripType].sort(),
-            comfort_levels: [...comfort].sort(),
-        };
-    }, [categories]);
+    const handleCategorySelect = useCallback((category) => {
+        setSelectedCategory(category);
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -137,34 +83,44 @@ const OurFleet = () => {
 
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                {/* Filters */}
+                {/* Category selector */}
                 <div className="mb-8">
-                    <VehicleFilters
-                        filters={filters}
-                        onFilterChange={setFilters}
-                        totalCount={filteredCategories.length}
-                        filterOptions={filterOptions}
+                    <CategoryTabs
+                        categories={categories}
+                        selectedCategory={selectedCategory}
+                        onCategorySelect={handleCategorySelect}
+                        loading={categoriesLoading}
                     />
                 </div>
 
-                {/* Category Showcase Display */}
-                <div className="space-y-8">
-                    {filteredCategories.map((category) => {
-                        const categoryVehicles = vehicles.filter(v => v.category_id === category.id);
-                        return (
-                            <CategoryShowcase 
-                                key={category.id} 
-                                category={category} 
-                                vehicles={categoryVehicles} 
-                            />
-                        );
-                    })}
-                    {filteredCategories.length === 0 && !categoriesLoading && (
-                        <div className="text-center py-12 text-gray-500">
-                            No categories match your selected filters.
-                        </div>
-                    )}
+                <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <div>
+                        <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+                            {selectedCategory ? selectedCategory.name : 'All Vehicles'}
+                        </h2>
+                        <p className="text-sm text-gray-500">
+                            {selectedCategory
+                                ? `Showing vehicles related to ${selectedCategory.name}.`
+                                : 'Browse all available vehicles, then click a category to filter the list.'}
+                        </p>
+                    </div>
+                    <div className="text-sm font-medium text-gray-500">
+                        {filteredVehicles.length} vehicle{filteredVehicles.length === 1 ? '' : 's'} shown
+                    </div>
                 </div>
+
+                <VehicleGrid
+                    vehicles={filteredVehicles}
+                    loading={vehiclesLoading || categoriesLoading}
+                    onViewDetails={handleViewDetails}
+                    categoryName={selectedCategoryName}
+                />
+
+                <VehicleDetailsModal
+                    isOpen={Boolean(selectedVehicle)}
+                    onClose={handleCloseDetails}
+                    vehicle={selectedVehicle}
+                />
 
 
             </div>

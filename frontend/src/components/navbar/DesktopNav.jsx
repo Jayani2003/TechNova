@@ -1,15 +1,13 @@
 import { NavLink } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { navLinks } from '../../config/navConfig';
-import { useTranslation } from 'react-i18next';
-
 const DesktopNav = () => {
-  const { t } = useTranslation();
+  
   return (
     <div className="hidden lg:flex items-center gap-10">
 
       {navLinks.map((link) => (
-        <div key={link.nameKey} className="relative group">
+        <div key={link.label} className="relative group">
 
           {/* Main Link */}
           <NavLink
@@ -21,7 +19,7 @@ const DesktopNav = () => {
               }`
             }
           >
-            {t(link.nameKey)}
+            {link.label}
 
             {link.children && (
               <ChevronDown
@@ -46,11 +44,11 @@ const DesktopNav = () => {
 
               {link.children.map((child) => (
                 <NavLink
-                  key={child.nameKey}
+                  key={child.label}
                   to={child.path}
                   className="block px-5 py-3 text-[#00b0a5] hover:bg-[#1fcfc4]/10 transition-all duration-300"
                 >
-                  {t(child.nameKey)}
+                  {child.label}
                 </NavLink>
               ))}
 

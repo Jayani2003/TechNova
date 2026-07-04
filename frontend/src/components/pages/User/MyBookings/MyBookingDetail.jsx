@@ -37,10 +37,11 @@ const MyBookingDetail = ({ booking, onBack }) => {
 
   const statusSteps = ["PENDING", "QUOTED", "ACCEPTED", "CONFIRMED", "TOUR_STARTED", "COMPLETED", "CLOSED"];
   const currentStepIndex = statusSteps.indexOf(booking.status);
+  const acceptedStepIndex = statusSteps.indexOf("ACCEPTED");
 
   // Customer can cancel from ACCEPTED or CONFIRMED
   const canCancel = ["ACCEPTED", "CONFIRMED"].includes(booking.status);
-  const canDownloadPdf = ["ACCEPTED", "CONFIRMED", "TOUR_STARTED", "COMPLETED", "CLOSED"].includes(booking.status);
+  const canDownloadPdf = currentStepIndex >= acceptedStepIndex;
 
   const handleDownloadPdf = async () => {
     try {
@@ -78,7 +79,11 @@ const MyBookingDetail = ({ booking, onBack }) => {
         {booking.status === "PENDING" && (
           <button
             onClick={() => {
-              const path = booking.tourType === "CUSTOM" ? "/tour-booking/customized" : "/tour-booking/point";
+              const path = booking.tourType === "CUSTOM"
+                ? "/tour-booking/customized"
+                : booking.tourType === "PACKAGE"
+                  ? "/tour-booking/package/book"
+                  : "/tour-booking/point";
               navigate(path, { state: { editBooking: booking } });
             }}
             className="ml-auto flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#00b0a5] text-white font-bold text-sm hover:bg-[#008f86] transition-all cursor-pointer group shadow-lg shadow-[#00b0a5]/20"
@@ -96,16 +101,6 @@ const MyBookingDetail = ({ booking, onBack }) => {
           <Zap className="w-4 h-4" />
           <span>Payments</span>
         </button>
-
-        {canDownloadPdf && (
-          <button
-            onClick={handleDownloadPdf}
-            className="ml-3 flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#00b0a5]/30 text-[#008f86] font-semibold text-sm hover:bg-[#00b0a5]/10 transition-all cursor-pointer"
-          >
-            <Download className="w-4 h-4" />
-            <span>Download PDF</span>
-          </button>
-        )}
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-0 pr-1">
@@ -141,12 +136,21 @@ const MyBookingDetail = ({ booking, onBack }) => {
               ❌ You rejected this quote. Feel free to submit a new booking.
             </p>
           )}
+          {canDownloadPdf && (
+            <button
+              onClick={handleDownloadPdf}
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#00b0a5]/30 text-[#008f86] font-semibold text-sm hover:bg-[#00b0a5]/10 transition-all cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download PDF</span>
+            </button>
+          )}
         </Section>
 
         {/* ── QUOTED — accept or reject ── */}
         {booking.status === "QUOTED" && (
           <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-4">
-            <p className="text-sm font-bold text-slate-800 mb-1">🎉 Price Quote Received!</p>
+            <p className="text-sm font-bold text-slate-800 mb-1">Price Quote Received!</p>
             <p className="text-2xl font-bold text-[#00b0a5] mb-1">${booking.quotedPrice}</p>
 
             {/* Show assigned vehicle to customer */}

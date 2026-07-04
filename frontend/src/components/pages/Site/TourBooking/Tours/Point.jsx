@@ -1,9 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from "react-i18next";
-
 const Point = () => {
-  const { t } = useTranslation();
+  
   const cardRef = useRef(null);
   useEffect(() => {
     const c = cardRef.current; if (!c) return;
@@ -172,7 +170,7 @@ const Point = () => {
 
           {/* Image */}
           <div className="ptp-img-wrap">
-            <span className="ptp-badge">{t("tours.point.badge")}</span>
+            <span className="ptp-badge">{"One Directional"}</span>
             <img className="ptp-img"
               src="https://images.unsplash.com/photo-1640282693834-f941c0c012aa?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Point to Point"
@@ -180,7 +178,20 @@ const Point = () => {
             <div className="ptp-overlay" />
             <div className="ptp-shimmer" />
             <div className="ptp-stats">
-              {t("tours.point.stats", { returnObjects: true }).map(([n, l]) => (
+              {[
+  [
+    "24/7",
+    "Available"
+  ],
+  [
+    "50+",
+    "Destinations"
+  ],
+  [
+    "4.9★",
+    "Rated"
+  ]
+].map(([n, l]) => (
                 <div key={l} className="ptp-stat">
                   <span className="ptp-stat-num">{n}</span>
                   <span className="ptp-stat-label">{l}</span>
@@ -191,11 +202,11 @@ const Point = () => {
 
           {/* Content */}
           <div className="ptp-content">
-            <span className="ptp-eyebrow">{t("tours.point.eyebrow")}</span>
-            <h2 className="ptp-title">{t("tours.point.title1")} <span className="teal">{t("tours.point.title2")}</span></h2>
+            <span className="ptp-eyebrow">{"Seamless Transfers"}</span>
+            <h2 className="ptp-title">{"Point to"} <span className="teal">{"Point."}</span></h2>
             <div className="ptp-rule" />
             <p className="ptp-desc">
-              {t("tours.point.desc")}
+              {"Reliable transfers between any two locations in Sri Lanka. Professional drivers and air-conditioned vehicles waiting just for you."}
             </p>
             {/* <ul className="ptp-features">
               {[
@@ -210,7 +221,11 @@ const Point = () => {
               ))}
             </ul> */}
             <div className="cst-steps">
-              {t("tours.point.steps", { returnObjects: true }).map((s, i, arr) => (
+              {[
+  "Set Locations",
+  "Instant Bookings",
+  "We Drive You"
+].map((s, i, arr) => (
                 <div key={s} className="cst-step">
                   {i < arr.length - 1 && <div className="cst-step-line" />}
                   <div className="cst-step-num">{i + 1}</div>
@@ -219,7 +234,7 @@ const Point = () => {
               ))}
             </div>
             <Link to="/tour-booking/point" className="ptp-btn">
-              <span>{t("tours.point.btn")}</span>
+              <span>{"Book a Transfer"}</span>
               <svg className="ptp-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>

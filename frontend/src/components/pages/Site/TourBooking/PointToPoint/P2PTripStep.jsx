@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { MapPin, Calendar, Clock, Search, X } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import { SRI_LANKA_LOCATIONS } from "./sriLankaLocations.js";
 
 const inputClass =
@@ -178,7 +177,7 @@ const LocationInput = ({ value, onChange, placeholder, pinColor, id }) => {
 
 // ─── Main Trip Step ────────────────────────────────────────────────────────────
 const P2PTripStep = ({ data, onChange }) => {
-  const { t } = useTranslation();
+  
   const today = new Date().toISOString().split("T")[0];
 
   const handleDate = (val) => {
@@ -194,23 +193,23 @@ const P2PTripStep = ({ data, onChange }) => {
       {/* ── Locations ── */}
       <div>
         <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-[#F5820D]" /> {t("p2pBooking.tripStep.locationsTitle")}
+          <MapPin className="w-5 h-5 text-[#F5820D]" /> {"Trip Locations"}
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
-          {t("p2pBooking.tripStep.locationsDesc")}
+          {"Type to search — use ↑ ↓ to navigate, Enter to select, Esc to close. You can also type a custom location name."}
         </p>
 
         <div className="space-y-4">
           {/* Pickup */}
           <div>
             <label htmlFor="pickup-location" className="block text-sm font-semibold text-[#2C2F3A] mb-1">
-              {t("p2pBooking.tripStep.pickupLabel")}
+              {"Pickup Location *"}
             </label>
             <LocationInput
               id="pickup-location"
               value={data.startLocation}
               onChange={val => onChange("startLocation", val)}
-              placeholder={t("p2pBooking.tripStep.pickupPlaceholder")}
+              placeholder={"Search airport, city, hotel area…"}
               pinColor="text-[#F5820D]"
             />
           </div>
@@ -222,7 +221,7 @@ const P2PTripStep = ({ data, onChange }) => {
               <div className="w-8 h-8 rounded-full bg-[#F5820D]/10 flex items-center justify-center">
                 <span className="text-[#F5820D] text-lg">↓</span>
               </div>
-              <span className="text-xs text-[#6B7280]/70">{t("p2pBooking.tripStep.oneWay")}</span>
+              <span className="text-xs text-[#6B7280]/70">{"One way"}</span>
             </div>
             <div className="flex-1 h-px bg-slate-200" />
           </div>
@@ -230,13 +229,13 @@ const P2PTripStep = ({ data, onChange }) => {
           {/* Drop-off */}
           <div>
             <label htmlFor="dropoff-location" className="block text-sm font-semibold text-[#2C2F3A] mb-1">
-              {t("p2pBooking.tripStep.dropoffLabel")}
+              {"Drop-off Location *"}
             </label>
             <LocationInput
               id="dropoff-location"
               value={data.endLocation}
               onChange={val => onChange("endLocation", val)}
-              placeholder={t("p2pBooking.tripStep.dropoffPlaceholder")}
+              placeholder={"Search tourist spot, city, beach…"}
               pinColor="text-red-400"
             />
           </div>
@@ -246,16 +245,16 @@ const P2PTripStep = ({ data, onChange }) => {
       {/* ── Date & Time ── */}
       <div>
         <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-[#F5820D]" /> {t("p2pBooking.tripStep.dateTimeTitle")}
+          <Calendar className="w-5 h-5 text-[#F5820D]" /> {"Travel Date & Time"}
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
-          {t("p2pBooking.tripStep.dateTimeDesc")}
+          {"Point-to-point is a one-day hire. Select your travel date and preferred pickup time."}
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="travel-date" className="block text-sm font-semibold text-[#2C2F3A] mb-1">
-              {t("p2pBooking.tripStep.dateLabel")}
+              {"Travel Date *"}
             </label>
             <input
               id="travel-date"
@@ -269,7 +268,7 @@ const P2PTripStep = ({ data, onChange }) => {
 
           <div>
             <label htmlFor="pickup-time" className="block text-sm font-semibold text-[#2C2F3A] mb-1 flex items-center gap-1">
-              <Clock className="w-4 h-4" /> {t("p2pBooking.tripStep.timeLabel")}
+              <Clock className="w-4 h-4" /> {"Preferred Pickup Time *"}
             </label>
             <input
               id="pickup-time"
@@ -287,7 +286,7 @@ const P2PTripStep = ({ data, onChange }) => {
               <Calendar className="w-5 h-5 text-[#F5820D]" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#2C2F3A]">{t("p2pBooking.tripStep.oneDayTransfer")}</p>
+              <p className="text-sm font-bold text-[#2C2F3A]">{"One-Day Transfer"}</p>
               <p className="text-xs text-[#6B7280] mt-0.5">
                 {data.startDate} {data.pickupTime && `at ${data.pickupTime}`}
                 {data.startLocation && data.endLocation &&

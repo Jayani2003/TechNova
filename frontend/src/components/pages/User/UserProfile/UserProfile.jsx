@@ -1,31 +1,67 @@
 import React, { useContext, useState } from 'react';
 import { AuthContext } from '../../../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, useLocation } from 'react-router';
+import { useNavigate } from 'react-router';
 import { 
   Camera, Mail, User as UserIcon, Phone, MapPin, Globe, Hash, 
   Edit3, Check, LayoutDashboard, Shield, CalendarDays, Lock, 
-  MessageCircle, Star, Eye, EyeOff, CreditCard
+  MessageCircle, Star, Eye, EyeOff
 } from 'lucide-react';
 import MyMessageList from '../MyMessages/MyMessageList';
 import MyMessageThread from '../MyMessages/MyMessageThread';
 import MyMessageEmpty from '../MyMessages/MyMessageEmpty';
-import { useMessages } from '../../../../context/MessagesContext.jsx';
+import { useMessages } from '../../../../context/useMessages.js';
 import { useBookings } from '../../../../context/BookingsContext.jsx';
 import MyBookings from '../MyBookings/MyBookings';
 import MyReviews from '../MyReviews/MyReviews';
-import Payments from '../Payments/Payments';
+
+const buildMergedConversation = (inquiries) => {
+  if (!inquiries?.length) return null;
+  const sorted = [...inquiries].sort(
+    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+  );
+  const first = sorted[0];
+  const latest = sorted[sorted.length - 1];
+
+  const events = [];
+  sorted.forEach((inquiry, index) => {
+    if (index > 0) {
+      events.push({
+        id: `inquiry-${inquiry.id}`,
+        from: 'customer',
+        fromName: inquiry.customerName,
+        message: inquiry.message,
+        timestamp: inquiry.createdAt,
+      });
+    }
+    (inquiry.replies || []).forEach((reply) => {
+      events.push({ ...reply, inquiryId: inquiry.id });
+    });
+  });
+
+  events.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+  return {
+    id: latest.id,
+    customerName: latest.customerName,
+    customerEmail: latest.customerEmail,
+    subject: 'Support Chat',
+    message: first.message,
+    createdAt: first.createdAt,
+    status: latest.status || 'new',
+    replies: events,
+    latestInquiryId: latest.id,
+  };
+};
 
 
 function UserProfile() {
   const { user, changePassword, logout, updateProfile } = useContext(AuthContext);
   const navigate = useNavigate();
-  const location = useLocation();
   
   // Tab State
   const [activeTab, setActiveTab] = useState('dashboard');
   const [toast, setToast] = useState(null);
-  const [activeBookingId, setActiveBookingId] = useState(null);
 
   // State for profile fields (defaults to empty strings if not updated yet)
   const [isEditing, setIsEditing] = useState(false);
@@ -87,21 +123,10 @@ function UserProfile() {
     { id: 'bookings', label: 'My Bookings', icon: CalendarDays },
     { id: 'reviews', label: 'My Reviews', icon: Star },
     { id: 'messages', label: 'My Messages', icon: MessageCircle },
-    { id: 'payments', label: 'Payments', icon: CreditCard },
     { id: 'security', label: 'Security', icon: Shield },
   ];
 
   // ================= TABS COMPONENTS =================
-
-  // Initialize tab from navigation state (e.g., when moved from booking details)
-  React.useEffect(() => {
-    if (location?.state?.activeTab) {
-      setActiveTab(location.state.activeTab);
-    }
-    if (location?.state?.bookingId) {
-      setActiveBookingId(location.state.bookingId);
-    }
-  }, [location]);
 
   const ReviewsTab = () => (
     <motion.div
@@ -247,10 +272,11 @@ const BookingsTab = () => <MyBookings userEmail={user?.email} />;
 // adding messages tab
   const MessagesTab = () => {
     const { messages, addReply } = useMessages();
-    const [selectedId, setSelectedId] = useState(null);
  
-    const userMessages = messages.filter((m) => m.customerId === user?.email);
-    const selectedMessage = userMessages.find((m) => m.id === selectedId) || null;
+    const merged = buildMergedConversation(
+      messages.filter((m) => m.customerEmail?.toLowerCase() === user?.email?.toLowerCase())
+    );
+    const selectedMessage = merged || null;
  
     const handleSendFollowUp = (messageId, text) => {
       addReply(messageId, {
@@ -269,17 +295,12 @@ const BookingsTab = () => <MyBookings userEmail={user?.email} />;
           <p className="text-slate-500 text-sm">View your conversations with support.</p>
         </div>
  
-        {userMessages.length === 0 ? (
+        {!selectedMessage ? (
           <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
             <MyMessageEmpty navigate={navigate} />
           </div>
         ) : (
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
-            <MyMessageList
-              messages={userMessages}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-            />
+          <div className="flex-1 min-h-0">
             <MyMessageThread
               message={selectedMessage}
               onSendFollowUp={handleSendFollowUp}
@@ -457,18 +478,6 @@ const BookingsTab = () => <MyBookings userEmail={user?.email} />;
             {activeTab === 'dashboard' && renderDashboardTab()}
             {activeTab === 'bookings' && <BookingsTab key="bookings" />}
             {activeTab === 'reviews' && <ReviewsTab key="reviews" />}
-            {activeTab === 'payments' && (
-              <Payments
-                key="payments"
-                bookingId={activeBookingId}
-                onRequestOpenTab={(tab, bookingId) => {
-                  setActiveTab(tab);
-                  setActiveBookingId(bookingId || null);
-                  // scroll to top of profile content
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              />
-            )}
             {activeTab === 'messages' && <MessagesTab key="messages" />}
             {activeTab === 'security' && <SecurityTab key="security" />}
           </AnimatePresence>

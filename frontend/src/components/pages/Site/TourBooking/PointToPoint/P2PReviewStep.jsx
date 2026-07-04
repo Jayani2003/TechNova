@@ -1,8 +1,6 @@
 import { MapPin, Calendar, Users, Car, Phone, FileText, Clock, AlertTriangle, Briefcase } from "lucide-react";
 import { useContext } from "react";
 import { AuthContext } from "../../../../../context/AuthContext";
-import { useTranslation } from "react-i18next";
-
 const VEHICLE_LABELS = {
   mini_car: "Mini Car", normal_car: "Normal Car", sedan_car: "Sedan Car",
   mpv: "MPV", suv: "SUV", mini_van: "Mini Van", van: "Van", large_van: "Large Van",
@@ -36,7 +34,7 @@ const Section = ({ title, children }) => (
 );
 
 const P2PReviewStep = ({ data }) => {
-  const { t } = useTranslation();
+  
   const { user } = useContext(AuthContext);
 
   const luggageParts = [];
@@ -94,28 +92,28 @@ const P2PReviewStep = ({ data }) => {
       {/* Emergency Contact */}
       <div className="bg-white rounded-2xl border border-[#F5820D]/10 shadow-sm p-5">
         <p className="text-xs font-bold text-[#6B7280]/70 uppercase tracking-wider mb-3 flex items-center gap-2">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-500" /> {t("p2pBooking.reviewStep.emergencyContact")}
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-500" /> {"Emergency Contact"}
         </p>
         {data.emergencyName || data.emergencyPhone ? (
           <>
-            <ReviewRow icon={Phone} label={t("p2pBooking.reviewStep.emergencyName")}         value={data.emergencyName || "—"} />
-            <ReviewRow icon={Phone} label={t("p2pBooking.reviewStep.relationship")}                   value={data.emergencyRelationship || "—"} />
-            <ReviewRow icon={Phone} label={t("p2pBooking.reviewStep.emergencyPhone")}        value={data.emergencyPhone || "—"} />
+            <ReviewRow icon={Phone} label={"Emergency Contact Name"}         value={data.emergencyName || "—"} />
+            <ReviewRow icon={Phone} label={"Relationship"}                   value={data.emergencyRelationship || "—"} />
+            <ReviewRow icon={Phone} label={"Emergency Contact Phone"}        value={data.emergencyPhone || "—"} />
           </>
         ) : (
-          <p className="text-sm text-[#6B7280]/70 italic py-2">{t("p2pBooking.reviewStep.noEmergency")}</p>
+          <p className="text-sm text-[#6B7280]/70 italic py-2">{"No emergency contact provided."}</p>
         )}
       </div>
 
       {/* What happens next */}
       <div className="bg-[#FFF8F0] rounded-2xl p-5 border border-[#F5820D]/10">
-        <p className="text-sm font-bold text-[#2C2F3A] mb-3">{t("p2pBooking.reviewStep.whatHappensNext")}</p>
+        <p className="text-sm font-bold text-[#2C2F3A] mb-3">{"What happens after you submit?"}</p>
         {[
-          t("p2pBooking.reviewStep.nextStep1"),
-          t("p2pBooking.reviewStep.nextStep2"),
-          t("p2pBooking.reviewStep.nextStep3"),
-          t("p2pBooking.reviewStep.nextStep4"),
-          t("p2pBooking.reviewStep.nextStep5"),
+          "Your booking is submitted with status: PENDING",
+          "Our team reviews your request within 24 hours",
+          "We'll send you a price quote through the system",
+          "You accept or reject the quote from your profile",
+          "Once accepted, we confirm and assign your vehicle",
         ].map((step, i) => (
           <div key={i} className="flex items-start gap-2 mb-2">
             <div className="w-5 h-5 rounded-full bg-[#F5820D] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">

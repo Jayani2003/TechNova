@@ -1,10 +1,9 @@
 import { MapPin, Calendar, User, ArrowUpRight } from "lucide-react";
 import { SEASONS, MOODS } from "../../../data/tourData";
-import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 
 export default function PhotoCard({ photo, onClick, index = 0 }) {
-  const { t } = useTranslation();
+  
   const season = SEASONS.find((s) => s.key === photo.season);
   const mood = MOODS.find((m) => m.key === photo.mood);
 
@@ -33,7 +32,7 @@ export default function PhotoCard({ photo, onClick, index = 0 }) {
         <div className="absolute top-4 left-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-4 group-hover:translate-x-0">
           {photo.withTourists && (
             <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-500/90 backdrop-blur-md text-white shadow-lg w-fit">
-              {t("gallery.filters.ourCustomers")}
+              {"Our Customers"}
             </span>
           )}
           {photo.event && (

@@ -2,7 +2,7 @@ import React from 'react';
 import VehicleCard from './CategoryCard';
 import EmptyState from './EmptyState';
 
-const VehicleGrid = ({ vehicles, loading, onViewDetails, onBookNow, categoryName }) => {
+const VehicleGrid = ({ vehicles, loading, onViewDetails, categoryName }) => {
     if (loading) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -40,7 +40,6 @@ const VehicleGrid = ({ vehicles, loading, onViewDetails, onBookNow, categoryName
                     key={vehicle.id}
                     vehicle={vehicle}
                     onViewDetails={onViewDetails}
-                    onBookNow={onBookNow}
                 />
             ))}
         </div>

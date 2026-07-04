@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-
 const StarIcon = ({ fillPercent = 0, delayMs = 0 }) => (
   <span className="rs-star">
     <svg width="100%" height="100%" viewBox="0 0 18 18" fill="none" stroke="#f5b301" strokeWidth="0.50">
@@ -38,7 +36,7 @@ const getAggregateStats = (reviews = []) => {
 };
 
 const ReviewStats = ({ reviews, stats }) => {
-  const { t } = useTranslation();
+  
   const fallback = getAggregateStats(reviews);
   const total = Number(stats?.total ?? fallback.total) || 0;
   const average = Number(stats?.avg ?? stats?.average ?? fallback.average) || 0;
@@ -173,7 +171,7 @@ const ReviewStats = ({ reviews, stats }) => {
       <div className="rs-wrap">
         <div className="rs-card">
           <div className="rs-header">
-            {/* <div className="rs-title">{t("reviews.stats.summary")}</div> */}
+            {/* <div className="rs-title">{"Average rating"}</div> */}
              <div className="rs-title">RATINGS</div>
             <div className="rs-rating-row" aria-label={`${average.toFixed(1)} out of 5 stars`}>
               <div className="rs-stars" aria-hidden="true">
@@ -186,7 +184,7 @@ const ReviewStats = ({ reviews, stats }) => {
               </div>
             </div>
             <div className="rs-based-on">
-              {t("reviews.stats.basedOn")} <strong>{animatedTotal}</strong> {t("reviews.stats.travelers")}
+              {"Based on"} <strong>{animatedTotal}</strong> {"travelers"}
             </div>
           </div>
         </div>

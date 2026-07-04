@@ -59,6 +59,9 @@ const mapBooking = (row) => ({
   contactNumber:    row.contact_number    || null,
   contactPlatform2: row.contact_platform2 || null,
   contactNumber2:   row.contact_number2   || null,
+  emergencyName:    row.emergency_name    || null,
+  emergencyPhone:   row.emergency_phone   || null,
+  emergencyRelationship: row.emergency_relationship || null,
   customerEmail:  row.email || null,
   tourType:       row.tour_type,
   categoryId:     row.category_id,
@@ -278,7 +281,7 @@ const createP2PBooking = async (req, res) => {
 const getMyBookings = async (req, res) => {
   try {
     const [rows] = await db.execute(
-      `SELECT b.*, u.email,
+      `SELECT b.*, u.email, u.emergency_name, u.emergency_phone, u.emergency_relationship,
               vc.category_name,
               p.package_id, p.title AS package_name
        FROM booking b
@@ -301,7 +304,7 @@ const getMyBookings = async (req, res) => {
 const getAllBookings = async (req, res) => {
   try {
     const [rows] = await db.execute(
-      `SELECT b.*, u.email,
+      `SELECT b.*, u.email, u.emergency_name, u.emergency_phone, u.emergency_relationship,
               vc.category_name,
               p.package_id, p.title AS package_name,
               v.vehicle_number, v.name AS vehicle_name
@@ -412,6 +415,10 @@ const updateBooking = async (req, res) => {
     luggageCustomCount,
     luggageCustomItems,
     customerName,
+    contactPlatform,
+    contactNumber,
+    contactPlatform2,
+    contactNumber2,
     customerPhone,
     notes,
     tourThoughts,

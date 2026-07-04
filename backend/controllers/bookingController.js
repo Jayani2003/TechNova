@@ -95,6 +95,7 @@ const mapBooking = (row) => ({
   quotedPrice:        row.quoted_price ? parseFloat(row.quoted_price) : null,
   notes:              row.notes        || null,
   tourThoughts:       row.tour_thoughts || null,
+  adminNote:          row.admin_note    || null,
   status:             row.booking_status,
   quotedAt:           row.quoted_at,
   confirmedAt:        row.confirmed_at,
@@ -168,8 +169,8 @@ const createP2PBooking = async (req, res) => {
   if (!isPackageBooking && !isCustomBooking && (!startLocation || !endLocation))
     return res.status(400).json({ message: 'Start and end location are required for P2P bookings.' });
 
-  if (isCustomBooking && selectedCityList.length === 0)
-    return res.status(400).json({ message: 'Please select at least one city for a customized tour.' });
+  if (isCustomBooking && !(tourThoughts || '').trim())
+    return res.status(400).json({ message: 'Dream Itinerary is required for a customized tour.' });
 
   if (isPackageBooking && !packageId)
     return res.status(400).json({ message: 'packageId is required for package bookings.' });
@@ -186,7 +187,7 @@ const createP2PBooking = async (req, res) => {
   // Build notes for cities/activities (stored in tour_thoughts to keep notes clean)
   const cityNotes     = selectedCityList.length ? `Cities: ${selectedCityList.join(', ')}`     : null;
   const activityNotes = activityList.length     ? `Activities: ${activityList.join(', ')}`     : null;
-  const fullTourThoughts = [tourThoughts || null, cityNotes, activityNotes].filter(Boolean).join(' | ') || null;
+  const fullTourThoughts = [tourThoughts || null, cityNotes, activityNotes].filter(Boolean).join('\n') || null;
 
   let conn;
   try {
@@ -350,7 +351,7 @@ const getAllBookings = async (req, res) => {
 // ── PATCH /api/bookings/:id/quote  (admin) ────────────────────────────────────
 const setQuote = async (req, res) => {
   const { id } = req.params;
-  const { quotedPrice, vehicleId } = req.body;
+  const { quotedPrice, vehicleId, adminNote } = req.body;
 
   if (!quotedPrice)
     return res.status(400).json({ message: 'quotedPrice is required.' });
@@ -358,10 +359,10 @@ const setQuote = async (req, res) => {
   try {
     const [result] = await db.execute(
       `UPDATE booking
-       SET quoted_price = ?, vehicle_id = ?,
+       SET quoted_price = ?, vehicle_id = ?, admin_note = ?,
            booking_status = 'QUOTED', quoted_at = NOW()
        WHERE booking_id = ?`,
-      [quotedPrice, vehicleId || null, id]
+      [quotedPrice, vehicleId || null, adminNote || null, id]
     );
 
     if (result.affectedRows === 0)
@@ -389,7 +390,7 @@ const STATUS_TIMESTAMP = {
 
 const updateStatus = async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { status, adminNote } = req.body;
   const isAdmin = ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(req.user?.role);
   const allowed = isAdmin ? ALLOWED_TRANSITIONS.ADMIN : ALLOWED_TRANSITIONS.CUSTOMER;
 
@@ -399,11 +400,19 @@ const updateStatus = async (req, res) => {
   const tsCol    = STATUS_TIMESTAMP[status];
   const tsClause = tsCol ? `, ${tsCol} = NOW()` : '';
 
+  let query = `UPDATE booking SET booking_status = ? ${tsClause}`;
+  let params = [status];
+  
+  if (adminNote !== undefined) {
+    query += `, admin_note = ?`;
+    params.push(adminNote || null);
+  }
+  
+  query += ` WHERE booking_id = ?`;
+  params.push(id);
+
   try {
-    const [result] = await db.execute(
-      `UPDATE booking SET booking_status = ? ${tsClause} WHERE booking_id = ?`,
-      [status, id]
-    );
+    const [result] = await db.execute(query, params);
 
     if (result.affectedRows === 0)
       return res.status(404).json({ message: 'Booking not found.' });
@@ -462,7 +471,7 @@ const updateBooking = async (req, res) => {
 
   const cityNotes     = selectedCityList.length ? `Cities: ${selectedCityList.join(', ')}`  : null;
   const activityNotes = activityList.length     ? `Activities: ${activityList.join(', ')}` : null;
-  const fullTourThoughts = [tourThoughts || null, cityNotes, activityNotes].filter(Boolean).join(' | ') || null;
+  const fullTourThoughts = [tourThoughts || null, cityNotes, activityNotes].filter(Boolean).join('\n') || null;
 
   let conn;
   try {
@@ -663,7 +672,7 @@ const downloadBookingConfirmationPdf = async (req, res) => {
 // ── PUT /api/bookings/:id/itinerary ──────────────────────────────────────────
 const updateCustomItinerary = async (req, res) => {
   const { id } = req.params;
-  const { itinerary } = req.body;
+  const { itinerary, adminNote } = req.body;
   let conn;
   try {
     conn = await db.getConnection();
@@ -682,6 +691,13 @@ const updateCustomItinerary = async (req, res) => {
           [id, stop.day_number, stop.city_name, stop.activities ? JSON.stringify(stop.activities) : null]
         );
       }
+    }
+
+    if (adminNote !== undefined) {
+      await conn.execute(
+        'UPDATE booking SET admin_note = ? WHERE booking_id = ?',
+        [adminNote || null, id]
+      );
     }
 
     await conn.commit();

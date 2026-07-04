@@ -43,7 +43,13 @@ const initialData = {
   largeLuggages:  0,
   categoryId:     "",
   customerName:   "",
-  customerPhone:  "",
+  contactPlatform: "mobile",
+  contactNumber:   "",
+  contactPlatform2: "",
+  contactNumber2:  "",
+  emergencyName:   "",
+  emergencyPhone:  "",
+  emergencyRelationship: "",
   notes:          "",
 };
 
@@ -134,7 +140,7 @@ const validateStep = (step, data) => {
   switch (step) {
     case 0: return data.startDate && data.endDate && data.pickupTime;
     case 1: return data.noOfAdults >= 1 && data.categoryId;
-    case 2: return data.customerName.trim() && data.customerPhone.trim();
+    case 2: return data.customerName.trim() && (data.contactNumber || '').trim();
     case 3: return true;
     default: return false;
   }
@@ -160,7 +166,14 @@ const PackageBookingForm = () => {
   const packageDays = parsePackageDays(searchParams.get("packageDays"));
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState(() => ({
+    ...initialData,
+    customerName:          user?.name || "",
+    contactNumber:         user?.contact_number || "",
+    emergencyName:         user?.emergency_name || "",
+    emergencyPhone:        user?.emergency_phone || "",
+    emergencyRelationship: user?.emergency_relationship || "",
+  }));
   const [submitted, setSubmitted] = useState(false);
   const [bookingRef, setBookingRef] = useState("");
   const [submitting, setSubmitting] = useState(false);

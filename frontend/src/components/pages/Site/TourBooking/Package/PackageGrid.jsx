@@ -85,7 +85,7 @@ const PackageGrid = ({ packages, onShowMore }) => {
   }
 
   return (
-    <>
+    <div>
       <style>{`
         .pkg-grid-wrap {
           max-width: 1280px; margin: 0 auto;
@@ -136,8 +136,7 @@ const PackageGrid = ({ packages, onShowMore }) => {
 
       <div className="pkg-grid-wrap">
         <AnimatePresence mode="popLayout">
-          <>
-            {sections.map((section, sectionIndex) => (
+          {sections.map((section, sectionIndex) => (
               <motion.section
                 key={section.key}
                 className="pkg-section"
@@ -168,10 +167,9 @@ const PackageGrid = ({ packages, onShowMore }) => {
                 </div>
               </motion.section>
             ))}
-          </>
         </AnimatePresence>
       </div>
-    </>
+    </div>
   );
 };
 

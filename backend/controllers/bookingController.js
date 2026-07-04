@@ -428,7 +428,7 @@ const updateBooking = async (req, res) => {
   const selectedCityList = Array.isArray(selectedCities) ? selectedCities.filter(Boolean) : [];
   const activityList     = Array.isArray(activities)     ? activities.filter(Boolean)     : [];
 
-  if (!startDate || !endDate || !categoryId || !customerName || !customerPhone)
+  if (!startDate || !endDate || !categoryId || !customerName || !(contactNumber || customerPhone || '').trim())
     return res.status(400).json({ message: 'Missing required fields.' });
 
   const customItems = Array.isArray(luggageCustomItems) ? luggageCustomItems : [];
@@ -477,7 +477,7 @@ const updateBooking = async (req, res) => {
            notes = ?, tour_thoughts = ?
        WHERE booking_id = ?`,
       [
-        customerName, contactPlatform  || 'mobile', contactNumber, contactPlatform2 || null, contactNumber2 || null,
+        customerName, contactPlatform  || 'mobile', contactNumber || customerPhone, contactPlatform2 || null, contactNumber2 || null,
         resolvedCategoryId,
         startDate, endDate, pickupTime || null,
         startLocation || null, endLocation || null,

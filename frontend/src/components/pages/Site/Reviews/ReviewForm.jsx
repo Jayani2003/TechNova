@@ -5,7 +5,7 @@ const StarPicker = ({ value, onChange }) => {
   const [hovered, setHovered] = useState(0);
   return (
     <div style={{ display: 'flex', gap: '6px', cursor: 'pointer' }}>
-      {[1,2,3,4,5].map(i => {
+      {[1, 2, 3, 4, 5].map(i => {
         const filled = i <= (hovered || value);
         return (
           <svg
@@ -19,7 +19,7 @@ const StarPicker = ({ value, onChange }) => {
             onMouseLeave={() => setHovered(0)}
             onClick={() => onChange(i)}
           >
-            <path d="M9 1.5l2.1 4.3 4.7.7-3.4 3.3.8 4.7L9 12.1l-4.2 2.4.8-4.7-3.4-3.3 4.7-.7L9 1.5z"/>
+            <path d="M9 1.5l2.1 4.3 4.7.7-3.4 3.3.8 4.7L9 12.1l-4.2 2.4.8-4.7-3.4-3.3 4.7-.7L9 1.5z" />
           </svg>
         );
       })}
@@ -28,21 +28,21 @@ const StarPicker = ({ value, onChange }) => {
 };
 
 const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
-  
+
   const fileInputRef = useRef(null);
 
   const STAR_LABELS = { 1: "Poor", 2: "Fair", 3: "Good", 4: "Very Good", 5: "Excellent" };
 
   const [form, setForm] = useState({
-    tourId:  reviewableTours[0]?.id || '',
-    stars:   0,
+    tourId: reviewableTours[0]?.id || '',
+    stars: 0,
     driverName: '',
-    title:   '',
+    title: '',
     comment: '',
   });
-  const [images,    setImages]    = useState([]);   // { file, preview }
+  const [images, setImages] = useState([]);   // { file, preview }
   const [submitted, setSubmitted] = useState(false);
-  const [errors,    setErrors]    = useState({});
+  const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
   // Auto-select tour based on reviewableTours
@@ -73,9 +73,9 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
 
   const validate = () => {
     const e = {};
-    if (!form.tourId)              e.tourId  = "Please select a tour.";
-    if (form.stars === 0)          e.stars   = "Please give a star rating.";
-    if (!form.title.trim())        e.title   = "Please add a review title.";
+    if (!form.tourId) e.tourId = "Please select a tour.";
+    if (form.stars === 0) e.stars = "Please give a star rating.";
+    if (!form.title.trim()) e.title = "Please add a review title.";
     if (form.comment.trim().length < 20) e.comment = "Comment must be at least 20 characters.";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -340,8 +340,27 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
             placeholder={"Type your driver's name (optional)"}
             value={form.driverName}
             maxLength={100}
-            onChange={e => set('driverName', e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+
+              if (/[^A-Za-z\s.]/.test(value)) {
+                setErrors({
+                  ...errors,
+                  driverName: "Only letters, spaces and '.' are allowed."
+                });
+              } else {
+                setErrors({
+                  ...errors,
+                  driverName: ""
+                });
+              }
+
+              set('driverName', value.replace(/[^A-Za-z\s.]/g, ''));
+            }}
           />
+          {errors.driverName && (
+            <span className="rvf-error">{errors.driverName}</span>
+          )}
         </div>
 
         {/* Title */}
@@ -385,7 +404,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
             {images.length < MAX_IMAGES && (
               <div className="rvf-img-add" onClick={() => fileInputRef.current?.click()}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
                 {"Add Photo"}
               </div>
@@ -408,7 +427,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
         <div className="rvf-actions">
           <button className="rvf-submit" onClick={handleSubmit} disabled={submitting}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M2 8l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 8l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             {submitting ? "Submitting..." : "Submit Review"}
           </button>

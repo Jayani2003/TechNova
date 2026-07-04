@@ -101,6 +101,7 @@ const mapBooking = (row) => ({
   tourStartedAt:      row.tour_started_at,
   completedAt:        row.completed_at,
   closedAt:           row.closed_at,
+  itinerary:          row.itinerary || [],
 });
 
 // ── Shared: resolve categoryId string → integer FK ────────────────────────────
@@ -294,7 +295,29 @@ const getMyBookings = async (req, res) => {
        ORDER BY b.booking_date DESC, b.booking_id DESC`,
       [req.user.id]
     );
-    res.json({ bookings: rows.map(mapBooking) });
+    const bookingIds = rows.map(r => r.booking_id);
+    let itineraries = [];
+    if (bookingIds.length > 0) {
+      const [itRows] = await db.query(
+        'SELECT * FROM booking_custom_itinerary WHERE booking_id IN (?) ORDER BY day_number ASC',
+        [bookingIds]
+      );
+      itineraries = itRows;
+    }
+
+    const mappedBookings = rows.map(row => {
+      const booking = mapBooking(row);
+      booking.itinerary = itineraries
+        .filter(it => it.booking_id === booking.id)
+        .map(it => ({
+          day_number: it.day_number,
+          city_name: it.city_name,
+          activities: it.activities ? JSON.parse(it.activities) : []
+        }));
+      return booking;
+    });
+
+    res.json({ bookings: mappedBookings });
   } catch (err) {
     console.error('getMyBookings error:', err);
     res.status(500).json({ message: 'Failed to load bookings.' });
@@ -633,9 +656,42 @@ const downloadBookingConfirmationPdf = async (req, res) => {
     doc.end();
   } catch (err) {
     console.error('downloadBookingConfirmationPdf error:', err);
-    if (!res.headersSent) {
-      res.status(500).json({ message: 'Failed to generate booking confirmation PDF.' });
+    res.status(500).json({ message: 'Failed to generate PDF.' });
+  }
+};
+
+// ── PUT /api/bookings/:id/itinerary ──────────────────────────────────────────
+const updateCustomItinerary = async (req, res) => {
+  const { id } = req.params;
+  const { itinerary } = req.body;
+  let conn;
+  try {
+    conn = await db.getConnection();
+    await conn.beginTransaction();
+
+    const [bookingRows] = await conn.execute('SELECT * FROM booking WHERE booking_id = ? FOR UPDATE', [id]);
+    if (!bookingRows.length) throw new Error('Booking not found');
+    if (bookingRows[0].tour_type !== 'CUSTOM') throw new Error('Not a custom tour');
+
+    await conn.execute('DELETE FROM booking_custom_itinerary WHERE booking_id = ?', [id]);
+
+    if (itinerary && Array.isArray(itinerary)) {
+      for (const stop of itinerary) {
+        await conn.execute(
+          'INSERT INTO booking_custom_itinerary (booking_id, day_number, city_name, activities) VALUES (?, ?, ?, ?)',
+          [id, stop.day_number, stop.city_name, stop.activities ? JSON.stringify(stop.activities) : null]
+        );
+      }
     }
+
+    await conn.commit();
+    res.json({ message: 'Itinerary updated successfully' });
+  } catch (err) {
+    if (conn) await conn.rollback();
+    console.error('updateCustomItinerary error:', err);
+    res.status(500).json({ message: err.message || 'Failed to update itinerary' });
+  } finally {
+    if (conn) conn.release();
   }
 };
 
@@ -647,4 +703,5 @@ module.exports = {
   updateStatus,
   updateBooking,
   downloadBookingConfirmationPdf,
+  updateCustomItinerary,
 };

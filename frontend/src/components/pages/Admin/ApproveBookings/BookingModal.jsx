@@ -21,6 +21,14 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
   const [vehiclesLoading, setVehiclesLoading] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState(booking.vehicleId ? String(booking.vehicleId) : "");
 
+  // Itinerary state
+  const [itinerary, setItinerary] = useState([]);
+  const [allowedCities, setAllowedCities] = useState([]);
+  const [allowedActivities, setAllowedActivities] = useState([]);
+  const [itinerarySaving, setItinerarySaving] = useState(false);
+  const [itineraryErr, setItineraryErr] = useState("");
+  const [itinerarySuccess, setItinerarySuccess] = useState("");
+
   const { getPaymentsForBooking, recordPayment } = useBookings();
   const [paymentsData, setPaymentsData] = useState(null);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
@@ -122,6 +130,21 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
     setRecNotes("");
     setRecError("");
     setRecSuccess("");
+
+    if (booking.tourType === "CUSTOM") {
+      setItinerary(booking.itinerary || []);
+      let cities = [];
+      let acts = [];
+      if (booking.tourThoughts) {
+        const parts = booking.tourThoughts.split(' | ');
+        parts.forEach(p => {
+          if (p.startsWith('Cities: ')) cities = p.replace('Cities: ', '').split(', ');
+          if (p.startsWith('Activities: ')) acts = p.replace('Activities: ', '').split(', ');
+        });
+      }
+      setAllowedCities(cities);
+      setAllowedActivities(acts);
+    }
   }, [booking]);
 
   useEffect(() => {
@@ -202,6 +225,42 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
     const vehicleName = selectedVehicle.vehicle_name || selectedVehicle.name || "";
     onSetQuote(booking.id, p, { id: selectedVehicle.id, name: vehicleName, plateNumber: vPlate.trim(), type: vType.trim() });
     setErr("");
+  };
+
+  const handleSaveItinerary = async () => {
+    setItinerarySaving(true);
+    setItineraryErr("");
+    setItinerarySuccess("");
+    try {
+      await api.put(`/bookings/${booking.id}/itinerary`, { itinerary });
+      setItinerarySuccess("Itinerary saved successfully!");
+      if (typeof window !== "undefined") {
+        setTimeout(() => setItinerarySuccess(""), 3000);
+      }
+    } catch (err) {
+      console.error(err);
+      setItineraryErr(err.message || "Failed to save itinerary");
+    } finally {
+      setItinerarySaving(false);
+    }
+  };
+
+  const updateItineraryDay = (index, field, value) => {
+    const newIt = [...itinerary];
+    newIt[index][field] = value;
+    setItinerary(newIt);
+  };
+  
+  const addItineraryDay = () => {
+    setItinerary([...itinerary, { day_number: itinerary.length + 1, city_name: allowedCities[0] || "", activities: [] }]);
+  };
+  
+  const removeItineraryDay = (index) => {
+    const newIt = [...itinerary];
+    newIt.splice(index, 1);
+    // Re-number
+    newIt.forEach((item, i) => item.day_number = i + 1);
+    setItinerary(newIt);
   };
 
   // Shared detail row
@@ -344,6 +403,74 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                 <Row icon={Car}  label="Vehicle Type"  value={booking.assignedVehicle.type} />
               </div>
             </>
+          )}
+
+          {/* ── Custom Tour Itinerary Builder ── */}
+          {booking.tourType === "CUSTOM" && (
+            <div style={{ background: dark ? "rgba(236,72,153,0.05)" : "rgba(236,72,153,0.03)", border: "1px solid rgba(236,72,153,0.2)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
+              <SectionTitle color="#ec4899">🗺️ Custom Tour Itinerary Builder</SectionTitle>
+              <p style={{ fontSize: 12, color: ts, marginBottom: 14 }}>
+                Construct the final path for this custom tour using the customer's requested destinations.
+              </p>
+
+              {itinerary.map((day, index) => (
+                <div key={index} style={{ background: card, border: `1px solid ${border}`, borderRadius: 12, padding: 12, marginBottom: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: tm }}>Stop {day.day_number}</span>
+                    <button onClick={() => removeItineraryDay(index)} style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", display: "flex" }}>
+                      <X size={16} />
+                    </button>
+                  </div>
+                  
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div>
+                      <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Destination</label>
+                      <select value={day.city_name} onChange={(e) => updateItineraryDay(index, 'city_name', e.target.value)} style={{ ...inputStyle, padding: "6px 10px" }}>
+                        <option value="">Select a city</option>
+                        {allowedCities.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Activities</label>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+                        {allowedActivities.map(act => {
+                          const isSelected = day.activities.includes(act);
+                          return (
+                            <button key={act}
+                              onClick={() => {
+                                const newActs = isSelected ? day.activities.filter(a => a !== act) : [...day.activities, act];
+                                updateItineraryDay(index, 'activities', newActs);
+                              }}
+                              style={{ 
+                                background: isSelected ? "#ec4899" : "transparent",
+                                color: isSelected ? "white" : ts,
+                                border: `1px solid ${isSelected ? "#ec4899" : border}`,
+                                borderRadius: 20, padding: "4px 10px", fontSize: 11, cursor: "pointer"
+                              }}
+                            >
+                              {act}
+                            </button>
+                          );
+                        })}
+                        {allowedActivities.length === 0 && <span style={{ fontSize: 11, color: ts }}>No activities requested.</span>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <button onClick={addItineraryDay} style={{ background: "transparent", color: "#ec4899", border: "1px dashed #ec4899", borderRadius: 10, padding: "8px 0", width: "100%", fontSize: 12, fontWeight: 700, cursor: "pointer", marginBottom: 12 }}>
+                + Add Stop
+              </button>
+
+              {itineraryErr && <p style={{ fontSize: 12, color: "#ef4444", margin: "0 0 10px" }}>{itineraryErr}</p>}
+              {itinerarySuccess && <p style={{ fontSize: 12, color: "#10b981", margin: "0 0 10px" }}>{itinerarySuccess}</p>}
+              
+              <button onClick={handleSaveItinerary} disabled={itinerarySaving} style={{ background: "#ec4899", color: "white", border: "none", borderRadius: 10, width: "100%", padding: 10, fontSize: 13, fontWeight: 700, cursor: itinerarySaving ? "not-allowed" : "pointer", opacity: itinerarySaving ? 0.7 : 1 }}>
+                {itinerarySaving ? "Saving..." : "Save Itinerary"}
+              </button>
+            </div>
           )}
 
           {/* ── Quote + vehicle assignment (PENDING or QUOTED) ── */}

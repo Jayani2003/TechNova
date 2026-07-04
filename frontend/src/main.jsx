@@ -7,18 +7,22 @@ import { AuthProvider } from './context/AuthContext';
 import { MessagesProvider } from './context/MessagesContext';
 import { BookingsProvider } from './context/BookingsContext.jsx';
 
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <MessagesProvider>
-          <BookingsProvider>
-            <App />
-          </BookingsProvider>
-        </MessagesProvider>
-      </AuthProvider>
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <AuthProvider>
+          <MessagesProvider>
+            <BookingsProvider>
+              <App />
+            </BookingsProvider>
+          </MessagesProvider>
+        </AuthProvider>
+      </GoogleOAuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )
-

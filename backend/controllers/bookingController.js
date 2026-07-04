@@ -1,10 +1,6 @@
-<<<<<<< Updated upstream
-const db = require('../db/connection'); 
-=======
 const db = require('../db/connection');
 const PDFDocument = require('pdfkit');
 const { sendBookingConfirmationEmail, sendBookingReceivedEmail } = require('../utils/emailService');
->>>>>>> Stashed changes
 
 const formatDate = (val) => {
   if (!val) return null;
@@ -268,14 +264,9 @@ const createP2PBooking = async (req, res) => {
 
     res.status(201).json({
       message: 'Booking submitted successfully.',
-<<<<<<< Updated upstream
-      bookingId: result.insertId,
-      bookingRef: `CBT-${isPackageBooking ? 'PKG' : isCustomBooking ? 'CUS' : 'P2P'}-${result.insertId}`,
-=======
       bookingId,
       booking: { id: bookingId },
       bookingRef: bookingRefStr,
->>>>>>> Stashed changes
     });
 
   } catch (err) {

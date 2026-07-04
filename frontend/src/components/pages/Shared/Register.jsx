@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, AlertCircle } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 import authBg from '../../../assets/auth-bg.png';
 import { AuthContext } from '../../../context/AuthContext';
 
@@ -17,7 +18,7 @@ function Register() {
   const [error,  setError]   = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { register } = useContext(AuthContext);
+  const { register, loginWithGoogle } = useContext(AuthContext);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -241,6 +242,38 @@ function Register() {
               {loading ? 'Creating account...' : 'Create Account'}
               <ArrowRight className="ml-2 h-5 w-5" />
             </motion.button>
+
+            <div className="relative my-6 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+              </div>
+              <span className="relative px-4 text-xs uppercase text-slate-400 bg-slate-50 dark:bg-[#1a1a1a]">Or continue with</span>
+            </div>
+
+            <div className="flex justify-center w-full">
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  setError('');
+                  setLoading(true);
+                  try {
+                    await loginWithGoogle(credentialResponse.credential);
+                    navigate('/');
+                  } catch (err) {
+                    setError(err.message || 'Google login failed.');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                onError={() => {
+                  setError('Google Registration Failed');
+                }}
+                useOneTap
+                shape="pill"
+                theme="filled_black"
+                text="continue_with"
+                width="100%"
+              />
+            </div>
             {error && (
               <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                 {error}

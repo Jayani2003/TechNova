@@ -22,17 +22,15 @@
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
+    "google-auth-library": "^10.9.0",
     "jsonwebtoken": "^9.0.3",
+    "jwks-rsa": "^4.1.0",
     "multer": "^2.1.1",
     "multer-storage-cloudinary": "^4.0.0",
-<<<<<<< Updated upstream
-    "mysql2": "^3.22.3"
-=======
     "mysql2": "^3.22.3",
     "nodemailer": "^9.0.3",
     "pdfkit": "^0.17.2",
     "twilio": "^6.0.2"
->>>>>>> Stashed changes
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

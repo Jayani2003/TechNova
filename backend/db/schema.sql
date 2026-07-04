@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS tours;
 CREATE DATABASE tours;
 USE tours;
 
@@ -6,7 +7,7 @@ CREATE TABLE user (
 
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NULL, -- Nullable for Auth0 users
 
     role ENUM('ADMIN','CUSTOMER') DEFAULT 'CUSTOMER',
 
@@ -14,9 +15,12 @@ CREATE TABLE user (
     street_address VARCHAR(255) NULL,
     country VARCHAR(100) NULL,
     zipcode VARCHAR(20) NULL,
+    emergency_name VARCHAR(100) NULL,
+    emergency_phone VARCHAR(20) NULL,
+    emergency_relationship VARCHAR(50) NULL,
 
-    auth_provider ENUM('LOCAL','GOOGLE','FACEBOOK') DEFAULT 'LOCAL',
-    provider_id VARCHAR(255) NULL,
+    auth_provider ENUM('LOCAL','GOOGLE','FACEBOOK','AUTH0') DEFAULT 'AUTH0',
+    provider_id VARCHAR(255) NULL, -- Auth0 user_id (sub)
 
     status ENUM('ACTIVE','BLOCKED') DEFAULT 'ACTIVE',
 

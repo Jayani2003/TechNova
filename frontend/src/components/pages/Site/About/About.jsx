@@ -55,10 +55,10 @@ const About = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-5xl md:text-7xl font-black text-white mb-6 uppercase tracking-tighter"
+            className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight"
           >
             {"Discover Sri Lanka"} <br />
-            <span className="block text-4xl md:text-7xl font-['Playfair_Display'] italic text-transparent bg-clip-text bg-gradient-to-r from-[#40e0d6] via-[#00b0a5] to-[#007a72] mt-4">
+            <span className="text-[#00b0a5] mt-4 inline-block">
               {"In Ultimate Luxury"}
             </span>
           </motion.h1>
@@ -75,7 +75,7 @@ const About = () => {
 
       {/* Stats Section */}
       <section className="relative -mt-16 z-20 px-4 max-w-7xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
+        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-slate-100">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, idx) => (
               <motion.div 
@@ -104,7 +104,7 @@ const About = () => {
             transition={{ duration: 0.8 }}
           >
             <h2 className="text-sm font-bold text-[#00b0a5] tracking-widest uppercase mb-3">{"Our Story"}</h2>
-            <h3 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6 leading-tight">
+            <h3 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
               {"A Legacy of Excellence in Travel"}
             </h3>
             <p className="text-lg text-slate-600 mb-6 leading-relaxed">
@@ -145,7 +145,7 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-sm font-bold text-[#00b0a5] tracking-widest uppercase mb-3">{"The Ceylone Best Tours Difference"}</h2>
-            <h3 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">
+            <h3 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
               {"Why Travel With Us?"}
             </h3>
             <p className="text-lg text-slate-600">

@@ -57,6 +57,7 @@ const mapBooking = (row) => ({
   customerName:   row.customer_name,
   contactPlatform:  row.contact_platform  || null,
   contactNumber:    row.contact_number    || null,
+  customerPhone:    row.contact_number    || null,
   contactPlatform2: row.contact_platform2 || null,
   contactNumber2:   row.contact_number2   || null,
   emergencyName:    row.emergency_name    || null,

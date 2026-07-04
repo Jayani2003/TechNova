@@ -6,7 +6,7 @@ CREATE TABLE user (
 
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NULL,
 
     role ENUM('ADMIN','CUSTOMER') DEFAULT 'CUSTOMER',
 

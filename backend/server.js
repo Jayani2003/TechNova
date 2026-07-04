@@ -66,4 +66,4 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ message: 'Internal server error.' });
 });
 
-app.listen(PORT, () => console.log(`Backend running on ${FRONTEND_ORIGIN}:${PORT}`));
+app.listen(PORT, () => console.log(`Backend running on ${FRONTEND_ORIGIN}:${PORT}`));

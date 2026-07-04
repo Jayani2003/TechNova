@@ -2,6 +2,8 @@ import React, { useState, useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
+import { useGoogleLogin } from '@react-oauth/google';
 import authBg from '../../../assets/auth-bg.png';
 import { AuthContext } from '../../../context/AuthContext';
 
@@ -14,10 +16,31 @@ function Login() {
 	const navigate = useNavigate();
 	
 	const location = useLocation();
-	const { login } = useContext(AuthContext);
+	const { login, loginWithGoogle } = useContext(AuthContext);
 	const params = new URLSearchParams(location.search);
 	const redirectPath = params.get('redirect');
 	const safeRedirect = redirectPath && redirectPath.startsWith('/') ? redirectPath : null;
+
+	const handleGoogleLogin = useGoogleLogin({
+		flow: 'auth-code',
+		onSuccess: async (codeResponse) => {
+			try {
+				setLoading(true);
+				setError('');
+				const user = await loginWithGoogle(codeResponse.code);
+				if (user.role === 'ADMIN') {
+					navigate('/admin/admin-dashboard');
+				} else {
+					navigate(safeRedirect || '/');
+				}
+			} catch (err) {
+				setError(err.message || 'Google login failed.');
+			} finally {
+				setLoading(false);
+			}
+		},
+		onError: errorResponse => setError('Google login failed.'),
+	});
 
 	{/*const handleLogin = (e) => {
 		e.preventDefault();
@@ -173,6 +196,28 @@ function Login() {
 					</div>
 				)}
 			</form>
+
+			<div className="mt-6">
+				<div className="relative">
+					<div className="absolute inset-0 flex items-center">
+						<div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+					</div>
+					<div className="relative flex justify-center text-sm">
+						<span className="px-2 bg-slate-50 dark:bg-[#1a1a1a] text-slate-500">Or continue with</span>
+					</div>
+				</div>
+				<div className="mt-6">
+					<button
+						type="button"
+						onClick={() => handleGoogleLogin()}
+						disabled={loading}
+						className="w-full flex justify-center items-center py-3 px-4 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm text-base font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-[#242424] hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00b0a5] transition-all cursor-pointer"
+					>
+						<FcGoogle className="h-5 w-5 mr-2" />
+						Google
+					</button>
+				</div>
+			</div>
 
 			<p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
 				{"Don't have an account?"}{' '}

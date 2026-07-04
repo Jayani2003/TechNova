@@ -157,6 +157,18 @@ const SuccessScreen = ({ bookingRef, navigate }) => {
   );
 };
 
+const areChildAgesValid = (noOfChildren, agesOfChildren) => {
+  if (!noOfChildren || Number(noOfChildren) <= 0) return true;
+  const ages = String(agesOfChildren || "").split(",").map((age) => age.trim());
+  if (ages.length !== Number(noOfChildren)) return { valid: false, msg: "Please enter ages for all children." };
+  const allValid = ages.every((age) => {
+    if (age === "") return false;
+    const num = Number(age);
+    return Number.isInteger(num) && num >= 0 && num <= 17;
+  });
+  return allValid ? { valid: true } : { valid: false, msg: "Child ages must be numbers between 0 and 17." };
+};
+
 const validateStep = (step, data, user) => {
   switch (step) {
     case 0:
@@ -168,7 +180,7 @@ const validateStep = (step, data, user) => {
     case 1:
       if (data.noOfAdults < 1) return { valid: false, msg: "At least 1 adult is required." };
       if (!data.categoryId) return { valid: false, msg: "Please select a vehicle category." };
-      return { valid: true };
+      return areChildAgesValid(data.noOfChildren, data.agesOfChildren);
     case 2:
       const finalName = data.customerName?.trim() || user?.name?.trim();
       if (!finalName) return { valid: false, msg: "Please enter your full name." };

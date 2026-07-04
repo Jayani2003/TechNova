@@ -135,11 +135,23 @@ const SuccessScreen = ({ bookingRef, navigate }) => {
   );
 };
 
+const areChildAgesValid = (noOfChildren, agesOfChildren) => {
+  if (!noOfChildren || Number(noOfChildren) <= 0) return true;
+  const ages = String(agesOfChildren || "").split(",").map((age) => age.trim());
+  if (ages.length !== Number(noOfChildren)) return false;
+  return ages.every((age) => {
+    if (age === "") return false;
+    const num = Number(age);
+    return Number.isInteger(num) && num >= 0 && num <= 17;
+  });
+};
+
 // ─── Step Validation ──────────────────────────────────────────────────────────
 const validateStep = (step, data) => {
   switch (step) {
     case 0: return data.startDate && data.endDate && data.pickupTime;
-    case 1: return data.noOfAdults >= 1 && data.categoryId;
+    case 1:
+      return data.noOfAdults >= 1 && data.categoryId && areChildAgesValid(data.noOfChildren, data.agesOfChildren);
     case 2: return data.customerName.trim() && (data.contactNumber || '').trim();
     case 3: return true;
     default: return false;

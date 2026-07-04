@@ -3,6 +3,7 @@ import {
   Wifi, ParkingCircle, Droplets, MapPin, UserCheck,
   Fuel, Shield, BedDouble, Check, Clock, Star, Phone
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const inclusions = [
   { icon: Wifi,          label: "Free Wi-Fi in Vehicle" },
@@ -15,13 +16,16 @@ const inclusions = [
   { icon: BedDouble,     label: "Driver Accommodation" },
 ];
 
-const steps = [
-  { title: "Submit Booking",   desc: "Fill the form and submit your transfer request." },
-  { title: "Receive a Quote",  desc: "Our team reviews and sends a price within 24 hours." },
-  { title: "Accept & Confirm", desc: "Accept the quote and we'll assign your vehicle." },
-];
+const P2PSidePanel = () => {
+  const { t } = useTranslation();
 
-const P2PSidePanel = () => (
+  const steps = [
+    { title: t("p2pBooking.sidePanel.step1Title"),   desc: t("p2pBooking.sidePanel.step1Desc") },
+    { title: t("p2pBooking.sidePanel.step2Title"),  desc: t("p2pBooking.sidePanel.step2Desc") },
+    { title: t("p2pBooking.sidePanel.step3Title"), desc: t("p2pBooking.sidePanel.step3Desc") },
+  ];
+
+  return (
   <motion.div
     initial={{ opacity: 0, x: 20 }}
     animate={{ opacity: 1, x: 0 }}
@@ -48,7 +52,7 @@ const P2PSidePanel = () => (
 
     {/* ── How It Works ── */}
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-      <h2 className="text-2xl font-extrabold text-slate-800 mb-5">How It Works</h2>
+      <h2 className="text-2xl font-extrabold text-slate-800 mb-5">{t("p2pBooking.sidePanel.howItWorks")}</h2>
       <div className="space-y-4">
         {steps.map(({ title, desc }, i) => (
           <div key={title} className="flex gap-3">
@@ -69,9 +73,9 @@ const P2PSidePanel = () => (
 
     {/* ── Emergency Assistance ── */}
     <div className="bg-[#00b0a5]/10 border border-[#00b0a5]/20 rounded-2xl p-6">
-      <h3 className="font-extrabold text-slate-800 mb-1">Emergency Assistance</h3>
+      <h3 className="font-extrabold text-slate-800 mb-1">{t("p2pBooking.sidePanel.emergencyTitle")}</h3>
       <p className="text-sm text-slate-600 mb-3">
-        24/7 roadside assistance for all our customers.
+        {t("p2pBooking.sidePanel.emergencyDesc")}
       </p>
       <a
         href="tel:+94778619582"
@@ -84,12 +88,12 @@ const P2PSidePanel = () => (
 
     {/* ── Payment Note ── */}
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center">
-      <p className="text-sm font-bold text-slate-700 mb-1">💳 Payment Policy</p>
-      <p className="text-xs text-slate-500 leading-relaxed">
-        Point-to-Point transfers require a <strong>single full payment</strong> after the tour ends. No upfront payment required.
+      <p className="text-sm font-bold text-slate-700 mb-1">💳 {t("p2pBooking.sidePanel.paymentPolicy")}</p>
+      <p className="text-xs text-slate-500 leading-relaxed" dangerouslySetInnerHTML={{ __html: t("p2pBooking.sidePanel.paymentDesc").replace("single full payment", "<strong>single full payment</strong>").replace("එක් සම්පූර්ණ ගෙවීමක්", "<strong>එක් සම්පූර්ණ ගෙවීමක්</strong>") }}>
       </p>
     </div>
   </motion.div>
-);
+  );
+};
 
 export default P2PSidePanel;

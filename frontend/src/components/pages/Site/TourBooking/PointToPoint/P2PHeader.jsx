@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
-const P2PHeader = () => (
+const P2PHeader = () => {
+  const { t } = useTranslation();
+  return (
   <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
     <motion.img
       initial={{ scale: 1.1 }}
@@ -18,17 +21,18 @@ const P2PHeader = () => (
         transition={{ duration: 0.8 }}
       >
         <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
-          Reliable Transfers
+          {t("p2pBooking.header.tag")}
         </span>
         <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 tracking-tight">
-          Point to <span className="text-[#00b0a5]">Point.</span>
+          {t("p2pBooking.header.title1")} <span className="text-[#00b0a5]">{t("p2pBooking.header.title2")}</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light">
-          Professional drivers and premium vehicles for seamless transfers across Sri Lanka.
+          {t("p2pBooking.header.desc")}
         </p>
       </motion.div>
     </div>
   </section>
-);
+  );
+};
 
 export default P2PHeader;

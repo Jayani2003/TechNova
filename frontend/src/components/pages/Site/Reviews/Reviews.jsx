@@ -6,38 +6,21 @@ import ReviewHero       from './ReviewHero';
 import ReviewStats      from './ReviewStats';
 import ReviewGrid       from './ReviewGrid';
 import ReviewFormModal  from './ReviewFormModal';
-import { mockReviews }  from './reviewsData';
 import { getCountryFlag } from './countryFlags';
 import {
   fetchPublishedReviews,
+  fetchReviewStats,
   fetchReviewableTours,
   createReview,
 } from './reviewsApi';
-
-const STORAGE_KEY = 'ceylon_reviews';
-
-const loadReviews = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : mockReviews;
-  } catch {
-    return mockReviews;
-  }
-};
-
-const saveReviews = (items) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  } catch (e) {
-    console.error('Failed to save reviews:', e);
-  }
-};
 
 const Reviews = () => {
   const { user } = useAuth();
   const { getCustomerBookings } = useBookings();
   const navigate     = useNavigate();
-  const [reviews, setReviews]       = useState(loadReviews);
+  const [reviews, setReviews]       = useState([]);
+  const [filters, setFilters] = useState({ stars: 'All', tourType: '', sort: 'newest' });
+  const [stats, setStats] = useState(null);
   const [userBookings, setUserBookings] = useState([]);
   const [serverReviewableTours, setServerReviewableTours] = useState([]);
   const [modalOpen, setModalOpen]   = useState(false);
@@ -97,13 +80,12 @@ const Reviews = () => {
 
     const loadFromServer = async () => {
       try {
-        const serverReviews = await fetchPublishedReviews();
-        if (!cancelled && serverReviews.length) {
-          setReviews(serverReviews);
-          saveReviews(serverReviews);
+        const serverReviews = await fetchPublishedReviews(filters);
+        if (!cancelled && Array.isArray(serverReviews)) {
+          setReviews(serverReviews.length ? serverReviews : []);
         }
       } catch (e) {
-        console.warn('Using local reviews fallback:', e.message);
+        console.warn('Failed to load reviews:', e.message);
       }
     };
 
@@ -111,6 +93,37 @@ const Reviews = () => {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  // Reload when filters change
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const serverReviews = await fetchPublishedReviews(filters);
+        if (!cancelled && Array.isArray(serverReviews)) {
+          setReviews(serverReviews);
+        }
+      } catch (e) {
+        console.warn('Filter load failed, keeping existing reviews:', e.message);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [filters]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadStats = async () => {
+      try {
+        const s = await fetchReviewStats();
+        if (!cancelled) setStats(s);
+      } catch (e) {
+        console.warn('Failed to load review stats:', e.message);
+      }
+    };
+    loadStats();
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -184,7 +197,13 @@ const Reviews = () => {
 
       const serverReviews = await fetchPublishedReviews();
       setReviews(serverReviews.length ? serverReviews : [newReview, ...reviews]);
-      saveReviews(serverReviews.length ? serverReviews : [newReview, ...reviews]);
+      try {
+        const refreshedStats = await fetchReviewStats();
+        setStats(refreshedStats);
+      } catch (statsError) {
+        console.warn('Failed to refresh review stats after submit:', statsError.message);
+        setStats(null);
+      }
       const tours = user?.email ? await fetchReviewableTours(user.email) : [];
       setServerReviewableTours(tours);
       setModalOpen(false);
@@ -193,12 +212,9 @@ const Reviews = () => {
       return true;
     } catch (e) {
       console.error('Review submit failed:', e);
-      // Fallback keeps UX working when backend is unavailable.
-      setReviews(prev => {
-        const next = [newReview, ...prev];
-        saveReviews(next);
-        return next;
-      });
+      // Fallback keeps UX working when backend is unavailable for this request.
+      setReviews(prev => [newReview, ...prev]);
+      setStats(null);
       setModalOpen(false);
       try { window.dispatchEvent(new Event('reviews:updated')); } catch (err) { /* ignore */ }
       return true;
@@ -215,10 +231,10 @@ const Reviews = () => {
       />
 
       {/* Aggregate stats */}
-      <ReviewStats reviews={reviews} />
+      <ReviewStats reviews={reviews} stats={stats} />
 
       {/* Review grid with filters */}
-      <ReviewGrid reviews={reviews} />
+      <ReviewGrid reviews={reviews} filters={filters} setFilters={setFilters} />
 
       {/* Form modal */}
       <ReviewFormModal

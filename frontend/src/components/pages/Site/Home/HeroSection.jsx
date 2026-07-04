@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const HeroSection = () => {
+  const { t } = useTranslation();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [currentImage, setCurrentImage] = useState(0);
 
@@ -62,16 +64,16 @@ const HeroSection = () => {
 
           <h1 className="mb-8 leading-tight tracking-tighter">
             <span className="block text-6xl md:text-9xl font-black text-white uppercase font-['Inter'] drop-shadow-2xl">
-              Ceylon
+              {t('home.hero.ceylon')}
             </span>
             {/* GRADIENT UPDATED TO #00b0a5 */}
             <span className="block text-5xl md:text-8xl font-['Playfair_Display'] italic text-transparent bg-clip-text bg-gradient-to-r from-[#40e0d6] via-[#00b0a5] to-[#007a72] ml-2 md:ml-4 -mt-2 md:-mt-4">
-              Best Tours
+              {t('home.hero.bestTours')}
             </span>
           </h1>
 
           <p className="text-lg md:text-xl text-gray-400 mb-10 leading-relaxed max-w-md border-l-2 border-[#00b0a5]/40 pl-6">
-            Explore the paradise island with unmatched elegance. From luxury sedans to rugged SUVs, we move your dreams.
+            {t('home.hero.desc')}
           </p>
 
           <div className="flex flex-wrap gap-5">
@@ -85,14 +87,14 @@ const HeroSection = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
               <span className="relative text-white font-extrabold tracking-wider">
-                BOOK YOUR RIDE
+                {t('home.hero.bookRide')}
               </span>
             </button>
             </Link>
 
             <Link to="/vehicle-category">
               <button className="px-10 py-4 border border-white/10 text-white rounded-full font-bold hover:bg-[#00b0a5]/5 backdrop-blur-sm transition-all">
-                EXPLORE FLEET
+                {t('home.hero.exploreFleet')}
               </button>
             </Link>
           </div>
@@ -101,12 +103,12 @@ const HeroSection = () => {
           <div className="mt-16 flex gap-8 items-center border-t border-white/5 pt-10">
             <div>
               <p className="text-3xl font-bold text-white">500+</p>
-              <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">Luxury Vehicles</p>
+              <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">{t('home.hero.luxuryVehicles')}</p>
             </div>
             <div className="w-px h-10 bg-white/10"></div>
             <div>
               <p className="text-3xl font-bold text-white">24/7</p>
-              <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">Island Support</p>
+              <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">{t('home.hero.islandSupport')}</p>
             </div>
           </div>
         </div>
@@ -119,7 +121,7 @@ const HeroSection = () => {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00b0a5] opacity-75"></span>
             <span className="relative inline-flex rounded-full h-3 w-3 bg-[#00b0a5]"></span>
           </span>
-          <p className="text-white text-sm font-medium uppercase tracking-tighter">Live Availability</p>
+          <p className="text-white text-sm font-medium uppercase tracking-tighter">{t('home.hero.liveAvailability')}</p>
         </div>
       </div>
 

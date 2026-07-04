@@ -13,9 +13,26 @@ const handleResponse = async (res) => {
   if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
   return data;
 };
+
+const handleBlobResponse = async (res) => {
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || `Request failed (${res.status})`);
+  }
+
+  const blob = await res.blob();
+  const disposition = res.headers.get('content-disposition') || '';
+  const fileNameMatch = disposition.match(/filename="?([^"]+)"?/i);
+
+  return {
+    blob,
+    fileName: fileNameMatch?.[1] || 'download.pdf',
+  };
+};
  
 export const api = {
   get:    (path)        => fetch(buildApiUrl(path), { headers: getHeaders() }).then(handleResponse),
+  getBlob:(path)        => fetch(buildApiUrl(path), { headers: getHeaders() }).then(handleBlobResponse),
   post:   (path, body)  => fetch(buildApiUrl(path), { method: 'POST',   headers: getHeaders(), body: JSON.stringify(body) }).then(handleResponse),
   put:    (path, body)  => fetch(buildApiUrl(path), { method: 'PUT',    headers: getHeaders(), body: JSON.stringify(body) }).then(handleResponse),
   patch:  (path, body)  => fetch(buildApiUrl(path), { method: 'PATCH',  headers: getHeaders(), body: JSON.stringify(body) }).then(handleResponse),

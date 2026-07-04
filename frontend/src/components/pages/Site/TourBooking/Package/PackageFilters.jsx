@@ -1,6 +1,17 @@
-import { getTypes, getDays } from './packagesData';
+import { useTranslation } from "react-i18next";
 
-// Type icons map — add a new entry when a new type is added to packagesData
+const PACKAGE_TYPES = [
+  'Beach Side',
+  'Hill Country',
+  'Safari',
+  'Cultural Heritage',
+  'Adventure',
+  'Wellness & Ayurveda',
+];
+
+const PACKAGE_DAYS = [7, 14, 21, 28];
+
+// Type icons map — add a new entry when a new package type is introduced.
 const TYPE_ICONS = {
   'Beach Side':          '🏖️',
   'Hill Country':        '🏔️',
@@ -11,8 +22,9 @@ const TYPE_ICONS = {
 };
 
 const PackageFilters = ({ activeType, activeDays, onTypeChange, onDaysChange, total }) => {
-  const types = ['All', ...getTypes()];
-  const days  = ['All', ...getDays()];
+  const { t } = useTranslation();
+  const types = ['All', ...PACKAGE_TYPES];
+  const days  = ['All', ...PACKAGE_DAYS];
 
   return (
     <>
@@ -96,33 +108,33 @@ const PackageFilters = ({ activeType, activeDays, onTypeChange, onDaysChange, to
 
           {/* Type row */}
           <div className="pf-row">
-            <span className="pf-label">Type</span>
-            {types.map(t => (
+            <span className="pf-label">{t("packageTours.filters.typeLabel")}</span>
+            {types.map(tOption => (
               <button
-                key={t}
-                className={`pf-type-btn ${activeType === t ? 'active' : ''}`}
-                onClick={() => onTypeChange(t)}
+                key={tOption}
+                className={`pf-type-btn ${activeType === tOption ? 'active' : ''}`}
+                onClick={() => onTypeChange(tOption)}
               >
-                {TYPE_ICONS[t] && <span>{TYPE_ICONS[t]}</span>}
-                {t}
+                {TYPE_ICONS[tOption] && <span>{TYPE_ICONS[tOption]}</span>}
+                {t(`packageTours.filters.types.${tOption}`)}
               </button>
             ))}
           </div>
 
           {/* Days row + count */}
           <div className="pf-row">
-            <span className="pf-label">Duration</span>
+            <span className="pf-label">{t("packageTours.filters.durationLabel")}</span>
             {days.map(d => (
               <button
                 key={d}
                 className={`pf-day-btn ${activeDays === String(d) ? 'active' : ''}`}
                 onClick={() => onDaysChange(String(d))}
               >
-                {d === 'All' ? 'All Durations' : `${d} Days`}
+                {d === 'All' ? t("packageTours.filters.allDurations") : `${d} ${t("packageTours.filters.days")}`}
               </button>
             ))}
             <span className="pf-count">
-              <span>{total}</span> packages
+              <span>{total}</span> {t("packageTours.filters.packages")}
             </span>
           </div>
 

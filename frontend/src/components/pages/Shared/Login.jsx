@@ -2,7 +2,11 @@ import React, { useState, useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
+<<<<<<< HEAD
 import { GoogleLogin } from '@react-oauth/google';
+=======
+import { useTranslation } from 'react-i18next';
+>>>>>>> origin/dev
 import authBg from '../../../assets/auth-bg.png';
 import { AuthContext } from '../../../context/AuthContext';
 
@@ -13,6 +17,7 @@ function Login() {
 	const [error, setError]               = useState('');
 	const [loading, setLoading]           = useState(false);
 	const navigate = useNavigate();
+	const { t } = useTranslation();
 	const location = useLocation();
 	const { login, loginWithGoogle } = useContext(AuthContext);
 	const params = new URLSearchParams(location.search);
@@ -47,7 +52,7 @@ function Login() {
 			}
  
 		} catch (err) {
-			setError(err.message || 'Invalid email or password. Please try again.');
+			setError(err.message || t('auth.login.invalidEmail'));
 		} finally {
 			setLoading(false);
 		}
@@ -70,8 +75,8 @@ function Login() {
 						animate={{ y: 0, opacity: 1 }}
 						transition={{ delay: 0.5, duration: 0.8 }}
 					>
-						<h1 className="text-4xl font-bold mb-4 tracking-tight">Your Journey Begins Here</h1>
-						<p className="text-lg text-slate-300 max-w-md">Experience the pinnacle of travel with Ceylone Best Tours' premium fleet and bespoke tours.</p>
+						<h1 className="text-4xl font-bold mb-4 tracking-tight">{t('auth.login.journeyBegins')}</h1>
+						<p className="text-lg text-slate-300 max-w-md">{t('auth.login.heroDesc')}</p>
 					</motion.div>
 				</div>
 				<div className="absolute top-8 left-12 z-20">
@@ -97,13 +102,13 @@ function Login() {
 					</div>
 
 					<div className="mb-10 lg:mb-12">
-						<h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Welcome Back</h2>
-						<p className="text-slate-500 dark:text-slate-400">Please enter your details to sign in.</p>
+						<h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{t('auth.login.welcomeBack')}</h2>
+						<p className="text-slate-500 dark:text-slate-400">{t('auth.login.enterDetails')}</p>
 					</div>
 
 					<form onSubmit={handleLogin} className="space-y-6">
 						<div className="space-y-2">
-							<label className="text-sm font-medium text-slate-700 dark:text-slate-300">Email address</label>
+							<label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('auth.login.emailAddress')}</label>
 							<div className="relative">
 								<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
 									<Mail className="h-5 w-5 text-slate-400" />
@@ -121,8 +126,8 @@ function Login() {
 
 						<div className="space-y-2">
 							<div className="flex items-center justify-between">
-								<label className="text-sm font-medium text-slate-700 dark:text-slate-300">Password</label>
-								<a href="#" className="text-sm font-medium text-[#00b0a5] hover:text-[#008f86] transition-colors">Forgot password?</a>
+								<label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('auth.login.password')}</label>
+								<a href="#" className="text-sm font-medium text-[#00b0a5] hover:text-[#008f86] transition-colors">{t('auth.login.forgotPassword')}</a>
 							</div>
 							<div className="relative">
 								<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -154,10 +159,11 @@ function Login() {
 								className="h-4 w-4 text-[#00b0a5] focus:ring-[#00b0a5] border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-[#242424] cursor-pointer"
 							/>
 							<label htmlFor="remember-me" className="ml-2 block text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
-								Remember me for 30 days
+								{t('auth.login.rememberMe')}
 							</label>
 						</div>
 
+<<<<<<< HEAD
 						<div className="relative my-6 flex items-center justify-center">
 							<div className="absolute inset-0 flex items-center">
 								<div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
@@ -194,6 +200,17 @@ function Login() {
 							/>
 						</div>
 
+=======
+						<motion.button
+							whileHover={{ scale: 1.01 }}
+							whileTap={{ scale: 0.99 }}
+							type="submit"
+							className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-slate-900 dark:bg-[#00b0a5] hover:bg-slate-800 dark:hover:bg-[#008f86] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00b0a5] transition-all cursor-pointer"
+						>
+					{loading ? t('auth.login.signingIn') : t('auth.login.signIn')}
+					<ArrowRight className="ml-2 h-5 w-5" />
+				</motion.button>
+>>>>>>> origin/dev
 				{error && (
 					<div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
 						{error}
@@ -202,9 +219,9 @@ function Login() {
 			</form>
 
 			<p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
-				Don't have an account?{' '}
+				{t('auth.login.noAccount')}{' '}
 				<Link to="/register" className="font-semibold text-[#00b0a5] hover:text-[#008f86] transition-colors">
-					Sign up for free
+					{t('auth.login.signUpFree')}
 				</Link>
 			</p>
 		</motion.div>

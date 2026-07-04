@@ -1,5 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { buildApiUrl } from '../../../../../config/api';
+import PackageCard from './PackageCard';
+import { useTranslation } from "react-i18next";
+import LocationWeather from "./LocationWeather";
 
 const TYPE_ICONS = {
   'Beach Side':          '🏖️',
@@ -10,10 +15,47 @@ const TYPE_ICONS = {
   'Wellness & Ayurveda': '🌿',
 };
 
-const PackageDetailModal = ({ pkg, onClose }) => {
-  if (!pkg) return null;
+const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
+  const { t } = useTranslation();
+  const [recommendations, setRecommendations] = useState(null);
+  const [showGuidDetails, setShowGuidDetails] = useState(false);
+
+  const handleRecommendationShowMore = (recPkg) => {
+    if (!onShowMore || !recPkg?.id) return;
+    // Close current modal first, then ask parent to load/show the new package detail.
+    try {
+      onClose && onClose();
+    } catch (e) {
+      // ignore
+    }
+    onShowMore({ id: Number(recPkg.id) || recPkg.id });
+  };
+
+  useEffect(() => {
+    // prefer recommendations already attached to pkg (from parent), else fetch
+    if (pkg?.recommendations) {
+      setRecommendations(pkg.recommendations);
+      return;
+    }
+    let cancelled = false;
+    const load = async () => {
+      if (!pkg?.id) return;
+      try {
+        const res = await fetch(buildApiUrl(`/packages/${pkg.id}/recommendations`));
+        if (!cancelled && res.ok) {
+          const data = await res.json();
+          setRecommendations(data);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [pkg?.id, pkg?.recommendations]);
   const destinations = Array.isArray(pkg.destinations) ? pkg.destinations : [];
   const highlights = Array.isArray(pkg.highlights) ? pkg.highlights : [];
+  const guide = pkg.guid || pkg.guide || null;
 
   return (
     <>
@@ -228,6 +270,115 @@ const PackageDetailModal = ({ pkg, onClose }) => {
           transition: all 0.2s ease;
         }
         .pdm-close-btn:hover { border-color: #00b0a5; color: #00b0a5; }
+        /* Recommendations compact layout */
+        .pdm-rec-group { margin-bottom: 18px; }
+        .pdm-rec-shell {
+          border: 1px solid rgba(0,176,165,0.12);
+          background: linear-gradient(180deg, rgba(236,255,253,0.9) 0%, rgba(255,255,255,0.98) 100%);
+          border-radius: 22px;
+          padding: 14px;
+          box-shadow: 0 10px 28px rgba(0,60,50,0.06);
+        }
+        .pdm-rec-title {
+          display: flex; align-items: center; justify-content: space-between; gap: 12px;
+          margin-bottom: 10px;
+        }
+        .pdm-rec-kicker {
+          font-size: 10px; font-weight: 900;
+          letter-spacing: 0.18em; text-transform: uppercase;
+          color: #0b7f78;
+        }
+        .pdm-rec-pill {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 5px 10px; border-radius: 999px;
+          background: rgba(0,176,165,0.08);
+          color: #00a79d; font-size: 10px; font-weight: 800;
+          letter-spacing: 0.08em; text-transform: uppercase;
+          border: 1px solid rgba(0,176,165,0.14);
+        }
+        .pdm-rec-row {
+          display: flex;
+          gap: 12px;
+          overflow-x: auto;
+          padding-bottom: 6px;
+          align-items: stretch;
+        }
+        .pdm-rec-item {
+          flex: 0 0 auto;
+          min-width: 240px;
+          transition: transform 0.22s ease;
+        }
+        .pdm-rec-item .pkc-card {
+          transform: scale(0.92);
+          transform-origin: top center;
+          transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+        .pdm-rec-item:hover .pkc-card {
+          transform: scale(1);
+          box-shadow: 0 18px 48px rgba(0,60,50,0.16);
+          border-color: rgba(0,176,165,0.22);
+        }
+        .pdm-guid-panel {
+          margin-top: 18px;
+          border: 1px solid rgba(0,176,165,0.12);
+          border-radius: 18px;
+          background: linear-gradient(180deg, rgba(247,255,254,0.92), rgba(255,255,255,0.98));
+          padding: 16px 18px;
+          box-shadow: 0 8px 28px rgba(0,60,50,0.05);
+        }
+        .pdm-guid-toggle {
+          display: flex; align-items: center; gap: 10px;
+          font-size: 13px; font-weight: 800; color: #0d2b2b;
+          letter-spacing: 0.02em;
+        }
+        .pdm-guid-toggle input {
+          width: 16px; height: 16px; accent-color: #00b0a5;
+          flex-shrink: 0;
+        }
+        .pdm-guid-note {
+          margin-top: 8px;
+          font-size: 12px;
+          color: #5a8080;
+        }
+        .pdm-guid-card {
+          margin-top: 14px;
+          display: grid;
+          gap: 12px;
+          border-radius: 16px;
+          padding: 14px;
+          background: #fff;
+          border: 1px solid rgba(0,176,165,0.12);
+        }
+        .pdm-guid-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+        }
+        @media (max-width: 640px) {
+          .pdm-guid-grid { grid-template-columns: 1fr; }
+        }
+        .pdm-guid-field {
+          display: flex; flex-direction: column; gap: 4px;
+        }
+        .pdm-guid-label {
+          font-size: 9px; font-weight: 900;
+          letter-spacing: 0.18em; text-transform: uppercase;
+          color: #7a9a9a;
+        }
+        .pdm-guid-value {
+          font-size: 14px; font-weight: 600;
+          color: #0d2b2b;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+        }
+        @media (min-width: 900px) {
+          .pdm-rec-shell { padding: 16px 18px; }
+          .pdm-rec-row { gap: 18px; }
+          .pdm-rec-item { min-width: 0; }
+          .pdm-rec-item { min-width: 220px; }
+          .pdm-rec-item .pkc-card { transform: scale(0.84); }
+          .pdm-rec-item:hover .pkc-card { transform: scale(0.92); }
+        }
       `}</style>
 
       <AnimatePresence>
@@ -253,11 +404,11 @@ const PackageDetailModal = ({ pkg, onClose }) => {
               <button className="pdm-close" onClick={onClose}>✕</button>
               <div className="pdm-hero-content">
                 <div className="pdm-type-badge">
-                  {TYPE_ICONS[pkg.type]} {pkg.type}
+                  {TYPE_ICONS[pkg.type]} {t(`packageTours.filters.types.${pkg.type}`, pkg.type)}
                 </div>
                 <div className="pdm-title">{pkg.title}</div>
                 <div className="pdm-days-badge">
-                  📅 {pkg.days} Days · {destinations.length} Destinations
+                  📅 {pkg.days} {t("packageTours.modal.days")} · {destinations.length} {t("packageTours.modal.destinations")}
                 </div>
               </div>
             </div>
@@ -274,7 +425,7 @@ const PackageDetailModal = ({ pkg, onClose }) => {
               </div> */}
 
               {/* Destinations */}
-              <div className="pdm-section-heading">Destinations & Itinerary</div>
+              <div className="pdm-section-heading">{t("packageTours.modal.destinationsItinerary")}</div>
               <div className="pdm-dest-grid">
                 {destinations.map((dest, i) => {
                   const activities = Array.isArray(dest.activities) ? dest.activities : [];
@@ -283,7 +434,7 @@ const PackageDetailModal = ({ pkg, onClose }) => {
                       <div className="pdm-dest-img">
                         <img src={dest.image} alt={dest.name} />
                         <div className="pdm-dest-img-overlay" />
-                        <span className="pdm-dest-days">{dest.days} {dest.days === 1 ? 'day' : 'days'}</span>
+                        <span className="pdm-dest-days">{dest.days} {dest.days === 1 ? t("packageTours.modal.day") : t("packageTours.modal.days")}</span>
                       </div>
                       <div className="pdm-dest-info">
                         <div className="pdm-dest-name">
@@ -291,11 +442,12 @@ const PackageDetailModal = ({ pkg, onClose }) => {
                           {dest.name}
                         </div>
                         <div className="pdm-dest-desc">{dest.description}</div>
+                        <LocationWeather locationName={dest.name} />
 
                         {/* Activities */}
                         {activities.length > 0 && (
                           <div className="pdm-activities">
-                            <span className="pdm-activities-label">📍 Activities</span>
+                            <span className="pdm-activities-label">📍 {t("packageTours.modal.activities")}</span>
                             {activities.map((act, ai) => (
                               <div key={ai} className="pdm-activity-item">
                                 <div className="pdm-activity-name">{act.name}</div>
@@ -323,15 +475,115 @@ const PackageDetailModal = ({ pkg, onClose }) => {
                   to={`/tour-booking/package/book?packageId=${pkg.id}&packageTitle=${encodeURIComponent(pkg.title || "Package Tour")}&packageDays=${encodeURIComponent(pkg.days || "")}`}
                   className="pdm-book-btn"
                 >
-                  <span>Book This Package</span>
+                  <span>{t("packageTours.modal.bookBtn")}</span>
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </Link>
                 <button className="pdm-close-btn" onClick={onClose}>
-                  ← Back to packages
+                  {t("packageTours.modal.backBtn")}
                 </button>
               </div>
+
+              <div className="pdm-guid-panel">
+                <label className="pdm-guid-toggle">
+                  <input
+                    type="checkbox"
+                    checked={showGuidDetails}
+                    onChange={e => setShowGuidDetails(e.target.checked)}
+                    disabled={!guide}
+                  />
+                  <span>{t("packageTours.modal.seeGuide")}</span>
+                </label>
+                {!guide && <div className="pdm-guid-note">{t("packageTours.modal.noGuide")}</div>}
+                {showGuidDetails && guide && (
+                  <motion.div
+                    className="pdm-guid-card"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="pdm-guid-grid">
+                      <div className="pdm-guid-field">
+                        <span className="pdm-guid-label">{t("packageTours.modal.guideName")}</span>
+                        <span className="pdm-guid-value">{guide.name}</span>
+                      </div>
+                      <div className="pdm-guid-field">
+                        <span className="pdm-guid-label">{t("packageTours.modal.nic")}</span>
+                        <span className="pdm-guid-value">{guide.nic}</span>
+                      </div>
+                    </div>
+                    <div className="pdm-guid-field">
+                      <span className="pdm-guid-label">{t("packageTours.modal.contactDetails")}</span>
+                      <span className="pdm-guid-value">{guide.contactDetails}</span>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Recommendations */}
+              {recommendations && (
+                <>
+                  <div className="pdm-section-heading">{t("packageTours.modal.recommendedTitle")}</div>
+
+                  <div className="pdm-rec-shell mb-5">
+                    <div className="pdm-rec-title">
+                      <div className="pdm-rec-kicker">{t("packageTours.modal.personalizedPicks")}</div>
+                      <div className="pdm-rec-pill">{t("packageTours.modal.tailoredRecs")}</div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 mb-5">
+                    {/* Same Duration */}
+                    <div>
+                      <div className="text-xs font-extrabold mb-2">{t("packageTours.modal.sameDuration")}</div>
+                      <div className="pdm-rec-row">
+                        {(recommendations.similarByDays || []).slice(0,6).map((r, i) => (
+                          <div key={`sd-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
+                            <PackageCard pkg={r} onShowMore={handleRecommendationShowMore} index={i} showBookButton={false} showDestinationsAction={false} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Same Type */}
+                    <div>
+                      <div className="text-xs font-extrabold mb-2">{t("packageTours.modal.sameType")}</div>
+                      <div className="pdm-rec-row">
+                        {(recommendations.similarByType || []).slice(0,6).map((r, i) => (
+                          <div key={`st-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
+                            <PackageCard pkg={r} onShowMore={handleRecommendationShowMore} index={i} showBookButton={false} showDestinationsAction={false} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Top Rated */}
+                    <div>
+                      <div className="text-xs font-extrabold mb-2">{t("packageTours.modal.topRated")}</div>
+                      <div className="pdm-rec-row">
+                        {(recommendations.topRated || []).slice(0,6).map((r, i) => (
+                          <div key={`tr-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
+                            <PackageCard pkg={r} onShowMore={handleRecommendationShowMore} index={i} showBookButton={false} showDestinationsAction={false} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Most Booked */}
+                    <div>
+                      <div className="text-xs font-extrabold mb-2">{t("packageTours.modal.mostBooked")}</div>
+                      <div className="pdm-rec-row">
+                        {(recommendations.mostBooked || []).slice(0,6).map((r, i) => (
+                          <div key={`mb-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
+                            <PackageCard pkg={r} onShowMore={handleRecommendationShowMore} index={i} showBookButton={false} showDestinationsAction={false} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </motion.div>
         </motion.div>

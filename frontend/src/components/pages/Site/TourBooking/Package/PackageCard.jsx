@@ -1,5 +1,7 @@
 import { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { CalendarDays } from "lucide-react";
 
 const TYPE_COLORS = {
   'Beach Side':          '#0099cc',
@@ -19,7 +21,8 @@ const TYPE_ICONS = {
   'Wellness & Ayurveda': '🌿',
 };
 
-const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
+const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDestinationsAction = true }) => {
+  const { t } = useTranslation();
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -34,7 +37,9 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
   const accentColor = TYPE_COLORS[pkg.type] || '#00b0a5';
   const destinations = Array.isArray(pkg.destinations) ? pkg.destinations : [];
   const highlights = Array.isArray(pkg.highlights) ? pkg.highlights : [];
-  const topDests = destinations.slice(0, 3);
+  const topDests = destinations.slice(0, 2);
+  const availability = pkg.availability || {};
+  const isAvailable = availability.status !== 'UNAVAILABLE';
 
   return (
     <>
@@ -106,13 +111,37 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
 
         /* Days badge */
         .pkc-days-badge {
-          position: absolute; top: 14px; right: 14px; z-index: 2;
+          display: inline-flex; align-items: center; gap: 5px;
           background: rgba(0,176,165,0.92); backdrop-filter: blur(8px);
           border: 1px solid rgba(255,255,255,0.25);
           color: #fff; font-size: 9px; font-weight: 800;
           letter-spacing: 0.15em; text-transform: uppercase;
           padding: 5px 12px; border-radius: 100px;
           box-shadow: 0 4px 12px rgba(0,176,165,0.35);
+        }
+        .pkc-availability-badge {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 6px 10px; border-radius: 100px;
+          border: 1px solid rgba(255,255,255,0.2);
+          background: rgba(0,0,0,0.44); backdrop-filter: blur(10px);
+          color: #fff; font-size: 9px; font-weight: 900;
+          letter-spacing: 0.15em; text-transform: uppercase;
+          box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+        }
+        .pkc-availability-badge.available {
+          background: rgba(16,185,129,0.92);
+          box-shadow: 0 6px 14px rgba(16,185,129,0.25);
+        }
+        .pkc-availability-badge.unavailable {
+          background: rgba(204,51,68,0.92);
+          box-shadow: 0 6px 14px rgba(204,51,68,0.25);
+        }
+        .pkc-availability-icon {
+          display: inline-flex; align-items: center; justify-content: center;
+        }
+        .pkc-badge-stack {
+          position: absolute; top: 14px; right: 14px; z-index: 2;
+          display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
         }
 
         /* Destination mini-chips on image bottom */
@@ -221,18 +250,38 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
 
           <div className="pkc-type-badge">
             <span className="pkc-type-dot" style={{ background: accentColor }} />
-            {TYPE_ICONS[pkg.type]} {pkg.type}
+            {TYPE_ICONS[pkg.type]} {t(`packageTours.filters.types.${pkg.type}`, pkg.type)}
           </div>
-          <div className="pkc-days-badge">📅 {pkg.days} Days</div>
+          <div className="pkc-badge-stack">
+            <div className={`pkc-availability-badge ${isAvailable ? 'available' : 'unavailable'}`}>
+              <span className="pkc-availability-icon"><CalendarDays size={11} /></span>
+              <span>{isAvailable ? t('packageTours.card.available') : t('packageTours.card.unavailable')}</span>
+            </div>
+            <div className="pkc-days-badge">📅 {pkg.days} {t("packageTours.card.days")}</div>
+          </div>
 
-          <div className="pkc-dest-chips">
-            {topDests.map(d => (
-              <span key={d.name} className="pkc-dest-chip">{d.name}</span>
-            ))}
-            {destinations.length > 3 && (
-              <span className="pkc-dest-more">+{destinations.length - 3} more</span>
-            )}
-          </div>
+
+          {showDestinationsAction ? (
+            <button type="button" onClick={() => onShowMore?.(pkg)}>
+              <div className="pkc-dest-chips">
+                {topDests.map(d => (
+                  <span key={d.name} className="pkc-dest-chip">{d.name}</span>
+                ))}
+                {(pkg.hidden_dest_count > 0 || destinations.length > 2) && (
+                  <span className="pkc-dest-more">+{pkg.hidden_dest_count ?? Math.max(0, destinations.length - 2)} {t("packageTours.card.more")}</span>
+                )}
+              </div>
+            </button>
+          ) : (
+            <div className="pkc-dest-chips">
+              {topDests.map(d => (
+                <span key={d.name} className="pkc-dest-chip">{d.name}</span>
+              ))}
+              {(pkg.hidden_dest_count > 0 || destinations.length > 2) && (
+                <span className="pkc-dest-more">+{pkg.hidden_dest_count ?? Math.max(0, destinations.length - 2)} {t("packageTours.card.more")}</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Content */}
@@ -249,14 +298,16 @@ const PackageCard = ({ pkg, onShowMore, index = 0 }) => {
           <div className="pkc-rule" />
 
           <div className="pkc-actions">
-            <Link to={`/tour-booking/package/book?packageId=${pkg.id}&packageTitle=${encodeURIComponent(pkg.title || "Package Tour")}&packageDays=${encodeURIComponent(pkg.days || "")}`} className="pkc-book-btn">
-              Book Now
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </Link>
-            <button className="pkc-more-btn" onClick={() => onShowMore(pkg)}>
-              Details
+            {showBookButton && (
+              <Link to={`/tour-booking/package/book?packageId=${pkg.id}&packageTitle=${encodeURIComponent(pkg.title || "Package Tour")}&packageDays=${encodeURIComponent(pkg.days || "")}`} className="pkc-book-btn">
+                {t("packageTours.card.bookBtn")}
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+            )}
+            <button type="button" className="pkc-more-btn" onClick={() => onShowMore?.(pkg)} style={showBookButton ? undefined : { width: '100%' }}>
+              {t("packageTours.card.detailsBtn")}
             </button>
           </div>
         </div>

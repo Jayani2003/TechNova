@@ -4,26 +4,26 @@ import { useOutletContext, useNavigate } from "react-router-dom";
 import { CalendarCheck, Clock, CheckCircle2, MessageSquare } from "lucide-react";
 
 const STATS = [
-  { label: "Total Bookings",  value: 248, delta: "+12 this week", color: "#00b0a5", icon: CalendarCheck },
-  { label: "Pending",         value: 34,  delta: "Needs review",  color: "#f59e0b", icon: Clock         },
-  { label: "Confirmed",       value: 189, delta: "76.2% rate",    color: "#10b981", icon: CheckCircle2  },
-  { label: "Unread Messages", value: 8,   delta: "3 urgent",      color: "#6366f1", icon: MessageSquare },
+  { label: "Total Bookings", value: 248, delta: "+12 this week", color: "#00b0a5", icon: CalendarCheck },
+  { label: "Pending", value: 34, delta: "Needs review", color: "#f59e0b", icon: Clock },
+  { label: "Confirmed", value: 189, delta: "76.2% rate", color: "#10b981", icon: CheckCircle2 },
+  { label: "Unread Messages", value: 8, delta: "3 urgent", color: "#6366f1", icon: MessageSquare },
 ];
 
 const BOOKINGS = [
-  { id: "BK-001", guest: "Arjun Perera",   tour: "Sigiriya Rock Safari",     date: "Apr 24, 2026", amount: "$340", status: "confirmed" },
-  { id: "BK-002", guest: "Sophie Martin",  tour: "Whale Watching Mirissa",   date: "Apr 25, 2026", amount: "$210", status: "pending"   },
-  { id: "BK-003", guest: "Yuki Tanaka",    tour: "Ella Train & Tea Estate",  date: "Apr 26, 2026", amount: "$155", status: "confirmed" },
-  { id: "BK-004", guest: "Carlos Romero",  tour: "Kandy Cultural Triangle",  date: "Apr 27, 2026", amount: "$280", status: "pending"   },
-  { id: "BK-005", guest: "Aisha Rahman",   tour: "Yala Safari Adventure",    date: "Apr 28, 2026", amount: "$420", status: "cancelled" },
-  { id: "BK-006", guest: "James O'Brien",  tour: "Galle Fort Heritage Walk", date: "Apr 29, 2026", amount: "$95",  status: "confirmed" },
+  { id: "BK-001", guest: "Arjun Perera", tour: "Sigiriya Rock Safari", date: "Apr 24, 2026", amount: "$340", status: "confirmed" },
+  { id: "BK-002", guest: "Sophie Martin", tour: "Whale Watching Mirissa", date: "Apr 25, 2026", amount: "$210", status: "pending" },
+  { id: "BK-003", guest: "Yuki Tanaka", tour: "Ella Train & Tea Estate", date: "Apr 26, 2026", amount: "$155", status: "confirmed" },
+  { id: "BK-004", guest: "Carlos Romero", tour: "Kandy Cultural Triangle", date: "Apr 27, 2026", amount: "$280", status: "pending" },
+  { id: "BK-005", guest: "Aisha Rahman", tour: "Yala Safari Adventure", date: "Apr 28, 2026", amount: "$420", status: "cancelled" },
+  { id: "BK-006", guest: "James O'Brien", tour: "Galle Fort Heritage Walk", date: "Apr 29, 2026", amount: "$95", status: "confirmed" },
 ];
 
 const STATUS_BARS = [
   { label: "Confirmed", pct: 76, color: "#10b981" },
-  { label: "Pending",   pct: 14, color: "#f59e0b" },
-  { label: "Cancelled", pct: 6,  color: "#ef4444" },
-  { label: "Completed", pct: 4,  color: "#00b0a5" },
+  { label: "Pending", pct: 14, color: "#f59e0b" },
+  { label: "Cancelled", pct: 6, color: "#ef4444" },
+  { label: "Completed", pct: 4, color: "#00b0a5" },
 ];
 
 function StatCard({ label, value, delta, color, icon: Icon, dark, index }) {
@@ -107,7 +107,7 @@ function ProgressBar({ label, pct, color, dark, delay }) {
 function StatusChip({ status }) {
   const map = {
     confirmed: "bg-emerald-500/10 text-emerald-600",
-    pending:   "bg-amber-400/10 text-amber-600",
+    pending: "bg-amber-400/10 text-amber-600",
     cancelled: "bg-red-500/10 text-red-500",
   };
   return (
@@ -196,7 +196,7 @@ export default function AdminDashboard() {
                 className={[
                   "w-full text-left px-3 py-2 rounded-lg border text-[13px] font-medium mb-2 last:mb-0 transition-all duration-150",
                   dark ? "border-white/8 text-slate-300 hover:border-[#00b0a5] hover:text-[#00b0a5]"
-                       : "border-slate-200 text-slate-600 hover:border-[#00b0a5] hover:text-[#00b0a5]",
+                    : "border-slate-200 text-slate-600 hover:border-[#00b0a5] hover:text-[#00b0a5]",
                 ].join(" ")}
               >
                 {action}

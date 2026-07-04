@@ -1,10 +1,10 @@
 import { useState, useContext } from "react";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Send, Lock, CheckCircle, AlertCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Send, Lock, MapPin, CheckCircle } from "lucide-react";
 import { AuthContext } from "../../../../../context/AuthContext";
-import { submitP2PBooking, updateBooking } from "../../../../../services/bookingService";
-import P2PHeader from "./P2PHeader";
+import { api } from "../../../../../config/api";
 import BookingStepIndicator from "../Booking/BookingStepIndicator";
 import P2PTripStep from "./P2PTripStep";
 import BookingPassengersStep from "../Booking/BookingPassengersStep";
@@ -15,102 +15,119 @@ import P2PSidePanel from "./P2PSidePanel";
 const STEPS = ["Trip Details", "Passengers", "More Info", "Review"];
  
 const initialData = {
-  tourType:       "P2P",
-  startLocation:  "",
-  endLocation:    "",
-  startDate:      "",
-  endDate:        "",
-  pickupTime:     "",
-  totalDays:      0,
-  daysRequired:   0,
-  noOfAdults:     1,
-  noOfChildren:   0,
+  tourType: "P2P",
+  startLocation: "",
+  endLocation: "",
+  startDate: "",
+  endDate: "",
+  pickupTime: "",
+  totalDays: 0,
+  daysRequired: 0,
+  noOfAdults: 1,
+  noOfChildren: 0,
   agesOfChildren: "",
   babySeatNeeded: false,
-  smallLuggages:  0,
-  largeLuggages:  0,
-  categoryId:     "",
-  customerName:   "",
-  customerPhone:  "",
-  notes:          "",
+  categoryId: "",
+  luggage10kg: 0,
+  luggage25kg: 0,
+  luggage35kg: 0,
+  luggageCustomCount: 0,
+  luggageCustomItems: [],
+  customerName: "",
+  contactPlatform:  "mobile",
+  contactNumber:   "",
+  contactPlatform2: "",
+  contactNumber2:  "",
+  emergencyName: "",
+  emergencyPhone: "",
+  emergencyRelationship: "",
+  notes: "",
 };
  
 // ─── Guest Guard ──────────────────────────────────────────────────────────────
-const GuestGuard = ({ navigate }) => (
-  <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+// ─── Guest Guard ──────────────────────────────────────────────────────────────
+const GuestGuard = ({ navigate }) => {
+  const { t } = useTranslation();
+  return (
+  <div className="min-h-screen bg-[#FFF8F0] flex items-center justify-center px-4">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center max-w-md w-full"
+      className="bg-white rounded-2xl border border-[#F5820D]/10 shadow-sm p-10 text-center max-w-md w-full"
     >
-      <div className="w-16 h-16 bg-[#00b0a5]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-        <Lock className="w-8 h-8 text-[#00b0a5]" />
+      <div className="w-16 h-16 bg-[#F5820D]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+        <Lock className="w-8 h-8 text-[#F5820D]" />
       </div>
-      <h2 className="text-2xl font-extrabold text-slate-800 mb-2">Login Required</h2>
-      <p className="text-slate-500 text-sm mb-6">
-        You need to be logged in to place a booking.
+      <h2 className="text-2xl font-extrabold text-[#2C2F3A] mb-2">{t("p2pBooking.guestGuard.title")}</h2>
+      <p className="text-[#6B7280] text-sm mb-6">
+        {t("p2pBooking.guestGuard.desc")}
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button
           onClick={() => navigate("/login")}
-          className="bg-[#00b0a5] hover:bg-[#009b91] text-white px-6 py-3 rounded-xl font-semibold transition-colors cursor-pointer"
+          className="bg-[#F5820D] hover:bg-[#C85A00] text-white px-6 py-3 rounded-xl font-semibold transition-colors cursor-pointer"
         >
-          Login
+          {t("p2pBooking.guestGuard.login")}
         </button>
         <button
           onClick={() => navigate("/register")}
-          className="border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
+          className="border border-[#F5820D]/15 text-[#2C2F3A] px-6 py-3 rounded-xl font-semibold hover:bg-[#FFF8F0] transition-colors cursor-pointer"
         >
-          Register
+          {t("p2pBooking.guestGuard.register")}
         </button>
       </div>
     </motion.div>
   </div>
-);
+  );
+};
  
 // ─── Success Screen ───────────────────────────────────────────────────────────
-const SuccessScreen = ({ bookingRef, navigate }) => (
+// ─── Success Screen ───────────────────────────────────────────────────────────
+const SuccessScreen = ({ bookingId, navigate }) => {
+  const { t } = useTranslation();
+  return (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5 }}
     className="text-center"
   >
-    <div className="w-20 h-20 bg-[#00b0a5]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-      <CheckCircle className="w-10 h-10 text-[#00b0a5]" />
+    <div className="w-20 h-20 bg-[#F5820D]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+      <CheckCircle className="w-10 h-10 text-[#F5820D]" />
     </div>
-    <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight mb-3">
-      Booking Submitted!
+    <h2 className="text-2xl font-extrabold text-[#2C2F3A] tracking-tight mb-3">
+      {t("p2pBooking.success.title")}
     </h2>
-    <p className="text-slate-500 text-sm mb-2">Your booking reference is:</p>
-    <p className="text-lg font-bold text-[#00b0a5] mb-8">{bookingRef}</p>
-    <div className="bg-slate-50 rounded-2xl p-5 mb-6 text-left space-y-2">
+    <p className="text-[#6B7280] text-sm mb-2">{t("p2pBooking.success.ref")}</p>
+    <p className="text-lg font-bold text-[#F5820D] mb-8">{bookingId}</p>
+    <div className="bg-[#FFF8F0] rounded-2xl p-5 mb-6 text-left space-y-2">
       {[
-        "Your booking is now PENDING review",
-        "Our team will send a price quote within 24 hours",
-        "You can track your booking status from your profile",
+        t("p2pBooking.success.step1"),
+        t("p2pBooking.success.step2"),
+        t("p2pBooking.success.step3"),
       ].map((s, i) => (
-        <div key={i} className="flex items-start gap-2 text-sm text-slate-600">
-          <span className="text-[#00b0a5] font-bold flex-shrink-0">✓</span>
+        <div key={i} className="flex items-start gap-2 text-sm text-[#2C2F3A]/70">
+          <span className="text-[#F5820D] font-bold flex-shrink-0">✓</span>
           {s}
         </div>
       ))}
     </div>
     <button
       onClick={() => navigate("/user/profile")}
-      className="w-full bg-[#00b0a5] hover:bg-[#009b91] text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 tracking-wide cursor-pointer"
+      className="w-full bg-[#F5820D] hover:bg-[#C85A00] text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 tracking-wide cursor-pointer"
     >
-      View My Bookings
+      {t("p2pBooking.success.viewBookings")}
     </button>
   </motion.div>
-);
+  );
+};
  
-// ─── Step Validation ──────────────────────────────────────────────────────────
+// ─── Validation ───────────────────────────────────────────────────────────────
 const validateStep = (step, data) => {
   switch (step) {
     case 0: return data.startLocation.trim() && data.endLocation.trim() && data.startDate && data.endDate && data.pickupTime;
     case 1: return data.noOfAdults >= 1 && data.categoryId;
-    case 2: return data.customerName.trim() && data.customerPhone.trim();
+    case 2: return data.customerName.trim() && (data.contactNumber || '').trim();
     case 3: return true;
     default: return false;
   }
@@ -118,73 +135,78 @@ const validateStep = (step, data) => {
  
 // ─── Main Component ───────────────────────────────────────────────────────────
 const PointToPoint = () => {
+  const { t } = useTranslation();
   const { user } = useContext(AuthContext);
-  const navigate  = useNavigate();
-  const location = useLocation();
-  const editBooking = location.state?.editBooking || null;
- 
+  const navigate = useNavigate();
+
   const [currentStep, setCurrentStep] = useState(0);
-  const [data, setData] = useState(() => {
-    if (editBooking) {
-      // Parse pickup time from notes
-      const pickupTimeMatch = editBooking.notes?.match(/Pickup time: ([^|]+)/);
-      const cleanNotes = editBooking.notes
-        ?.replace(/Pickup time: [^|]+\|?\s*/g, '')
-        ?.replace(/Activities: [^|]+\|?\s*/g, '')
-        ?.replace(/Cities: [^|]+\|?\s*/g, '')
-        ?.trim();
-
-      // Extract small and large luggage from luggage string
-      const luggageMatch = editBooking.noOfLuggages?.match(/Small: (\d+), Large: (\d+)/);
-
-      return {
-        ...initialData,
-        ...editBooking,
-        pickupTime: pickupTimeMatch ? pickupTimeMatch[1].trim() : "",
-        notes: cleanNotes || "",
-        smallLuggages: luggageMatch ? parseInt(luggageMatch[1]) : 0,
-        largeLuggages: luggageMatch ? parseInt(luggageMatch[2]) : 0,
-        babySeatNeeded: editBooking.noOfLuggages?.includes("Baby seat needed") || false,
-      };
-    }
-    return initialData;
+  const [maxReachedStep, setMaxReachedStep] = useState(0);
+  const [data, setData] = useState({
+    ...initialData,
+    customerName: user?.name || "",
   });
-  const [submitted, setSubmitted]     = useState(false);
-  const [bookingRef, setBookingRef]   = useState("");
-  const [submitting, setSubmitting]   = useState(false);
-  const [error, setError]             = useState("");
- 
+  const [submitted, setSubmitted] = useState(false);
+  const [bookingId, setBookingId] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
   if (!user) return <GuestGuard navigate={navigate} />;
- 
+
   const handleChange = (field, value) => setData((prev) => ({ ...prev, [field]: value }));
-  const handleNext   = () => { if (validateStep(currentStep, data)) setCurrentStep((s) => s + 1); };
-  const handleBack   = () => { setError(""); setCurrentStep((s) => s - 1); };
- 
-  // ── Submit to real backend ──────────────────────────────────────────────────
+  const handleNext = () => {
+    if (validateStep(currentStep, data)) {
+      setCurrentStep((s) => {
+        const next = s + 1;
+        setMaxReachedStep((m) => Math.max(m, next));
+        return next;
+      });
+    }
+  };
+  const handleBack = () => setCurrentStep((s) => s - 1);
+
+  const CATEGORY_LABELS = {
+    mini_car: "Mini Car", normal_car: "Normal Car", sedan_car: "Sedan Car",
+    mpv: "MPV", suv: "SUV", mini_van: "Mini Van", van: "Van", large_van: "Large Van",
+  };
+
   const handleSubmit = async () => {
     setSubmitting(true);
-    setError("");
+    setSubmitError("");
     try {
-      if (editBooking) {
-        await updateBooking(editBooking.id, {
-          ...data,
-          customerEmail: user.email,
-          tourType: "P2P",
-        });
-        setBookingRef(editBooking.bookingRef || editBooking.id);
-        setSubmitted(true);
-        window.scrollTo({ top: 200, behavior: "smooth" });
-      } else {
-        const result = await submitP2PBooking({
-          ...data,
-          customerEmail: user.email,
-          tourType: "P2P",
-        });
-        setBookingRef(result.bookingRef);
-        setSubmitted(true);
-      }
+      const result = await api.post("/bookings/p2p", {
+        tourType: "P2P",
+        startLocation: data.startLocation,
+        endLocation: data.endLocation,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        pickupTime: data.pickupTime,
+        totalDays: data.totalDays,
+        daysRequired: data.daysRequired,
+        categoryId: CATEGORY_LABELS[data.categoryId] || data.categoryId,
+        noOfAdults: data.noOfAdults,
+        noOfChildren: data.noOfChildren,
+        agesOfChildren: data.agesOfChildren,
+        babySeatNeeded: data.babySeatNeeded,
+        luggage10kg: data.luggage10kg || 0,
+        luggage25kg: data.luggage25kg || 0,
+        luggage35kg: data.luggage35kg || 0,
+        luggageCustomCount: data.luggageCustomCount || 0,
+        luggageCustomItems: data.luggageCustomItems || [],
+        customerName: data.customerName,
+        contactPlatform:  data.contactPlatform  || "whatsapp",
+        contactNumber:    data.contactNumber,
+        contactPlatform2: data.contactPlatform2 || null,
+        contactNumber2:   data.contactNumber2   || null,
+        customerEmail: user.email,
+        emergencyName: data.emergencyName,
+        emergencyPhone: data.emergencyPhone,
+        emergencyRelationship: data.emergencyRelationship,
+        notes: data.notes,
+      });
+      setBookingId(result.bookingId || "");
+      setSubmitted(true);
     } catch (err) {
-      setError(err.message || "Submission failed. Please try again.");
+      setSubmitError(err.message || "Submission failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -193,41 +215,52 @@ const PointToPoint = () => {
   const canProceed = validateStep(currentStep, data);
  
   return (
-    <div className="min-h-screen bg-slate-50 pb-16">
-      <P2PHeader />
+    <div className="min-h-screen bg-[#FFF8F0] pb-16">
  
-      <div className="max-w-6xl mx-auto px-4 mt-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* ── Page Title ── */}
+      <div className="text-center py-12 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#F5820D] rounded-full">
+            <MapPin className="w-3 h-3" /> {t("p2pBooking.form.title")}
+          </span>
+          <h1 className="text-5xl md:text-7xl font-extrabold text-[#2C2F3A] mb-4 tracking-tight">
+            {t("p2pBooking.form.mainTitle1")} <span className="text-[#F5820D]">{t("p2pBooking.form.mainTitle2")}</span>
+          </h1>
+          <p className="text-lg text-[#6B7280] max-w-xl mx-auto font-light">
+            {t("p2pBooking.form.mainDesc")}
+          </p>
+        </motion.div>
+      </div>
  
-          {/* ── Left: Form ── */}
+      <div className="max-w-6xl mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+        >
+          {/* ── Left: Booking Form ── */}
           <div className="lg:col-span-2 space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8"
+              className="bg-white rounded-2xl border border-[#F5820D]/10 shadow-sm p-8"
             >
               {submitted ? (
-                <SuccessScreen bookingRef={bookingRef} navigate={navigate} />
+                <SuccessScreen bookingId={bookingId} navigate={navigate} />
               ) : (
                 <>
-                  <BookingStepIndicator steps={STEPS} currentStep={currentStep} />
- 
-                  {editBooking && (
-                    <div className="mb-6 flex items-center justify-between bg-amber-50 border border-amber-100 rounded-2xl px-5 py-2.5">
-                      <p className="text-sm font-bold text-amber-800">Editing Booking: {editBooking.id}</p>
-                      <button 
-                        onClick={() => {
-                          setData(initialData);
-                          setCurrentStep(0);
-                          navigate(location.pathname, { replace: true, state: {} });
-                        }}
-                        className="text-xs font-bold text-amber-600 hover:text-amber-700 cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  )}
+                  <BookingStepIndicator
+                    steps={t("p2pBooking.form.steps", { returnObjects: true })}
+                    currentStep={currentStep}
+                    maxReachedStep={maxReachedStep}
+                    onStepClick={(idx) => setCurrentStep(idx)}
+                  />
  
                   <AnimatePresence mode="wait">
                     <motion.div
@@ -244,54 +277,41 @@ const PointToPoint = () => {
                     </motion.div>
                   </AnimatePresence>
  
-                  {/* Error message */}
-                  {error && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-4 flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm"
-                    >
-                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                      {error}
-                    </motion.div>
-                  )}
- 
                   {/* Navigation */}
-                  <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
+                  <div className="flex items-center justify-between mt-8 pt-6 border-t border-[#F5820D]/10">
                     <button
                       onClick={handleBack}
                       disabled={currentStep === 0}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#F5820D]/15 text-[#2C2F3A]/70 font-semibold hover:bg-[#FFF8F0] transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                     >
-                      <ChevronLeft className="w-4 h-4" /> Back
+                      <ChevronLeft className="w-4 h-4" /> {t("p2pBooking.form.backBtn")}
                     </button>
  
                     {currentStep < STEPS.length - 1 ? (
                       <button
                         onClick={handleNext}
                         disabled={!canProceed}
-                        className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#00b0a5] hover:bg-[#009b91] text-white font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                        className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#F5820D] hover:bg-[#C85A00] text-white font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                       >
-                        Next <ChevronRight className="w-4 h-4" />
+                        {t("p2pBooking.form.nextBtn")} <ChevronRight className="w-4 h-4" />
                       </button>
                     ) : (
-                      <button
-                        onClick={handleSubmit}
-                        disabled={submitting}
-                        className="flex items-center gap-2 px-7 py-3 rounded-xl bg-[#00b0a5] hover:bg-[#009b91] text-white font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
-                      >
-                        {submitting ? (
-                          <>
-                            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                            </svg>
-                            Submitting...
-                          </>
-                        ) : (
-                          <><Send className="w-4 h-4" /> Submit Booking</>
+                      <>
+                        {submitError && (
+                          <p className="text-sm text-red-500 text-center mb-2">{submitError}</p>
                         )}
-                      </button>
+                        <button
+                          onClick={handleSubmit}
+                          disabled={submitting}
+                          className="w-full bg-[#F5820D] hover:bg-[#C85A00] disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 tracking-wide cursor-pointer"
+                        >
+                          {submitting ? (
+                            <><span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block" /> {t("p2pBooking.form.submitting")}</>
+                          ) : (
+                            <><Send className="w-4 h-4" /> {t("p2pBooking.form.submitBtn")}</>
+                          )}
+                        </button>
+                      </>
                     )}
                   </div>
                 </>
@@ -303,7 +323,7 @@ const PointToPoint = () => {
           <div className="lg:col-span-1">
             <P2PSidePanel />
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

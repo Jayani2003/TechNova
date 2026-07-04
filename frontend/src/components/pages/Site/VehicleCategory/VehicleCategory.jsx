@@ -1,122 +1,177 @@
-import React, { useState, useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import CategoryHero from './CategoryHero';
-import CategoryGrid from './CategoryGrid';
-import VehicleDisplay from './VehicalDisplay';
+import CategoryShowcase from './CategoryShowcase';
+import VehicleFilters from './VehicleFilters';
+import { categoryService, vehicleService } from '../../../../services/vehicleService';
 
-const CATEGORY_DATA = [
-    { id: 1, title: 'Luxury Sedan', icon: '🚘', tagline: 'Executive comfort', description: 'Premium sedans for business travel.', features: ['Leather interior', 'Professional chauffeur'] },
-    { id: 2, title: 'SUV', icon: '🚙', tagline: 'Space and power', description: 'Spacious SUVs suited for family outings.', features: ['7-seater options', 'Large cargo space'] },
-    { id: 3, title: 'Van', icon: '🚐', tagline: 'Group mobility', description: 'Reliable vans for team transport.', features: ['High roof comfort', 'Flexible seating'] },
-    { id: 4, title: 'Mini Car', icon: '🚗', tagline: 'City friendly', description: 'Compact vehicles ideal for quick city trips.', features: ['Fuel efficient', 'Easy parking'] }
-];
+const OurFleet = () => {
+    // State
+    const [categories, setCategories] = useState([]);
+    const [vehicles, setVehicles] = useState([]);
+    // Loading states
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
 
-const VEHICLE_INVENTORY = [
-    { id: 101, categoryId: 1, name: "Mercedes-Benz E-Class", price: "120", image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=800", specs: { seats: 5, transmission: "Auto" } },
-    { id: 102, categoryId: 1, name: "BMW 5 Series", price: "115", image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=800", specs: { seats: 5, transmission: "Auto" } },
-    { id: 201, categoryId: 2, name: "Range Rover Sport", price: "210", image: "https://images.unsplash.com/photo-1606611013016-969c19ba27bb?auto=format&fit=crop&q=80&w=800", specs: { seats: 7, transmission: "4x4" } },
-    { id: 301, categoryId: 3, name: "Toyota Hiace", price: "160", image: "https://images.unsplash.com/photo-1486006920555-c77dcf18193c?auto=format&fit=crop&q=80&w=800", specs: { seats: 12, transmission: "Manual" } },
-    { id: 401, categoryId: 4, name: "Toyota Yaris", price: "70", image: "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80&w=800", specs: { seats: 5, transmission: "Auto" } }
-];
+    // Filter state
+    const [filters, setFilters] = useState({
+        search: '',
+        passenger_capacity: '',
+        luggage_capacity: '',
+        trip_type: '',
+        comfort_level: '',
+        sortBy: 'default',
+    });
 
-function VehicleCategory() {
-    const navigate = useNavigate();
-    const [selectedCategory, setSelectedCategory] = useState(null);
-
-    // Prevent background scrolling when modal is open
-    useEffect(() => {
-        if (selectedCategory) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
+    // Fetch categories
+    const fetchCategories = useCallback(async () => {
+        try {
+            setCategoriesLoading(true);
+            const response = await categoryService.getAll();
+            if (response.success) {
+                setCategories(response.data);
+            }
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        } finally {
+            setCategoriesLoading(false);
         }
-    }, [selectedCategory]);
+    }, []);
 
-    const filteredVehicles = selectedCategory
-        ? VEHICLE_INVENTORY.filter(v => v.categoryId === selectedCategory.id)
-        : [];
+    // Fetch vehicles
+    const fetchVehicles = useCallback(async () => {
+        try {
+            const response = await vehicleService.getAll();
+            if (response.success) {
+                const userVisibleVehicles = (response.data || []).filter((vehicle) => !vehicle.insurance_expired);
+                setVehicles(userVisibleVehicles);
+            }
+        } catch (error) {
+            console.error('Error fetching vehicles:', error);
+        }
+    }, []);
 
-    const handleBookNow = (cat) => {
-        navigate('/tour-booking', {
-            state: { categoryId: cat.id, categoryTitle: cat.title }
+    // Initial load
+    useEffect(() => {
+        fetchCategories();
+        fetchVehicles();
+    }, [fetchCategories, fetchVehicles]);
+
+
+
+    // Filter categories based on the same filters
+    const filteredCategories = useMemo(() => {
+        let result = [...categories];
+
+        if (filters.search) {
+            const searchLower = filters.search.toLowerCase();
+            result = result.filter((cat) => {
+                return (
+                    (cat.name && cat.name.toLowerCase().includes(searchLower)) ||
+                    (cat.ideal_trip_types && cat.ideal_trip_types.toLowerCase().includes(searchLower)) ||
+                    (cat.best_for && cat.best_for.toLowerCase().includes(searchLower)) ||
+                    (cat.description && cat.description.toLowerCase().includes(searchLower))
+                );
+            });
+        }
+
+        if (filters.passenger_capacity) {
+            const val = filters.passenger_capacity.toLowerCase();
+            result = result.filter((cat) => cat.passenger_capacity && cat.passenger_capacity.toLowerCase().includes(val));
+        }
+
+        if (filters.luggage_capacity) {
+            const val = filters.luggage_capacity.toLowerCase();
+            result = result.filter((cat) => cat.luggage_capacity && cat.luggage_capacity.toLowerCase().includes(val));
+        }
+
+        if (filters.trip_type) {
+            const val = filters.trip_type.toLowerCase();
+            result = result.filter((cat) => cat.ideal_trip_types && cat.ideal_trip_types.toLowerCase().includes(val));
+        }
+
+        if (filters.comfort_level) {
+            const val = filters.comfort_level.toLowerCase();
+            result = result.filter((cat) => cat.comfort_level && cat.comfort_level.toLowerCase().includes(val));
+        }
+
+        if (filters.sortBy === 'name_asc') {
+            result.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (filters.sortBy === 'name_desc') {
+            result.sort((a, b) => b.name.localeCompare(a.name));
+        }
+
+        return result;
+    }, [categories, filters]);
+
+    // Compute unique options for filters based on current data
+    const filterOptions = useMemo(() => {
+        const passenger = new Set();
+        const luggage = new Set();
+        const tripType = new Set();
+        const comfort = new Set();
+
+        categories.forEach(cat => {
+            if (cat.passenger_capacity) passenger.add(cat.passenger_capacity.trim());
+            if (cat.luggage_capacity) luggage.add(cat.luggage_capacity.trim());
+            if (cat.comfort_level) comfort.add(cat.comfort_level.trim());
+            if (cat.ideal_trip_types) {
+                cat.ideal_trip_types.split(',').forEach(t => {
+                    const trimmed = t.trim();
+                    if (trimmed) tripType.add(trimmed);
+                });
+            }
         });
-    };
+
+        return {
+            passenger_capacities: [...passenger].sort(),
+            luggage_capacities: [...luggage].sort(),
+            trip_types: [...tripType].sort(),
+            comfort_levels: [...comfort].sort(),
+        };
+    }, [categories]);
 
     return (
-        <div className="bg-slate-50 min-h-screen selection:bg-[#00b0a5]/20">
+        <div className="min-h-screen bg-gray-50">
+
+            {/* Hero Section */}
             <CategoryHero />
 
-            <CategoryGrid
-                data={CATEGORY_DATA}
-                onSelect={(cat) => setSelectedCategory(cat)}
-                onBookNow={handleBookNow}
-            />
+            {/* Main Content */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                {/* Filters */}
+                <div className="mb-8">
+                    <VehicleFilters
+                        filters={filters}
+                        onFilterChange={setFilters}
+                        totalCount={filteredCategories.length}
+                        filterOptions={filterOptions}
+                    />
+                </div>
 
-            {/* PROFESSIONAL POPUP OVERLAY */}
-            <AnimatePresence>
-                {selectedCategory && (
-                    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-6 lg:p-12">
+                {/* Category Showcase Display */}
+                <div className="space-y-8">
+                    {filteredCategories.map((category) => {
+                        const categoryVehicles = vehicles.filter(v => v.category_id === category.id);
+                        return (
+                            <CategoryShowcase 
+                                key={category.id} 
+                                category={category} 
+                                vehicles={categoryVehicles} 
+                            />
+                        );
+                    })}
+                    {filteredCategories.length === 0 && !categoriesLoading && (
+                        <div className="text-center py-12 text-gray-500">
+                            No categories match your selected filters.
+                        </div>
+                    )}
+                </div>
 
-                        {/* 1. High-End Backdrop */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setSelectedCategory(null)}
-                            className="absolute inset-0 bg-slate-950/40 backdrop-blur-xl"
-                        />
 
-                        {/* 2. Modal Window */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 100, scale: 0.98 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 100, scale: 0.98 }}
-                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="relative bg-white w-full max-w-7xl h-[94vh] md:h-auto md:max-h-[90vh] overflow-hidden rounded-t-[2.5rem] md:rounded-[2rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] flex flex-col"
-                        >
-                            {/* Decorative Mobile Handle */}
-                            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-4 md:hidden" />
+            </div>
 
-                        
-                            {/* Gallery Content Area */}
-                            <div className="flex-1 overflow-y-auto no-scrollbar bg-[#fcfcfc] px-6 md:px-10 py-5">
-                                {filteredVehicles.length > 0 ? (
-                                    <div className="max-w-6xl mx-auto mt-4">
-                                        <VehicleDisplay
-                                            vehicles={filteredVehicles}
-                                            categoryTitle={selectedCategory.title}
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center py-32 text-center">
-                                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 border border-slate-100">
-                                            <span className="text-4xl opacity-20">🚘</span>
-                                        </div>
-                                        <h3 className="text-xl font-bold text-slate-800 tracking-tight">No Inventory Found</h3>
-                                        <p className="text-slate-500 mt-2 max-w-xs mx-auto">We are currently updating our {selectedCategory.title} collection.</p>
-                                    </div>
-                                )}
-                            </div>
 
-                            {/* Professional Footer */}
-                            <div className="px-8 py-5 border-t border-slate-100 bg-white flex justify-between items-center">
-                                <span className="hidden md:inline text-xs font-medium text-slate-400 uppercase tracking-widest">
-                                    Ceylon Best Tours © 2026
-                                </span>
-                                <button
-                                    onClick={() => setSelectedCategory(null)}
-                                    className="w-full md:w-auto px-10 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-[#00b0a5] transition-all duration-300 transform active:scale-95 shadow-lg shadow-slate-200"
-                                >
-                                    CLOSE GALLERY
-                                </button>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
         </div>
     );
-}
+};
 
-export default VehicleCategory;
+export default OurFleet;

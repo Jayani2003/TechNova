@@ -1,13 +1,79 @@
-import { getAggregateStats } from './reviewsData';
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-const StarIcon = ({ filled }) => (
-  <svg width="18" height="18" viewBox="0 0 18 18" fill={filled ? '#00b0a5' : 'none'} stroke="#00b0a5" strokeWidth="1.5">
-    <path d="M9 1.5l2.1 4.3 4.7.7-3.4 3.3.8 4.7L9 12.1l-4.2 2.4.8-4.7-3.4-3.3 4.7-.7L9 1.5z"/>
-  </svg>
+const StarIcon = ({ fillPercent = 0, delayMs = 0 }) => (
+  <span className="rs-star">
+    <svg width="100%" height="100%" viewBox="0 0 18 18" fill="none" stroke="#f5b301" strokeWidth="0.50">
+      <path d="M9 1.5l2.1 4.3 4.7.7-3.4 3.3.8 4.7L9 12.1l-4.2 2.4.8-4.7-3.4-3.3 4.7-.7L9 1.5z"/>
+    </svg>
+    <span
+      className="rs-star-fill"
+      style={{
+        width: `${Math.max(0, Math.min(100, fillPercent))}%`,
+        transitionDelay: `${delayMs}ms`,
+      }}
+    >
+      <svg width="100%" height="100%" viewBox="0 0 18 18" fill="#f5b301" stroke="#f5b301" strokeWidth="0.50">
+        <path d="M9 1.5l2.1 4.3 4.7.7-3.4 3.3.8 4.7L9 12.1l-4.2 2.4.8-4.7-3.4-3.3 4.7-.7L9 1.5z"/>
+      </svg>
+    </span>
+  </span>
 );
 
-const ReviewStats = ({ reviews }) => {
-  const { avg, total, breakdown } = getAggregateStats(reviews);
+const getAggregateStats = (reviews = []) => {
+  if (!Array.isArray(reviews) || !reviews.length) {
+    return { total: 0, average: 0, breakdown: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } };
+  }
+  const total = reviews.length;
+  const breakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  let ratingSum = 0;
+  reviews.forEach((r) => {
+    const key = Number(r.stars || 0);
+    if (breakdown[key] != null) {
+      breakdown[key] += 1;
+      ratingSum += key;
+    }
+  });
+  return { total, average: total ? ratingSum / total : 0, breakdown };
+};
+
+const ReviewStats = ({ reviews, stats }) => {
+  const { t } = useTranslation();
+  const fallback = getAggregateStats(reviews);
+  const total = Number(stats?.total ?? fallback.total) || 0;
+  const average = Number(stats?.avg ?? stats?.average ?? fallback.average) || 0;
+  const [animatedTotal, setAnimatedTotal] = useState(0);
+  const [animatedAverage, setAnimatedAverage] = useState(0);
+
+  useEffect(() => {
+    let rafId = 0;
+    const start = performance.now();
+    const duration = 1100;
+
+    const tick = (now) => {
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setAnimatedTotal(Math.round(total * eased));
+      setAnimatedAverage(Number((average * eased).toFixed(1)));
+
+      if (progress < 1) {
+        rafId = requestAnimationFrame(tick);
+      }
+    };
+
+    setAnimatedTotal(0);
+    setAnimatedAverage(0);
+    rafId = requestAnimationFrame(tick);
+
+    return () => cancelAnimationFrame(rafId);
+  }, [average, total]);
+
+  const starWidths = Array.from({ length: 5 }, (_, index) => {
+    const starNumber = index + 1;
+    if (animatedAverage >= starNumber) return 100;
+    if (animatedAverage > index) return Math.round((animatedAverage - index) * 100);
+    return 0;
+  });
 
   return (
     <>
@@ -19,91 +85,109 @@ const ReviewStats = ({ reviews }) => {
         @media(max-width:768px){ .rs-wrap { padding: 36px 16px 0; } }
 
         .rs-card {
-          background: #fff;
-          border: 1px solid rgba(0,176,165,0.14);
-          border-radius: 24px;
-          padding: 40px 48px;
-          display: grid;
-          grid-template-columns: auto 1fr;
-          gap: 52px;
+          background:
+            radial-gradient(circle at top left, rgba(0,176,165,0.14), transparent 42%),
+            linear-gradient(180deg, rgba(255,255,255,0.98), #ffffff);
+          border: 1px solid rgba(0,176,165,0.16);
+          border-radius: 28px;
+          padding: 40px 44px;
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
           align-items: center;
-          box-shadow: 0 4px 32px rgba(0,176,165,0.07);
+          box-shadow: 0 18px 50px rgba(0,60,50,0.08);
         }
         @media(max-width:768px){
-          .rs-card { grid-template-columns: 1fr; gap: 28px; padding: 28px 20px; text-align: center; }
+          .rs-card { gap: 18px; padding: 28px 20px; text-align: center; }
         }
 
-        /* Left — big number */
-        .rs-score {
-          display: flex; flex-direction: column; align-items: center;
-          gap: 8px; min-width: 160px;
+        .rs-header {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          width: 100%;
         }
-        .rs-number {
-          font-size: 5rem; font-weight: 800;
-          color: #0d2b2b; letter-spacing: -0.05em; line-height: 1;
+        .rs-title {
+          font-size: 25px;
+          font-weight: 800;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          color: #4f6f6c;
         }
-        .rs-number span { color: #00b0a5; }
-        .rs-stars { display: flex; gap: 3px; }
-        .rs-total {
-          font-size: 11px; font-weight: 700;
-          letter-spacing: 0.18em; text-transform: uppercase;
-          color: #5a8080;
+        .rs-rating-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          flex-wrap: wrap;
         }
-
-        /* Right — breakdown bars */
-        .rs-bars { display: flex; flex-direction: column; gap: 10px; }
-        .rs-bar-row {
-          display: flex; align-items: center; gap: 12px;
+        .rs-stars {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
         }
-        .rs-bar-label {
-          font-size: 11px; font-weight: 700;
-          color: #3a5a5a; width: 36px; text-align: right; flex-shrink: 0;
+        .rs-star {
+          position: relative;
+          display: inline-block;
+          width: 80px;
+          height: 80px;
+          flex: 0 0 auto;
         }
-        .rs-bar-track {
-          flex: 1; height: 8px; border-radius: 100px;
-          background: rgba(0,176,165,0.1); overflow: hidden;
+        .rs-star-fill {
+          position: absolute;
+          inset: 0 auto 0 0;
+          overflow: hidden;
+          transition: width 900ms cubic-bezier(0.22,1,0.36,1);
         }
-        .rs-bar-fill {
-          height: 100%; border-radius: 100px;
-          background: linear-gradient(90deg, #00b0a5, #00ddd0);
-          transition: width 1s cubic-bezier(0.22,1,0.36,1);
+        .rs-rating-value {
+          font-size: 40px;
+          font-weight: 900;
+          color: #0d2b2b;
+          letter-spacing: -0.03em;
+          line-height: 1;
         }
-        .rs-bar-count {
-          font-size: 11px; font-weight: 600; color: #5a8080;
-          width: 24px; flex-shrink: 0;
+        .rs-rating-out-of {
+          font-size: 19px;
+          font-weight: 800;
+          color: #4f6f6c;
+        }
+        .rs-based-on {
+          font-size: 21px;
+          font-weight: 650;
+          color: #5d7776;
+        }
+        .rs-based-on strong {
+          color: #0d2b2b;
+          font-weight: 800;
+        }
+        .rs-fine-print {
+          font-size: 12px;
+          font-weight: 600;
+          color: #6c8a88;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
         }
       `}</style>
 
       <div className="rs-wrap">
         <div className="rs-card">
-          {/* Left */}
-          <div className="rs-score">
-            <div className="rs-number">
-              {avg}<span>/5</span>
+          <div className="rs-header">
+            {/* <div className="rs-title">{t("reviews.stats.summary")}</div> */}
+             <div className="rs-title">RATINGS</div>
+            <div className="rs-rating-row" aria-label={`${average.toFixed(1)} out of 5 stars`}>
+              <div className="rs-stars" aria-hidden="true">
+                {starWidths.map((fillPercent, index) => (
+                  <StarIcon key={index} fillPercent={fillPercent} delayMs={index * 90} />
+                ))}
+              </div>
+              <div className="rs-rating-value">
+                {animatedAverage.toFixed(1)}<span className="rs-rating-out-of">/5</span>
+              </div>
             </div>
-            <div className="rs-stars">
-              {[1,2,3,4,5].map(i => (
-                <StarIcon key={i} filled={i <= Math.round(Number(avg))} />
-              ))}
+            <div className="rs-based-on">
+              {t("reviews.stats.basedOn")} <strong>{animatedTotal}</strong> {t("reviews.stats.travelers")}
             </div>
-            <div className="rs-total">{total} Customer Reviews</div>
-          </div>
-
-          {/* Right */}
-          <div className="rs-bars">
-            {[5,4,3,2,1].map(star => {
-              const count = breakdown[star] || 0;
-              const pct   = total ? Math.round((count / total) * 100) : 0;
-              return (
-                <div key={star} className="rs-bar-row">
-                  <div className="rs-bar-label">{'★'.repeat(star)}</div>
-                  <div className="rs-bar-track">
-                    <div className="rs-bar-fill" style={{ width: `${pct}%` }} />
-                  </div>
-                  <div className="rs-bar-count">{count}</div>
-                </div>
-              );
-            })}
           </div>
         </div>
       </div>

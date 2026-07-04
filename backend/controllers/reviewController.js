@@ -134,6 +134,47 @@ const getPublishedReviews = async (_req, res) => {
   }
 };
 
+const getReviewStats = async (_req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `
+      SELECT
+        COUNT(*) AS total_reviews,
+        COALESCE(SUM(rating), 0) AS rating_sum,
+        COALESCE(AVG(rating), 0) AS average_rating,
+        SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END) AS five_star_reviews,
+        SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END) AS four_star_reviews,
+        SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END) AS three_star_reviews,
+        SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END) AS two_star_reviews,
+        SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END) AS one_star_reviews
+      FROM review
+      `
+    );
+
+    const row = rows[0] || {};
+    const breakdown = {
+      5: Number(row.five_star_reviews) || 0,
+      4: Number(row.four_star_reviews) || 0,
+      3: Number(row.three_star_reviews) || 0,
+      2: Number(row.two_star_reviews) || 0,
+      1: Number(row.one_star_reviews) || 0,
+    };
+    const total = Number(row.total_reviews) || 0;
+    const average = Number(row.average_rating) || 0;
+
+    res.json({
+      total,
+      ratingSum: Number(row.rating_sum) || 0,
+      avg: average,
+      average,
+      breakdown,
+    });
+  } catch (error) {
+    console.error('getReviewStats failed:', error);
+    res.status(500).json({ message: 'Failed to load review stats.' });
+  }
+};
+
 const getReviewableTours = async (req, res) => {
   const { email } = req.query;
   if (!email) {
@@ -285,6 +326,7 @@ const createReview = async (req, res) => {
 
 module.exports = {
   getPublishedReviews,
+  getReviewStats,
   getReviewableTours,
   createReview,
 };

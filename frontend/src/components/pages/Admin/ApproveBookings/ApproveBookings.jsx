@@ -1,6 +1,6 @@
 // components/pages/Admin/ApproveBookings/ApproveBookings.jsx
 import { useState, useEffect } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useLocation } from "react-router-dom";
 import { useBookings } from "../../../../context/BookingsContext";
 import { STATUS_CFG } from "./BookingConstants";
 import BookingFilters from "./BookingFilters";
@@ -10,13 +10,26 @@ import BookingModal   from "./BookingModal";
 export default function ApproveBookings() {
   const context = useOutletContext();
   const dark = context?.dark ?? false;
+  const location = useLocation();
 
   const { bookings, getAllBookings, setQuotedPrice, updateBookingStatus } = useBookings();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getAllBookings().finally(() => setLoading(false));
-  }, []);
+    getAllBookings()
+      .then((fetchedBookings) => {
+        if (location.state?.bookingId) {
+          const targetId = location.state.bookingId;
+          const found = fetchedBookings.find(
+            b => b.id === targetId || String(b.booking_id) === String(targetId) || b.id?.toLowerCase() === targetId.toLowerCase()
+          );
+          if (found) {
+            setSelected(found);
+          }
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [location.state, getAllBookings]);
 
   const [search,       setSearch]      = useState("");
   const [statusFilter, setStatus]      = useState("ALL");

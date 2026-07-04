@@ -57,7 +57,13 @@ const initialData = {
   largeLuggages:  0,
   categoryId:     "",
   customerName:   "",
-  customerPhone:  "",
+  contactPlatform:  "mobile",
+  contactNumber:   "",
+  contactPlatform2: "",
+  contactNumber2:  "",
+  emergencyName: "",
+  emergencyPhone: "",
+  emergencyRelationship: "",
   notes:          "",
   tourThoughts:   "",
 };
@@ -165,16 +171,7 @@ const validateStep = (step, data) => {
       return { valid: true };
     case 2:
       if (!data.customerName.trim()) return { valid: false, msg: "Please enter your full name." };
-      if (!data.customerPhone.trim()) return { valid: false, msg: "Please enter your phone number." };
-      
-
-      if (data.customerPhone.startsWith("+94")) {
-        const numberPart = data.customerPhone.split(" ")[1] || "";
-        const cleanNumber = numberPart.replace(/\s/g, "");
-        if (cleanNumber.length !== 9) {
-          return { valid: false, msg: "Sri Lankan phone numbers must have exactly 9 digits after +94." };
-        }
-      }
+      if (!(data.contactNumber || '').trim()) return { valid: false, msg: "Please enter your contact number." };
       return { valid: true };
     case 3:
       return { valid: true };
@@ -395,7 +392,7 @@ const Customized = () => {
         babySeatNeeded: editBooking.noOfLuggages?.includes("Baby seat needed") || false,
       };
     }
-    return initialData;
+    return { ...initialData, customerName: user?.name || "" };
   });
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedActivity, setSelectedActivity] = useState("");

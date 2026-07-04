@@ -1,4 +1,10 @@
+<<<<<<< Updated upstream
 const db = require('../db/connection'); 
+=======
+const db = require('../db/connection');
+const PDFDocument = require('pdfkit');
+const { sendBookingConfirmationEmail, sendBookingReceivedEmail } = require('../utils/emailService');
+>>>>>>> Stashed changes
 
 const formatDate = (val) => {
   if (!val) return null;
@@ -231,10 +237,45 @@ const createP2PBooking = async (req, res) => {
 
     await conn.commit();
 
+    const tourTypeLabel = isPackageBooking ? 'PACKAGE' : isCustomBooking ? 'CUSTOM' : 'P2P';
+    const bookingRefStr = `CBT-${isPackageBooking ? 'PKG' : isCustomBooking ? 'CUS' : 'P2P'}-${bookingId}`;
+
+    // Send "Booking Received" email asynchronously
+    (async () => {
+      try {
+        const [userRows] = await db.execute(
+          'SELECT email FROM user WHERE user_id = ? LIMIT 1',
+          [req.user.id]
+        );
+        if (userRows.length > 0 && userRows[0].email) {
+          await sendBookingReceivedEmail(
+            {
+              booking_id: bookingId,
+              customer_name: customerName,
+              tour_type: tourTypeLabel,
+              start_date: startDate,
+              end_date: endDate,
+              no_of_adults: noOfAdults || 1,
+              no_of_children: noOfChildren || 0,
+            },
+            userRows[0].email
+          );
+        }
+      } catch (mailErr) {
+        console.error('[Email Trigger] Failed to send booking received email:', mailErr);
+      }
+    })();
+
     res.status(201).json({
       message: 'Booking submitted successfully.',
+<<<<<<< Updated upstream
       bookingId: result.insertId,
       bookingRef: `CBT-${isPackageBooking ? 'PKG' : isCustomBooking ? 'CUS' : 'P2P'}-${result.insertId}`,
+=======
+      bookingId,
+      booking: { id: bookingId },
+      bookingRef: bookingRefStr,
+>>>>>>> Stashed changes
     });
 
   } catch (err) {
@@ -349,6 +390,32 @@ const updateStatus = async (req, res) => {
 
     if (result.affectedRows === 0)
       return res.status(404).json({ message: 'Booking not found.' });
+
+    // Send confirmation email asynchronously if status changes to ACCEPTED or CONFIRMED
+    if (status === 'ACCEPTED' || status === 'CONFIRMED') {
+      (async () => {
+        try {
+          const [bookingRows] = await db.execute(
+            `SELECT b.*, u.email, u.name as customer_name, vc.category_name, p.title as package_name
+             FROM booking b
+             JOIN user u ON b.user_id = u.user_id
+             LEFT JOIN vehicle_category vc ON vc.category_id = b.category_id
+             LEFT JOIN booking_package bp ON bp.booking_id = b.booking_id
+             LEFT JOIN package p ON p.package_id = bp.package_id
+             WHERE b.booking_id = ?
+             LIMIT 1`,
+            [id]
+          );
+
+          if (bookingRows.length > 0 && bookingRows[0].email) {
+            const booking = bookingRows[0];
+            await sendBookingConfirmationEmail(booking, booking.email);
+          }
+        } catch (mailErr) {
+          console.error('[Email Trigger] Failed to send booking confirmation email:', mailErr);
+        }
+      })();
+    }
 
     res.json({ message: `Booking status updated to ${status}.` });
   } catch (err) {

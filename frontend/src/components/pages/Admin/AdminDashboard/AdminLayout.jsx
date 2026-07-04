@@ -3,8 +3,6 @@ import { useState, useEffect, useContext } from "react";
 import { NavLink, Link, Outlet, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../../context/AuthContext";
 import { Sun, Moon, Home, User, LogIn } from "lucide-react";
-import { useBookings } from "../../../../context/BookingsContext";
-import { useMessages } from "../../../../context/MessagesContext";
 
 const NAV_ITEMS = [
   { label: "Overview",  path: "/admin/admin-dashboard",  id: "overview", badge: 0  },
@@ -29,29 +27,7 @@ export default function AdminLayout() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const { getPendingCount, getPendingPaymentsCount, getAllBookings, getAllPayments } = useBookings();
-  const { getAdminNotificationCount } = useMessages();
-
-  const pendingBookings = getPendingCount ? getPendingCount() : 0;
-  const pendingPayments = getPendingPaymentsCount ? getPendingPaymentsCount() : 0;
-  const pendingMessages = getAdminNotificationCount ? getAdminNotificationCount() : 0;
-
-  const getBadgeValue = (id) => {
-    if (id === "bookings") return pendingBookings;
-    if (id === "payments") return pendingPayments;
-    if (id === "messages") return pendingMessages;
-    return 0;
-  };
-
   const handleLogout = () => { logout(); navigate("/"); };
-
-  // Prefetch data for badges on mount
-  useEffect(() => {
-    if (user && ["ADMIN", "SUPER_ADMIN", "STAFF"].includes(user.role)) {
-      getAllBookings().catch(console.error);
-      getAllPayments().catch(console.error);
-    }
-  }, [user, getAllBookings, getAllPayments]);
 
   // body/root CSS that conflicts with admin full-width layout
   useEffect(() => {
@@ -279,33 +255,30 @@ export default function AdminLayout() {
           overflowX: "auto",
           fontSize: 14,            
         }}>
-          {NAV_ITEMS.map(({ label, path, id }) => {
-            const badge = getBadgeValue(id);
-            return (
-              <NavLink
-                key={id}
-                to={path}
-                className={({ isActive }) => tabClass(isActive, dark)}
-              >
-                {label}
-                {badge > 0 && (
-                  <span
-                    className={id === "messages" ? "bg-indigo-500" : "bg-amber-400"}
-                    style={{
-                      minWidth: 18, height: 16, padding: "0 5px",
-                      fontSize: 9, fontWeight: 900, color: "white",
-                      borderRadius: 9999,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      lineHeight: 1,
-                      animation: "pulse-badge 2s infinite",
-                    }}
-                  >
-                    {badge}
-                  </span>
-                )}
-              </NavLink>
-            );
-          })}
+          {NAV_ITEMS.map(({ label, path, id, badge }) => (
+            <NavLink
+              key={id}
+              to={path}
+              className={({ isActive }) => tabClass(isActive, dark)}
+            >
+              {label}
+              {badge > 0 && (
+                <span
+                  className={id === "messages" ? "bg-indigo-500" : "bg-amber-400"}
+                  style={{
+                    minWidth: 18, height: 16, padding: "0 5px",
+                    fontSize: 9, fontWeight: 900, color: "white",
+                    borderRadius: 9999,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    lineHeight: 1,
+                    animation: "pulse-badge 2s infinite",
+                  }}
+                >
+                  {badge}
+                </span>
+              )}
+            </NavLink>
+          ))}
         </div>
 
       </div>

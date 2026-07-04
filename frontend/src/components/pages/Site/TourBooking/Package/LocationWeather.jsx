@@ -1,47 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CloudRain, Wind, Calendar, RefreshCw, AlertTriangle } from "lucide-react";
 import WeatherModal, { getWeatherInfo } from "./WeatherModal";
-
-// ─── Geocode a location name → { latitude, longitude } ────────────────────────
-// Tries the exact name first, then with ", Sri Lanka" appended for local context.
-const geocodeLocation = async (name) => {
-  const trySearch = async (query) => {
-    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=3&language=en&format=json`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Geocoding API returned ${res.status}`);
-    const data = await res.json();
-    return data.results && data.results.length > 0 ? data.results[0] : null;
-  };
-
-  // 1st attempt: exact name
-  let result = await trySearch(name);
-  if (result) return result;
-
-  // 2nd attempt: add "Sri Lanka" as context hint
-  result = await trySearch(`${name}, Sri Lanka`);
-  if (result) return result;
-
-  return null;
-};
-
-// ─── Fetch weather forecast for coords ────────────────────────────────────────
-const fetchForecast = async (latitude, longitude) => {
-  const url = [
-    `https://api.open-meteo.com/v1/forecast`,
-    `?latitude=${latitude}`,
-    `&longitude=${longitude}`,
-    `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m`,
-    `&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,weather_code,wind_speed_10m`,
-    `&timezone=auto`,
-    `&forecast_days=7`,
-  ].join('');
-
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Weather API returned ${res.status}`);
-  const data = await res.json();
-  if (!data.current) throw new Error("Unexpected weather response format");
-  return data;
-};
+import { loadLocationWeather } from "../../../../../services/weatherService";
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const LocationWeather = ({ locationName }) => {
@@ -67,21 +27,11 @@ const LocationWeather = ({ locationName }) => {
       setResolvedName(null);
 
       try {
-        // Step 1 – Geocode
-        const geo = await geocodeLocation(locationName);
-        if (!geo) {
-          throw new Error(`Location "${locationName}" not found. Please check the place name.`);
-        }
-
-        const { latitude, longitude, name, country } = geo;
-        const displayName = [name, country].filter(Boolean).join(", ");
-
-        // Step 2 – Weather
-        const data = await fetchForecast(latitude, longitude);
+        const { displayName, weatherData } = await loadLocationWeather(locationName);
 
         if (active) {
           setResolvedName(displayName);
-          setWeatherData(data);
+          setWeatherData(weatherData);
           setLoading(false);
         }
       } catch (err) {

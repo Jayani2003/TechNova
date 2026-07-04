@@ -157,6 +157,13 @@ const MyBookingDetail = ({ booking, onBack }) => {
             <p className="text-sm font-bold text-slate-800 mb-1">Price Quote Received!</p>
             <p className="text-2xl font-bold text-[#00b0a5] mb-1">${booking.quotedPrice}</p>
 
+            {booking.adminNote && (
+              <div className="bg-white rounded-xl border border-blue-100 px-4 py-3 mb-3">
+                <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Note from Admin</p>
+                <p className="text-sm font-medium text-slate-700 italic">"{booking.adminNote}"</p>
+              </div>
+            )}
+
             {/* Show assigned vehicle to customer */}
             {booking.assignedVehicle && (
               <div className="bg-white rounded-xl border border-blue-100 px-4 py-3 mb-3">
@@ -185,6 +192,14 @@ const MyBookingDetail = ({ booking, onBack }) => {
               </button>
             </div>
           </div>
+        )}
+
+        {booking.adminNote && ["CONFIRMED", "TOUR_STARTED", "COMPLETED", "CLOSED"].includes(booking.status) && (
+          <Section title="Admin's Note" accent>
+            <div className="bg-[#00b0a5]/5 border border-[#00b0a5]/10 rounded-xl p-4 mt-1">
+              <p className="text-sm font-medium text-slate-700 italic">"{booking.adminNote}"</p>
+            </div>
+          </Section>
         )}
 
         {/* ── CONFIRMED — show vehicle info ── */}

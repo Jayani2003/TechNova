@@ -45,9 +45,9 @@ const ContactInfo = () => {
       className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-2"
     >
       <div className="mb-4">
-        <span className="inline-block px-3 py-1 mb-2 text-xs font-semibold tracking-widest text-white uppercase rounded-full" style={{ backgroundColor: "#00b0a5" }}>
+        {/* <span className="inline-block px-3 py-1 mb-2 text-xs font-semibold tracking-widest text-white uppercase rounded-full" style={{ backgroundColor: "#00b0a5" }}>
           {"Contact"}
-        </span>
+        </span> */}
         <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">{"Get in Touch"}</h2>
       </div>
 

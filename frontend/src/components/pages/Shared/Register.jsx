@@ -2,6 +2,8 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, AlertCircle } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
+import { useGoogleLogin } from '@react-oauth/google';
 import authBg from '../../../assets/auth-bg.png';
 import { AuthContext } from '../../../context/AuthContext';
 
@@ -18,7 +20,24 @@ function Register() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   
-  const { register } = useContext(AuthContext);
+  const { register, loginWithGoogle } = useContext(AuthContext);
+
+  const handleGoogleLogin = useGoogleLogin({
+    flow: 'auth-code',
+    onSuccess: async (codeResponse) => {
+      try {
+        setLoading(true);
+        setError('');
+        await loginWithGoogle(codeResponse.code);
+        navigate('/');
+      } catch (err) {
+        setError(err.message || 'Google registration failed.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    onError: errorResponse => setError('Google registration failed.'),
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -248,6 +267,28 @@ function Register() {
               </div>
             )}
           </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-slate-50 dark:bg-[#1a1a1a] text-slate-500">Or continue with</span>
+              </div>
+            </div>
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={() => handleGoogleLogin()}
+                disabled={loading}
+                className="w-full flex justify-center items-center py-3 px-4 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm text-base font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-[#242424] hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00b0a5] transition-all cursor-pointer"
+              >
+                <FcGoogle className="h-5 w-5 mr-2" />
+                Google
+              </button>
+            </div>
+          </div>
 
           <p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
             {"Already have an account?"}{' '}

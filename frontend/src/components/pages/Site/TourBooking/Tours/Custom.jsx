@@ -1,9 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from "react-i18next";
-
 const Custom = () => {
-  const { t } = useTranslation();
+  
   const cardRef = useRef(null);
   useEffect(() => {
     const c = cardRef.current; if (!c) return;
@@ -185,14 +183,18 @@ const Custom = () => {
 
           {/* Content — left */}
           <div className="cst-content" style={{ order: 1 }}>
-            <span className="cst-eyebrow">{t("tours.custom.eyebrow")}</span>
-            <h2 className="cst-title">{t("tours.custom.title1")} <span className="teal">{t("tours.custom.title2")}</span></h2>
+            <span className="cst-eyebrow">{"Bespoke Experience"}</span>
+            <h2 className="cst-title">{"Customized"} <span className="teal">{"Tours."}</span></h2>
             <div className="cst-rule" />
             <p className="cst-desc">
-              {t("tours.custom.desc")}
+              {"Your journey, your rules. Select your favourite stops, your preferred vehicle category, and let us handle the logistics. Freedom is the ultimate luxury."}
             </p>
             <div className="cst-steps">
-              {t("tours.custom.steps", { returnObjects: true }).map((s, i, arr) => (
+              {[
+  "Your Plans",
+  "Pick Vehicle",
+  "We Handle It"
+].map((s, i, arr) => (
                 <div key={s} className="cst-step">
                   {i < arr.length - 1 && <div className="cst-step-line" />}
                   <div className="cst-step-num">{i + 1}</div>
@@ -201,7 +203,7 @@ const Custom = () => {
               ))}
             </div>
             <Link to="/tour-booking/customized" className="cst-btn">
-              <span>{t("tours.custom.btn")}</span>
+              <span>{"Design Your Tour"}</span>
               <svg className="cst-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -226,7 +228,7 @@ const Custom = () => {
             </div>
           </div> */}
           <div className="cst-img-wrap" style={{ order: 2 }}>
-  <span className="cst-badge">{t("tours.custom.badge")}</span>
+  <span className="cst-badge">{"Fully Custom"}</span>
   <img className="cst-img"
     src="https://images.unsplash.com/photo-1650867715136-0774db12a0fb?q=80&w=1931&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     alt="Customized Tours"
@@ -234,7 +236,20 @@ const Custom = () => {
   <div className="cst-overlay" />
   <div className="cst-shimmer" />
   <div className="cst-stats">
-    {t("tours.custom.stats", { returnObjects: true }).map(([n, l]) => (
+    {[
+  [
+    "500+",
+    "Happy Customers"
+  ],
+  [
+    "10+",
+    "Years Exp"
+  ],
+  [
+    "100%",
+    "Bespoke"
+  ]
+].map(([n, l]) => (
       <div key={l} className="cst-stat">
         <span className="cst-stat-num">{n}</span>
         <span className="cst-stat-label">{l}</span>

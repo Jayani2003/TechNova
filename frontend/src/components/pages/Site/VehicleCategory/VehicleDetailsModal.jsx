@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import FeatureBadge from './FeatureBadge';
 
 const VehicleDetailsModal = ({ isOpen, onClose, vehicle }) => {
-    const { t } = useTranslation();
+    
     const [currentImageIdx, setCurrentImageIdx] = useState(0);
     const images = vehicle?.images && vehicle.images.length > 0 ? vehicle.images : (vehicle?.image_url ? [vehicle.image_url] : []);
 
@@ -115,40 +114,40 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle }) => {
 
                         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-5 mb-5 border border-blue-100">
                             <div className="text-center md:text-left">
-                                <p className="text-sm text-gray-500">{t("vehicleCategory.modal.dailyRentalPrice")}</p>
+                                <p className="text-sm text-gray-500">{"Daily Rental Price"}</p>
                                 <p className="text-4xl font-bold text-blue-600">
                                     USD {vehicle.price_per_day}
-                                    <span className="text-lg text-gray-500 font-normal">{t("vehicleCategory.card.perDay")}</span>
+                                    <span className="text-lg text-gray-500 font-normal">{"/day"}</span>
                                 </p>
                             </div>
                         </div>
 
                         <div className="mb-5">
                             <h3 className="text-lg font-bold text-gray-800 mb-3">
-                                {t("vehicleCategory.modal.vehicleSpecs")}
+                                {"Vehicle Specifications"}
                             </h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                <FeatureBadge icon="👥" label={t("vehicleCategory.card.seats", { count: '' }).trim()} value={vehicle.seats} />
-                                <FeatureBadge icon="⛽" label={t("vehicleCategory.filters.fuelType")} value={vehicle.fuel_type} />
-                                <FeatureBadge icon="⚙️" label={t("vehicleCategory.filters.transmission")} value={vehicle.transmission} />
-                                <FeatureBadge icon="🧳" label={t("vehicleCategory.card.bags", { count: '' }).trim()} value={`${vehicle.luggage_capacity} ${t("vehicleCategory.card.bags", { count: '' }).trim()}`} />
+                                <FeatureBadge icon="👥" label={"Seats"} value={vehicle.seats} />
+                                <FeatureBadge icon="⛽" label={"Fuel Type"} value={vehicle.fuel_type} />
+                                <FeatureBadge icon="⚙️" label={"Transmission"} value={vehicle.transmission} />
+                                <FeatureBadge icon="🧳" label={"Bags"} value={`${vehicle.luggage_capacity} ${"Bags"}`} />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                             <div>
                                 <h3 className="text-lg font-bold text-gray-800 mb-3">
-                                    {t("vehicleCategory.modal.vehicleDetails")}
+                                    {"Vehicle Details"}
                                 </h3>
                                 <div className="bg-gray-50 rounded-xl divide-y divide-gray-200 border border-gray-200 overflow-hidden">
                                     {[
-                                        { label: t("vehicleCategory.modal.brand"), value: vehicle.brand },
-                                        { label: t("vehicleCategory.modal.model"), value: vehicle.model },
-                                        { label: t("vehicleCategory.modal.year"), value: vehicle.year || 'N/A' },
-                                        { label: t("vehicleCategory.modal.color"), value: vehicle.color || 'N/A' },
-                                        { label: t("vehicleCategory.modal.license"), value: vehicle.vehicle_license || 'N/A' },
-                                        { label: t("vehicleCategory.modal.engine"), value: vehicle.engine_capacity || 'N/A' },
-                                        { label: t("vehicleCategory.modal.mileage"), value: vehicle.mileage || 'N/A' },
+                                        { label: "Brand", value: vehicle.brand },
+                                        { label: "Model", value: vehicle.model },
+                                        { label: "Year", value: vehicle.year || 'N/A' },
+                                        { label: "Color", value: vehicle.color || 'N/A' },
+                                        { label: "Vehicle License", value: vehicle.vehicle_license || 'N/A' },
+                                        { label: "Engine", value: vehicle.engine_capacity || 'N/A' },
+                                        { label: "Mileage", value: vehicle.mileage || 'N/A' },
                                     ].map((item, index) => (
                                         <div key={index} className="flex justify-between items-center px-4 py-2">
                                             <span className="text-sm text-gray-500">{item.label}</span>
@@ -160,23 +159,23 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle }) => {
 
                             <div>
                                 <h3 className="text-lg font-bold text-gray-800 mb-3">
-                                    {t("vehicleCategory.modal.comfortConv")}
+                                    {"Comfort & Convenience"}
                                 </h3>
                                 <div className="space-y-3">
                                     {vehicle.air_conditioning && (
                                         <div className="flex items-center gap-3 bg-blue-50 rounded-lg p-3 border border-blue-100">
                                             <span className="text-2xl">❄️</span>
                                             <div>
-                                                <p className="font-semibold text-gray-800">{t("vehicleCategory.modal.airCond")}</p>
-                                                <p className="text-xs text-gray-500">{t("vehicleCategory.modal.climateControl")}</p>
+                                                <p className="font-semibold text-gray-800">{"Air Conditioning"}</p>
+                                                <p className="text-xs text-gray-500">{"Climate control system"}</p>
                                             </div>
                                         </div>
                                     )}
                                     <div className="flex items-center gap-3 bg-purple-50 rounded-lg p-3 border border-purple-100">
                                         <span className="text-2xl">🛟</span>
                                         <div>
-                                            <p className="font-semibold text-gray-800">{t("vehicleCategory.modal.support")}</p>
-                                            <p className="text-xs text-gray-500">{t("vehicleCategory.modal.roadside")}</p>
+                                            <p className="font-semibold text-gray-800">{"24/7 Support"}</p>
+                                            <p className="text-xs text-gray-500">{"Roadside assistance"}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -186,7 +185,7 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle }) => {
                         {features.length > 0 && (
                             <div className="mb-5">
                                 <h3 className="text-lg font-bold text-gray-800 mb-3">
-                                    {t("vehicleCategory.modal.addFeatures")}
+                                    {"Additional Features"}
                                 </h3>
                                 <div className="flex flex-wrap gap-2">
                                     {features.map((feature, index) => (
@@ -207,7 +206,7 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle }) => {
                                 className="flex-1 px-6 py-2.5 font-medium rounded-xl transition-colors"
                                 style={{ backgroundColor: '#ffffff', color: '#374151', border: '1px solid #d1d5db' }}
                             >
-                                {t("vehicleCategory.modal.close")}
+                                {"Close"}
                             </button>
                         </div>
                     </div>

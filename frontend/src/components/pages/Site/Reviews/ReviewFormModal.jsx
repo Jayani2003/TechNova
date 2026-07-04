@@ -1,8 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ReviewForm from './ReviewForm';
-import { useTranslation } from "react-i18next";
-
 // ── Auth gate shown when user is not logged in ───────────────
 const AuthGate = ({ onClose, t }) => (
   <>
@@ -62,12 +60,12 @@ const AuthGate = ({ onClose, t }) => (
 
     <div className="rvm-auth">
       <div className="rvm-auth-icon">🔐</div>
-      <div className="rvm-auth-title">{t("reviews.modal.loginTitle")}</div>
+      <div className="rvm-auth-title">{"Log in to write a review"}</div>
       <div className="rvm-auth-sub">
-        {t("reviews.modal.loginSub")}
+        {"Share your Sri Lanka experience with fellow travellers. Sign in to get started."}
       </div>
       <div className="rvm-auth-note">
-        <strong>{t("reviews.modal.note1")}</strong> {t("reviews.modal.note2")} <strong>{t("reviews.modal.note3")}</strong>{t("reviews.modal.note4")}
+        <strong>{"✦ Note:"}</strong> {"Reviews are only available once our team marks your tour status as"} <strong>{"Completed"}</strong>{". You will be notified when you can leave a review."}
       </div>
       <div className="rvm-auth-btns">
         <Link
@@ -75,7 +73,7 @@ const AuthGate = ({ onClose, t }) => (
           className="rvm-login-btn"
           onClick={onClose}
         >
-          {t("reviews.modal.loginBtn")}
+          {"Log In"}
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -85,7 +83,7 @@ const AuthGate = ({ onClose, t }) => (
           className="rvm-signup-btn"
           onClick={onClose}
         >
-          {t("reviews.modal.createBtn")}
+          {"Create Account"}
         </Link>
       </div>
     </div>
@@ -94,7 +92,7 @@ const AuthGate = ({ onClose, t }) => (
 
 // ── Modal shell ──────────────────────────────────────────────
 const ReviewFormModal = ({ isOpen, isLoggedIn, reviewableTours, onClose, onSubmit }) => {
-  const { t } = useTranslation();
+  
   return (
   <>
     <style>{`
@@ -169,9 +167,9 @@ const ReviewFormModal = ({ isOpen, isLoggedIn, reviewableTours, onClose, onSubmi
             {/* Header */}
             <div className="rvm-header">
               <div className="rvm-header-left">
-                <span className="rvm-header-tag">{t("reviews.modal.tag")}</span>
+                <span className="rvm-header-tag">{"✦ Share Your Experience"}</span>
                 <div className="rvm-header-title">
-                  {isLoggedIn ? t("reviews.modal.writeTitle") : t("reviews.modal.reqTitle")}
+                  {isLoggedIn ? "Write a Review" : "Login Required"}
                 </div>
               </div>
               <button className="rvm-close" onClick={onClose}>✕</button>

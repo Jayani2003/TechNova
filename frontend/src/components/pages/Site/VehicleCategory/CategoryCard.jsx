@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-
 const VehicleCard = ({ vehicle, onViewDetails }) => {
-    const { t } = useTranslation();
+    
     const [currentImageIdx, setCurrentImageIdx] = useState(0);
     const images = vehicle?.images && vehicle.images.length > 0 ? vehicle.images : (vehicle?.image_url ? [vehicle.image_url] : []);
 
@@ -58,10 +56,10 @@ const VehicleCard = ({ vehicle, onViewDetails }) => {
 
                 {/* Price Tag */}
                 <div className="absolute bottom-3 right-3 bg-white rounded-xl px-4 py-2 shadow-lg">
-                    <p className="text-xs text-gray-500">{t("vehicleCategory.card.startingAt")}</p>
+                    <p className="text-xs text-gray-500">{"Starting at"}</p>
                     <p className="text-xl font-bold text-blue-600">
                         USD {vehicle.price_per_day}
-                        <span className="text-xs text-gray-500 font-normal">{t("vehicleCategory.card.perDay")}</span>
+                        <span className="text-xs text-gray-500 font-normal">{"/day"}</span>
                     </p>
                 </div>
             </div>
@@ -82,7 +80,7 @@ const VehicleCard = ({ vehicle, onViewDetails }) => {
                 <div className="grid grid-cols-2 gap-2 mb-4">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span className="text-lg">👥</span>
-                        <span>{t("vehicleCategory.card.seats", { count: vehicle.seats })}</span>
+                        <span>{`vehicle.seats Seats`}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span className="text-lg">⛽</span>
@@ -94,7 +92,7 @@ const VehicleCard = ({ vehicle, onViewDetails }) => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span className="text-lg">🧳</span>
-                        <span>{t("vehicleCategory.card.bags", { count: vehicle.luggage_capacity })}</span>
+                        <span>{`vehicle.luggage_capacity Bags`}</span>
                     </div>
                 </div>
 
@@ -127,7 +125,7 @@ const VehicleCard = ({ vehicle, onViewDetails }) => {
                         className="flex-1 font-medium py-2.5 rounded-lg transition-colors text-sm hover:shadow-md"
                         style={{ backgroundColor: '#ffffff', color: '#374151', border: '1px solid #d1d5db' }}
                     >
-                        {t("vehicleCategory.card.viewDetails")}
+                        {"View Details"}
                     </button>
                 </div>
             </div>

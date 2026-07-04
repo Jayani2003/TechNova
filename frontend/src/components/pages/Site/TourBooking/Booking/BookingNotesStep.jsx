@@ -12,7 +12,6 @@ import {
   Plus,
   X,
 } from "lucide-react";
-import { useTranslation, Trans } from "react-i18next";
 import { api } from "../../../../../config/api";
 import { AuthContext } from "../../../../../context/AuthContext";
 
@@ -133,7 +132,7 @@ const PlatformRow = ({ index, platform, number, onChange, onRemove, required, us
 // ── Main Component ─────────────────────────────────────────────────────────────
 const BookingNotesStep = ({ data, onChange }) => {
   const { user } = useContext(AuthContext);
-  const { t } = useTranslation();
+  
   const [showSecond, setShowSecond] = useState(!!(data.contactPlatform2 && data.contactNumber2));
   const [emergencyPhoneTouched, setEmergencyPhoneTouched] = useState(false);
 
@@ -175,7 +174,7 @@ const BookingNotesStep = ({ data, onChange }) => {
       {/* ── Contact Details ── */}
       <div>
         <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <Phone className="w-5 h-5 text-[#F5820D]" /> {t("bookingForm.notesStep.contactDetails")}
+          <Phone className="w-5 h-5 text-[#F5820D]" /> {"Contact Details"}
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
           Choose how you prefer us to reach you about this booking.
@@ -192,7 +191,7 @@ const BookingNotesStep = ({ data, onChange }) => {
               type="text"
               value={nameValue}
               onChange={e => onChange("customerName", e.target.value)}
-              placeholder={t("bookingForm.notesStep.fullNamePlaceholder")}
+              placeholder={"Your full name"}
               className={inputClass}
             />
             {user?.name && (
@@ -242,7 +241,7 @@ const BookingNotesStep = ({ data, onChange }) => {
       {/* ── Emergency Contact ── */}
       <div>
         <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <UserPlus className="w-5 h-5 text-[#F5820D]" /> {t("bookingForm.notesStep.emergencyContact")}
+          <UserPlus className="w-5 h-5 text-[#F5820D]" /> {"Emergency Contact"}
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
           In case of emergency during the trip. Saved to your profile.
@@ -255,7 +254,7 @@ const BookingNotesStep = ({ data, onChange }) => {
               type="text"
               value={data.emergencyName || ""}
               onChange={e => onChange("emergencyName", e.target.value)}
-              placeholder={t("bookingForm.notesStep.emergencyNamePlaceholder")}
+              placeholder={"Full name of emergency contact"}
               className={inputClass}
             />
           </div>
@@ -309,15 +308,15 @@ const BookingNotesStep = ({ data, onChange }) => {
       {/* ── Additional Notes ── */}
       <div>
         <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <FileText className="w-5 h-5 text-[#F5820D]" /> {t("bookingForm.notesStep.additionalNotes")}
+          <FileText className="w-5 h-5 text-[#F5820D]" /> {"Additional Notes"}
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
-          {t("bookingForm.notesStep.notesDesc")}
+          {"Any special requests, preferences, or information for the driver."}
         </p>
         <textarea
           value={data.notes || ""}
           onChange={e => onChange("notes", e.target.value)}
-          placeholder={t("bookingForm.notesStep.notesPlaceholder")}
+          placeholder={"E.g. early morning pickup, wheelchair access needed, stop at airport first…"}
           rows={4}
           className={`${inputClass} resize-none`}
         />

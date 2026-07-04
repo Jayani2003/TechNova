@@ -1,5 +1,3 @@
-import { useTranslation } from "react-i18next";
-
 const PACKAGE_TYPES = [
   'Beach Side',
   'Hill Country',
@@ -22,7 +20,7 @@ const TYPE_ICONS = {
 };
 
 const PackageFilters = ({ activeType, activeDays, onTypeChange, onDaysChange, total }) => {
-  const { t } = useTranslation();
+  
   const types = ['All', ...PACKAGE_TYPES];
   const days  = ['All', ...PACKAGE_DAYS];
 
@@ -108,7 +106,7 @@ const PackageFilters = ({ activeType, activeDays, onTypeChange, onDaysChange, to
 
           {/* Type row */}
           <div className="pf-row">
-            <span className="pf-label">{t("packageTours.filters.typeLabel")}</span>
+            <span className="pf-label">Type</span>
             {types.map(tOption => (
               <button
                 key={tOption}
@@ -116,25 +114,25 @@ const PackageFilters = ({ activeType, activeDays, onTypeChange, onDaysChange, to
                 onClick={() => onTypeChange(tOption)}
               >
                 {TYPE_ICONS[tOption] && <span>{TYPE_ICONS[tOption]}</span>}
-                {t(`packageTours.filters.types.${tOption}`)}
+                {tOption}
               </button>
             ))}
           </div>
 
           {/* Days row + count */}
           <div className="pf-row">
-            <span className="pf-label">{t("packageTours.filters.durationLabel")}</span>
+            <span className="pf-label">Duration</span>
             {days.map(d => (
               <button
                 key={d}
                 className={`pf-day-btn ${activeDays === String(d) ? 'active' : ''}`}
                 onClick={() => onDaysChange(String(d))}
               >
-                {d === 'All' ? t("packageTours.filters.allDurations") : `${d} ${t("packageTours.filters.days")}`}
+                {d === 'All' ? 'All Durations' : `${d} Days`}
               </button>
             ))}
             <span className="pf-count">
-              <span>{total}</span> {t("packageTours.filters.packages")}
+              <span>{total}</span> packages
             </span>
           </div>
 

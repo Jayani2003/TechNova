@@ -1,8 +1,6 @@
 import { motion } from "framer-motion";
-import { useTranslation } from "react-i18next";
-
 const ContactHeader = () => {
-  const { t } = useTranslation();
+  
 
   return (
     <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
@@ -22,13 +20,13 @@ const ContactHeader = () => {
           transition={{ duration: 0.8 }}
         >
           <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
-            {t("contact.header.help")}
+            {"We're Here to Help"}
           </span>
           <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 tracking-tight">
-            {t("contact.header.contact")} <span className="text-[#00b0a5]">{t("contact.header.us")}</span>
+            {"Contact"} <span className="text-[#00b0a5]">{"Us."}</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light">
-            {t("contact.header.desc")}
+            {"Have questions or need assistance? Reach out through any of the channels below."}
           </p>
         </motion.div>
       </div>

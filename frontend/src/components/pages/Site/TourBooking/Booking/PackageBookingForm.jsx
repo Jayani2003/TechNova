@@ -2,7 +2,6 @@ import { useState, useContext } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Send, Lock, CheckCircle, AlertCircle } from "lucide-react";
-import { useTranslation, Trans } from "react-i18next";
 import { AuthContext } from "../../../../../context/AuthContext";
 import { submitPackageBooking } from "../../../../../services/bookingService";
 import BookingStepIndicator from "./BookingStepIndicator";
@@ -50,7 +49,7 @@ const initialData = {
 
 // ─── Guest Guard ──────────────────────────────────────────────────────────────
 const GuestGuard = ({ navigate }) => {
-  const { t } = useTranslation();
+  
   return (
   <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
     <motion.div
@@ -61,22 +60,22 @@ const GuestGuard = ({ navigate }) => {
       <div className="w-16 h-16 bg-[#00b0a5]/10 rounded-full flex items-center justify-center mx-auto mb-4">
         <Lock className="w-8 h-8 text-[#00b0a5]" />
       </div>
-      <h2 className="text-2xl font-extrabold text-slate-800 mb-2">{t("bookingForm.packageForm.loginReq")}</h2>
+      <h2 className="text-2xl font-extrabold text-slate-800 mb-2">{"Login Required"}</h2>
       <p className="text-slate-500 text-sm mb-6">
-        {t("bookingForm.packageForm.loginDesc")}
+        {"You need to be logged in to place a booking."}
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button
           onClick={() => navigate("/login")}
           className="bg-[#00b0a5] hover:bg-[#009b91] text-white px-6 py-3 rounded-xl font-semibold transition-colors cursor-pointer"
         >
-          {t("bookingForm.packageForm.loginBtn")}
+          {"Login"}
         </button>
         <button
           onClick={() => navigate("/register")}
           className="border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
         >
-          {t("bookingForm.packageForm.registerBtn")}
+          {"Register"}
         </button>
       </div>
     </motion.div>
@@ -86,7 +85,7 @@ const GuestGuard = ({ navigate }) => {
 
 // ─── Success Screen ───────────────────────────────────────────────────────────
 const SuccessScreen = ({ bookingRef, navigate }) => {
-  const { t } = useTranslation();
+  
   return (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -98,15 +97,15 @@ const SuccessScreen = ({ bookingRef, navigate }) => {
       <CheckCircle className="w-10 h-10 text-[#00b0a5]" />
     </div>
     <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight mb-3">
-      {t("bookingForm.packageForm.successTitle")}
+      {"Booking Submitted!"}
     </h2>
-    <p className="text-slate-500 text-sm mb-2">{t("bookingForm.packageForm.successRef")}</p>
+    <p className="text-slate-500 text-sm mb-2">{"Your booking reference is:"}</p>
     <p className="text-lg font-bold text-[#00b0a5] mb-8">{bookingRef}</p>
     <div className="bg-slate-50 rounded-2xl p-5 mb-6 text-left space-y-2">
       {[
-        t("bookingForm.packageForm.successStep1"),
-        t("bookingForm.packageForm.successStep2"),
-        t("bookingForm.packageForm.successStep3"),
+        "Your booking is now PENDING review",
+        "Our team will send a price quote within 24 hours",
+        "You can track your booking status from your profile",
       ].map((s, i) => (
         <div key={i} className="flex items-start gap-2 text-sm text-slate-600">
           <span className="text-[#00b0a5] font-bold flex-shrink-0">✓</span>
@@ -118,13 +117,13 @@ const SuccessScreen = ({ bookingRef, navigate }) => {
       onClick={() => navigate("/user/profile")}
       className="w-full bg-[#00b0a5] hover:bg-[#009b91] text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 tracking-wide cursor-pointer mb-3"
     >
-      {t("bookingForm.packageForm.viewBookings")}
+      {"View My Bookings"}
     </button>
     <button
       onClick={() => navigate("/tour-booking/package")}
       className="w-full border border-slate-200 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-50 transition-colors cursor-pointer"
     >
-      {t("bookingForm.packageForm.backToPackages")}
+      {"Back to Packages"}
     </button>
   </motion.div>
   );
@@ -143,12 +142,17 @@ const validateStep = (step, data) => {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const PackageBookingForm = () => {
-  const { t } = useTranslation();
+  
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const STEPS = t("p2pBooking.form.steps", { returnObjects: true });
+  const STEPS = [
+  "Trip Details",
+  "Passengers",
+  "More Info",
+  "Review"
+];
 
   const packageIdRaw = searchParams.get("packageId");
   const packageId = packageIdRaw ? Number(packageIdRaw) : null;
@@ -212,11 +216,11 @@ const PackageBookingForm = () => {
             className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
-            {t("bookingForm.packageForm.backToPackages")}
+            {"Back to Packages"}
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">{t("bookingForm.packageForm.bookPrefix")}{packageTitle}</h1>
-            <p className="text-sm text-slate-500">{t("bookingForm.packageForm.completeBooking")}</p>
+            <h1 className="text-2xl font-bold text-slate-800">{"Book: "}{packageTitle}</h1>
+            <p className="text-sm text-slate-500">{"Complete your package tour booking"}</p>
           </div>
         </div>
       </div>
@@ -285,7 +289,7 @@ const PackageBookingForm = () => {
                       disabled={currentStep === 0}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                     >
-                      <ChevronLeft className="w-4 h-4" /> {t("bookingForm.packageForm.backBtn")}
+                      <ChevronLeft className="w-4 h-4" /> {"Back"}
                     </button>
 
                     {currentStep < STEPS.length - 1 ? (
@@ -294,7 +298,7 @@ const PackageBookingForm = () => {
                         disabled={!canProceed}
                         className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#00b0a5] hover:bg-[#009b91] text-white font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                       >
-                        {t("bookingForm.packageForm.nextBtn")} <ChevronRight className="w-4 h-4" />
+                        {"Next"} <ChevronRight className="w-4 h-4" />
                       </button>
                     ) : (
                       <button
@@ -308,10 +312,10 @@ const PackageBookingForm = () => {
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                             </svg>
-                            {t("bookingForm.packageForm.submitting")}
+                            {"Submitting..."}
                           </>
                         ) : (
-                          <><Send className="w-4 h-4" /> {t("bookingForm.packageForm.submitBooking")}</>
+                          <><Send className="w-4 h-4" /> {"Submit Booking"}</>
                         )}
                       </button>
                     )}
@@ -324,10 +328,10 @@ const PackageBookingForm = () => {
           {/* ── Right: Info Panel ── */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sticky top-32">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{t("bookingForm.packageForm.pkgDetails")}</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">{"Package Details"}</p>
               <div className="space-y-3">
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">{t("bookingForm.packageForm.selectedPkg")}</p>
+                  <p className="text-xs text-slate-500 mb-1">{"Selected Package"}</p>
                   <p className="text-sm font-semibold text-slate-800">{packageTitle}</p>
                 </div>
               </div>
@@ -341,7 +345,7 @@ const PackageBookingForm = () => {
 
 // ─── Package Trip Step (simplified - no location inputs) ──────────────────────
 const PackageBookingTripStep = ({ data, onChange, onStartDateChange, packageTitle, packageDays }) => {
-  const { t } = useTranslation();
+  
   const today = new Date().toISOString().split("T")[0];
 
   const inputClass =
@@ -351,14 +355,14 @@ const PackageBookingTripStep = ({ data, onChange, onStartDateChange, packageTitl
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
-          {t("bookingForm.packageForm.yourPkgTitle")}
+          {"📦 Your Package"}
         </h3>
         <p className="text-sm text-slate-500 mb-4">
-          {t("bookingForm.packageForm.yourPkgDesc")}
+          {"Package tour details and travel dates."}
         </p>
 
         <div className="bg-[#00b0a5]/5 border border-[#00b0a5]/20 rounded-xl p-4 mb-6">
-          <p className="text-xs text-slate-500 mb-1">{t("bookingForm.packageForm.selectedPkg")}</p>
+          <p className="text-xs text-slate-500 mb-1">{"Selected Package"}</p>
           <p className="text-sm font-semibold text-slate-800">{packageTitle}</p>
         </div>
       </div>
@@ -366,16 +370,16 @@ const PackageBookingTripStep = ({ data, onChange, onStartDateChange, packageTitl
       {/* Dates */}
       <div>
         <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
-          {t("bookingForm.packageForm.travelDatesTitle")}
+          {"📅 Travel Dates"}
         </h3>
         <p className="text-sm text-slate-500 mb-4">
-          {t("bookingForm.packageForm.travelDatesDesc")}
+          {"When would you like to travel?"}
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">
-              {t("bookingForm.packageForm.startDate")}
+              {"Start Date *"}
             </label>
             <input
               type="date"
@@ -388,16 +392,16 @@ const PackageBookingTripStep = ({ data, onChange, onStartDateChange, packageTitl
         </div>
 
         <div className="mt-4">
-          <p className="text-sm font-semibold text-slate-700 mb-1">{t("bookingForm.packageForm.endDate")}</p>
+          <p className="text-sm font-semibold text-slate-700 mb-1">{"End Date"}</p>
           <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm">
-            {data.endDate || t("bookingForm.packageForm.endDatePlaceholder")}
+            {data.endDate || "Select a start date to calculate the end date"}
           </div>
         </div>
 
         {/* Pickup Time */}
         <div className="mt-4">
           <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-            {t("bookingForm.packageForm.pickupTime")}
+            {"🕐 Preferred Pickup Time *"}
           </label>
           <input
             type="time"
@@ -415,17 +419,13 @@ const PackageBookingTripStep = ({ data, onChange, onStartDateChange, packageTitl
             </div>
             <div>
               <p className="text-sm font-bold text-slate-800">
-                <Trans i18nKey="bookingForm.packageForm.tripDays" days={data.totalDays}>
-                  <span className="text-lg">{{days: data.totalDays}}</span> Day Trip
-                </Trans>
+                <span className="text-lg">{data.totalDays}</span> Day Trip
               </p>
               <p className="text-xs text-slate-500">
                 {data.startDate} → {data.endDate}
               </p>
               <p className="text-xs text-slate-500 mt-1">
-                <Trans i18nKey="bookingForm.packageForm.pkgDuration" days={packageDays}>
-                  Package duration: <span>{{days: packageDays}}</span> day(s)
-                </Trans>
+                Package duration: <span>{packageDays}</span> day(s)
               </p>
             </div>
           </div>

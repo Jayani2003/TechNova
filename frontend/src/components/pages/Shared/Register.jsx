@@ -2,7 +2,6 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, AlertCircle } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import authBg from '../../../assets/auth-bg.png';
 import { AuthContext } from '../../../context/AuthContext';
 
@@ -18,7 +17,7 @@ function Register() {
   const [error,  setError]   = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  
   const { register } = useContext(AuthContext);
 
   const handleChange = (e) => {
@@ -34,13 +33,13 @@ function Register() {
 
     if (formData.password !== formData.confirmPassword) {
       console.log('BLOCKED: passwords dont match');  // ← ADD THIS
-      setError(t('auth.register.passwordsDontMatch'));
+      setError("Passwords don't match. Please try again.");
       return;
     }
 
     if (formData.password.length < 6) {
       console.log('BLOCKED: password too short, length:', formData.password.length);  // ← ADD THIS
-      setError(t('auth.register.passwordTooShort'));
+      setError("Password must be at least 6 characters.");
       return;
     }
     
@@ -53,7 +52,7 @@ function Register() {
       navigate('/');
     } catch (err) {
       console.log('5. Error caught:', err.message);
-      setError(err.message || t('auth.register.registrationFailed'));
+      setError(err.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -102,8 +101,8 @@ function Register() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.8 }}
           >
-            <h1 className="text-4xl font-bold mb-4 tracking-tight">{t('auth.register.joinAdventure')}</h1>
-            <p className="text-lg text-slate-300 max-w-md">{t('auth.register.heroDesc')}</p>
+            <h1 className="text-4xl font-bold mb-4 tracking-tight">{"Join the Adventure"}</h1>
+            <p className="text-lg text-slate-300 max-w-md">{"Create an account to unlock exclusive tours and premium vehicle rentals."}</p>
           </motion.div>
         </div>
         <div className="absolute top-8 left-12 z-20">
@@ -129,13 +128,13 @@ function Register() {
           </div>
 
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{t('auth.register.createAccount')}</h2>
-            <p className="text-slate-500 dark:text-slate-400">{t('auth.register.signUpStart')}</p>
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{"Create Account"}</h2>
+            <p className="text-slate-500 dark:text-slate-400">{"Sign up to get started with Ceylone Best Tours."}</p>
           </div>
 
           <form onSubmit={handleRegister} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('auth.register.fullName')}</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{"Full Name"}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <User className="h-5 w-5 text-slate-400" />
@@ -153,7 +152,7 @@ function Register() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('auth.register.emailAddress')}</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{"Email address"}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-slate-400" />
@@ -171,7 +170,7 @@ function Register() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('auth.register.password')}</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{"Password"}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-slate-400" />
@@ -196,7 +195,7 @@ function Register() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('auth.register.confirmPassword')}</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{"Confirm Password"}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-slate-400" />
@@ -229,7 +228,7 @@ function Register() {
                 className="h-4 w-4 text-[#00b0a5] focus:ring-[#00b0a5] border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-[#242424] cursor-pointer"
               />
               <label htmlFor="terms" className="ml-2 block text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
-                {t('auth.register.agreeTo')} <a href="#" className="text-[#00b0a5] hover:underline">{t('auth.register.termsOfService')}</a> {t('auth.register.and')} <a href="#" className="text-[#00b0a5] hover:underline">{t('auth.register.privacyPolicy')}</a>
+                {"I agree to the"} <a href="#" className="text-[#00b0a5] hover:underline">{"Terms of Service"}</a> {"and"} <a href="#" className="text-[#00b0a5] hover:underline">{"Privacy Policy"}</a>
               </label>
               {/*----------add terms when get the call--------------------*/}
             </div>
@@ -240,7 +239,7 @@ function Register() {
               type="submit"
               className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-slate-900 dark:bg-[#00b0a5] hover:bg-slate-800 dark:hover:bg-[#008f86] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00b0a5] transition-all cursor-pointer mt-4"
             >
-              {loading ? t('auth.register.creatingAccount') : t('auth.register.createAccount')}
+              {loading ? "Creating account..." : "Create Account"}
               <ArrowRight className="ml-2 h-5 w-5" />
             </motion.button>
             {error && (
@@ -251,9 +250,9 @@ function Register() {
           </form>
 
           <p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
-            {t('auth.register.alreadyHaveAccount')}{' '}
+            {"Already have an account?"}{' '}
             <Link to="/login" className="font-semibold text-[#00b0a5] hover:text-[#008f86] transition-colors">
-              {t('auth.register.signIn')}
+              {"Sign in"}
             </Link>
           </p>
         </motion.div>

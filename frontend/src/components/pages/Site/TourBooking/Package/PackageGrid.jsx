@@ -1,9 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import PackageCard from "./PackageCard";
-import { useTranslation } from "react-i18next";
-
 const PackageGrid = ({ packages, onShowMore }) => {
-  const { t } = useTranslation();
+  
 
   const getPackageIdNumber = (pkg) => {
     const match = String(pkg?.id || '').match(/(\d+)/);
@@ -43,17 +41,17 @@ const PackageGrid = ({ packages, onShowMore }) => {
   const sections = [
     {
       key: 'highest',
-      title: t('packageTours.grid.highestRated', 'Highest Rated Packages'),
+      title: 'Highest Rated Packages',
       items: highestRated.slice(0, sectionSize),
     },
     {
       key: 'booked',
-      title: t('packageTours.grid.mostBooked', 'Most Booked Packages'),
+      title: 'Most Booked Packages',
       items: mostBooked.slice(0, sectionSize),
     },
     {
       key: 'new',
-      title: t('packageTours.grid.newPackage', 'New Package'),
+      title: 'New Package',
       items: newest,
     },
   ].map((section) => ({
@@ -77,10 +75,10 @@ const PackageGrid = ({ packages, onShowMore }) => {
           fontSize: '1.4rem', fontWeight: 800,
           color: '#0d2b2b', letterSpacing: '-0.02em'
         }}>
-          {t("packageTours.grid.noPackagesTitle")}
+          {"No packages found"}
         </h3>
         <p style={{ fontSize: '15px', fontWeight: 300, color: '#5a8080', maxWidth: '320px' }}>
-          {t("packageTours.grid.noPackagesSub")}
+          {"Try adjusting your filters to discover more Sri Lanka experiences."}
         </p>
       </div>
     );

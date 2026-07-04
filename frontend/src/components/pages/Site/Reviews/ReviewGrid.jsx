@@ -1,33 +1,31 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReviewCard from './ReviewCard';
-import { useTranslation } from "react-i18next";
-
 const ReviewGrid = ({ reviews, filters = {}, setFilters }) => {
-  const { t } = useTranslation();
+  
 
   const SORT_OPTIONS = [
-    { value: 'newest',    label: t("reviews.grid.sortNewest") },
-    { value: 'highest',   label: t("reviews.grid.sortHighest") },
-    { value: 'lowest',    label: t("reviews.grid.sortLowest") },
+    { value: 'newest',    label: "Newest First" },
+    { value: 'highest',   label: "Highest Rated" },
+    { value: 'lowest',    label: "Lowest Rated" },
   ];
 
-  const STAR_FILTERS = [t("reviews.grid.all"), '5', '4', '3', '2', '1'];
-  const BOOKING_TYPE_FILTERS = [t("reviews.grid.all"), t("reviews.grid.types.package"), t("reviews.grid.types.custom"), t("reviews.grid.types.p2p")];
+  const STAR_FILTERS = ["All", '5', '4', '3', '2', '1'];
+  const BOOKING_TYPE_FILTERS = ["All", "Package Tour", "Customised Tours", "Point to Point Tours"];
 
   const normalizeBookingType = (tourType = '') => {
     const value = String(tourType).toLowerCase();
-    if (value.includes('custom')) return t("reviews.grid.types.custom");
-    if (value === 'p2p' || value.includes('point')) return t("reviews.grid.types.p2p");
-    if (value.includes('package')) return t("reviews.grid.types.package");
-    if (value.includes('beach') || value.includes('hill') || value.includes('safari')) return t("reviews.grid.types.package");
-    return t("reviews.grid.types.package");
+    if (value.includes('custom')) return "Customised Tours";
+    if (value === 'p2p' || value.includes('point')) return "Point to Point Tours";
+    if (value.includes('package')) return "Package Tour";
+    if (value.includes('beach') || value.includes('hill') || value.includes('safari')) return "Package Tour";
+    return "Package Tour";
   };
 
   // Controlled: sort and filter handled in parent (backend). We only call setFilters to request changes.
   const sort = filters.sort || 'newest';
-  const starFilter = filters.stars || t("reviews.grid.all");
-  const bookingTypeFilter = filters.tourTypeLabel || t("reviews.grid.all");
+  const starFilter = filters.stars || "All";
+  const bookingTypeFilter = filters.tourTypeLabel || "All";
 
   return (
     <>
@@ -119,18 +117,18 @@ const ReviewGrid = ({ reviews, filters = {}, setFilters }) => {
       <div className="rvg-wrap">
         {/* Toolbar */}
         <div className="rvg-toolbar">
-          <span className="rvg-toolbar-label">{t("reviews.grid.stars")}</span>
+          <span className="rvg-toolbar-label">{"Stars"}</span>
           {STAR_FILTERS.map(s => (
             <button
               key={s}
               className={`rvg-star-btn ${starFilter === s ? 'active' : ''}`}
               onClick={() => setFilters({ ...filters, stars: s })}
             >
-              {s === t("reviews.grid.all") ? t("reviews.grid.all") : `${'★'.repeat(Number(s))} ${s}`}
+              {s === "All" ? "All" : `${'★'.repeat(Number(s))} ${s}`}
             </button>
           ))}
           
-          <span className="rvg-toolbar-label">{t("reviews.grid.bookingType")}</span>
+          <span className="rvg-toolbar-label">{"Booking Type"}</span>
           {BOOKING_TYPE_FILTERS.map(type => (
             <button
               key={type}
@@ -138,10 +136,10 @@ const ReviewGrid = ({ reviews, filters = {}, setFilters }) => {
               onClick={() => {
                 // map UI label to backend tourType enum/value
                 const map = {
-                  [t("reviews.grid.types.package")]: 'PACKAGE',
-                  [t("reviews.grid.types.custom")]: 'CUSTOM',
-                  [t("reviews.grid.types.p2p")]: 'P2P',
-                  [t("reviews.grid.all")]: ''
+                  ["Package Tour"]: 'PACKAGE',
+                  ["Customised Tours"]: 'CUSTOM',
+                  ["Point to Point Tours"]: 'P2P',
+                  ["All"]: ''
                 };
                 setFilters({ ...filters, tourType: map[type], tourTypeLabel: type });
               }}
@@ -149,7 +147,7 @@ const ReviewGrid = ({ reviews, filters = {}, setFilters }) => {
               {type}
             </button>
           ))}
-          <span className="rvg-count"><span>{reviews.length}</span> {t("reviews.grid.reviews")}</span>
+          <span className="rvg-count"><span>{reviews.length}</span> {"reviews"}</span>
           <select
             className="rvg-sort"
             value={sort}
@@ -165,8 +163,8 @@ const ReviewGrid = ({ reviews, filters = {}, setFilters }) => {
         {reviews.length === 0 ? (
           <div className="rvg-empty">
             <div className="rvg-empty-icon">⭐</div>
-            <div className="rvg-empty-title">{t("reviews.grid.emptyTitle")}</div>
-            <div className="rvg-empty-sub">{t("reviews.grid.emptySub")}</div>
+            <div className="rvg-empty-title">{"No reviews found"}</div>
+            <div className="rvg-empty-sub">{"Try adjusting your filters."}</div>
           </div>
         ) : (
           <div className="rvg-grid">

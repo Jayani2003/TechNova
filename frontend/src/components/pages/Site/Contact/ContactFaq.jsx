@@ -1,25 +1,23 @@
 import { motion } from "framer-motion";
-import { useTranslation } from "react-i18next";
-
 const ContactFaq = () => {
-  const { t } = useTranslation();
+  
 
   const faqs = [
     {
-      question: t("contact.faq.q1"),
-      answer: t("contact.faq.a1"),
+      question: "Is insurance included in the quoted price?",
+      answer: "Yes, all our tours have foreign passenger insurance included in the price.",
     },
     {
-      question: t("contact.faq.q2"),
-      answer: t("contact.faq.a2"),
+      question: "Can I pick up the car at the airport?",
+      answer: "Absolutely yes! Just let us know your flight details.",
     },
     {
-      question: t("contact.faq.q3"),
-      answer: t("contact.faq.a3"),
+      question: "What happens if you face an accident while travelling?",
+      answer: "After reporting the insurance, if the vehicle is suitable for the journey will continue the tour with the same vehicle. If necessary, the vehicle will be replaced with another same range of the vehicle as soon as possible.",
     },
     {
-      question: t("contact.faq.q4"),
-      answer: t("contact.faq.a4"),
+      question: "What are the excludes from the quoted price?",
+      answer: "You'll need to pay for any services like entrance tickets, food and beverages, accommodation.",
     },
   ];
 
@@ -32,10 +30,10 @@ const ContactFaq = () => {
     >
       <div className="mb-6">
         <span className="inline-block px-3 py-1 mb-2 text-xs font-semibold tracking-widest text-white uppercase rounded-full" style={{ backgroundColor: "#00b0a5" }}>
-          {t("contact.faq.badge")}
+          {"FAQ"}
         </span>
         <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">
-          {t("contact.faq.title")}
+          {"Frequently Asked Questions"}
         </h2>
       </div>
 

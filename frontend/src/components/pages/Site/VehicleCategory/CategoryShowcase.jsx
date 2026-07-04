@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Users, Briefcase, Snowflake, Star, Map } from 'lucide-react';
 
 const categoryDescriptions = {
@@ -46,7 +45,7 @@ const categoryDescriptions = {
 };
 
 const CategoryShowcase = ({ category, vehicles = [] }) => {
-    const { t } = useTranslation();
+    
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     // Parse images - Prefer images from actual vehicles in this category
@@ -110,32 +109,11 @@ const CategoryShowcase = ({ category, vehicles = [] }) => {
 
     const info = categoryDescriptions[category.name] || {
         icon: '🚗',
-        description: category.description || t("vehicleCategory.showcase.defaultDesc"),
-        bestFor: category.best_for || t("vehicleCategory.showcase.defaultBestFor"),
+        description: category.description || "Quality vehicles for your journey.",
+        bestFor: category.best_for || "All travelers",
     };
-
-    const getDescKey = (name) => {
-        const map = {
-            'Mini Car': 'miniCarDesc', 'Normal Car': 'normalCarDesc', 'Sedan Car': 'sedanCarDesc',
-            'MPV': 'mpvDesc', 'SUV': 'suvDesc', 'Mini Van': 'miniVanDesc', 'Van': 'vanDesc', 'Large Van': 'largeVanDesc'
-        };
-        return map[name];
-    };
-
-    const getBestForKey = (name) => {
-        const map = {
-            'Mini Car': 'miniCarBest', 'Normal Car': 'normalCarBest', 'Sedan Car': 'sedanCarBest',
-            'MPV': 'mpvBest', 'SUV': 'suvBest', 'Mini Van': 'miniVanBest', 'Van': 'vanBest', 'Large Van': 'largeVanBest'
-        };
-        return map[name];
-    };
-
-    const descKey = getDescKey(category.name);
-    const bestForKey = getBestForKey(category.name);
-
-    // Prefer DB data if available, fallback to translations/defaults
-    const translatedDesc = category.description || (descKey ? t(`vehicleCategory.showcase.${descKey}`) : info.description);
-    const translatedBestFor = category.best_for || (bestForKey ? t(`vehicleCategory.showcase.${bestForKey}`) : info.bestFor);
+    const translatedDesc = category.description || info.description;
+    const translatedBestFor = category.best_for || info.bestFor;
 
     return (
         <div className="bg-white rounded-2xl p-6 md:p-8 mb-8 border border-gray-100 shadow-xl relative overflow-hidden group">
@@ -172,7 +150,7 @@ const CategoryShowcase = ({ category, vehicles = [] }) => {
                             {category.name}
                         </h2>
                         <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border border-green-200">
-                            {t("vehicleCategory.showcase.availableCount", { count: category.vehicle_count || 0 })}
+                            🚗 {category.vehicle_count || 0} Available
                         </span>
                     </div>
                     

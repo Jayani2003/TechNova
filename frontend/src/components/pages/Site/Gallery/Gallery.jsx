@@ -4,12 +4,11 @@ import { SEASONS, MOODS } from "../../../data/tourData";
 import { fetchGalleryPhotos } from "../../../../services/galleryService";
 import PhotoCard from "./PhotoCard";
 import FooterCTA from "./FooterCTA";
-import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import galleryBg from "../../../../assets/mirissa.jpg";
 
 export default function Gallery({ photos, onPhotoClick = () => { } }) {
-  const { t } = useTranslation();
+  
   const [search, setSearch] = useState("");
   const [selectedSeason, setSelectedSeason] = useState("all");
   const [selectedMood, setSelectedMood] = useState("all");
@@ -108,13 +107,13 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
           >
             <span className="inline-flex items-center gap-2 px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
               <Camera className="w-3.5 h-3.5" />
-              {t("gallery.header.badge")}
+              {"Traveler's Gallery"}
             </span>
             <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-              {t("gallery.header.title")}
+              {"A Glimpse into Paradise."}
             </h1>
             <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light">
-              {t("gallery.header.desc")}
+              {"Real stories and moments captured by our travelers across the beautiful landscapes of Sri Lanka."}
             </p>
           </motion.div>
         </div>
@@ -133,7 +132,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder={t("gallery.filters.searchPlaceholder")}
+                  placeholder={"Search memories, locations, or tags..."}
                   className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-stone-50 border border-stone-200 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 text-stone-800 transition-all"
                 />
               </div>
@@ -144,7 +143,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
                 className="lg:hidden flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-stone-100 text-stone-700 font-semibold cursor-pointer"
               >
                 <Filter className="w-4 h-4" />
-                {t("gallery.filters.filtersBtn")}
+                {"Filters"}
                 <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
               </button>
 
@@ -157,7 +156,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
                     onChange={(e) => setSelectedSeason(e.target.value)}
                     className="appearance-none px-4 py-3 pr-10 rounded-xl bg-stone-50 border border-stone-200 outline-none focus:border-emerald-500 text-stone-700 font-medium cursor-pointer min-w-[160px]"
                   >
-                    <option value="all">{t("gallery.filters.allSeasons")}</option>
+                    <option value="all">{"All Seasons"}</option>
                     {SEASONS.map((s) => (
                       <option key={s.key} value={s.key}>
                         {s.icon} {s.label}
@@ -174,7 +173,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
                     onChange={(e) => setSelectedMood(e.target.value)}
                     className="appearance-none px-4 py-3 pr-10 rounded-xl bg-stone-50 border border-stone-200 outline-none focus:border-emerald-500 text-stone-700 font-medium cursor-pointer min-w-[150px]"
                   >
-                    <option value="all">{t("gallery.filters.allVibes")}</option>
+                    <option value="all">{"All Vibes"}</option>
                     {MOODS.map((m) => (
                       <option key={m.key} value={m.key}>
                         {m.icon} {m.label}
@@ -191,7 +190,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
                     onChange={(e) => setSelectedLocation(e.target.value)}
                     className="appearance-none px-4 py-3 pr-10 rounded-xl bg-stone-50 border border-stone-200 outline-none focus:border-emerald-500 text-stone-700 font-medium cursor-pointer min-w-[150px]"
                   >
-                    <option value="all">{t("gallery.filters.allLocations")}</option>
+                    <option value="all">{"All Locations"}</option>
                     {uniqueLocations.map((loc) => (
                       <option key={loc} value={loc}>
                         {loc}
@@ -210,7 +209,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
                     }`}
                 >
                   <Sparkles className="w-4 h-4" />
-                  {t("gallery.filters.ourCustomers")}
+                  {"Our Customers"}
                 </button>
               </div>
             </div>
@@ -224,7 +223,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
                     onChange={(e) => setSelectedSeason(e.target.value)}
                     className="w-full appearance-none px-3 py-2.5 pr-8 rounded-xl bg-stone-50 border border-stone-200 text-sm text-stone-700 font-medium"
                   >
-                    <option value="all">{t("gallery.filters.allSeasons")}</option>
+                    <option value="all">{"All Seasons"}</option>
                     {SEASONS.map((s) => (
                       <option key={s.key} value={s.key}>
                         {s.icon} {s.label}
@@ -240,7 +239,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
                     onChange={(e) => setSelectedMood(e.target.value)}
                     className="w-full appearance-none px-3 py-2.5 pr-8 rounded-xl bg-stone-50 border border-stone-200 text-sm text-stone-700 font-medium"
                   >
-                    <option value="all">{t("gallery.filters.allVibes")}</option>
+                    <option value="all">{"All Vibes"}</option>
                     {MOODS.map((m) => (
                       <option key={m.key} value={m.key}>
                         {m.icon} {m.label}
@@ -256,7 +255,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
                     onChange={(e) => setSelectedLocation(e.target.value)}
                     className="w-full appearance-none px-3 py-2.5 pr-8 rounded-xl bg-stone-50 border border-stone-200 text-sm text-stone-700 font-medium"
                   >
-                    <option value="all">{t("gallery.filters.allLocations")}</option>
+                    <option value="all">{"All Locations"}</option>
                     {uniqueLocations.map((loc) => (
                       <option key={loc} value={loc}>
                         {loc}
@@ -274,7 +273,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
                     }`}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  {t("gallery.filters.customersMobile")}
+                  {"Customers"}
                 </button>
               </div>
             )}
@@ -282,7 +281,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
             {/* Active Filters */}
             {hasActiveFilters && (
               <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-stone-100">
-                <span className="text-xs font-semibold text-stone-500">{t("gallery.filters.activeFilters")}</span>
+                <span className="text-xs font-semibold text-stone-500">{"Active Filters:"}</span>
                 {search && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
                     "{search}"
@@ -317,7 +316,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
                 )}
                 {showCustomerPhotos && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
-                    {t("gallery.filters.ourCustomers")}
+                    {"Our Customers"}
                     <button onClick={() => setShowCustomerPhotos(false)} className="hover:text-purple-900 cursor-pointer">
                       <X className="w-3 h-3" />
                     </button>
@@ -327,7 +326,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
                   onClick={clearFilters}
                   className="text-xs font-semibold text-red-600 hover:text-red-700 cursor-pointer ml-2"
                 >
-                  {t("gallery.filters.clearAll")}
+                  {"Clear all"}
                 </button>
               </div>
             )}
@@ -337,10 +336,10 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
           <div className="flex items-center justify-between mb-6">
             <p className="text-stone-600">
               {loading ? (
-                t("gallery.results.loadingBackend")
+                "Loading from backend..."
               ) : (
                 <>
-                  {t("gallery.results.showing")} <span className="font-bold text-stone-900">{filteredPhotos.length}</span> {t("gallery.results.tourExperiences")}
+                  {"Showing"} <span className="font-bold text-stone-900">{filteredPhotos.length}</span> {"tour experiences"}
                 </>
               )}
             </p>
@@ -355,23 +354,23 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
           {loading ? (
             <div className="text-center py-20 bg-white rounded-2xl border border-stone-200">
               <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
-              <h3 className="text-xl font-bold text-stone-800 mb-2">{t("gallery.results.loadingTitle")}</h3>
-              <p className="text-stone-500 max-w-md mx-auto">{t("gallery.results.loadingDesc")}</p>
+              <h3 className="text-xl font-bold text-stone-800 mb-2">{"Loading Memories"}</h3>
+              <p className="text-stone-500 max-w-md mx-auto">{"Getting the latest photos from our travelers' adventures..."}</p>
             </div>
           ) : filteredPhotos.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-2xl border border-stone-200">
               <div className="w-20 h-20 rounded-full bg-stone-100 flex items-center justify-center text-4xl mx-auto mb-4">
                 📷
               </div>
-              <h3 className="text-xl font-bold text-stone-800 mb-2">{t("gallery.results.noPhotos")}</h3>
+              <h3 className="text-xl font-bold text-stone-800 mb-2">{"No Photos Found"}</h3>
               <p className="text-stone-500 max-w-md mx-auto">
-                {t("gallery.results.noPhotosDesc")}
+                {"We couldn't find any photos matching your current filters. Try adjusting your search criteria."}
               </p>
               <button
                 onClick={clearFilters}
                 className="mt-6 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold transition-colors cursor-pointer"
               >
-                {t("gallery.results.clearAllBtn")}
+                {"Clear All Filters"}
               </button>
             </div>
           ) : (

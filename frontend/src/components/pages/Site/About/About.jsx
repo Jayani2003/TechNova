@@ -2,39 +2,38 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Star, Clock, Map, Users, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import aboutusImg from '../../../../assets/aboutus_img.jpg';
 
 const About = () => {
-  const { t } = useTranslation();
+  
 
   const stats = [
-    { label: t('about.stats.yearsExperience'), value: '10+' },
-    { label: t('about.stats.happyTravelers'), value: '15k+' },
-    { label: t('about.stats.luxuryVehicles'), value: '50+' },
-    { label: t('about.stats.expertGuides'), value: '100+' },
+    { label: "Years Experience", value: '10+' },
+    { label: "Happy Travelers", value: '15k+' },
+    { label: "Luxury Vehicles", value: '50+' },
+    { label: "Expert Guides", value: '100+' },
   ];
 
   const features = [
     {
       icon: <Star className="w-6 h-6" />,
-      title: t('about.features.premiumQuality'),
-      description: t('about.features.premiumQualityDesc')
+      title: "Premium Quality",
+      description: "We offer only the highest standard of vehicles and services to ensure your comfort."
     },
     {
       icon: <Map className="w-6 h-6" />,
-      title: t('about.features.bespokeItineraries'),
-      description: t('about.features.bespokeItinerariesDesc')
+      title: "Bespoke Itineraries",
+      description: "Custom-tailored tours designed to match your unique interests and preferences."
     },
     {
       icon: <Shield className="w-6 h-6" />,
-      title: t('about.features.safeSecure'),
-      description: t('about.features.safeSecureDesc')
+      title: "Safe & Secure",
+      description: "Your safety is our priority. All our vehicles are well-maintained and insured."
     },
     {
       icon: <Clock className="w-6 h-6" />,
-      title: t('about.features.support247'),
-      description: t('about.features.support247Desc')
+      title: "24/7 Support",
+      description: "Round-the-clock customer service to assist you at any point during your journey."
     }
   ];
 
@@ -58,9 +57,9 @@ const About = () => {
             transition={{ duration: 0.8 }}
             className="text-5xl md:text-7xl font-black text-white mb-6 uppercase tracking-tighter"
           >
-            {t('about.hero.discover')} <br />
+            {"Discover Sri Lanka"} <br />
             <span className="block text-4xl md:text-7xl font-['Playfair_Display'] italic text-transparent bg-clip-text bg-gradient-to-r from-[#40e0d6] via-[#00b0a5] to-[#007a72] mt-4">
-              {t('about.hero.inLuxury')}
+              {"In Ultimate Luxury"}
             </span>
           </motion.h1>
           <motion.p 
@@ -69,7 +68,7 @@ const About = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-lg md:text-xl text-slate-200 max-w-2xl mx-auto"
           >
-            {t('about.hero.desc')}
+            {"We are more than just a travel agency. We are your premium gateway to the wonders of Ceylon, dedicated to crafting unforgettable journeys."}
           </motion.p>
         </div>
       </section>
@@ -104,15 +103,15 @@ const About = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-sm font-bold text-[#00b0a5] tracking-widest uppercase mb-3">{t('about.story.subtitle')}</h2>
+            <h2 className="text-sm font-bold text-[#00b0a5] tracking-widest uppercase mb-3">{"Our Story"}</h2>
             <h3 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6 leading-tight">
-              {t('about.story.title')}
+              {"A Legacy of Excellence in Travel"}
             </h3>
             <p className="text-lg text-slate-600 mb-6 leading-relaxed">
-              {t('about.story.p1')}
+              {"Founded over a decade ago, Ceylone Best Tours started with a simple vision: to showcase the breathtaking beauty of Sri Lanka while providing unparalleled comfort and luxury to every traveler."}
             </p>
             <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-              {t('about.story.p2')}
+              {"Today, we stand as a premier travel and transport provider. Our dedicated team of professionals, expert chauffeurs, and a fleet of top-tier vehicles ensure that your journey through our island is nothing short of perfection."}
             </p>
             <Link to="/vehicle-category">
               <motion.button
@@ -120,7 +119,7 @@ const About = () => {
                 whileTap={{ scale: 0.95 }}
                 className="bg-[#00b0a5] text-white px-8 py-4 rounded-xl font-semibold shadow-lg shadow-[#00b0a5]/30 hover:bg-[#008f86] transition-colors"
               >
-                {t('about.story.btn')}
+                {"Explore Our Fleet"}
               </motion.button>
             </Link>
           </motion.div>
@@ -145,12 +144,12 @@ const About = () => {
       <section className="py-24 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-sm font-bold text-[#00b0a5] tracking-widest uppercase mb-3">{t('about.whyChoose.subtitle')}</h2>
+            <h2 className="text-sm font-bold text-[#00b0a5] tracking-widest uppercase mb-3">{"The Ceylone Best Tours Difference"}</h2>
             <h3 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">
-              {t('about.whyChoose.title')}
+              {"Why Travel With Us?"}
             </h3>
             <p className="text-lg text-slate-600">
-              {t('about.whyChoose.desc')}
+              {"We go above and beyond to deliver an extraordinary travel experience, combining authentic local knowledge with international standards of service."}
             </p>
           </div>
 

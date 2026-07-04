@@ -1,6 +1,4 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-
 const categoryIcons = {
     'Mini Car': '🚗',
     'Normal Car': '🚙',
@@ -13,7 +11,7 @@ const categoryIcons = {
 };
 
 const CategoryTabs = ({ categories, selectedCategory, onCategorySelect, loading }) => {
-    const { t } = useTranslation();
+    
     if (loading) {
         return (
             <div className="flex gap-3 overflow-x-auto pb-2">
@@ -31,10 +29,10 @@ const CategoryTabs = ({ categories, selectedCategory, onCategorySelect, loading 
         <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-gray-800">
-                    {t("vehicleCategory.tabs.browseByCategory")}
+                    {"Browse by Category"}
                 </h2>
                 <p className="text-sm text-gray-500 hidden md:block">
-                    {t("vehicleCategory.tabs.clickToSee")}
+                    {"Click any category to see vehicles"}
                 </p>
             </div>
 
@@ -51,9 +49,9 @@ const CategoryTabs = ({ categories, selectedCategory, onCategorySelect, loading 
                 >
                     <div className="flex flex-col items-center text-center">
                         <span className="text-4xl mb-2">📋</span>
-                        <h3 className="font-bold text-sm">{t("vehicleCategory.tabs.all")}</h3>
+                        <h3 className="font-bold text-sm">{"All"}</h3>
                         <p className={`text-xs mt-1 ${!selectedCategory ? 'text-blue-100' : 'text-gray-500'}`}>
-                            {t("vehicleCategory.tabs.viewAll")}
+                            {"View All"}
                         </p>
                     </div>
                 </button>

@@ -13,6 +13,8 @@ const vehicleRoutes = require('./routes/vehicleRoutes');
 
 
 const packageRoutes = require('./routes/packageRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const reportRoutes  = require('./routes/reportRoutes');
 
 const app = express();
 const PORT = Number(process.env.PORT || 5000);
@@ -58,6 +60,8 @@ app.use('/api/vehicles', vehicleRoutes);
 
 
 app.use('/api/packages', packageRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error('Unhandled server error:', err);
@@ -66,4 +70,4 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ message: 'Internal server error.' });
 });
 
-app.listen(PORT, () => console.log(`Backend running on ${FRONTEND_ORIGIN}:${PORT}`));
+app.listen(PORT, () => console.log(`Backend running on ${FRONTEND_ORIGIN}:${PORT}`));

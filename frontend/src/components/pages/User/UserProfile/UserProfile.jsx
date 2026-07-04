@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { AuthContext } from '../../../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { 
   Camera, Mail, User as UserIcon, Phone, MapPin, Globe, Hash, 
   Edit3, Check, LayoutDashboard, Shield, CalendarDays, Lock, 
@@ -14,6 +14,7 @@ import { useMessages } from '../../../../context/useMessages.js';
 import { useBookings } from '../../../../context/BookingsContext.jsx';
 import MyBookings from '../MyBookings/MyBookings';
 import MyReviews from '../MyReviews/MyReviews';
+import PaymentPage from '../Payments/Payments';
 
 const buildMergedConversation = (inquiries) => {
   if (!inquiries?.length) return null;
@@ -58,10 +59,24 @@ const buildMergedConversation = (inquiries) => {
 function UserProfile() {
   const { user, changePassword, logout, updateProfile } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Tab State
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'dashboard');
+  const [paymentBookingId, setPaymentBookingId] = useState(location.state?.bookingId || null);
   const [toast, setToast] = useState(null);
+
+  // Sync state from navigation (e.g. from MyBookingDetail)
+  React.useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+      // clear the state so a page refresh doesn't force us back, or just let it be.
+      window.history.replaceState({}, document.title)
+    }
+    if (location.state?.bookingId) {
+      setPaymentBookingId(location.state.bookingId);
+    }
+  }, [location.state]);
 
   // State for profile fields (defaults to empty strings if not updated yet)
   const [isEditing, setIsEditing] = useState(false);
@@ -477,6 +492,24 @@ const BookingsTab = () => <MyBookings userEmail={user?.email} />;
           <AnimatePresence mode="wait">
             {activeTab === 'dashboard' && renderDashboardTab()}
             {activeTab === 'bookings' && <BookingsTab key="bookings" />}
+            {activeTab === 'payments' && (
+              <motion.div
+                key="payments"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3 }}
+                className="h-full"
+              >
+                <PaymentPage 
+                  bookingId={paymentBookingId} 
+                  onRequestOpenTab={(tab, bId) => {
+                    setActiveTab(tab);
+                    if (bId) setPaymentBookingId(bId);
+                  }} 
+                />
+              </motion.div>
+            )}
             {activeTab === 'reviews' && <ReviewsTab key="reviews" />}
             {activeTab === 'messages' && <MessagesTab key="messages" />}
             {activeTab === 'security' && <SecurityTab key="security" />}

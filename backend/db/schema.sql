@@ -6,7 +6,7 @@ CREATE TABLE user (
 
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NULL,
 
     role ENUM('ADMIN','CUSTOMER') DEFAULT 'CUSTOMER',
 
@@ -293,7 +293,21 @@ CREATE TABLE contact_inquiry (
     subject      VARCHAR(100),
     message      TEXT NOT NULL,
     is_read      BOOLEAN DEFAULT FALSE,
+    status ENUM('new', 'read', 'replied') NOT NULL DEFAULT 'new',
     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE contact_reply (
+    reply_id INT NOT NULL AUTO_INCREMENT,
+    inquiry_id INT NOT NULL,
+    sender_role ENUM('customer', 'admin') NOT NULL,
+    sender_name VARCHAR(100) NOT NULL,
+    message TEXT NOT NULL,
+    sent_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (reply_id),
+    FOREIGN KEY (inquiry_id) REFERENCES contact_inquiry(inquiry_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE chat_topic (

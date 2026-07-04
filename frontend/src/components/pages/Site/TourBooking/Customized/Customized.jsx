@@ -157,7 +157,7 @@ const SuccessScreen = ({ bookingRef, navigate }) => {
   );
 };
 
-const validateStep = (step, data) => {
+const validateStep = (step, data, user) => {
   switch (step) {
     case 0:
       if (data.selectedCities.length === 0) return { valid: false, msg: "Please select at least one destination." };
@@ -170,17 +170,9 @@ const validateStep = (step, data) => {
       if (!data.categoryId) return { valid: false, msg: "Please select a vehicle category." };
       return { valid: true };
     case 2:
-      if (!data.customerName.trim()) return { valid: false, msg: "Please enter your full name." };
-      if (!data.customerPhone.trim()) return { valid: false, msg: "Please enter your phone number." };
-      
-      // Phone validation for +94
-      if (data.customerPhone.startsWith("+94")) {
-        const numberPart = data.customerPhone.split(" ")[1] || "";
-        const cleanNumber = numberPart.replace(/\s/g, "");
-        if (cleanNumber.length !== 9) {
-          return { valid: false, msg: "Sri Lankan phone numbers must have exactly 9 digits after +94." };
-        }
-      }
+      const finalName = data.customerName?.trim() || user?.name?.trim();
+      if (!finalName) return { valid: false, msg: "Please enter your full name." };
+      if (!data.contactNumber?.trim()) return { valid: false, msg: "Please enter your primary contact number." };
       return { valid: true };
     case 3:
       return { valid: true };
@@ -189,7 +181,7 @@ const validateStep = (step, data) => {
   }
 };
 
-const CustomReviewStep = ({ data }) => {
+const CustomReviewStep = ({ data, user }) => {
   
   const VEHICLE_LABELS = {
     mini_car: "Mini Car",
@@ -241,7 +233,8 @@ const CustomReviewStep = ({ data }) => {
           <ReviewRow icon={Users} label={"Travelers"} value={`${data.noOfAdults} Adults${data.noOfChildren > 0 ? `, ${data.noOfChildren} Children` : ""}`} />
           <ReviewRow icon={Car} label={"Vehicle Type"} value={VEHICLE_LABELS[data.categoryId] || "Not Selected"} />
           <ReviewRow icon={Briefcase} label={"Luggage"} value={`${data.smallLuggages || 0} Small, ${data.largeLuggages || 0} Large`} />
-          <ReviewRow icon={Phone} label={"Contact Name"} value={data.customerName} />
+          <ReviewRow icon={Phone} label={"Contact Name"} value={data.customerName || user?.name || "Not Specified"} />
+          <ReviewRow icon={Phone} label={"Contact Info"} value={`${data.contactPlatform || 'Mobile'}: ${data.contactNumber || ''}`} />
         </div>
       </div>
 
@@ -366,6 +359,7 @@ const Customized = () => {
       return {
         ...initialData,
         ...editBooking,
+        customerName: editBooking.customerName || user?.name || "",
         selectedCities: citiesMatch ? citiesMatch[1].split(', ') : [],
         activities: activitiesMatch ? activitiesMatch[1].split(', ') : [],
         pickupTime: pickupTimeMatch ? pickupTimeMatch[1].trim() : "",
@@ -376,7 +370,7 @@ const Customized = () => {
         babySeatNeeded: editBooking.noOfLuggages?.includes("Baby seat needed") || false,
       };
     }
-    return initialData;
+    return { ...initialData, customerName: user?.name || "" };
   });
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedActivity, setSelectedActivity] = useState("");
@@ -445,7 +439,7 @@ const Customized = () => {
   };
 
   const handleNext = () => {
-    const validation = validateStep(currentStep, data);
+    const validation = validateStep(currentStep, data, user);
     if (validation.valid) {
       setError("");
       setCurrentStep((s) => s + 1);
@@ -472,6 +466,7 @@ const Customized = () => {
       if (editBooking) {
         await updateBooking(editBooking.id, {
           ...data,
+          customerName: data.customerName || user?.name || "Not Specified",
           customerEmail: user.email,
         });
         setBookingRef(editBooking.bookingRef || editBooking.id);
@@ -480,6 +475,7 @@ const Customized = () => {
       } else {
         const result = await submitCustomBooking({
           ...data,
+          customerName: data.customerName || user?.name || "Not Specified",
           customerEmail: user.email,
         });
         setBookingRef(result.bookingRef);
@@ -493,7 +489,7 @@ const Customized = () => {
     }
   };
 
-  const canProceed = validateStep(currentStep, data).valid;
+  const canProceed = validateStep(currentStep, data, user).valid;
   const today = new Date().toISOString().split("T")[0];
 
   return (
@@ -752,7 +748,7 @@ const Customized = () => {
                         )}
                         {currentStep === 1 && <BookingPassengersStep data={data} onChange={handleChange} />}
                         {currentStep === 2 && <BookingNotesStep data={data} onChange={handleChange} />}
-                        {currentStep === 3 && <CustomReviewStep data={data} />}
+                        {currentStep === 3 && <CustomReviewStep data={data} user={user} />}
                       </motion.div>
                     </AnimatePresence>
 

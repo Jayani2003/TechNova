@@ -29,9 +29,9 @@ const ContactFaq = () => {
       className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8"
     >
       <div className="mb-6">
-        <span className="inline-block px-3 py-1 mb-2 text-xs font-semibold tracking-widest text-white uppercase rounded-full" style={{ backgroundColor: "#00b0a5" }}>
+        {/*<span className="inline-block px-3 py-1 mb-2 text-xs font-semibold tracking-widest text-white uppercase rounded-full" style={{ backgroundColor: "#00b0a5" }}>
           {"FAQ"}
-        </span>
+        </span>*/}
         <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">
           {"Frequently Asked Questions"}
         </h2>

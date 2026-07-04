@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { MapPin, ExternalLink } from "lucide-react";
 
-const MAPS_URL = "https://share.google/SJnuuanvPhICCZe92";
+const MAPS_URL = "https://www.google.com/maps/place/Ceylon+Best+Tours+Taxi+Service/@6.2129128,81.3317322,17z/data=!3m1!4b1!4m6!3m5!1s0x3ae69bddb46dbf41:0x2e6bf396d66f87b!8m2!3d6.2129128!4d81.3317322!16s%2Fg%2F11g_zlc7p2?entry=tts";
+const MAPS_EMBED_URL = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3949.3443702359334!2d81.32954391528251!3d6.212912799999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae69bddb46dbf41%3A0x2e6bf396d66f87b!2sCeylon%20Best%20Tours%20Taxi%20Service!5e0!3m2!1sen!2slk!4v1700000000000";
 
 const ContactMap = () => (
   <motion.div
@@ -16,49 +17,17 @@ const ContactMap = () => (
       <h2 className="font-extrabold text-slate-800 tracking-tight">Our Location</h2>
     </div>
 
-    {/* Map placeholder */}
-    <a
-      href={MAPS_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block relative h-80 w-full bg-slate-100 hover:bg-slate-200 transition-colors group"
-    >
-      {/* Grid */}
-      <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#94a3b8" strokeWidth="1" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
-      </svg>
-
-      {/* Road lines */}
-      <svg className="absolute inset-0 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
-        <line x1="0" y1="50%" x2="100%" y2="50%" stroke="#94a3b8" strokeWidth="6" />
-        <line x1="35%" y1="0" x2="35%" y2="100%" stroke="#94a3b8" strokeWidth="4" />
-        <line x1="70%" y1="0" x2="70%" y2="100%" stroke="#94a3b8" strokeWidth="3" />
-        <line x1="0" y1="25%" x2="100%" y2="25%" stroke="#94a3b8" strokeWidth="3" />
-        <line x1="0" y1="75%" x2="100%" y2="75%" stroke="#94a3b8" strokeWidth="3" />
-      </svg>
-
-      {/* Pin */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-        <div
-          className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"
-          style={{ backgroundColor: "#00b0a5" }}
-        >
-          <MapPin className="w-7 h-7 text-white" />
-        </div>
-        <div className="bg-white rounded-xl px-5 py-2 shadow-md flex items-center gap-2">
-          <span className="text-sm font-semibold text-slate-700">
-            No.214, Kirinda Hospital Road, Kirinda
-          </span>
-          <ExternalLink className="w-4 h-4" style={{ color: "#00b0a5" }} />
-        </div>
-        <p className="text-xs text-slate-400 tracking-wide">Click to open in Google Maps</p>
-      </div>
-    </a>
+    {/* Google Maps embed */}
+    <div className="h-80 w-full bg-slate-100">
+      <iframe
+        title="Ceylon Best Tours Location"
+        src={MAPS_EMBED_URL}
+        className="w-full h-full border-0"
+        allowFullScreen
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+    </div>
 
     {/* Footer */}
     <div className="px-6 py-4 bg-slate-50 flex items-start justify-between">
@@ -78,7 +47,7 @@ const ContactMap = () => (
         onMouseLeave={e => e.currentTarget.style.color = "#00b0a5"}
       >
         <MapPin className="w-4 h-4" />
-        View Larger Map
+        Open in Google Maps
       </a>
     </div>
   </motion.div>

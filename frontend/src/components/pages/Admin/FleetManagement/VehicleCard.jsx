@@ -34,7 +34,7 @@ const VehicleCard = ({ vehicle, onView, onEdit, onDelete }) => {
                         {vehicle.vehicle_name}
                     </h3>
                     <span className="text-lg font-bold text-blue-600">
-                        Rs. {vehicle.price_per_day}
+                        USD {vehicle.price_per_day}
                         <span className="text-xs text-gray-500 font-normal">/day</span>
                     </span>
                 </div>

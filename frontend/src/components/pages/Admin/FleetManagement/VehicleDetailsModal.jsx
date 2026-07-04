@@ -92,7 +92,7 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle }) => {
                         </div>
                         <div className="text-right">
                             <span className="text-2xl font-bold text-blue-600">
-                                Rs. {vehicle.price_per_day}
+                                USD {vehicle.price_per_day}
                             </span>
                             <p className="text-xs text-gray-500">per day</p>
                         </div>

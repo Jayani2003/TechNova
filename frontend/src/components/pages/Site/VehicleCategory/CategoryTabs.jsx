@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 const categoryIcons = {
     'Mini Car': '🚗',
@@ -61,6 +61,7 @@ const CategoryTabs = ({ categories, selectedCategory, onCategorySelect, loading 
                 {categories.map((category) => {
                     const isSelected = selectedCategory?.id === category.id;
                     const icon = categoryIcons[category.name] || '🚗';
+                    const vehicleCount = category.vehicle_count || 0;
                     
                     let firstImage = null;
                     if (Array.isArray(category.images) && category.images.length > 0) {
@@ -102,9 +103,8 @@ const CategoryTabs = ({ categories, selectedCategory, onCategorySelect, loading 
                                 </div>
                                 <h3 className="font-bold text-sm">{category.name}</h3>
                                 <p className={`text-xs mt-1 ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
-                                    <Trans i18nKey="vehicleCategory.tabs.vehiclesCount" count={category.vehicle_count || 0}>
-                                        <span className="font-bold">{{count: category.vehicle_count || 0}}</span> vehicles
-                                    </Trans>
+                                    <span className="font-bold">{vehicleCount}</span>{' '}
+                                    {vehicleCount === 1 ? 'vehicle' : 'vehicles'}
                                 </p>
                             </div>
                         </button>

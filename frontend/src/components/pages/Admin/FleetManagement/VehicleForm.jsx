@@ -58,8 +58,8 @@ const initialFormData = {
 const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }) => {
     const [formData, setFormData] = useState(initialFormData);
     const [errors, setErrors] = useState({});
-    const [imageFile, setImageFile] = useState(null);
-    const [imagePreview, setImagePreview] = useState('');
+    const [imageFiles, setImageFiles] = useState([]);
+    const [imagePreviews, setImagePreviews] = useState([]);
 
     const isEditing = !!vehicle;
 
@@ -88,12 +88,12 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                 engine_capacity: vehicle.engine_capacity || '',
                 features: vehicle.features || '',
             });
-            setImageFile(null);
-            setImagePreview(vehicle.image_url || '');
+            setImageFiles([]);
+            setImagePreviews(Array.isArray(vehicle.images) && vehicle.images.length > 0 ? vehicle.images : (vehicle.image_url ? [vehicle.image_url] : []));
         } else {
             setFormData(initialFormData);
-            setImageFile(null);
-            setImagePreview('');
+            setImageFiles([]);
+            setImagePreviews([]);
         }
         setErrors({});
     }, [vehicle, isOpen]);
@@ -126,14 +126,13 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
     };
 
     const handleImageChange = (e) => {
-        const file = e.target.files?.[0] || null;
-        setImageFile(file);
+        const files = Array.from(e.target.files || []);
+        setImageFiles(files);
 
-        if (file) {
-            const previewUrl = URL.createObjectURL(file);
-            setImagePreview(previewUrl);
+        if (files.length > 0) {
+            setImagePreviews(files.map((file) => URL.createObjectURL(file)));
         } else {
-            setImagePreview(vehicle?.image_url || '');
+            setImagePreviews(Array.isArray(vehicle?.images) && vehicle.images.length > 0 ? vehicle.images : (vehicle?.image_url ? [vehicle.image_url] : []));
         }
     };
 
@@ -167,7 +166,7 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validate()) {
-            onSubmit({ ...formData, imageFile });
+            onSubmit({ ...formData, imageFiles });
         }
     };
 
@@ -348,7 +347,7 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                             {/* Price Per Day */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Price Per Day ($) <span className="text-red-500">*</span>
+                                    Price Per Day (USD) <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="number"
@@ -565,17 +564,22 @@ const VehicleForm = ({ isOpen, onClose, onSubmit, vehicle, categories, loading }
                         <div className="space-y-4">
                             {/* Image Upload */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Image</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Images</label>
                                 <input
                                     type="file"
                                     accept="image/*"
+                                    multiple
                                     onChange={handleImageChange}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Choose an image from your PC. It will be uploaded to Cloudinary.</p>
-                                {imagePreview && (
-                                    <div className="mt-3 rounded-xl border border-gray-200 overflow-hidden bg-gray-50">
-                                        <img src={imagePreview} alt="Vehicle preview" className="h-52 w-full object-cover" />
+                                <p className="text-xs text-gray-500 mt-1">Choose one or more images from your PC. They will be uploaded to Cloudinary.</p>
+                                {imagePreviews.length > 0 && (
+                                    <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        {imagePreviews.map((preview, index) => (
+                                            <div key={index} className="rounded-xl border border-gray-200 overflow-hidden bg-gray-50 h-28">
+                                                <img src={preview} alt={`Vehicle preview ${index + 1}`} className="h-full w-full object-cover" />
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </div>

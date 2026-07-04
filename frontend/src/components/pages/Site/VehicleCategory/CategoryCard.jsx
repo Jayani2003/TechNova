@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
+const VehicleCard = ({ vehicle, onViewDetails }) => {
     const { t } = useTranslation();
-    const isAvailable = vehicle.status === 'Available';
     const [currentImageIdx, setCurrentImageIdx] = useState(0);
     const images = vehicle?.images && vehicle.images.length > 0 ? vehicle.images : (vehicle?.image_url ? [vehicle.image_url] : []);
 
@@ -16,7 +15,18 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
     }, [images.length]);
 
     return (
-        <div className="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group transform hover:-translate-y-1">
+        <div
+            className="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group transform hover:-translate-y-1 cursor-pointer"
+            onClick={() => onViewDetails(vehicle)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onViewDetails(vehicle);
+                }
+            }}
+        >
             {/* Image Section */}
             <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                 {images.length > 0 ? (
@@ -39,20 +49,6 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                     </div>
                 )}
 
-                {/* Availability Badge */}
-                <div className="absolute top-3 left-3">
-                    {isAvailable ? (
-                        <span className="bg-green-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
-                            <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                            {t("vehicleCategory.card.available")}
-                        </span>
-                    ) : (
-                        <span className="bg-red-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-md">
-                            {vehicle.status}
-                        </span>
-                    )}
-                </div>
-
                 {/* Category Badge */}
                 <div className="absolute top-3 right-3">
                     <span className="bg-white/90 backdrop-blur-sm text-xs font-medium px-3 py-1.5 rounded-full text-gray-700 shadow-md">
@@ -64,7 +60,7 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                 <div className="absolute bottom-3 right-3 bg-white rounded-xl px-4 py-2 shadow-lg">
                     <p className="text-xs text-gray-500">{t("vehicleCategory.card.startingAt")}</p>
                     <p className="text-xl font-bold text-blue-600">
-                        Rs. {vehicle.price_per_day}
+                        USD {vehicle.price_per_day}
                         <span className="text-xs text-gray-500 font-normal">{t("vehicleCategory.card.perDay")}</span>
                     </p>
                 </div>
@@ -109,11 +105,6 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                             ❄️ A/C
                         </span>
                     )}
-                    {vehicle.insurance_expired && (
-                        <span className="text-xs bg-red-50 text-red-700 px-2 py-1 rounded-full border border-red-200">
-                            {t("vehicleCategory.card.insuranceExpired")}
-                        </span>
-                    )}
                     {vehicle.mileage && (
                         <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full border border-green-200">
                             ⚡ {vehicle.mileage}
@@ -129,22 +120,14 @@ const VehicleCard = ({ vehicle, onViewDetails, onBookNow }) => {
                 {/* Action Buttons */}
                 <div className="flex gap-2">
                     <button
-                        onClick={() => onViewDetails(vehicle)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onViewDetails(vehicle);
+                        }}
                         className="flex-1 font-medium py-2.5 rounded-lg transition-colors text-sm hover:shadow-md"
                         style={{ backgroundColor: '#ffffff', color: '#374151', border: '1px solid #d1d5db' }}
                     >
                         {t("vehicleCategory.card.viewDetails")}
-                    </button>
-                    <button
-                        onClick={() => onBookNow(vehicle)}
-                        disabled={!isAvailable}
-                        className="flex-1 font-medium py-2.5 rounded-lg transition-colors text-sm"
-                        style={isAvailable 
-                            ? { backgroundColor: '#ffffff', color: '#2563eb', border: '1px solid #93c5fd' } 
-                            : { backgroundColor: '#ffffff', color: '#9ca3af', cursor: 'not-allowed', border: '1px solid #d1d5db' }
-                        }
-                    >
-                        {isAvailable ? t("vehicleCategory.card.bookNow") : t("vehicleCategory.card.notAvailable")}
                     </button>
                 </div>
             </div>

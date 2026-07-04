@@ -232,6 +232,34 @@ const MyBookingDetail = ({ booking, onBack }) => {
           <DetailRow icon={Calendar} label="Total Days"   value={booking.totalDays ? `${booking.totalDays} day(s)` : null} />
         </Section>
 
+        {/* ── Custom Tour Itinerary ── */}
+        {booking.tourType === "CUSTOM" && booking.itinerary && booking.itinerary.length > 0 && (
+          <Section title="Tour Itinerary" accent>
+            <div className="flex flex-col gap-3 mt-2">
+              {booking.itinerary.map((day, idx) => (
+                <div key={idx} className="bg-white border border-pink-100 rounded-xl p-3 shadow-sm">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold text-pink-500 uppercase tracking-wider">Stop {day.day_number}</span>
+                    <span className="text-sm font-extrabold text-slate-800">{day.city_name}</span>
+                  </div>
+                  {day.activities && day.activities.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1">Activities</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {day.activities.map(act => (
+                          <span key={act} className="bg-pink-50 text-pink-600 border border-pink-100 px-2 py-0.5 rounded-md text-xs font-semibold">
+                            {act}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
         {/* Passengers */}
         <Section title="Passengers & Vehicle">
           <DetailRow icon={Users}    label="Adults"    value={booking.noOfAdults ? `${booking.noOfAdults} adult(s)` : null} />

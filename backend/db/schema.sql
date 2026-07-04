@@ -208,6 +208,15 @@ CREATE TABLE booking_custom_activities (
     FOREIGN KEY (booking_id) REFERENCES booking(booking_id) ON DELETE CASCADE
 );
 
+CREATE TABLE booking_custom_itinerary (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id    INT NOT NULL,
+    day_number    INT NOT NULL,
+    city_name     VARCHAR(100) NOT NULL,
+    activities    TEXT NULL,
+    FOREIGN KEY (booking_id) REFERENCES booking(booking_id) ON DELETE CASCADE
+);
+
 CREATE TABLE payment (
     payment_id     INT AUTO_INCREMENT PRIMARY KEY,
     booking_id     INT NOT NULL,

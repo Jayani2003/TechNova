@@ -11,7 +11,7 @@ const formatDate = (val) => {
 
 const normalizeTourType = (value) => String(value || 'P2P').toUpperCase();
 
-const COMPANY_NAME = 'TechNova Tours';
+const COMPANY_NAME = 'Ceylon Best Tours';
 
 const getBookingReference = (tourType, bookingId) => {
   const type = normalizeTourType(tourType);
@@ -23,7 +23,7 @@ const formatMoney = (value) => {
   if (value === null || value === undefined) return 'N/A';
   const n = Number(value);
   if (Number.isNaN(n)) return 'N/A';
-  return `LKR ${n.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `USD ${n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 };
 
 const getPaymentScheduleLines = (tourType, quotedPrice) => {
@@ -601,9 +601,13 @@ const downloadBookingConfirmationPdf = async (req, res) => {
 
     writeRow('Booking Reference', bookingRef);
     writeRow('Customer Name', booking.customer_name);
-    writeRow('Customer Phone', booking.customer_phone);
+    writeRow('Customer Phone', booking.contact_number);
     writeRow('Tour Type', normalizeTourType(booking.tour_type));
     writeRow('Selected Package', booking.package_name || 'Not applicable');
+    if (normalizeTourType(booking.tour_type) === 'P2P') {
+      writeRow('Start Location', booking.start_location);
+      writeRow('End Location', booking.end_location);
+    }
     writeRow('Start Date', startDate || 'N/A');
     writeRow('End Date', endDate || 'N/A');
     writeRow('Vehicle Category', booking.category_name || 'N/A');

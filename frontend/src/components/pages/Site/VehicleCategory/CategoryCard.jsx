@@ -12,6 +12,8 @@ const VehicleCard = ({ vehicle, onViewDetails }) => {
         return () => clearInterval(timer);
     }, [images.length]);
 
+    const isLargeVanOrVan = ['van', 'large van'].includes(vehicle?.category_name?.toLowerCase());
+
     return (
         <div
             className="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group transform hover:-translate-y-1 cursor-pointer"
@@ -80,7 +82,7 @@ const VehicleCard = ({ vehicle, onViewDetails }) => {
                 <div className="grid grid-cols-2 gap-2 mb-4">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span className="text-lg">👥</span>
-                        <span>{`vehicle.seats Seats`}</span>
+                        <span>{vehicle.seats} Seats</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span className="text-lg">⛽</span>
@@ -92,7 +94,7 @@ const VehicleCard = ({ vehicle, onViewDetails }) => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span className="text-lg">🧳</span>
-                        <span>{`vehicle.luggage_capacity Bags`}</span>
+                        <span>{vehicle.luggage_capacity} Bags</span>
                     </div>
                 </div>
 
@@ -113,6 +115,12 @@ const VehicleCard = ({ vehicle, onViewDetails }) => {
                             🎨 {vehicle.color}
                         </span>
                     )}
+                </div>
+
+                {/* Mileage Policy */}
+                <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-3 mb-4 text-xs text-slate-600">
+                    <p className="font-semibold text-slate-800 mb-0.5">Package & Custom Tours Pricing</p>
+                    <p>Includes <span className="font-bold">{isLargeVanOrVan ? 125 : 150} km</span> per day. Additional mileage is charged at <span className="font-bold">$0.5/km</span>.</p>
                 </div>
 
                 {/* Action Buttons */}

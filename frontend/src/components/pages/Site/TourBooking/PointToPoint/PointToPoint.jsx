@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+// import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Send, Lock, MapPin, CheckCircle } from "lucide-react";
 import { AuthContext } from "../../../../../context/AuthContext";

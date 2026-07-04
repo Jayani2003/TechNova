@@ -172,7 +172,10 @@ const MyBookingDetail = ({ booking, onBack }) => {
 
             <p className="text-xs text-slate-500 mb-4">Accept to proceed, or reject to cancel this booking.</p>
             <div className="flex gap-3">
-              <button onClick={() => acceptQuote(booking.id)}
+              <button onClick={async () => {
+                  await acceptQuote(booking.id);
+                  handleDownloadPdf();
+                }}
                 className="flex-1 flex items-center justify-center gap-2 bg-[#00b0a5] text-white py-2.5 rounded-xl font-semibold hover:bg-[#009b91] transition-colors cursor-pointer">
                 <Check className="w-4 h-4" /> Accept Quote
               </button>

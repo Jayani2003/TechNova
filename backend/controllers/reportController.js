@@ -1,7 +1,7 @@
 const PDFDocument = require('pdfkit');
 const db = require('../db/connection');
 
-const COMPANY_NAME = 'TechNova Tours';
+const COMPANY_NAME = 'Ceylon Best Tours';
 const COMPANY_TAGLINE = 'Official Management Report';
 const BRAND_PRIMARY = '#00b0a5';
 const BRAND_DARK = '#0f172a';

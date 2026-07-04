@@ -46,13 +46,11 @@ const MessageList = ({ messages, selectedId, adminNotificationCount, getStatusCo
                 </span>
               )}
             </div>
-            <p className="text-xs text-gray-500 mb-1">Subject: {message.subject}</p>
             <p className="text-xs text-gray-700 line-clamp-2">{message.message}</p>
-            <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center justify-start mt-2">
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getStatusColor(message.status)}`}>
                 {message.status}
               </span>
-              <span className="text-xs text-gray-500">{message.createdAt}</span>
             </div>
           </button>
         );

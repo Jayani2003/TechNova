@@ -1,10 +1,10 @@
 import { useState, useContext } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Send, Lock, MapPin, CheckCircle } from "lucide-react";
 import { AuthContext } from "../../../../../context/AuthContext";
-import { api } from "../../../../../config/api";
+import { submitP2PBooking, updateBooking } from "../../../../../services/bookingService";
 import BookingStepIndicator from "../Booking/BookingStepIndicator";
 import P2PTripStep from "./P2PTripStep";
 import BookingPassengersStep from "../Booking/BookingPassengersStep";
@@ -45,7 +45,6 @@ const initialData = {
 };
  
 // ─── Guest Guard ──────────────────────────────────────────────────────────────
-// ─── Guest Guard ──────────────────────────────────────────────────────────────
 const GuestGuard = ({ navigate }) => {
   const { t } = useTranslation();
   return (
@@ -81,7 +80,6 @@ const GuestGuard = ({ navigate }) => {
   );
 };
  
-// ─── Success Screen ───────────────────────────────────────────────────────────
 // ─── Success Screen ───────────────────────────────────────────────────────────
 const SuccessScreen = ({ bookingId, navigate }) => {
   const { t } = useTranslation();
@@ -138,12 +136,40 @@ const PointToPoint = () => {
   const { t } = useTranslation();
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const editBooking = location.state?.editBooking || null;
 
   const [currentStep, setCurrentStep] = useState(0);
   const [maxReachedStep, setMaxReachedStep] = useState(0);
-  const [data, setData] = useState({
-    ...initialData,
-    customerName: user?.name || "",
+  const [data, setData] = useState(() => {
+    if (!editBooking) {
+      return { ...initialData, customerName: user?.name || "" };
+    }
+    return {
+      ...initialData,
+      ...editBooking,
+      customerName: editBooking.customerName || user?.name || "",
+      contactPlatform: editBooking.contactPlatform || "mobile",
+      contactNumber: editBooking.contactNumber || editBooking.customerPhone || "",
+      contactPlatform2: editBooking.contactPlatform2 || "",
+      contactNumber2: editBooking.contactNumber2 || "",
+      totalDays: editBooking.totalDays || 0,
+      daysRequired: editBooking.daysRequired || 0,
+      noOfAdults: editBooking.noOfAdults || 1,
+      noOfChildren: editBooking.noOfChildren || 0,
+      agesOfChildren: editBooking.agesOfChildren || "",
+      babySeatNeeded: editBooking.babySeatNeeded || false,
+      categoryId: editBooking.categoryId || "",
+      luggage10kg: editBooking.luggage10kg || 0,
+      luggage25kg: editBooking.luggage25kg || 0,
+      luggage35kg: editBooking.luggage35kg || 0,
+      luggageCustomCount: editBooking.luggageCustomCount || 0,
+      luggageCustomItems: editBooking.luggageCustomItems || [],
+      emergencyName: editBooking.emergencyName || "",
+      emergencyPhone: editBooking.emergencyPhone || "",
+      emergencyRelationship: editBooking.emergencyRelationship || "",
+      notes: editBooking.notes || "",
+    };
   });
   const [submitted, setSubmitted] = useState(false);
   const [bookingId, setBookingId] = useState("");
@@ -173,7 +199,7 @@ const PointToPoint = () => {
     setSubmitting(true);
     setSubmitError("");
     try {
-      const result = await api.post("/bookings/p2p", {
+      const payload = {
         tourType: "P2P",
         startLocation: data.startLocation,
         endLocation: data.endLocation,
@@ -193,17 +219,20 @@ const PointToPoint = () => {
         luggageCustomCount: data.luggageCustomCount || 0,
         luggageCustomItems: data.luggageCustomItems || [],
         customerName: data.customerName,
-        contactPlatform:  data.contactPlatform  || "whatsapp",
-        contactNumber:    data.contactNumber,
+        contactPlatform: data.contactPlatform || "whatsapp",
+        contactNumber: data.contactNumber,
         contactPlatform2: data.contactPlatform2 || null,
-        contactNumber2:   data.contactNumber2   || null,
+        contactNumber2: data.contactNumber2 || null,
         customerEmail: user.email,
         emergencyName: data.emergencyName,
         emergencyPhone: data.emergencyPhone,
         emergencyRelationship: data.emergencyRelationship,
         notes: data.notes,
-      });
-      setBookingId(result.bookingId || "");
+      };
+      const result = editBooking?.id
+        ? await updateBooking(editBooking.id, payload)
+        : await submitP2PBooking(payload);
+      setBookingId(editBooking?.id || result.bookingId || "");
       setSubmitted(true);
     } catch (err) {
       setSubmitError(err.message || "Submission failed. Please try again.");

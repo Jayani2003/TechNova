@@ -77,7 +77,11 @@ const MyBookingDetail = ({ booking, onBack }) => {
         {booking.status === "PENDING" && (
           <button
             onClick={() => {
-              const path = booking.tourType === "CUSTOM" ? "/tour-booking/customized" : "/tour-booking/point";
+              const path = booking.tourType === "CUSTOM"
+                ? "/tour-booking/customized"
+                : booking.tourType === "PACKAGE"
+                  ? "/tour-booking/package/book"
+                  : "/tour-booking/point";
               navigate(path, { state: { editBooking: booking } });
             }}
             className="ml-auto flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#00b0a5] text-white font-bold text-sm hover:bg-[#008f86] transition-all cursor-pointer group shadow-lg shadow-[#00b0a5]/20"
@@ -145,7 +149,7 @@ const MyBookingDetail = ({ booking, onBack }) => {
         {/* ── QUOTED — accept or reject ── */}
         {booking.status === "QUOTED" && (
           <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-4">
-            <p className="text-sm font-bold text-slate-800 mb-1">🎉 Price Quote Received!</p>
+            <p className="text-sm font-bold text-slate-800 mb-1">Price Quote Received!</p>
             <p className="text-2xl font-bold text-[#00b0a5] mb-1">${booking.quotedPrice}</p>
 
             {/* Show assigned vehicle to customer */}

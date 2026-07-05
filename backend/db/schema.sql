@@ -159,6 +159,7 @@ CREATE TABLE booking (
 
     notes          TEXT,
     tour_thoughts  TEXT,
+    admin_note     TEXT NULL,
     booking_date   DATE NOT NULL DEFAULT (CURRENT_DATE),
 
     -- status

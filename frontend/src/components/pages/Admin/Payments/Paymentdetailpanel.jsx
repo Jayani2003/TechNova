@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useBookings } from "../../../../context/BookingsContext.jsx";
 
 const STATUS_CONFIG = {
   pending: { label: "PENDING VERIFICATION", className: "bg-amber-100 text-amber-700 border border-amber-300" },
@@ -86,7 +87,16 @@ function SlipPreview({ slip }) {
 
 export default function PaymentDetailPanel({ payment = null, onClose = () => {}, onApprove = () => {}, onReject = () => {}, loading = false }) {
   const [notes, setNotes] = useState("");
+  const [additionalCharges, setAdditionalCharges] = useState(0);
+  const [isUpdatingCharges, setIsUpdatingCharges] = useState(false);
   const navigate = useNavigate();
+  const { updateAdditionalCharges } = useBookings();
+
+  useEffect(() => {
+    if (payment) {
+      setAdditionalCharges(payment.rawAdditionalCharges || 0);
+    }
+  }, [payment]);
 
   if (!payment) return null;
 
@@ -95,6 +105,20 @@ export default function PaymentDetailPanel({ payment = null, onClose = () => {},
 
   const handleApprove = () => onApprove(payment.id, notes);
   const handleReject = () => onReject(payment.id, notes);
+
+  const handleUpdateCharges = async () => {
+    try {
+      setIsUpdatingCharges(true);
+      await updateAdditionalCharges(payment.booking_id, additionalCharges);
+      // It will trigger a re-fetch in context, which flows down to here, though payment object here comes from Payments tab
+      alert("Additional charges updated successfully. Please close and reopen this panel to see updated totals.");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update additional charges.");
+    } finally {
+      setIsUpdatingCharges(false);
+    }
+  };
 
   return (
     <>
@@ -130,7 +154,9 @@ export default function PaymentDetailPanel({ payment = null, onClose = () => {},
             <div className="bg-gray-50/60 rounded-xl p-3">
               <InfoRow label="Payment Type" value={payment.paymentType} />
               <InfoRow label="Amount Paid" value={payment.amountPaid} highlight />
-              <InfoRow label="Total Amount" value={payment.totalAmount} />
+              <InfoRow label="Base Amount" value={payment.baseAmount} />
+              <InfoRow label="Additional Charges" value={payment.additionalCharges} />
+              <InfoRow label="Total Amount" value={payment.totalAmount} highlight />
               <InfoRow label="Remaining Amount" value={payment.remainingAmount} highlight />
               <InfoRow label="Payment Method" value={payment.paymentMethod} />
               {payment.bankName && <InfoRow label="Bank Name" value={payment.bankName} />}
@@ -140,6 +166,45 @@ export default function PaymentDetailPanel({ payment = null, onClose = () => {},
 
             <SectionHeader title="Payment Slip" />
             {payment.slip ? <SlipPreview slip={payment.slip} /> : <p className="text-xs text-gray-400 italic">No payment slip uploaded.</p>}
+
+            {/* Additional Charges - Only for Custom and Package tours */}
+            {payment.tourType !== 'P2P Tour' && (
+              <div className="mb-5 mt-5 bg-teal-50 border border-teal-100 rounded-xl p-4">
+                <p className="text-sm font-bold text-teal-800 mb-1">Additional Mileage Charges</p>
+                <p className="text-xs text-teal-600 mb-3">Add any extra charges incurred during the tour.</p>
+                
+                {!payment.isBasePricePaid ? (
+                  <div className="bg-white/60 p-3 rounded-lg border border-teal-200/50">
+                    <p className="text-xs font-semibold text-teal-700 flex items-start gap-1.5">
+                      <span className="mt-0.5">⚠️</span> 
+                      Cannot add additional charges yet. The quoted base price must be fully paid and approved first.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-teal-500 font-bold text-sm">LKR</span>
+                      <input 
+                        type="number" 
+                        value={additionalCharges}
+                        onChange={(e) => setAdditionalCharges(e.target.value)}
+                        className="w-full pl-10 pr-3 py-2 rounded-lg border border-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 text-sm font-semibold text-gray-800"
+                        placeholder="0.00"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                    <button 
+                      onClick={handleUpdateCharges}
+                      disabled={isUpdatingCharges || additionalCharges === payment.rawAdditionalCharges}
+                      className="px-4 py-2 bg-teal-600 hover:bg-teal-700 disabled:bg-teal-300 text-white text-sm font-bold rounded-lg transition-colors"
+                    >
+                      {isUpdatingCharges ? "Updating..." : "Update"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             <SectionHeader title="Admin Notes" />
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add notes about this payment (optional)..." rows={4} className="w-full text-sm px-3 py-2.5 border border-gray-200 rounded-xl bg-white resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder-gray-300" />

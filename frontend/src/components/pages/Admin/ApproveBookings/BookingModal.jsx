@@ -6,16 +6,33 @@ import {
 } from "lucide-react";
 import { StatusChip, TourTypeChip } from "./BookingChips";
 import { VEHICLE_LABELS, TOUR_TYPE_CFG, formatPhone } from "./BookingConstants";
+import { api } from "../../../../config/api";
 import { useBookings } from "../../../../context/BookingsContext";
 
 export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpdateStatus }) {
   const [price,  setPrice]  = useState(booking.quotedPrice ?? "");
-  const [vName,  setVName]  = useState(booking.assignedVehicle?.name ?? "");
   const [vPlate, setVPlate] = useState(booking.assignedVehicle?.plateNumber ?? "");
   const [vType,  setVType]  = useState(booking.assignedVehicle?.type ?? (booking.categoryName || VEHICLE_LABELS[booking.categoryId] || ""));
+  const [selectedCategoryId, setSelectedCategoryId] = useState(booking.categoryId ? String(booking.categoryId) : "");
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [err,    setErr]    = useState("");
+  const [vehicles, setVehicles] = useState([]);
+  const [vehiclesLoading, setVehiclesLoading] = useState(false);
+  const [selectedVehicleId, setSelectedVehicleId] = useState(booking.vehicleId ? String(booking.vehicleId) : "");
+  const [adminNote, setAdminNote] = useState(booking.adminNote || "");
 
-  const { getPaymentsForBooking, recordPayment } = useBookings();
+  // Itinerary state
+  const [itinerary, setItinerary] = useState([]);
+  const [allowedCities, setAllowedCities] = useState([]);
+  const [allowedActivities, setAllowedActivities] = useState([]);
+  const [customCityInput, setCustomCityInput] = useState("");
+  const [customActivityInput, setCustomActivityInput] = useState("");
+  const [itinerarySaving, setItinerarySaving] = useState(false);
+  const [itineraryErr, setItineraryErr] = useState("");
+  const [itinerarySuccess, setItinerarySuccess] = useState("");
+
+  const { getPaymentsForBooking, recordPayment, updateAdditionalCharges } = useBookings();
   const [paymentsData, setPaymentsData] = useState(null);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
   const [recInstallment, setRecInstallment] = useState("");
@@ -26,6 +43,9 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
   const [recError, setRecError] = useState("");
   const [recSuccess, setRecSuccess] = useState("");
   const [recSubmitting, setRecSubmitting] = useState(false);
+
+  const [addlChargeInput, setAddlChargeInput] = useState("");
+  const [addlChargeSaving, setAddlChargeSaving] = useState(false);
 
   const bg     = dark ? "#0f172a" : "#f8fafc";
   const card   = dark ? "#1e293b" : "#ffffff";
@@ -59,12 +79,117 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
       .finally(() => setPaymentsLoading(false));
   };
 
+  const getBookingDays = () => {
+    if (booking.totalDays && Number(booking.totalDays) > 0) {
+      return Number(booking.totalDays);
+    }
+    if (booking.startDate && booking.endDate) {
+      const start = new Date(booking.startDate);
+      const end = new Date(booking.endDate);
+      const diff = Math.round((end - start) / (1000 * 60 * 60 * 24));
+      return diff > 0 ? diff : 1;
+    }
+    return 1;
+  };
+
+  const loadVehicles = async (categoryId) => {
+    if (!categoryId) {
+      setVehicles([]);
+      return;
+    }
+    setVehiclesLoading(true);
+    try {
+      const data = await api.get(`/vehicles/category/${categoryId}`);
+      setVehicles(data.data || []);
+      if (booking.vehicleId) setSelectedVehicleId(booking.vehicleId);
+    } catch (err) {
+      console.error('Error loading vehicles:', err);
+      setVehicles([]);
+    } finally {
+      setVehiclesLoading(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    setCategoriesLoading(true);
+    try {
+      const data = await api.get('/vehicles/categories');
+      setCategories(data.data || []);
+    } catch (err) {
+      console.error('Error loading categories:', err);
+      setCategories([]);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
   useEffect(() => {
+    setPrice(booking.quotedPrice ?? "");
+    setVPlate(booking.assignedVehicle?.plateNumber ?? "");
+    setVType(booking.assignedVehicle?.type ?? (booking.categoryName || VEHICLE_LABELS[booking.categoryId] || ""));
+    setSelectedCategoryId(booking.categoryId ? String(booking.categoryId) : "");
+    setSelectedVehicleId(booking.vehicleId ? String(booking.vehicleId) : "");
+
     loadPayments();
+    loadCategories();
+    loadVehicles(booking.categoryId);
     setRecNotes("");
     setRecError("");
     setRecSuccess("");
-  }, [booking.id]);
+
+    if (booking.tourType === "CUSTOM") {
+      setItinerary(booking.itinerary || []);
+      let cities = [];
+      let acts = [];
+      if (booking.tourThoughts) {
+        const parts = booking.tourThoughts.split(' | ');
+        parts.forEach(p => {
+          if (p.startsWith('Cities: ')) cities = p.replace('Cities: ', '').split(', ');
+          if (p.startsWith('Activities: ')) acts = p.replace('Activities: ', '').split(', ');
+        });
+      }
+      setAllowedCities(cities);
+      setAllowedActivities(acts);
+    }
+  }, [booking]);
+
+  useEffect(() => {
+    if (categories.length) {
+      if (!selectedCategoryId && booking.categoryName) {
+        const match = categories.find(c => String(c.name).trim().toLowerCase() === String(booking.categoryName).trim().toLowerCase());
+        if (match) {
+          setSelectedCategoryId(String(match.id));
+          setVType(match.name || booking.categoryName);
+          return;
+        }
+      }
+
+      if (selectedCategoryId) {
+        const selectedCategory = categories.find(c => String(c.id) === String(selectedCategoryId));
+        if (selectedCategory) {
+          setVType(selectedCategory.name);
+        }
+      }
+    }
+  }, [categories, selectedCategoryId, booking.categoryName]);
+
+  useEffect(() => {
+    if (selectedCategoryId) {
+      loadVehicles(selectedCategoryId);
+    } else {
+      setVehicles([]);
+    }
+  }, [selectedCategoryId]);
+
+  useEffect(() => {
+    if (selectedVehicleId && vehicles.length) {
+      const selectedVehicle = vehicles.find((v) => String(v.id) === String(selectedVehicleId));
+      const days = getBookingDays();
+      if (selectedVehicle && selectedVehicle.price_per_day != null) {
+        setPrice((Number(selectedVehicle.price_per_day) * days).toFixed(2));
+      }
+    }
+  }, [selectedVehicleId, vehicles]);
 
   const handleRecordPayment = async (e) => {
     e.preventDefault();
@@ -96,13 +221,88 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
     }
   };
 
+  const handleAddlCharge = async (e) => {
+    e.preventDefault();
+    setRecError("");
+    setRecSuccess("");
+    if (!addlChargeInput || isNaN(Number(addlChargeInput))) {
+      setRecError("Please enter a valid amount.");
+      return;
+    }
+    try {
+      setAddlChargeSaving(true);
+      await updateAdditionalCharges(booking.id, addlChargeInput);
+      setRecSuccess("Additional charges updated successfully!");
+      setAddlChargeInput("");
+      loadPayments();
+    } catch (err) {
+      console.error(err);
+      setRecError(err.message || "Failed to update additional charges");
+    } finally {
+      setAddlChargeSaving(false);
+    }
+  };
+
   const handleSendQuote = () => {
     const p = parseFloat(price);
     if (!price || isNaN(p) || p <= 0) { setErr("Enter a valid price"); return; }
-    if (!vName.trim())  { setErr("Enter vehicle name"); return; }
+    if (!selectedVehicleId) { setErr("Select a vehicle"); return; }
+    const selectedVehicle = vehicles.find((v) => String(v.id) === String(selectedVehicleId));
+    if (!selectedVehicle) { setErr("Selected vehicle not found"); return; }
     if (!vPlate.trim()) { setErr("Enter plate number"); return; }
-    onSetQuote(booking.id, p, { name: vName.trim(), plateNumber: vPlate.trim(), type: vType.trim() });
+    const vehicleName = selectedVehicle.vehicle_name || selectedVehicle.name || "";
+    onSetQuote(booking.id, p, { id: selectedVehicle.id, name: vehicleName, plateNumber: vPlate.trim(), type: vType.trim() }, adminNote.trim() || null);
     setErr("");
+  };
+
+  const handleSaveItinerary = async () => {
+    setItinerarySaving(true);
+    setItineraryErr("");
+    setItinerarySuccess("");
+    try {
+      await api.put(`/bookings/${booking.id}/itinerary`, { itinerary, adminNote: adminNote.trim() || undefined });
+      setItinerarySuccess("Itinerary saved successfully!");
+      if (typeof window !== "undefined") {
+        setTimeout(() => setItinerarySuccess(""), 3000);
+      }
+    } catch (err) {
+      console.error(err);
+      setItineraryErr(err.message || "Failed to save itinerary");
+    } finally {
+      setItinerarySaving(false);
+    }
+  };
+
+  const updateItineraryDay = (index, field, value) => {
+    const newIt = [...itinerary];
+    newIt[index][field] = value;
+    setItinerary(newIt);
+  };
+  
+  const handleAddCustomCity = () => {
+    if (customCityInput.trim() && !allowedCities.includes(customCityInput.trim())) {
+      setAllowedCities([...allowedCities, customCityInput.trim()]);
+    }
+    setCustomCityInput("");
+  };
+
+  const handleAddCustomActivity = () => {
+    if (customActivityInput.trim() && !allowedActivities.includes(customActivityInput.trim())) {
+      setAllowedActivities([...allowedActivities, customActivityInput.trim()]);
+    }
+    setCustomActivityInput("");
+  };
+
+  const addItineraryDay = () => {
+    setItinerary([...itinerary, { day_number: itinerary.length + 1, city_name: "", activities: [] }]);
+  };
+  
+  const removeItineraryDay = (index) => {
+    const newIt = [...itinerary];
+    newIt.splice(index, 1);
+    // Re-number
+    newIt.forEach((item, i) => item.day_number = i + 1);
+    setItinerary(newIt);
   };
 
   // Shared detail row
@@ -247,13 +447,127 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
             </>
           )}
 
+          {/* ── Custom Tour Itinerary Builder ── */}
+          {booking.tourType === "CUSTOM" && (
+            <div style={{ background: dark ? "rgba(236,72,153,0.05)" : "rgba(236,72,153,0.03)", border: "1px solid rgba(236,72,153,0.2)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
+              <SectionTitle color="#ec4899">🗺️ Custom Tour Itinerary Builder</SectionTitle>
+              <p style={{ fontSize: 12, color: ts, marginBottom: 14 }}>
+                Construct the final path for this custom tour using the customer's requested destinations and their dream itinerary.
+              </p>
+
+              {booking.tourThoughts && (
+                <div style={{ background: dark ? "rgba(236,72,153,0.1)" : "#fdf2f8", border: "1px solid rgba(236,72,153,0.3)", borderRadius: 12, padding: 12, marginBottom: 16 }}>
+                  <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 800, color: "#ec4899", textTransform: "uppercase" }}>Customer's Dream Itinerary</p>
+                  <p style={{ margin: 0, fontSize: 13, color: tm, whiteSpace: "pre-wrap", fontStyle: "italic" }}>"{booking.tourThoughts.split(' | ').join('\n')}"</p>
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 10, marginBottom: 16, background: card, padding: 12, borderRadius: 12, border: `1px dashed rgba(236,72,153,0.4)` }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                  <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Add Custom City</label>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <input type="text" value={customCityInput} onChange={e => setCustomCityInput(e.target.value)} placeholder="Type a city..." style={{ ...inputStyle, padding: "6px 10px", flex: 1 }} />
+                    <button onClick={handleAddCustomCity} style={{ background: "#ec4899", color: "white", border: "none", borderRadius: 8, padding: "0 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Add</button>
+                  </div>
+                </div>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                  <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Add Custom Activity</label>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <input type="text" value={customActivityInput} onChange={e => setCustomActivityInput(e.target.value)} placeholder="Type an activity..." style={{ ...inputStyle, padding: "6px 10px", flex: 1 }} />
+                    <button onClick={handleAddCustomActivity} style={{ background: "#ec4899", color: "white", border: "none", borderRadius: 8, padding: "0 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Add</button>
+                  </div>
+                </div>
+              </div>
+
+              {itinerary.map((day, index) => {
+                const selectedCitiesSet = new Set(itinerary.map(it => it.city_name).filter(Boolean));
+                const otherSelectedActivitiesSet = new Set(
+                  itinerary.filter((_, i) => i !== index).flatMap(it => it.activities)
+                );
+                return (
+                  <div key={index} style={{ background: card, border: `1px solid ${border}`, borderRadius: 12, padding: 12, marginBottom: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: tm }}>Stop {day.day_number}</span>
+                      <button onClick={() => removeItineraryDay(index)} style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", display: "flex" }}>
+                        <X size={16} />
+                      </button>
+                    </div>
+                    
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      <div>
+                        <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Destination</label>
+                        <select value={day.city_name} onChange={(e) => updateItineraryDay(index, 'city_name', e.target.value)} style={{ ...inputStyle, padding: "6px 10px" }}>
+                          <option value="">Select a city</option>
+                          {allowedCities.map(c => {
+                            const isAvailable = !selectedCitiesSet.has(c) || c === day.city_name;
+                            if (!isAvailable) return null;
+                            return <option key={c} value={c}>{c}</option>;
+                          })}
+                        </select>
+                      </div>
+                    
+                    <div>
+                      <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Activities</label>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+                        {allowedActivities.map(act => {
+                          const isAvailable = !otherSelectedActivitiesSet.has(act);
+                          if (!isAvailable) return null;
+                          const isSelected = day.activities.includes(act);
+                          return (
+                            <button key={act}
+                              onClick={() => {
+                                const newActs = isSelected ? day.activities.filter(a => a !== act) : [...day.activities, act];
+                                updateItineraryDay(index, 'activities', newActs);
+                              }}
+                              style={{ 
+                                background: isSelected ? "#ec4899" : "transparent",
+                                color: isSelected ? "white" : ts,
+                                border: `1px solid ${isSelected ? "#ec4899" : border}`,
+                                borderRadius: 20, padding: "4px 10px", fontSize: 11, cursor: "pointer"
+                              }}
+                            >
+                              {act}
+                            </button>
+                          );
+                        })}
+                        {allowedActivities.length === 0 && <span style={{ fontSize: 11, color: ts }}>No activities requested.</span>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+              <button onClick={addItineraryDay} style={{ background: "transparent", color: "#ec4899", border: "1px dashed #ec4899", borderRadius: 10, padding: "8px 0", width: "100%", fontSize: 12, fontWeight: 700, cursor: "pointer", marginBottom: 12 }}>
+                + Add Stop
+              </button>
+
+              {itineraryErr && <p style={{ fontSize: 12, color: "#ef4444", margin: "0 0 10px" }}>{itineraryErr}</p>}
+              {itinerarySuccess && <p style={{ fontSize: 12, color: "#10b981", margin: "0 0 10px" }}>{itinerarySuccess}</p>}
+              
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Special Note to Customer (Optional)</label>
+                <textarea 
+                  value={adminNote} 
+                  onChange={e => setAdminNote(e.target.value)} 
+                  placeholder="e.g. We have upgraded your vehicle for free..." 
+                  style={{ ...inputStyle, height: 60, resize: "none" }} 
+                />
+              </div>
+
+              <button onClick={handleSaveItinerary} disabled={itinerarySaving} style={{ background: "#ec4899", color: "white", border: "none", borderRadius: 10, width: "100%", padding: 10, fontSize: 13, fontWeight: 700, cursor: itinerarySaving ? "not-allowed" : "pointer", opacity: itinerarySaving ? 0.7 : 1 }}>
+                {itinerarySaving ? "Saving..." : "Save Itinerary"}
+              </button>
+            </div>
+          )}
+
           {/* ── Quote + vehicle assignment (PENDING or QUOTED) ── */}
           {(booking.status === "PENDING" || booking.status === "QUOTED") && (
             <div style={{ background: dark ? "rgba(99,102,241,0.07)" : "rgba(99,102,241,0.04)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
-              <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 800, color: "#6366f1" }}>💰 Set Price & Assign Vehicle</p>
+              <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 800, color: "#6366f1" }}>Set Price & Assign Vehicle</p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Price (LKR) *</label>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Price (USD) *</label>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, background: card, border: `1px solid ${border}`, borderRadius: 10, padding: "9px 12px" }}>
                     <Banknote size={14} color="#00b0a5" />
                     <input type="number" value={price} onChange={e => { setPrice(e.target.value); setErr(""); }} placeholder="0.00"
@@ -261,12 +575,46 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                   </div>
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Vehicle Type *</label>
-                  <input value={vType} onChange={e => { setVType(e.target.value); setErr(""); }} placeholder="e.g. SUV, Van" style={inputStyle} />
+                  <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Vehicle Category *</label>
+                  <select value={selectedCategoryId} onChange={e => {
+                    const categoryId = e.target.value;
+                    setSelectedCategoryId(categoryId);
+                    setErr("");
+                    const category = categories.find(c => String(c.id) === String(categoryId));
+                    if (category) {
+                      setVType(category.name);
+                    } else {
+                      setVType(booking.categoryName || VEHICLE_LABELS[booking.categoryId] || "");
+                    }
+                    setSelectedVehicleId("");
+                    setVPlate("");
+                    setPrice(booking.quotedPrice ?? "");
+                  }} style={inputStyle}>
+                    <option value="">{categoriesLoading ? "Loading categories..." : "Select vehicle category"}</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>{category.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Vehicle Name *</label>
-                  <input value={vName} onChange={e => { setVName(e.target.value); setErr(""); }} placeholder="e.g. Toyota Hiace" style={inputStyle} />
+                  <select value={selectedVehicleId} onChange={e => {
+                    const vehicleId = e.target.value;
+                    setSelectedVehicleId(vehicleId);
+                    setErr("");
+                    const vehicle = vehicles.find(v => String(v.id) === String(vehicleId));
+                    if (vehicle) {
+                      setVPlate(vehicle.vehicle_number || vehicle.license_plate || "");
+                      setVType(vehicle.category_name || booking.categoryName || VEHICLE_LABELS[booking.categoryId] || "");
+                    }
+                  }} style={inputStyle}>
+                    <option value="">{vehiclesLoading ? "Loading vehicles..." : "Select a vehicle"}</option>
+                    {vehicles.map(v => (
+                      <option key={v.id} value={v.id}>
+                        {v.vehicle_name ? `${v.vehicle_name} (${v.vehicle_number || v.license_plate || 'No plate'})` : `${v.vehicle_number || v.license_plate || 'Unnamed vehicle'}`}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Plate Number *</label>
@@ -295,7 +643,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
               <p style={{ margin: "0 0 14px", fontSize: 12, color: ts }}>
                 Confirm to lock this booking.{booking.assignedVehicle ? ` Vehicle: ${booking.assignedVehicle.name} (${booking.assignedVehicle.plateNumber})` : ""}
               </p>
-              <button onClick={() => onUpdateStatus(booking.id, "CONFIRMED")}
+              <button onClick={() => onUpdateStatus(booking.id, "CONFIRMED", adminNote.trim() || undefined)}
                 style={{ background: "#10b981", color: "white", border: "none", borderRadius: 12, padding: "10px 28px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
                 <CheckCircle2 size={15} /> Confirm Booking
               </button>
@@ -354,6 +702,40 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                 <p style={{ fontSize: 12, color: ts, fontStyle: "italic", marginBottom: 15 }}>No payments recorded yet.</p>
               )}
 
+              {/* Additional Charges Form */}
+              {booking.tourType !== 'P2P' && paymentsData && (
+                <form onSubmit={handleAddlCharge} style={{ borderTop: `1px solid ${border}`, paddingTop: 15, paddingBottom: 15 }}>
+                  <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 800, color: tm }}>➕ Add Additional Mileage Charges</p>
+                  
+                  {paymentsData.paidAmount < paymentsData.baseAmount ? (
+                    <div style={{ background: "rgba(245,158,11,0.1)", padding: 10, borderRadius: 8, border: "1px solid rgba(245,158,11,0.2)" }}>
+                      <p style={{ margin: 0, fontSize: 11, color: "#b45309", fontWeight: 600 }}>⚠️ Cannot add additional charges yet. The quoted base price must be fully paid and approved first.</p>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <div style={{ flex: 1 }}>
+                        <input 
+                          type="number" 
+                          value={addlChargeInput} 
+                          onChange={e => setAddlChargeInput(e.target.value)} 
+                          placeholder="Amount in LKR" 
+                          style={inputStyle}
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+                      <button 
+                        type="submit" 
+                        disabled={addlChargeSaving}
+                        style={{ background: "#0d9488", color: "white", border: "none", borderRadius: 8, padding: "0 20px", fontWeight: 700, fontSize: 11, cursor: "pointer", opacity: addlChargeSaving ? 0.7 : 1 }}
+                      >
+                        {addlChargeSaving ? "Saving..." : "Update"}
+                      </button>
+                    </div>
+                  )}
+                </form>
+              )}
+
               {/* Record Form */}
               {paymentsData && paymentsData.remainingAmount > 0 ? (
                 <form onSubmit={handleRecordPayment} style={{ borderTop: `1px solid ${border}`, paddingTop: 15 }}>
@@ -368,6 +750,10 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                           setRecInstallment(e.target.value);
                           if (e.target.value === 'DEPOSIT') setRecAmount(paymentsData.totalAmount * 0.5);
                           else if (e.target.value === 'FINAL') setRecAmount(paymentsData.totalAmount * 0.5);
+                          else if (e.target.value === 'ADDITIONAL') {
+                            const addl = paymentsData.installments?.find(i => i.type === 'Additional Charges');
+                            setRecAmount(addl ? addl.rawAmount : 0);
+                          }
                           else if (e.target.value === 'FULL') setRecAmount(paymentsData.remainingAmount);
                         }} 
                         style={inputStyle}
@@ -375,6 +761,9 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                         <option value="">-- Select --</option>
                         {booking.tourType !== 'P2P' && <option value="DEPOSIT">DEPOSIT (50%)</option>}
                         {booking.tourType !== 'P2P' && <option value="FINAL">FINAL (50%)</option>}
+                        {booking.tourType !== 'P2P' && paymentsData.installments?.some(i => i.type === 'Additional Charges') && (
+                          <option value="ADDITIONAL">ADDITIONAL CHARGES</option>
+                        )}
                         <option value="FULL">FULL PAYMENT</option>
                       </select>
                     </div>

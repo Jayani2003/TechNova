@@ -48,29 +48,38 @@ export default function ApproveBookings() {
   // Apply filters
   const filtered = bookings.filter(b => {
     const q = search.toLowerCase();
+    const bookingId = b.id != null ? String(b.id).toLowerCase() : "";
+    const bookingRef = b.booking_id != null ? String(b.booking_id).toLowerCase() : "";
+    const customerName = b.customerName?.toLowerCase() || "";
+    const pickupLocation = (b.pickupLocation || b.startLocation || "").toLowerCase();
+    const dropoffLocation = (b.dropoffLocation || b.endLocation || "").toLowerCase();
+    const packageName = (b.packageName || "").toLowerCase();
+    const destination = (b.destination || "").toLowerCase();
+
     const matchSearch = !q ||
-      b.id?.toLowerCase().includes(q) ||
-      b.customerName?.toLowerCase().includes(q) ||
-      (b.pickupLocation || b.startLocation || "").toLowerCase().includes(q) ||
-      (b.dropoffLocation || b.endLocation || "").toLowerCase().includes(q) ||
-      (b.packageName || "").toLowerCase().includes(q) ||
-      (b.destination || "").toLowerCase().includes(q);
+      bookingId.includes(q) ||
+      bookingRef.includes(q) ||
+      customerName.includes(q) ||
+      pickupLocation.includes(q) ||
+      dropoffLocation.includes(q) ||
+      packageName.includes(q) ||
+      destination.includes(q);
     const matchStatus = statusFilter === "ALL" || b.status === statusFilter;
     const matchType   = typeFilter   === "ALL" || b.tourType === typeFilter;
     return matchSearch && matchStatus && matchType;
   });
 
   // Modal handlers — async, re-sync selected booking after mutations
-  const handleSetQuote = async (id, price, vehicleInfo) => {
-    await setQuotedPrice(id, price, vehicleInfo);
+  const handleSetQuote = async (id, price, vehicleInfo, adminNote) => {
+    await setQuotedPrice(id, price, vehicleInfo, adminNote);
     const updated = bookings.find(b => b.id === id);
-    if (updated) setSelected({ ...updated, status: "QUOTED", quotedPrice: price, assignedVehicle: vehicleInfo });
+    if (updated) setSelected({ ...updated, status: "QUOTED", quotedPrice: price, assignedVehicle: vehicleInfo, adminNote });
   };
 
-  const handleUpdateStatus = async (id, status) => {
-    await updateBookingStatus(id, status);
+  const handleUpdateStatus = async (id, status, adminNote = undefined) => {
+    await updateBookingStatus(id, status, adminNote);
     const updated = bookings.find(b => b.id === id);
-    if (updated) setSelected({ ...updated, status });
+    if (updated) setSelected({ ...updated, status, adminNote: adminNote !== undefined ? adminNote : updated.adminNote });
     else setSelected(null);
   };
 

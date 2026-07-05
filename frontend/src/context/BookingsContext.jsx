@@ -22,17 +22,25 @@ export const BookingsProvider = ({ children }) => {
   }, []);
 
   // ── Admin: set quoted price + vehicle ──────────────────────────────────────
-  const setQuotedPrice = useCallback(async (bookingId, price, vehicleInfo = null) => {
+  const setQuotedPrice = useCallback(async (bookingId, price, vehicleInfo = null, adminNote = null) => {
     await api.patch(`/bookings/${bookingId}/quote`, {
       quotedPrice: price,
       vehicleId: vehicleInfo?.id || null,
+      adminNote,
     });
     await getAllBookings();
   }, [getAllBookings]);
 
+  // ── Admin: set additional charges ──────────────────────────────────────────
+  const updateAdditionalCharges = useCallback(async (bookingId, additionalCharges) => {
+    const res = await api.patch(`/bookings/${bookingId}/additional-charges`, { additionalCharges });
+    await getAllBookings();
+    return res;
+  }, [getAllBookings]);
+
   // ── Update booking status ──────────────────────────────────────────────────
-  const updateBookingStatus = useCallback(async (bookingId, status) => {
-    await api.patch(`/bookings/${bookingId}/status`, { status });
+  const updateBookingStatus = useCallback(async (bookingId, status, adminNote = undefined) => {
+    await api.patch(`/bookings/${bookingId}/status`, { status, adminNote });
     // Refresh whichever list is loaded
     try { await getAllBookings(); } catch { await getCustomerBookings(); }
   }, [getAllBookings, getCustomerBookings]);
@@ -103,6 +111,7 @@ export const BookingsProvider = ({ children }) => {
         getCustomerBookings,
         getAllBookings,
         setQuotedPrice,
+        updateAdditionalCharges,
         updateBookingStatus,
         acceptQuote,
         rejectQuote,

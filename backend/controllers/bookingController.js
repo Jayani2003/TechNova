@@ -6,12 +6,17 @@ const formatDate = (val) => {
   if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
   const dt = new Date(val);
   if (Number.isNaN(dt.getTime())) return null;
-  return dt.toISOString().split('T')[0];
+  
+  // Extract local date parts to prevent timezone shifts when converting DB Date objects to strings
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth() + 1).padStart(2, '0');
+  const d = String(dt.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 };
 
 const normalizeTourType = (value) => String(value || 'P2P').toUpperCase();
 
-const COMPANY_NAME = 'TechNova Tours';
+const COMPANY_NAME = 'Ceylon Best Tours';
 
 const getBookingReference = (tourType, bookingId) => {
   const type = normalizeTourType(tourType);
@@ -23,7 +28,7 @@ const formatMoney = (value) => {
   if (value === null || value === undefined) return 'N/A';
   const n = Number(value);
   if (Number.isNaN(n)) return 'N/A';
-  return `LKR ${n.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `USD ${n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 };
 
 const getPaymentScheduleLines = (tourType, quotedPrice) => {
@@ -57,6 +62,7 @@ const mapBooking = (row) => ({
   customerName:   row.customer_name,
   contactPlatform:  row.contact_platform  || null,
   contactNumber:    row.contact_number    || null,
+  customerPhone:    row.contact_number    || null,
   contactPlatform2: row.contact_platform2 || null,
   contactNumber2:   row.contact_number2   || null,
   emergencyName:    row.emergency_name    || null,
@@ -92,14 +98,17 @@ const mapBooking = (row) => ({
   noOfChildren:       row.no_of_children,
   agesOfChildren:     row.ages_of_children || null,
   quotedPrice:        row.quoted_price ? parseFloat(row.quoted_price) : null,
+  additionalCharges:  row.additional_charges ? parseFloat(row.additional_charges) : 0,
   notes:              row.notes        || null,
   tourThoughts:       row.tour_thoughts || null,
+  adminNote:          row.admin_note    || null,
   status:             row.booking_status,
   quotedAt:           row.quoted_at,
   confirmedAt:        row.confirmed_at,
   tourStartedAt:      row.tour_started_at,
   completedAt:        row.completed_at,
   closedAt:           row.closed_at,
+  itinerary:          row.itinerary || [],
 });
 
 // ── Shared: resolve categoryId string → integer FK ────────────────────────────
@@ -166,8 +175,8 @@ const createP2PBooking = async (req, res) => {
   if (!isPackageBooking && !isCustomBooking && (!startLocation || !endLocation))
     return res.status(400).json({ message: 'Start and end location are required for P2P bookings.' });
 
-  if (isCustomBooking && selectedCityList.length === 0)
-    return res.status(400).json({ message: 'Please select at least one city for a customized tour.' });
+  if (isCustomBooking && !(tourThoughts || '').trim())
+    return res.status(400).json({ message: 'Dream Itinerary is required for a customized tour.' });
 
   if (isPackageBooking && !packageId)
     return res.status(400).json({ message: 'packageId is required for package bookings.' });
@@ -184,7 +193,7 @@ const createP2PBooking = async (req, res) => {
   // Build notes for cities/activities (stored in tour_thoughts to keep notes clean)
   const cityNotes     = selectedCityList.length ? `Cities: ${selectedCityList.join(', ')}`     : null;
   const activityNotes = activityList.length     ? `Activities: ${activityList.join(', ')}`     : null;
-  const fullTourThoughts = [tourThoughts || null, cityNotes, activityNotes].filter(Boolean).join(' | ') || null;
+  const fullTourThoughts = [tourThoughts || null, cityNotes, activityNotes].filter(Boolean).join('\n') || null;
 
   let conn;
   try {
@@ -293,7 +302,29 @@ const getMyBookings = async (req, res) => {
        ORDER BY b.booking_date DESC, b.booking_id DESC`,
       [req.user.id]
     );
-    res.json({ bookings: rows.map(mapBooking) });
+    const bookingIds = rows.map(r => r.booking_id);
+    let itineraries = [];
+    if (bookingIds.length > 0) {
+      const [itRows] = await db.query(
+        'SELECT * FROM booking_custom_itinerary WHERE booking_id IN (?) ORDER BY day_number ASC',
+        [bookingIds]
+      );
+      itineraries = itRows;
+    }
+
+    const mappedBookings = rows.map(row => {
+      const booking = mapBooking(row);
+      booking.itinerary = itineraries
+        .filter(it => it.booking_id === booking.id)
+        .map(it => ({
+          day_number: it.day_number,
+          city_name: it.city_name,
+          activities: it.activities ? JSON.parse(it.activities) : []
+        }));
+      return booking;
+    });
+
+    res.json({ bookings: mappedBookings });
   } catch (err) {
     console.error('getMyBookings error:', err);
     res.status(500).json({ message: 'Failed to load bookings.' });
@@ -326,7 +357,7 @@ const getAllBookings = async (req, res) => {
 // ── PATCH /api/bookings/:id/quote  (admin) ────────────────────────────────────
 const setQuote = async (req, res) => {
   const { id } = req.params;
-  const { quotedPrice, vehicleId } = req.body;
+  const { quotedPrice, vehicleId, adminNote } = req.body;
 
   if (!quotedPrice)
     return res.status(400).json({ message: 'quotedPrice is required.' });
@@ -334,10 +365,10 @@ const setQuote = async (req, res) => {
   try {
     const [result] = await db.execute(
       `UPDATE booking
-       SET quoted_price = ?, vehicle_id = ?,
+       SET quoted_price = ?, vehicle_id = ?, admin_note = ?,
            booking_status = 'QUOTED', quoted_at = NOW()
        WHERE booking_id = ?`,
-      [quotedPrice, vehicleId || null, id]
+      [quotedPrice, vehicleId || null, adminNote || null, id]
     );
 
     if (result.affectedRows === 0)
@@ -365,7 +396,7 @@ const STATUS_TIMESTAMP = {
 
 const updateStatus = async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { status, adminNote } = req.body;
   const isAdmin = ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(req.user?.role);
   const allowed = isAdmin ? ALLOWED_TRANSITIONS.ADMIN : ALLOWED_TRANSITIONS.CUSTOMER;
 
@@ -375,11 +406,19 @@ const updateStatus = async (req, res) => {
   const tsCol    = STATUS_TIMESTAMP[status];
   const tsClause = tsCol ? `, ${tsCol} = NOW()` : '';
 
+  let query = `UPDATE booking SET booking_status = ? ${tsClause}`;
+  let params = [status];
+  
+  if (adminNote !== undefined) {
+    query += `, admin_note = ?`;
+    params.push(adminNote || null);
+  }
+  
+  query += ` WHERE booking_id = ?`;
+  params.push(id);
+
   try {
-    const [result] = await db.execute(
-      `UPDATE booking SET booking_status = ? ${tsClause} WHERE booking_id = ?`,
-      [status, id]
-    );
+    const [result] = await db.execute(query, params);
 
     if (result.affectedRows === 0)
       return res.status(404).json({ message: 'Booking not found.' });
@@ -438,7 +477,7 @@ const updateBooking = async (req, res) => {
 
   const cityNotes     = selectedCityList.length ? `Cities: ${selectedCityList.join(', ')}`  : null;
   const activityNotes = activityList.length     ? `Activities: ${activityList.join(', ')}` : null;
-  const fullTourThoughts = [tourThoughts || null, cityNotes, activityNotes].filter(Boolean).join(' | ') || null;
+  const fullTourThoughts = [tourThoughts || null, cityNotes, activityNotes].filter(Boolean).join('\n') || null;
 
   let conn;
   try {
@@ -600,9 +639,13 @@ const downloadBookingConfirmationPdf = async (req, res) => {
 
     writeRow('Booking Reference', bookingRef);
     writeRow('Customer Name', booking.customer_name);
-    writeRow('Customer Phone', booking.customer_phone);
+    writeRow('Customer Phone', booking.contact_number);
     writeRow('Tour Type', normalizeTourType(booking.tour_type));
     writeRow('Selected Package', booking.package_name || 'Not applicable');
+    if (normalizeTourType(booking.tour_type) === 'P2P') {
+      writeRow('Start Location', booking.start_location);
+      writeRow('End Location', booking.end_location);
+    }
     writeRow('Start Date', startDate || 'N/A');
     writeRow('End Date', endDate || 'N/A');
     writeRow('Vehicle Category', booking.category_name || 'N/A');
@@ -628,9 +671,96 @@ const downloadBookingConfirmationPdf = async (req, res) => {
     doc.end();
   } catch (err) {
     console.error('downloadBookingConfirmationPdf error:', err);
-    if (!res.headersSent) {
-      res.status(500).json({ message: 'Failed to generate booking confirmation PDF.' });
+    res.status(500).json({ message: 'Failed to generate PDF.' });
+  }
+};
+
+// ── PUT /api/bookings/:id/itinerary ──────────────────────────────────────────
+const updateCustomItinerary = async (req, res) => {
+  const { id } = req.params;
+  const { itinerary, adminNote } = req.body;
+  let conn;
+  try {
+    conn = await db.getConnection();
+    await conn.beginTransaction();
+
+    const [bookingRows] = await conn.execute('SELECT * FROM booking WHERE booking_id = ? FOR UPDATE', [id]);
+    if (!bookingRows.length) throw new Error('Booking not found');
+    if (bookingRows[0].tour_type !== 'CUSTOM') throw new Error('Not a custom tour');
+
+    await conn.execute('DELETE FROM booking_custom_itinerary WHERE booking_id = ?', [id]);
+
+    if (itinerary && Array.isArray(itinerary)) {
+      for (const stop of itinerary) {
+        await conn.execute(
+          'INSERT INTO booking_custom_itinerary (booking_id, day_number, city_name, activities) VALUES (?, ?, ?, ?)',
+          [id, stop.day_number, stop.city_name, stop.activities ? JSON.stringify(stop.activities) : null]
+        );
+      }
     }
+
+    if (adminNote !== undefined) {
+      await conn.execute(
+        'UPDATE booking SET admin_note = ? WHERE booking_id = ?',
+        [adminNote || null, id]
+      );
+    }
+
+    await conn.commit();
+    res.json({ message: 'Itinerary updated successfully' });
+  } catch (err) {
+    if (conn) await conn.rollback();
+    console.error('updateCustomItinerary error:', err);
+    res.status(500).json({ message: err.message || 'Failed to update itinerary' });
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+// ── PUT /api/bookings/:id/additional-charges ─────────────────────────────────
+const updateAdditionalCharges = async (req, res) => {
+  const { id } = req.params;
+  const { additionalCharges } = req.body;
+  const isAdmin = ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(req.user?.role);
+  if (!isAdmin) return res.status(403).json({ message: 'Unauthorized.' });
+
+  if (additionalCharges === undefined || additionalCharges === null || isNaN(Number(additionalCharges))) {
+    return res.status(400).json({ message: 'additionalCharges is required and must be a valid number.' });
+  }
+
+  try {
+    // Check if the base quoted price is fully paid before allowing additional charges
+    const [rows] = await db.execute(`
+      SELECT b.quoted_price, 
+             COALESCE((SELECT SUM(amount) FROM payment WHERE booking_id = b.booking_id AND status = 'APPROVED'), 0) AS total_paid
+      FROM booking b
+      WHERE b.booking_id = ?
+    `, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    const { quoted_price, total_paid } = rows[0];
+    const basePrice = quoted_price ? parseFloat(quoted_price) : 0;
+    const totalPaid = parseFloat(total_paid);
+
+    if (totalPaid < basePrice) {
+      return res.status(400).json({ message: 'Cannot add additional charges until the quoted base price is fully paid and approved.' });
+    }
+
+    const [result] = await db.execute(
+      `UPDATE booking SET additional_charges = ? WHERE booking_id = ?`,
+      [Number(additionalCharges), id]
+    );
+
+    if (result.affectedRows === 0)
+      return res.status(404).json({ message: 'Booking not found.' });
+
+    res.json({ message: 'Additional charges updated successfully.' });
+  } catch (err) {
+    console.error('updateAdditionalCharges error:', err);
+    res.status(500).json({ message: 'Failed to update additional charges.' });
   }
 };
 
@@ -642,4 +772,6 @@ module.exports = {
   updateStatus,
   updateBooking,
   downloadBookingConfirmationPdf,
+  updateCustomItinerary,
+  updateAdditionalCharges,
 };

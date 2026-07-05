@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { label: "Packages",  path: "/admin/tour-packages",    id: "packages", badge: 0  },
   { label: "Gallery",   path: "/admin/add-gallery",      id: "gallery",  badge: 0  },
   { label: "Messages",  path: "/admin/messages",         id: "messages", badge: 8  },
+  { label: "Tour Options", path: "/admin/tour-options",    id: "tour-options", badge: 0 },
   { label: "Reports",   path: "/admin/report",           id: "reports",  badge: 0  },
 ];
 

@@ -157,6 +157,13 @@ const MyBookingDetail = ({ booking, onBack }) => {
             <p className="text-sm font-bold text-slate-800 mb-1">Price Quote Received!</p>
             <p className="text-2xl font-bold text-[#00b0a5] mb-1">${booking.quotedPrice}</p>
 
+            {booking.adminNote && (
+              <div className="bg-white rounded-xl border border-blue-100 px-4 py-3 mb-3">
+                <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Note from Admin</p>
+                <p className="text-sm font-medium text-slate-700 italic">"{booking.adminNote}"</p>
+              </div>
+            )}
+
             {/* Show assigned vehicle to customer */}
             {booking.assignedVehicle && (
               <div className="bg-white rounded-xl border border-blue-100 px-4 py-3 mb-3">
@@ -172,7 +179,9 @@ const MyBookingDetail = ({ booking, onBack }) => {
 
             <p className="text-xs text-slate-500 mb-4">Accept to proceed, or reject to cancel this booking.</p>
             <div className="flex gap-3">
-              <button onClick={() => acceptQuote(booking.id)}
+              <button onClick={async () => {
+                  await acceptQuote(booking.id);
+                }}
                 className="flex-1 flex items-center justify-center gap-2 bg-[#00b0a5] text-white py-2.5 rounded-xl font-semibold hover:bg-[#009b91] transition-colors cursor-pointer">
                 <Check className="w-4 h-4" /> Accept Quote
               </button>
@@ -182,6 +191,14 @@ const MyBookingDetail = ({ booking, onBack }) => {
               </button>
             </div>
           </div>
+        )}
+
+        {booking.adminNote && ["CONFIRMED", "TOUR_STARTED", "COMPLETED", "CLOSED"].includes(booking.status) && (
+          <Section title="Admin's Note" accent>
+            <div className="bg-[#00b0a5]/5 border border-[#00b0a5]/10 rounded-xl p-4 mt-1">
+              <p className="text-sm font-medium text-slate-700 italic">"{booking.adminNote}"</p>
+            </div>
+          </Section>
         )}
 
         {/* ── CONFIRMED — show vehicle info ── */}
@@ -231,6 +248,34 @@ const MyBookingDetail = ({ booking, onBack }) => {
           <DetailRow icon={Clock}    label="Pickup Time"  value={booking.pickupTime || null} />
           <DetailRow icon={Calendar} label="Total Days"   value={booking.totalDays ? `${booking.totalDays} day(s)` : null} />
         </Section>
+
+        {/* ── Custom Tour Itinerary ── */}
+        {booking.tourType === "CUSTOM" && booking.itinerary && booking.itinerary.length > 0 && (
+          <Section title="Tour Itinerary" accent>
+            <div className="flex flex-col gap-3 mt-2">
+              {booking.itinerary.map((day, idx) => (
+                <div key={idx} className="bg-white border border-pink-100 rounded-xl p-3 shadow-sm">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold text-pink-500 uppercase tracking-wider">Stop {day.day_number}</span>
+                    <span className="text-sm font-extrabold text-slate-800">{day.city_name}</span>
+                  </div>
+                  {day.activities && day.activities.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1">Activities</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {day.activities.map(act => (
+                          <span key={act} className="bg-pink-50 text-pink-600 border border-pink-100 px-2 py-0.5 rounded-md text-xs font-semibold">
+                            {act}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
 
         {/* Passengers */}
         <Section title="Passengers & Vehicle">

@@ -169,17 +169,7 @@ function Login() {
 							</div>
 						</div>
 
-						<div className="flex items-center">
-							<input
-								id="remember-me"
-								name="remember-me"
-								type="checkbox"
-								className="h-4 w-4 text-[#00b0a5] focus:ring-[#00b0a5] border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-[#242424] cursor-pointer"
-							/>
-							<label htmlFor="remember-me" className="ml-2 block text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
-								{"Remember me for 30 days"}
-							</label>
-						</div>
+
 
 						<motion.button
 							whileHover={{ scale: 1.01 }}

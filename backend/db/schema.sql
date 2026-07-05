@@ -156,9 +156,11 @@ CREATE TABLE booking (
 
     -- pricing (admin sets, customer accepts or rejects)
     quoted_price     DECIMAL(10,2) NULL,
+    additional_charges DECIMAL(10,2) DEFAULT 0.00,
 
     notes          TEXT,
     tour_thoughts  TEXT,
+    admin_note     TEXT NULL,
     booking_date   DATE NOT NULL DEFAULT (CURRENT_DATE),
 
     -- status
@@ -208,11 +210,20 @@ CREATE TABLE booking_custom_activities (
     FOREIGN KEY (booking_id) REFERENCES booking(booking_id) ON DELETE CASCADE
 );
 
+CREATE TABLE booking_custom_itinerary (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id    INT NOT NULL,
+    day_number    INT NOT NULL,
+    city_name     VARCHAR(100) NOT NULL,
+    activities    TEXT NULL,
+    FOREIGN KEY (booking_id) REFERENCES booking(booking_id) ON DELETE CASCADE
+);
+
 CREATE TABLE payment (
     payment_id     INT AUTO_INCREMENT PRIMARY KEY,
     booking_id     INT NOT NULL,
 
-    installment    ENUM('DEPOSIT','FINAL','FULL') NOT NULL,
+    installment    ENUM('DEPOSIT', 'FINAL', 'ADDITIONAL', 'FULL') NOT NULL,
     amount         DECIMAL(10,2) NOT NULL,
     payment_method ENUM('CASH','BANK_TRANSFER') NOT NULL,
     received_date  DATE NOT NULL,
@@ -326,4 +337,16 @@ CREATE TABLE chat_message (
     sent_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (topic_id) REFERENCES chat_topic(topic_id),
     FOREIGN KEY (sender_id) REFERENCES user(user_id)
+);
+
+CREATE TABLE city (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE custom_activity (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

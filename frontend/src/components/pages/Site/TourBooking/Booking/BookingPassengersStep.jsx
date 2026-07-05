@@ -35,7 +35,20 @@ const CounterInput = ({ value, onChange, min = 0 }) => (
 );
 
 const BookingPassengersStep = ({ data, onChange }) => {
-  
+  const normalizeChildAge = (value) => {
+    if (value === "" || value == null) return "";
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) return "";
+    return String(Math.min(17, Math.max(0, Math.trunc(parsed))));
+  };
+
+  const handleChildAgeKeyDown = (event) => {
+    const allowedKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Tab"];
+    if (allowedKeys.includes(event.key)) return;
+    if (/^[0-9]$/.test(event.key)) return;
+    event.preventDefault();
+  };
+
   // Total luggage count for vehicle filter
   const totalLuggage =
     (data.luggage10kg  || 0) +
@@ -98,9 +111,10 @@ const BookingPassengersStep = ({ data, onChange }) => {
                     <div key={i} className="flex flex-col items-center gap-1">
                       <span className="text-[10px] font-bold text-[#6B7280]/70 uppercase tracking-wider">{"Child"} {i + 1}</span>
                       <input type="number" min="0" max="17" value={ages[i] || ""} placeholder={"Age"}
+                        onKeyDown={handleChildAgeKeyDown}
                         onChange={(e) => {
                           const updated = Array.from({ length: data.noOfChildren }, (_, j) =>
-                            j === i ? e.target.value : (ages[j] || "")
+                            j === i ? normalizeChildAge(e.target.value) : (ages[j] || "")
                           );
                           onChange("agesOfChildren", updated.join(","));
                         }}

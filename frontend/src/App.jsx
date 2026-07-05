@@ -40,8 +40,9 @@ import FleetManagement   from "./components/pages/Admin/FleetManagement/FleetMan
 import Messages          from "./components/pages/Admin/Messages/Messages";
 import Payment   from "./components/pages/Admin/Payments/Payment";
 import TourPackages      from "./components/pages/Admin/TourPackages/TourPackages";
-import AddGallery        from "./components/pages/Admin/AddGallery/AddGallery";
-import Report            from "./components/pages/Admin/Report/Report";
+import AddGallery from './components/pages/Admin/AddGallery/AddGallery';
+import ManageTourOptions from './components/pages/Admin/ManageTourOptions/ManageTourOptions';
+import Report from './components/pages/Admin/Report/Report';
 import AdminProfile      from "./components/pages/Admin/AdminProfile/AdminProfile";
 
 
@@ -74,6 +75,7 @@ export default function App() {
         <Route path="seasonal-pricing"   element={<Payment />} />
         <Route path="tour-packages"      element={<TourPackages />} />
         <Route path="add-gallery"        element={<AddGallery />} />
+        <Route path="tour-options"       element={<ManageTourOptions />} />
         <Route path="report"             element={<Report />} />
         <Route path="profile"            element={<AdminProfile />} />
       </Route>

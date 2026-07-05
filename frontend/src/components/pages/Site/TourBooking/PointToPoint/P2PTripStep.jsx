@@ -3,7 +3,7 @@ import { MapPin, Calendar, Clock, Search, X } from "lucide-react";
 import { SRI_LANKA_LOCATIONS } from "./sriLankaLocations.js";
 
 const inputClass =
-  "w-full px-4 py-3 bg-white border border-[#F5820D]/15 rounded-xl text-[#2C2F3A] text-sm outline-none transition-all focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20";
+  "w-full px-4 py-3 bg-white border border-[#EF8354]/15 rounded-xl text-[#2D3142] text-sm outline-none transition-all focus:border-[#EF8354] focus:ring-2 focus:ring-[#EF8354]/20";
 
 // ─── Keyboard-accessible Location Input ───────────────────────────────────────
 // - No category grouping: flat list so users can navigate with arrow keys
@@ -135,7 +135,7 @@ const LocationInput = ({ value, onChange, placeholder, pinColor, id }) => {
             type="button"
             aria-label="Clear"
             onClick={clear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280]/70 hover:text-[#2C2F3A]/70"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280]/70 hover:text-[#2D3142]/70"
           >
             <X className="w-4 h-4" />
           </button>
@@ -149,7 +149,7 @@ const LocationInput = ({ value, onChange, placeholder, pinColor, id }) => {
           ref={listRef}
           role="listbox"
           id={`${id}-listbox`}
-          className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#F5820D]/15 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto py-1"
+          className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#EF8354]/15 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto py-1"
         >
           {results.map((loc, i) => (
             <li
@@ -161,11 +161,11 @@ const LocationInput = ({ value, onChange, placeholder, pinColor, id }) => {
               onMouseEnter={() => setActiveIdx(i)}
               className={`flex items-center gap-2.5 px-4 py-2.5 text-sm cursor-pointer transition-colors ${
                 i === activeIdx
-                  ? "bg-[#F5820D]/8 text-[#F5820D]"
-                  : "text-[#2C2F3A] hover:bg-[#FFF8F0]"
+                  ? "bg-[#EF8354]/8 text-[#EF8354]"
+                  : "text-[#2D3142] hover:bg-[#BFC0C0]"
               }`}
             >
-              <MapPin className={`w-3.5 h-3.5 flex-shrink-0 ${i === activeIdx ? "text-[#F5820D]" : "text-slate-300"}`} />
+              <MapPin className={`w-3.5 h-3.5 flex-shrink-0 ${i === activeIdx ? "text-[#EF8354]" : "text-slate-300"}`} />
               <span>{loc}</span>
             </li>
           ))}
@@ -192,8 +192,8 @@ const P2PTripStep = ({ data, onChange }) => {
 
       {/* ── Locations ── */}
       <div>
-        <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-[#F5820D]" /> {"Trip Locations"}
+        <h3 className="text-lg font-bold text-[#2D3142] mb-1 flex items-center gap-2">
+          <MapPin className="w-5 h-5 text-[#EF8354]" /> {"Trip Locations"}
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
           {"Type to search — use ↑ ↓ to navigate, Enter to select, Esc to close. You can also type a custom location name."}
@@ -202,7 +202,7 @@ const P2PTripStep = ({ data, onChange }) => {
         <div className="space-y-4">
           {/* Pickup */}
           <div>
-            <label htmlFor="pickup-location" className="block text-sm font-semibold text-[#2C2F3A] mb-1">
+            <label htmlFor="pickup-location" className="block text-sm font-semibold text-[#2D3142] mb-1">
               {"Pickup Location *"}
             </label>
             <LocationInput
@@ -210,7 +210,7 @@ const P2PTripStep = ({ data, onChange }) => {
               value={data.startLocation}
               onChange={val => onChange("startLocation", val)}
               placeholder={"Search airport, city, hotel area…"}
-              pinColor="text-[#F5820D]"
+              pinColor="text-[#EF8354]"
             />
           </div>
 
@@ -218,8 +218,8 @@ const P2PTripStep = ({ data, onChange }) => {
           <div className="flex items-center gap-3 px-3">
             <div className="flex-1 h-px bg-slate-200" />
             <div className="flex flex-col items-center gap-1">
-              <div className="w-8 h-8 rounded-full bg-[#F5820D]/10 flex items-center justify-center">
-                <span className="text-[#F5820D] text-lg">↓</span>
+              <div className="w-8 h-8 rounded-full bg-[#EF8354]/10 flex items-center justify-center">
+                <span className="text-[#EF8354] text-lg">↓</span>
               </div>
               <span className="text-xs text-[#6B7280]/70">{"One way"}</span>
             </div>
@@ -228,7 +228,7 @@ const P2PTripStep = ({ data, onChange }) => {
 
           {/* Drop-off */}
           <div>
-            <label htmlFor="dropoff-location" className="block text-sm font-semibold text-[#2C2F3A] mb-1">
+            <label htmlFor="dropoff-location" className="block text-sm font-semibold text-[#2D3142] mb-1">
               {"Drop-off Location *"}
             </label>
             <LocationInput
@@ -244,8 +244,8 @@ const P2PTripStep = ({ data, onChange }) => {
 
       {/* ── Date & Time ── */}
       <div>
-        <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-[#F5820D]" /> {"Travel Date & Time"}
+        <h3 className="text-lg font-bold text-[#2D3142] mb-1 flex items-center gap-2">
+          <Calendar className="w-5 h-5 text-[#EF8354]" /> {"Travel Date & Time"}
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
           {"Point-to-point is a one-day hire. Select your travel date and preferred pickup time."}
@@ -253,7 +253,7 @@ const P2PTripStep = ({ data, onChange }) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="travel-date" className="block text-sm font-semibold text-[#2C2F3A] mb-1">
+            <label htmlFor="travel-date" className="block text-sm font-semibold text-[#2D3142] mb-1">
               {"Travel Date *"}
             </label>
             <input
@@ -267,7 +267,7 @@ const P2PTripStep = ({ data, onChange }) => {
           </div>
 
           <div>
-            <label htmlFor="pickup-time" className="block text-sm font-semibold text-[#2C2F3A] mb-1 flex items-center gap-1">
+            <label htmlFor="pickup-time" className="block text-sm font-semibold text-[#2D3142] mb-1 flex items-center gap-1">
               <Clock className="w-4 h-4" /> {"Preferred Pickup Time *"}
             </label>
             <input
@@ -281,12 +281,12 @@ const P2PTripStep = ({ data, onChange }) => {
         </div>
 
         {data.startDate && data.pickupTime && (
-          <div className="mt-4 bg-[#F5820D]/8 border border-[#F5820D]/25 rounded-xl p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#F5820D]/10 rounded-full flex items-center justify-center flex-shrink-0">
-              <Calendar className="w-5 h-5 text-[#F5820D]" />
+          <div className="mt-4 bg-[#EF8354]/8 border border-[#EF8354]/25 rounded-xl p-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#EF8354]/10 rounded-full flex items-center justify-center flex-shrink-0">
+              <Calendar className="w-5 h-5 text-[#EF8354]" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#2C2F3A]">{"One-Day Transfer"}</p>
+              <p className="text-sm font-bold text-[#2D3142]">{"One-Day Transfer"}</p>
               <p className="text-xs text-[#6B7280] mt-0.5">
                 {data.startDate} {data.pickupTime && `at ${data.pickupTime}`}
                 {data.startLocation && data.endLocation &&

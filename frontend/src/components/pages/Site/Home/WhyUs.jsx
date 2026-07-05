@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 export default function LuxuryServiceSlider() {
-  const brandColor = "#00b0a5";
+  const brandColor = "#EF8354";
   
   
   const allServices = [
@@ -28,8 +28,8 @@ export default function LuxuryServiceSlider() {
   return (
     <section className="py-24 bg-slate-950 text-white overflow-hidden">
       {/* Header */}
-      <div className="max-w-7xl mx-auto px-6 mb-20 border-l-2 border-[#00b0a5] pl-8">
-        <h2 className="text-xs uppercase tracking-[0.5em] text-[#00b0a5] mb-2 font-bold">
+      <div className="max-w-7xl mx-auto px-6 mb-20 border-l-2 border-[#EF8354] pl-8">
+        <h2 className="text-xs uppercase tracking-[0.5em] text-[#EF8354] mb-2 font-bold">
           {"The Gold Standard"}
         </h2>
         <p className="text-3xl md:text-5xl font-extralight tracking-tight">
@@ -55,7 +55,7 @@ export default function LuxuryServiceSlider() {
               key={idx}
               className="flex-none w-[320px] px-10 border-r border-white/5 transition-all duration-500 hover:bg-white/[0.02]"
             >
-              <div className="mb-8 text-gray-600 group-hover/item:text-[#00b0a5] transition-colors duration-500">
+              <div className="mb-8 text-gray-600 group-hover/item:text-[#EF8354] transition-colors duration-500">
                 <service.icon size={26} strokeWidth={1} />
               </div>
 
@@ -69,7 +69,7 @@ export default function LuxuryServiceSlider() {
               </div>
               
               {/* Subtle underline that grows on hover */}
-              <div className="mt-8 w-8 group-hover:w-full h-[1px] bg-[#00b0a5]/30 group-hover:bg-[#00b0a5] transition-all duration-1000" />
+              <div className="mt-8 w-8 group-hover:w-full h-[1px] bg-[#EF8354]/30 group-hover:bg-[#EF8354] transition-all duration-1000" />
             </div>
           ))}
         </motion.div>
@@ -83,7 +83,7 @@ export default function LuxuryServiceSlider() {
       <div className="max-w-7xl mx-auto px-6 mt-20 flex justify-between items-center opacity-40">
          
          <div className="h-[1px] flex-1 mx-12 bg-white/5" />
-         <span className="text-[9px] uppercase tracking-[0.4em] text-[#00b0a5]">{"All-Inclusive Fleet"}</span>
+         <span className="text-[9px] uppercase tracking-[0.4em] text-[#EF8354]">{"All-Inclusive Fleet"}</span>
       </div>
     </section>
   );

@@ -34,7 +34,7 @@ const MessageItem = ({ message, isSelected, onClick }) => {
         </p>
         <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
           {hasUnreadReply && (
-            <span className="w-2 h-2 rounded-full bg-[#F5820D]" title="New reply" />
+            <span className="w-2 h-2 rounded-full bg-[#EF8354]" title="New reply" />
           )}
           <ChevronRight className="w-4 h-4 text-slate-400" />
         </div>
@@ -47,7 +47,7 @@ const MessageItem = ({ message, isSelected, onClick }) => {
         </span>
       </div>
       {message.replies?.length > 0 && (
-        <p className="text-xs text-[#F5820D] mt-1.5 font-medium">
+        <p className="text-xs text-[#EF8354] mt-1.5 font-medium">
           {message.replies.length} repl{message.replies.length > 1 ? "ies" : "y"}
         </p>
       )}

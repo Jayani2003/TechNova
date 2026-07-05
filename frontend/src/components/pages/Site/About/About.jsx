@@ -58,7 +58,7 @@ const About = () => {
             className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight"
           >
             {"Discover Sri Lanka"} <br />
-            <span className="text-[#00b0a5] mt-4 inline-block">
+            <span className="text-[#EF8354] mt-4 inline-block">
               {"In Ultimate Luxury"}
             </span>
           </motion.h1>
@@ -86,7 +86,7 @@ const About = () => {
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
                 className="text-center"
               >
-                <div className="text-4xl md:text-5xl font-bold text-[#00b0a5] mb-2">{stat.value}</div>
+                <div className="text-4xl md:text-5xl font-bold text-[#EF8354] mb-2">{stat.value}</div>
                 <div className="text-sm md:text-base font-medium text-slate-600 uppercase tracking-wider">{stat.label}</div>
               </motion.div>
             ))}
@@ -103,7 +103,7 @@ const About = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-sm font-bold text-[#00b0a5] tracking-widest uppercase mb-3">{"Our Story"}</h2>
+            <h2 className="text-sm font-bold text-[#EF8354] tracking-widest uppercase mb-3">{"Our Story"}</h2>
             <h3 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
               {"A Legacy of Excellence in Travel"}
             </h3>
@@ -117,7 +117,7 @@ const About = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-[#00b0a5] text-white px-8 py-4 rounded-xl font-semibold shadow-lg shadow-[#00b0a5]/30 hover:bg-[#008f86] transition-colors"
+                className="bg-[#EF8354] text-white px-8 py-4 rounded-xl font-semibold shadow-lg shadow-[#EF8354]/30 hover:bg-[#4F5D75] transition-colors"
               >
                 {"Explore Our Fleet"}
               </motion.button>
@@ -144,7 +144,7 @@ const About = () => {
       <section className="py-24 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-sm font-bold text-[#00b0a5] tracking-widest uppercase mb-3">{"The Ceylone Best Tours Difference"}</h2>
+            <h2 className="text-sm font-bold text-[#EF8354] tracking-widest uppercase mb-3">{"The Ceylone Best Tours Difference"}</h2>
             <h3 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
               {"Why Travel With Us?"}
             </h3>
@@ -163,7 +163,7 @@ const About = () => {
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
                 className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl transition-shadow border border-slate-100"
               >
-                <div className="w-14 h-14 bg-[#00b0a5]/10 rounded-xl flex items-center justify-center text-[#00b0a5] mb-6">
+                <div className="w-14 h-14 bg-[#EF8354]/10 rounded-xl flex items-center justify-center text-[#EF8354] mb-6">
                   {feature.icon}
                 </div>
                 <h4 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h4>

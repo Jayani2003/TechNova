@@ -37,11 +37,11 @@ const Footer = () => {
                 <div className="space-y-6">
                     <div className="flex flex-col">
                         <span className="text-3xl font-serif font-bold text-white tracking-wider uppercase">CEYLON</span>
-                        {/* Updated to #00b0a5 */}
-                        <span className="text-[#00b0a5] font-medium italic text-lg leading-tight -mt-1">Best Tours</span>
+                        {/* Updated to #EF8354 */}
+                        <span className="text-[#EF8354] font-medium italic text-lg leading-tight -mt-1">Best Tours</span>
                     </div>
                     {/* Border updated to brand teal opacity */}
-                    <p className="text-sm leading-relaxed text-gray-500 italic border-l border-[#00b0a5]/30 pl-4">
+                    <p className="text-sm leading-relaxed text-gray-500 italic border-l border-[#EF8354]/30 pl-4">
                         Explore the paradise island with unmatched elegance. From luxury sedans to rugged SUVs, we move your dreams.
                     </p>
                     <div className="flex gap-4">
@@ -49,7 +49,7 @@ const Footer = () => {
                             href="https://www.facebook.com/ceylonbesttours" 
                             target="_blank" 
                             rel="noopener noreferrer" 
-                            className="!text-gray-500 hover:!text-[#00b0a5] transition-colors duration-300"
+                            className="!text-gray-500 hover:!text-[#EF8354] transition-colors duration-300"
                         >
                             <Facebook size={18} />
                         </a>
@@ -57,7 +57,7 @@ const Footer = () => {
                             href="https://www.instagram.com/ceylon_best_tours?igsh=MXRiMW5iM3R4M3hvdQ==" 
                             target="_blank" 
                             rel="noopener noreferrer" 
-                            className="!text-gray-500 hover:!text-[#00b0a5] transition-colors duration-300"
+                            className="!text-gray-500 hover:!text-[#EF8354] transition-colors duration-300"
                         >
                             <Instagram size={18} />
                         </a>
@@ -65,7 +65,7 @@ const Footer = () => {
                             href="https://www.tripadvisor.com/Attraction_Review-g1102395-d16926335-Reviews-Ceylon_Best_Tours_Taxi_Service-Tissamaharama_Southern_Province.html" 
                             target="_blank" 
                             rel="noopener noreferrer" 
-                            className="!text-gray-500 hover:!text-[#00b0a5] transition-colors duration-300"
+                            className="!text-gray-500 hover:!text-[#EF8354] transition-colors duration-300"
                         >
                             <FaTripadvisor size={18} />
                         </a>
@@ -87,7 +87,7 @@ const Footer = () => {
                                     {/* Icon color updated */}
                                     <ChevronRight
                                         size={14}
-                                        className="mr-2 text-[#00b0a5] opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all"
+                                        className="mr-2 text-[#EF8354] opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all"
                                     />
                                     {item.label}
                                 </Link>
@@ -104,12 +104,12 @@ const Footer = () => {
                             <li key={item.label}>
                                 {item.path === '#' ? (
                                     <span className="!text-white flex items-center group text-sm transition-colors cursor-not-allowed opacity-50">
-                                        <ChevronRight size={14} className="mr-2 text-[#00b0a5] opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all" />
+                                        <ChevronRight size={14} className="mr-2 text-[#EF8354] opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all" />
                                         {item.label}
                                     </span>
                                 ) : (
                                     <Link to={item.path} className="!text-white hover:!text-white visited:!text-white flex items-center group text-sm transition-colors">
-                                        <ChevronRight size={14} className="mr-2 text-[#00b0a5] opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all" />
+                                        <ChevronRight size={14} className="mr-2 text-[#EF8354] opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all" />
                                         {item.label}
                                     </Link>
                                 )}
@@ -123,19 +123,19 @@ const Footer = () => {
                     <h4 className="text-white font-semibold mb-6 text-sm uppercase tracking-widest">Get In Touch</h4>
                     <div className="space-y-4 text-sm">
                         <div className="flex items-start gap-3">
-                            <MapPin className="text-[#00b0a5] shrink-0" size={18} />
+                            <MapPin className="text-[#EF8354] shrink-0" size={18} />
                             <p className="text-white">No.214, Kirinda Hospital Road, Kirinda, Tissamaharama, Sri Lanka.</p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Phone className="text-[#00b0a5] shrink-0" size={18} />
+                            <Phone className="text-[#EF8354] shrink-0" size={18} />
                             <p className="text-white">+94 77 861 9582</p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Mail className="text-[#00b0a5] shrink-0" size={18} />
+                            <Mail className="text-[#EF8354] shrink-0" size={18} />
                             <p className="text-white">ceylonbesttours05@gmail.com</p>
                         </div>
                         {/* Bottom Shield updated */}
-                        <div className="pt-4 flex items-center gap-2 text-[#00b0a5]/80 font-semibold">
+                        <div className="pt-4 flex items-center gap-2 text-[#EF8354]/80 font-semibold">
                             <ShieldCheck size={18} />
                             <span className="text-[10px] uppercase tracking-tighter text-gray-500">SLTDA Registered Agency</span>
                         </div>

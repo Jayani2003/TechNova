@@ -15,19 +15,19 @@ const PLATFORM_LABELS = {
 
 const ReviewRow = ({ icon: Icon, label, value }) =>
   value ? (
-    <div className="flex items-start gap-3 py-3 border-b border-[#F5820D]/8 last:border-0">
-      <div className="w-8 h-8 bg-[#F5820D]/8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-        <Icon className="w-4 h-4 text-[#F5820D]" />
+    <div className="flex items-start gap-3 py-3 border-b border-[#EF8354]/8 last:border-0">
+      <div className="w-8 h-8 bg-[#EF8354]/8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+        <Icon className="w-4 h-4 text-[#EF8354]" />
       </div>
       <div>
         <p className="text-xs text-[#6B7280] font-medium">{label}</p>
-        <p className="text-sm font-semibold text-[#2C2F3A] mt-0.5">{value}</p>
+        <p className="text-sm font-semibold text-[#2D3142] mt-0.5">{value}</p>
       </div>
     </div>
   ) : null;
 
 const Section = ({ title, children }) => (
-  <div className="bg-white rounded-2xl border border-[#F5820D]/10 shadow-sm p-5">
+  <div className="bg-white rounded-2xl border border-[#EF8354]/10 shadow-sm p-5">
     <p className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-3">{title}</p>
     {children}
   </div>
@@ -54,7 +54,7 @@ const P2PReviewStep = ({ data }) => {
     <div className="space-y-4">
 
       {/* ── Booking type badge ── */}
-      <div className="inline-flex items-center gap-2 bg-[#F5820D]/10 text-[#F5820D] px-4 py-2 rounded-full text-sm font-bold">
+      <div className="inline-flex items-center gap-2 bg-[#EF8354]/10 text-[#EF8354] px-4 py-2 rounded-full text-sm font-bold">
         🚗 Point-to-Point Transfer
       </div>
 
@@ -90,7 +90,7 @@ const P2PReviewStep = ({ data }) => {
       </Section>
 
       {/* Emergency Contact */}
-      <div className="bg-white rounded-2xl border border-[#F5820D]/10 shadow-sm p-5">
+      <div className="bg-white rounded-2xl border border-[#EF8354]/10 shadow-sm p-5">
         <p className="text-xs font-bold text-[#6B7280]/70 uppercase tracking-wider mb-3 flex items-center gap-2">
           <AlertTriangle className="w-3.5 h-3.5 text-amber-500" /> {"Emergency Contact"}
         </p>
@@ -106,8 +106,8 @@ const P2PReviewStep = ({ data }) => {
       </div>
 
       {/* What happens next */}
-      <div className="bg-[#FFF8F0] rounded-2xl p-5 border border-[#F5820D]/10">
-        <p className="text-sm font-bold text-[#2C2F3A] mb-3">{"What happens after you submit?"}</p>
+      <div className="bg-[#BFC0C0] rounded-2xl p-5 border border-[#EF8354]/10">
+        <p className="text-sm font-bold text-[#2D3142] mb-3">{"What happens after you submit?"}</p>
         {[
           "Your booking is submitted with status: PENDING",
           "Our team reviews your request within 24 hours",
@@ -116,7 +116,7 @@ const P2PReviewStep = ({ data }) => {
           "Once accepted, we confirm and assign your vehicle",
         ].map((step, i) => (
           <div key={i} className="flex items-start gap-2 mb-2">
-            <div className="w-5 h-5 rounded-full bg-[#F5820D] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">
+            <div className="w-5 h-5 rounded-full bg-[#EF8354] text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">
               {i + 1}
             </div>
             <p className="text-sm text-white/80">{step}</p>

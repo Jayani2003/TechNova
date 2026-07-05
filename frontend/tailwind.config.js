@@ -8,12 +8,11 @@ export default {
     extend: {
       colors: {
         brand: {
-          primary:   "#F5820D",
-          hover:     "#C85A00",
-          light:     "#FEF0E0",
-          gold:      "#F0A500",
-          dark:      "#2C2F3A",
-          warm:      "#FFF8F0",
+          primary:   "#EF8354", // Coral
+          hover:     "#4F5D75", // Payne's gray
+          light:     "#BFC0C0", // Silver
+          dark:      "#2D3142", // Gunmetal
+          white:     "#FFFFFF",
         },
       },
       fontFamily: {

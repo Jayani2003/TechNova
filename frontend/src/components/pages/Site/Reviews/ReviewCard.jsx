@@ -12,8 +12,8 @@ const StarRow = ({ stars }) => (
   <div style={{ display: 'flex', gap: '2px' }}>
     {[1,2,3,4,5].map(i => (
       <svg key={i} width="14" height="14" viewBox="0 0 18 18"
-        fill={i <= stars ? '#00b0a5' : 'none'}
-        stroke={i <= stars ? '#00b0a5' : '#c0d8d5'}
+        fill={i <= stars ? '#EF8354' : 'none'}
+        stroke={i <= stars ? '#EF8354' : '#c0d8d5'}
         strokeWidth="1.5"
       >
         <path d="M9 1.5l2.1 4.3 4.7.7-3.4 3.3.8 4.7L9 12.1l-4.2 2.4.8-4.7-3.4-3.3 4.7-.7L9 1.5z"/>
@@ -136,7 +136,7 @@ const ReviewCard = ({ review, index = 0 }) => {
         }
         .rvc-avatar-placeholder {
           width: 50px; height: 50px; border-radius: 50%;
-          background: linear-gradient(135deg, #00b0a5, #009e94);
+          background: linear-gradient(135deg, #EF8354, #4F5D75);
           display: flex; align-items: center; justify-content: center;
           color: #fff; font-size: 18px; font-weight: 800;
           flex-shrink: 0; border: 2px solid rgba(0,176,165,0.25);
@@ -198,14 +198,14 @@ const ReviewCard = ({ review, index = 0 }) => {
           align-self: flex-start;
           background: none;
           border: none;
-          color: #00b0a5;
+          color: #EF8354;
           font-size: 12px;
           font-weight: 700;
           cursor: pointer;
           padding: 0;
           transition: color 0.2s ease;
         }
-        .rvc-see-more-btn:hover { color: #009e94; }
+        .rvc-see-more-btn:hover { color: #4F5D75; }
 
         /* Images */
         .rvc-images { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
@@ -228,7 +228,7 @@ const ReviewCard = ({ review, index = 0 }) => {
           border-radius: 10px;
           border: 1.5px solid rgba(0,176,165,0.25);
           background: rgba(0,176,165,0.08);
-          color: #00b0a5;
+          color: #EF8354;
           font-size: 12px;
           font-weight: 700;
           cursor: pointer;
@@ -236,7 +236,7 @@ const ReviewCard = ({ review, index = 0 }) => {
         }
         .rvc-image-expand-btn:hover {
           background: rgba(0,176,165,0.15);
-          border-color: #00b0a5;
+          border-color: #EF8354;
           transform: scale(1.05);
         }
 

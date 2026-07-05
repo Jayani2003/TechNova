@@ -60,7 +60,7 @@ const EMERGENCY_RELATIONSHIPS = [
   "Colleague", "Hotel Concierge", "Tour Guide", "Other",
 ];
 
-const inputClass = "w-full px-4 py-3 bg-white border border-[#F5820D]/15 rounded-xl text-[#2C2F3A] text-sm outline-none transition-all focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20";
+const inputClass = "w-full px-4 py-3 bg-white border border-[#EF8354]/15 rounded-xl text-[#2D3142] text-sm outline-none transition-all focus:border-[#EF8354] focus:ring-2 focus:ring-[#EF8354]/20";
 
 // ── Phone validation with country code min/max ────────────────────────────────
 const validatePhone = (digits, countryCode) => {
@@ -102,7 +102,7 @@ const PhoneInput = ({ value, onChange, label, required, theme = "orange" }) => {
   return (
     <div>
       {label && (
-        <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">
+        <label className="block text-sm font-semibold text-[#2D3142] mb-1">
           {label}{required && <span className="text-red-500"> *</span>}
         </label>
       )}
@@ -112,7 +112,7 @@ const PhoneInput = ({ value, onChange, label, required, theme = "orange" }) => {
           <select
             value={code}
             onChange={e => handleCodeChange(e.target.value)}
-            className="appearance-none pl-3 pr-7 py-3 bg-white border border-[#F5820D]/15 rounded-xl text-[#2C2F3A] text-sm outline-none focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20 cursor-pointer min-w-[170px]"
+            className="appearance-none pl-3 pr-7 py-3 bg-white border border-[#EF8354]/15 rounded-xl text-[#2D3142] text-sm outline-none focus:border-[#EF8354] focus:ring-2 focus:ring-[#EF8354]/20 cursor-pointer min-w-[170px]"
           >
             {COUNTRIES.map(c => (
               <option key={c.code} value={c.code}>
@@ -169,7 +169,7 @@ const PlatformRow = ({ index, platform, number, onChange, onRemove, required, us
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-semibold text-[#2C2F3A]">
+        <label className="text-sm font-semibold text-[#2D3142]">
           {index === 0
             ? <span>Primary Contact <span className="text-red-500">*</span></span>
             : "Alternative Contact"}
@@ -190,7 +190,7 @@ const PlatformRow = ({ index, platform, number, onChange, onRemove, required, us
         <select
           value={platform}
           onChange={e => { onChange("platform", e.target.value); setTouched(false); }}
-          className="appearance-none w-full pl-3 pr-7 py-3 bg-white border border-[#F5820D]/15 rounded-xl text-[#2C2F3A] text-sm font-medium outline-none focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20 cursor-pointer"
+          className="appearance-none w-full pl-3 pr-7 py-3 bg-white border border-[#EF8354]/15 rounded-xl text-[#2D3142] text-sm font-medium outline-none focus:border-[#EF8354] focus:ring-2 focus:ring-[#EF8354]/20 cursor-pointer"
         >
           {available.map(p => (
             <option key={p.id} value={p.id}>{p.label}</option>
@@ -282,8 +282,8 @@ const BookingNotesStep = ({ data, onChange }) => {
 
       {/* ── Contact Details ── */}
       <div>
-        <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <Phone className="w-5 h-5 text-[#F5820D]" /> Contact Details
+        <h3 className="text-lg font-bold text-[#2D3142] mb-1 flex items-center gap-2">
+          <Phone className="w-5 h-5 text-[#EF8354]" /> Contact Details
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
           Choose how you prefer us to reach you about this booking.
@@ -293,7 +293,7 @@ const BookingNotesStep = ({ data, onChange }) => {
 
           {/* Full Name */}
           <div>
-            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">
+            <label className="block text-sm font-semibold text-[#2D3142] mb-1">
               Full Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -304,7 +304,7 @@ const BookingNotesStep = ({ data, onChange }) => {
               className={inputClass}
             />
             {user?.name && (
-              <p className="text-xs text-[#F5820D] mt-1 ml-1">
+              <p className="text-xs text-[#EF8354] mt-1 ml-1">
                 ✓ Auto-filled from your profile — you can edit this
               </p>
             )}
@@ -335,9 +335,9 @@ const BookingNotesStep = ({ data, onChange }) => {
             <button
               type="button"
               onClick={addSecond}
-              className="flex items-center gap-2 text-sm text-[#F5820D] font-semibold hover:text-[#C85A00] transition-colors"
+              className="flex items-center gap-2 text-sm text-[#EF8354] font-semibold hover:text-[#4F5D75] transition-colors"
             >
-              <div className="w-7 h-7 rounded-full border-2 border-dashed border-[#F5820D]/40 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-full border-2 border-dashed border-[#EF8354]/40 flex items-center justify-center">
                 <Plus className="w-3.5 h-3.5" />
               </div>
               Add alternative contact method
@@ -349,16 +349,16 @@ const BookingNotesStep = ({ data, onChange }) => {
 
       {/* ── Emergency Contact ── */}
       <div>
-        <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <UserPlus className="w-5 h-5 text-[#F5820D]" /> Emergency Contact
+        <h3 className="text-lg font-bold text-[#2D3142] mb-1 flex items-center gap-2">
+          <UserPlus className="w-5 h-5 text-[#EF8354]" /> Emergency Contact
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
           In case of emergency during the trip. Saved to your profile.
         </p>
-        <div className="bg-white border border-[#F5820D]/15 rounded-2xl p-4 space-y-4">
+        <div className="bg-white border border-[#EF8354]/15 rounded-2xl p-4 space-y-4">
 
           <div>
-            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">Name *</label>
+            <label className="block text-sm font-semibold text-[#2D3142] mb-1">Name *</label>
             <input
               type="text"
               value={data.emergencyName || ""}
@@ -369,7 +369,7 @@ const BookingNotesStep = ({ data, onChange }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-[#2C2F3A] mb-1">Relationship *</label>
+            <label className="block text-sm font-semibold text-[#2D3142] mb-1">Relationship *</label>
             <div className="relative">
               <select
                 value={data.emergencyRelationship || ""}
@@ -396,8 +396,8 @@ const BookingNotesStep = ({ data, onChange }) => {
 
       {/* ── Additional Notes ── */}
       <div>
-        <h3 className="text-lg font-bold text-[#2C2F3A] mb-1 flex items-center gap-2">
-          <FileText className="w-5 h-5 text-[#F5820D]" /> Additional Notes
+        <h3 className="text-lg font-bold text-[#2D3142] mb-1 flex items-center gap-2">
+          <FileText className="w-5 h-5 text-[#EF8354]" /> Additional Notes
         </h3>
         <p className="text-sm text-[#6B7280] mb-4">
           Any special requests, preferences, or information for the driver.

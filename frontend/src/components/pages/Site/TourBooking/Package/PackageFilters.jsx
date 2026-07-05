@@ -62,12 +62,12 @@ const PackageFilters = ({ activeType, activeDays, onTypeChange, onDaysChange, to
           transition: all 0.2s cubic-bezier(0.22,1,0.36,1);
         }
         .pf-type-btn:hover {
-          border-color: #00b0a5; color: #00b0a5;
+          border-color: #EF8354; color: #EF8354;
           background: rgba(0,176,165,0.06);
         }
         .pf-type-btn.active {
-          background: #00b0a5; color: #fff;
-          border-color: #00b0a5;
+          background: #EF8354; color: #fff;
+          border-color: #EF8354;
           box-shadow: 0 4px 14px rgba(0,176,165,0.35);
         }
 
@@ -82,11 +82,11 @@ const PackageFilters = ({ activeType, activeDays, onTypeChange, onDaysChange, to
           transition: all 0.2s cubic-bezier(0.22,1,0.36,1);
         }
         .pf-day-btn:hover {
-          border-color: #00b0a5; color: #00b0a5;
+          border-color: #EF8354; color: #EF8354;
           background: rgba(0,176,165,0.06);
         }
         .pf-day-btn.active {
-          background: linear-gradient(135deg, #00b0a5, #009e94);
+          background: linear-gradient(135deg, #EF8354, #4F5D75);
           color: #fff; border-color: transparent;
           box-shadow: 0 4px 14px rgba(0,176,165,0.35);
         }
@@ -95,7 +95,7 @@ const PackageFilters = ({ activeType, activeDays, onTypeChange, onDaysChange, to
         .pf-count {
           margin-left: auto; font-size: 11px; font-weight: 700;
           letter-spacing: 0.1em; text-transform: uppercase;
-          color: #00b0a5;
+          color: #EF8354;
           flex-shrink: 0;
         }
         .pf-count span { color: #0d2b2b; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }

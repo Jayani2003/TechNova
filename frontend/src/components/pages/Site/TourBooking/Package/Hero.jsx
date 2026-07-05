@@ -18,11 +18,11 @@ const Hero = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
+        <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#EF8354] rounded-full">
           {"Handpicked Journeys"}
         </span>
         <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 tracking-tight">
-          {"Package"} <span className="text-[#00b0a5]">{"Tours."}</span>
+          {"Package"} <span className="text-[#EF8354]">{"Tours."}</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light">
           {"Discover the soul of Sri Lanka with our curated travel experiences. From misty mountains to golden beaches."}

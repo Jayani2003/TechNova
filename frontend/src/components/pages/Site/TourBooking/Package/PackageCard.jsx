@@ -33,7 +33,7 @@ const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDe
     obs.observe(el); return () => obs.disconnect();
   }, []);
 
-  const accentColor = TYPE_COLORS[pkg.type] || '#00b0a5';
+  const accentColor = TYPE_COLORS[pkg.type] || '#EF8354';
   const destinations = Array.isArray(pkg.destinations) ? pkg.destinations : [];
   const highlights = Array.isArray(pkg.highlights) ? pkg.highlights : [];
   const topDests = destinations.slice(0, 2);
@@ -197,7 +197,7 @@ const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDe
           padding: 4px 10px; border-radius: 100px;
           background: rgba(0,176,165,0.07);
           border: 1px solid rgba(0,176,165,0.18);
-          font-size: 10px; font-weight: 600; color: #00b0a5;
+          font-size: 10px; font-weight: 600; color: #EF8354;
           letter-spacing: 0.04em;
           overflow-wrap: anywhere;
           word-break: break-word;
@@ -214,7 +214,7 @@ const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDe
         .pkc-book-btn {
           flex: 1;
           display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-          background: #00b0a5; color: #fff;
+          background: #EF8354; color: #fff;
           font-size: 11px; font-weight: 700;
           letter-spacing: 0.1em; text-transform: uppercase;
           padding: 12px 16px; border-radius: 10px;
@@ -222,7 +222,7 @@ const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDe
           box-shadow: 0 4px 16px -4px rgba(0,176,165,0.45);
           transition: all 0.25s ease;
         }
-        .pkc-book-btn:hover { background: #009e94; transform: translateY(-1px); }
+        .pkc-book-btn:hover { background: #4F5D75; transform: translateY(-1px); }
         .pkc-more-btn {
           display: inline-flex; align-items: center; justify-content: center; gap-6px;
           padding: 12px 16px; border-radius: 10px;
@@ -233,7 +233,7 @@ const PackageCard = ({ pkg, onShowMore, index = 0, showBookButton = true, showDe
           cursor: pointer;
           transition: all 0.2s ease;
         }
-        .pkc-more-btn:hover { border-color: #00b0a5; color: #00b0a5; background: rgba(0,176,165,0.05); }
+        .pkc-more-btn:hover { border-color: #EF8354; color: #EF8354; background: rgba(0,176,165,0.05); }
       `}</style>
 
       <div

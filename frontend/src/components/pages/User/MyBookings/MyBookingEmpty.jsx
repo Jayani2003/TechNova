@@ -14,7 +14,7 @@ const MyBookingEmpty = ({ navigate }) => (
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={() => navigate("/tour-booking")}
-      className="flex items-center gap-2 bg-[#00b0a5] hover:bg-[#009b91] text-white px-6 py-2.5 rounded-full font-semibold shadow-md shadow-[#00b0a5]/20 transition-all cursor-pointer"
+      className="flex items-center gap-2 bg-[#EF8354] hover:bg-[#4F5D75] text-white px-6 py-2.5 rounded-full font-semibold shadow-md shadow-[#EF8354]/20 transition-all cursor-pointer"
     >
       Browse Tours
     </motion.button>

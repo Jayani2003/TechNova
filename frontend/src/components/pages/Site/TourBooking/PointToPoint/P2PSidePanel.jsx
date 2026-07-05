@@ -32,15 +32,15 @@ const P2PSidePanel = () => {
   >
     {/* ── What's Included ──
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-      <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
+      <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#EF8354] rounded-full">
         Included
       </span>
       <h2 className="text-2xl font-extrabold text-slate-800 mb-5">What's Included</h2>
       <div className="space-y-4">
         {inclusions.map(({ icon: Icon, label }) => (
           <div key={label} className="flex items-center gap-3 hover:bg-slate-50 p-2 rounded-xl transition-colors">
-            <div className="w-10 h-10 bg-[#00b0a5]/10 rounded-full flex items-center justify-center flex-shrink-0">
-              <Icon className="w-5 h-5 text-[#00b0a5]" />
+            <div className="w-10 h-10 bg-[#EF8354]/10 rounded-full flex items-center justify-center flex-shrink-0">
+              <Icon className="w-5 h-5 text-[#EF8354]" />
             </div>
             <p className="font-bold text-slate-800 text-sm">{label}</p>
           </div>
@@ -55,7 +55,7 @@ const P2PSidePanel = () => {
         {steps.map(({ title, desc }, i) => (
           <div key={title} className="flex gap-3">
             <div className="flex flex-col items-center">
-              <div className="w-8 h-8 bg-[#00b0a5] rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              <div className="w-8 h-8 bg-[#EF8354] rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                 {i + 1}
               </div>
               {i < steps.length - 1 && <div className="w-0.5 h-6 bg-slate-200 mt-1" />}
@@ -70,14 +70,14 @@ const P2PSidePanel = () => {
     </div>
 
     {/* ── Emergency Assistance ── */}
-    <div className="bg-[#00b0a5]/10 border border-[#00b0a5]/20 rounded-2xl p-6">
+    <div className="bg-[#EF8354]/10 border border-[#EF8354]/20 rounded-2xl p-6">
       <h3 className="font-extrabold text-slate-800 mb-1">{"Emergency Assistance"}</h3>
       <p className="text-sm text-slate-600 mb-3">
         {"24/7 roadside assistance for all our customers."}
       </p>
       <a
         href="tel:+94778619582"
-        className="flex items-center gap-2 text-[#00b0a5] font-semibold hover:text-[#009b91] transition-colors"
+        className="flex items-center gap-2 text-[#EF8354] font-semibold hover:text-[#4F5D75] transition-colors"
       >
         <Phone className="w-5 h-5" />
         +94 77 861 9582

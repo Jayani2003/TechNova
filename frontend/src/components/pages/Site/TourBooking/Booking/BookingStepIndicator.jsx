@@ -14,10 +14,10 @@ const BookingStepIndicator = ({ steps, currentStep, maxReachedStep = currentStep
             <div
               onClick={() => isClickable && onStepClick(index)}
               className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300
-                ${isCompleted || isVisited ? "bg-[#00b0a5] text-white shadow-md shadow-[#00b0a5]/30" : ""}
-                ${isActive    ? "bg-[#00b0a5] text-white shadow-lg shadow-[#00b0a5]/40 scale-110" : ""}
+                ${isCompleted || isVisited ? "bg-[#EF8354] text-white shadow-md shadow-[#EF8354]/30" : ""}
+                ${isActive    ? "bg-[#EF8354] text-white shadow-lg shadow-[#EF8354]/40 scale-110" : ""}
                 ${!isCompleted && !isActive && !isVisited ? "bg-slate-100 text-slate-400" : ""}
-                ${isClickable ? "cursor-pointer hover:scale-110 hover:shadow-lg hover:shadow-[#00b0a5]/40" : "cursor-default"}
+                ${isClickable ? "cursor-pointer hover:scale-110 hover:shadow-lg hover:shadow-[#EF8354]/40" : "cursor-default"}
               `}
             >
               {(isCompleted || isVisited) ? <Check className="w-5 h-5" /> : index + 1}
@@ -25,11 +25,11 @@ const BookingStepIndicator = ({ steps, currentStep, maxReachedStep = currentStep
             <span
               onClick={() => isClickable && onStepClick(index)}
               className={`text-xs mt-1 font-medium whitespace-nowrap transition-colors
-                ${isActive              ? "text-[#00b0a5]" : ""}
+                ${isActive              ? "text-[#EF8354]" : ""}
                 ${isCompleted           ? "text-slate-600" : ""}
                 ${isVisited && !isActive ? "text-slate-600" : ""}
                 ${!isCompleted && !isActive && !isVisited ? "text-slate-400" : ""}
-                ${isClickable ? "cursor-pointer hover:text-[#00b0a5]" : ""}
+                ${isClickable ? "cursor-pointer hover:text-[#EF8354]" : ""}
               `}
             >
               {step}
@@ -40,7 +40,7 @@ const BookingStepIndicator = ({ steps, currentStep, maxReachedStep = currentStep
           {index < steps.length - 1 && (
             <div
               className={`h-0.5 w-16 sm:w-24 mx-2 mb-5 transition-all duration-500 ${
-                index < maxReachedStep ? "bg-[#00b0a5]" : "bg-slate-200"
+                index < maxReachedStep ? "bg-[#EF8354]" : "bg-slate-200"
               }`}
             />
           )}

@@ -20,7 +20,7 @@ const NotificationCard = ({ notification }) => (
     <ul className="mb-3 space-y-0.5">
       {notification.destinations.map((name) => (
         <li key={name} className="text-sm text-slate-700 flex items-center gap-1.5">
-          <span className="text-[#00b0a5]">•</span> {name}
+          <span className="text-[#EF8354]">•</span> {name}
         </li>
       ))}
     </ul>
@@ -31,7 +31,7 @@ const NotificationCard = ({ notification }) => (
     <ul className="mb-3 space-y-0.5">
       {notification.forecasts.map((f) => (
         <li key={f.name} className="text-sm text-slate-700 flex items-start gap-1.5">
-          <span className="text-[#00b0a5] mt-0.5">•</span>
+          <span className="text-[#EF8354] mt-0.5">•</span>
           <span>
             <span className="font-semibold">{f.name}</span>
             {" — "}
@@ -93,7 +93,7 @@ const NotificationBell = () => {
         >
           <WeatherIcon pulse={unreadCount > 0} />
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-[#00b0a5] text-white text-[9px] font-black rounded-full flex items-center justify-center shadow">
+            <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-[#EF8354] text-white text-[9px] font-black rounded-full flex items-center justify-center shadow">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -112,7 +112,7 @@ const NotificationBell = () => {
               <button
                 onClick={refreshNotifications}
                 disabled={loading}
-                className="p-1.5 rounded-lg hover:bg-slate-100 text-[#00b0a5] disabled:opacity-50 cursor-pointer"
+                className="p-1.5 rounded-lg hover:bg-slate-100 text-[#EF8354] disabled:opacity-50 cursor-pointer"
                 title="Refresh"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -122,7 +122,7 @@ const NotificationBell = () => {
             <div className="max-h-[420px] overflow-y-auto">
               {loading && notifications.length === 0 && (
                 <div className="flex items-center justify-center gap-2 py-10 text-slate-400">
-                  <RefreshCw className="w-4 h-4 animate-spin text-[#00b0a5]" />
+                  <RefreshCw className="w-4 h-4 animate-spin text-[#EF8354]" />
                   <span className="text-sm font-semibold">Loading forecasts…</span>
                 </div>
               )}

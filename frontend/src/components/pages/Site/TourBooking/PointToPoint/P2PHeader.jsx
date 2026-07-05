@@ -18,11 +18,11 @@ const P2PHeader = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
+        <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#EF8354] rounded-full">
           {"Reliable Transfers"}
         </span>
         <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 tracking-tight">
-          {"Point to "} <span className="text-[#00b0a5]">{"Point."}</span>
+          {"Point to "} <span className="text-[#EF8354]">{"Point."}</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light">
           {"Professional drivers and premium vehicles for seamless transfers across Sri Lanka."}

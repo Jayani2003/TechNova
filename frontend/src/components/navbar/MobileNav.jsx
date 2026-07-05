@@ -33,7 +33,7 @@ const MobileNav = () => {
                     : setOpen(false)
                 }
               >
-                <Link to={link.path} className="text-[#00b0a5] hover:text-[#188c85] font-semibold">
+                <Link to={link.path} className="text-[#EF8354] hover:text-[#4F5D75] font-semibold">
                   {link.label}
                 </Link>
                 {link.children && <span>▼</span>}
@@ -47,7 +47,7 @@ const MobileNav = () => {
                       key={child.label}
                       to={child.path}
                       onClick={() => setOpen(false)}
-                      className="block text-sm text-[#00b0a5] hover:text-[#188c85]"
+                      className="block text-sm text-[#EF8354] hover:text-[#4F5D75]"
                     >
                       {child.label}
                     </Link>

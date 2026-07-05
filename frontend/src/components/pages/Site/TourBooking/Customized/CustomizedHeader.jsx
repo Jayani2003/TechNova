@@ -18,11 +18,11 @@ const CustomizedHeader = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
+        <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#EF8354] rounded-full">
           {"Tailor-Made Journeys"}
         </span>
         <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 tracking-tight">
-          {"Your Trip,"} <span className="text-[#00b0a5]">{"Your Way."}</span>
+          {"Your Trip,"} <span className="text-[#EF8354]">{"Your Way."}</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light">
           {"Design your dream Sri Lankan adventure. Select your favorite destinations, thrilling activities, and let us handle the rest."}

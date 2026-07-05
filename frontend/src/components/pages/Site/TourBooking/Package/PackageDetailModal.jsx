@@ -113,6 +113,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
           position: absolute; bottom: 28px; left: 32px; right: 90px;
         }
         .pdm-type-badge {
+<<<<<<< HEAD
           display: inline-flex; align-items: center; gap: 6px;
           padding: 5px 16px; border-radius: 100px;
           background: rgba(0,176,165,0.9); backdrop-filter: blur(8px);
@@ -120,6 +121,14 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
           letter-spacing: 0.22em; text-transform: uppercase;
           margin-bottom: 12px;
           border: 1px solid rgba(255,255,255,0.25);
+=======
+          display: inline-block;
+          padding: 4px 14px; border-radius: 100px;
+          background: #EF8354; color: #fff;
+          font-size: 9px; font-weight: 800;
+          letter-spacing: 0.2em; text-transform: uppercase;
+          margin-bottom: 10px;
+>>>>>>> Kolitha
         }
         .pdm-title {
           font-size: clamp(1.7rem, 3.5vw, 2.4rem);
@@ -163,7 +172,23 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
           padding-left: 16px;
         }
 
+<<<<<<< HEAD
         /* ─── Section heading ──────────────────────── */
+=======
+        /* Highlights */
+        .pdm-highlights {
+          display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px;
+        }
+        .pdm-hl {
+          padding: 5px 14px; border-radius: 100px;
+          background: rgba(0,176,165,0.08);
+          border: 1px solid rgba(0,176,165,0.25);
+          font-size: 11px; font-weight: 600; color: #EF8354;
+          letter-spacing: 0.06em;
+        }
+
+        /* Section heading */
+>>>>>>> Kolitha
         .pdm-section-heading {
           font-size: 9px; font-weight: 900;
           letter-spacing: 0.28em; text-transform: uppercase;
@@ -238,9 +263,16 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
           padding: 12px 0 0 0; margin-top: 10px;
         }
         .pdm-activities-label {
+<<<<<<< HEAD
           font-size: 8px; font-weight: 900;
           letter-spacing: 0.2em; text-transform: uppercase;
           color: #00b0a5; margin-bottom: 10px; display: block;
+=======
+          font-size: 9px; font-weight: 700;
+          letter-spacing: 0.15em; text-transform: uppercase;
+          color: #EF8354; margin-bottom: 8px;
+          display: block;
+>>>>>>> Kolitha
         }
         .pdm-activity-item {
           margin-bottom: 10px; padding-bottom: 10px;
@@ -275,15 +307,24 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
         }
         .pdm-book-btn {
           display: inline-flex; align-items: center; gap: 10px;
+<<<<<<< HEAD
           background: linear-gradient(135deg, #00b0a5, #007a72);
           color: #fff; font-size: 13px; font-weight: 700;
+=======
+          background: #EF8354; color: #fff;
+          font-size: 13px; font-weight: 700;
+>>>>>>> Kolitha
           letter-spacing: 0.1em; text-transform: uppercase;
           padding: 15px 30px; border-radius: 14px;
           text-decoration: none;
           box-shadow: 0 8px 28px -4px rgba(0,176,165,0.5);
           transition: all 0.25s ease;
         }
+<<<<<<< HEAD
         .pdm-book-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 36px -4px rgba(0,176,165,0.6); }
+=======
+        .pdm-book-btn:hover { background: #4F5D75; transform: translateY(-2px); }
+>>>>>>> Kolitha
         .pdm-close-btn {
           display: inline-flex; align-items: center; gap: 8px;
           background: transparent; color: #6a9090;
@@ -309,6 +350,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
           user-select: none;
           transition: background 0.2s;
         }
+<<<<<<< HEAD
         .pdm-guide-header:hover { background: rgba(0,176,165,0.1); }
         .pdm-guide-header-left { display: flex; align-items: center; gap: 12px; }
         .pdm-guide-icon {
@@ -366,6 +408,14 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
           margin-top: 4px; padding: 24px;
           background: linear-gradient(180deg, #f5fffe 0%, #fff 100%);
           border: 1.5px solid rgba(0,176,165,0.13);
+=======
+        .pdm-close-btn:hover { border-color: #EF8354; color: #EF8354; }
+        /* Recommendations compact layout */
+        .pdm-rec-group { margin-bottom: 18px; }
+        .pdm-rec-shell {
+          border: 1px solid rgba(0,176,165,0.12);
+          background: linear-gradient(180deg, rgba(236,255,253,0.9) 0%, rgba(255,255,255,0.98) 100%);
+>>>>>>> Kolitha
           border-radius: 22px;
           box-shadow: 0 8px 32px rgba(0,60,50,0.05);
         }
@@ -380,11 +430,21 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
           cursor: pointer; transition: all 0.2s;
           letter-spacing: 0.04em;
         }
+<<<<<<< HEAD
         .pdm-rec-tab:hover { border-color: #00b0a5; color: #00b0a5; background: rgba(0,176,165,0.05); }
         .pdm-rec-tab.active {
           background: linear-gradient(135deg, #00b0a5, #007a72);
           border-color: transparent; color: #fff;
           box-shadow: 0 4px 14px rgba(0,176,165,0.35);
+=======
+        .pdm-rec-pill {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 5px 10px; border-radius: 999px;
+          background: rgba(0,176,165,0.08);
+          color: #EF8354; font-size: 10px; font-weight: 800;
+          letter-spacing: 0.08em; text-transform: uppercase;
+          border: 1px solid rgba(0,176,165,0.14);
+>>>>>>> Kolitha
         }
         .pdm-rec-scroll {
           display: flex; gap: 14px;
@@ -400,7 +460,52 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
         .pdm-rec-item .pkc-card {
           transform: scale(0.92);
           transform-origin: top center;
+<<<<<<< HEAD
           transition: transform 0.22s ease;
+=======
+          transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+        .pdm-rec-item:hover .pkc-card {
+          transform: scale(1);
+          box-shadow: 0 18px 48px rgba(0,60,50,0.16);
+          border-color: rgba(0,176,165,0.22);
+        }
+        .pdm-guid-panel {
+          margin-top: 18px;
+          border: 1px solid rgba(0,176,165,0.12);
+          border-radius: 18px;
+          background: linear-gradient(180deg, rgba(247,255,254,0.92), rgba(255,255,255,0.98));
+          padding: 16px 18px;
+          box-shadow: 0 8px 28px rgba(0,60,50,0.05);
+        }
+        .pdm-guid-toggle {
+          display: flex; align-items: center; gap: 10px;
+          font-size: 13px; font-weight: 800; color: #0d2b2b;
+          letter-spacing: 0.02em;
+        }
+        .pdm-guid-toggle input {
+          width: 16px; height: 16px; accent-color: #EF8354;
+          flex-shrink: 0;
+        }
+        .pdm-guid-note {
+          margin-top: 8px;
+          font-size: 12px;
+          color: #5a8080;
+        }
+        .pdm-guid-card {
+          margin-top: 14px;
+          display: grid;
+          gap: 12px;
+          border-radius: 16px;
+          padding: 14px;
+          background: #fff;
+          border: 1px solid rgba(0,176,165,0.12);
+        }
+        .pdm-guid-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+>>>>>>> Kolitha
         }
         .pdm-rec-item:hover .pkc-card { transform: scale(1); }
 
@@ -476,10 +581,18 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
                         </span>
                       </div>
                       <div className="pdm-dest-info">
+<<<<<<< HEAD
                         <div className="pdm-dest-name">{dest.name}</div>
                         {dest.description && (
                           <div className="pdm-dest-desc">{dest.description}</div>
                         )}
+=======
+                        <div className="pdm-dest-name">
+                          <span style={{color:'#EF8354', marginRight:'6px'}}>{i + 1}.</span>
+                          {dest.name}
+                        </div>
+                        <div className="pdm-dest-desc">{dest.description}</div>
+>>>>>>> Kolitha
                         <LocationWeather locationName={dest.name} />
 
                         {activities.length > 0 && (

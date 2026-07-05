@@ -64,13 +64,13 @@ const HeroSection = () => {
             <span className="block text-6xl md:text-9xl font-black text-white uppercase font-['Inter'] drop-shadow-2xl">
               {"Ceylon"}
             </span>
-            {/* GRADIENT UPDATED TO #00b0a5 */}
-            <span className="block text-5xl md:text-8xl font-['Playfair_Display'] italic text-transparent bg-clip-text bg-gradient-to-r from-[#40e0d6] via-[#00b0a5] to-[#007a72] ml-2 md:ml-4 -mt-2 md:-mt-4">
+            {/* GRADIENT UPDATED TO #EF8354 */}
+            <span className="block text-5xl md:text-8xl font-['Playfair_Display'] italic text-transparent bg-clip-text bg-gradient-to-r from-[#40e0d6] via-[#EF8354] to-[#4F5D75] ml-2 md:ml-4 -mt-2 md:-mt-4">
               {"Best Tours"}
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-gray-400 mb-10 leading-relaxed max-w-md border-l-2 border-[#00b0a5]/40 pl-6">
+          <p className="text-lg md:text-xl text-gray-400 mb-10 leading-relaxed max-w-md border-l-2 border-[#EF8354]/40 pl-6">
             {"Explore the paradise island with unmatched elegance. From luxury sedans to rugged SUVs, we move your dreams."}
           </p>
 
@@ -81,7 +81,7 @@ const HeroSection = () => {
             <Link to="/tour-booking">
             <button
               // onClick={() => navigate("/tourbooking")}
-              className="relative group px-10 py-4 bg-[#00b0a5] rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-[#00b0a5]/20"
+              className="relative group px-10 py-4 bg-[#EF8354] rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-[#EF8354]/20"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
               <span className="relative text-white font-extrabold tracking-wider">
@@ -91,7 +91,7 @@ const HeroSection = () => {
             </Link>
 
             <Link to="/vehicle-category">
-              <button className="px-10 py-4 border border-white/10 text-white rounded-full font-bold hover:bg-[#00b0a5]/5 backdrop-blur-sm transition-all">
+              <button className="px-10 py-4 border border-white/10 text-white rounded-full font-bold hover:bg-[#EF8354]/5 backdrop-blur-sm transition-all">
                 {"EXPLORE FLEET"}
               </button>
             </Link>
@@ -113,11 +113,11 @@ const HeroSection = () => {
       </div>
 
       {/* 3. Availability Badge */}
-      <div className="absolute bottom-10 right-10 backdrop-blur-xl bg-white/5 border border-[#00b0a5]/20 p-4 rounded-2xl z-30 animate-bounce-slow hidden md:block">
+      <div className="absolute bottom-10 right-10 backdrop-blur-xl bg-white/5 border border-[#EF8354]/20 p-4 rounded-2xl z-30 animate-bounce-slow hidden md:block">
         <div className="flex items-center gap-3">
           <span className="flex h-3 w-3 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00b0a5] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-[#00b0a5]"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#EF8354] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-[#EF8354]"></span>
           </span>
           <p className="text-white text-sm font-medium uppercase tracking-tighter">{"Live Availability"}</p>
         </div>
@@ -125,7 +125,7 @@ const HeroSection = () => {
 
       {/* Parallax Glow Effect - Updated to match Teal */}
       <div
-        className="absolute w-[600px] h-[600px] bg-[#00b0a5]/10 rounded-full blur-[150px] pointer-events-none transition-transform duration-1000 z-10"
+        className="absolute w-[600px] h-[600px] bg-[#EF8354]/10 rounded-full blur-[150px] pointer-events-none transition-transform duration-1000 z-10"
         style={{ transform: `translate(${mousePos.x}px, ${mousePos.y}px)`, left: '10%', top: '10%' }}
       ></div>
     </section>

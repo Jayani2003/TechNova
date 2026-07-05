@@ -12,7 +12,7 @@ const CATEGORY_ICONS = {
   "Hotel Area":    "🏨",
 };
  
-const LocationSearch = ({ value, onChange, placeholder, pinColor = "text-[#F5820D]" }) => {
+const LocationSearch = ({ value, onChange, placeholder, pinColor = "text-[#EF8354]" }) => {
   const [query, setQuery]       = useState(value || "");
   const [open, setOpen]         = useState(false);
   const [filtered, setFiltered] = useState([]);
@@ -76,7 +76,7 @@ const LocationSearch = ({ value, onChange, placeholder, pinColor = "text-[#F5820
           onChange={e => handleSearch(e.target.value)}
           onFocus={() => { if (filtered.length > 0) setOpen(true); }}
           placeholder={placeholder}
-          className="w-full pl-9 pr-9 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20"
+          className="w-full pl-9 pr-9 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#EF8354] focus:ring-2 focus:ring-[#EF8354]/20"
         />
         {query ? (
           <button
@@ -108,7 +108,7 @@ const LocationSearch = ({ value, onChange, placeholder, pinColor = "text-[#F5820
                   key={i}
                   type="button"
                   onClick={() => handleSelect(loc)}
-                  className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-[#F5820D]/5 hover:text-[#F5820D] transition-colors flex items-center gap-2"
+                  className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-[#EF8354]/5 hover:text-[#EF8354] transition-colors flex items-center gap-2"
                 >
                   <MapPin className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
                   {loc.label}

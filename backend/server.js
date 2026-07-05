@@ -9,9 +9,8 @@ const authRoutes    = require('./routes/authRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
- 
-
-
+const cityRoutes = require('./routes/cityRoutes');
+const activityRoutes = require('./routes/activityRoutes');
 const packageRoutes = require('./routes/packageRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const reportRoutes  = require('./routes/reportRoutes');
@@ -55,7 +54,8 @@ app.use('/api/gallery',  galleryRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/reviews',  reviewRoutes);
 app.use('/api/vehicles', vehicleRoutes);
- 
+app.use('/api/cities', cityRoutes);
+app.use('/api/activities', activityRoutes);
 // ── Global error handler ──────────────────────────────────────────────────────
 
 

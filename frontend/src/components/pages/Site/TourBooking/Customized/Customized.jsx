@@ -27,6 +27,7 @@ import BookingPassengersStep from "../Booking/BookingPassengersStep";
 import BookingNotesStep from "../Booking/BookingNotesStep";
 import CustomizedHeader from "./CustomizedHeader";
 import { updateBooking } from "../../../../../services/bookingService";
+import { getBookingReferenceForBooking } from "../../../../../utils/bookingReference";
 
 import { useEffect } from "react";
 const STEPS = ["Your Plan", "Passengers", "More Info", "Review"];
@@ -149,7 +150,7 @@ const SuccessScreen = ({ bookingRef, navigate }) => {
 };
 
 const areChildAgesValid = (noOfChildren, agesOfChildren) => {
-  if (!noOfChildren || Number(noOfChildren) <= 0) return true;
+  if (!noOfChildren || Number(noOfChildren) <= 0) return { valid: true };
   const ages = String(agesOfChildren || "").split(",").map((age) => age.trim());
   if (ages.length !== Number(noOfChildren)) return { valid: false, msg: "Please enter ages for all children." };
   const allValid = ages.every((age) => {
@@ -512,7 +513,7 @@ const Customized = () => {
           customerName: data.customerName || user?.name || "Not Specified",
           customerEmail: user.email,
         });
-        setBookingRef(editBooking.bookingRef || editBooking.id);
+        setBookingRef(editBooking.bookingRef || getBookingReferenceForBooking(editBooking));
         setSubmitted(true);
         window.scrollTo({ top: 200, behavior: "smooth" });
       } else {

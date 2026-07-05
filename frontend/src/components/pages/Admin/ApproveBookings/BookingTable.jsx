@@ -2,12 +2,14 @@
 import { Eye } from "lucide-react";
 import { StatusChip, TourTypeChip } from "./BookingChips";
 import { VEHICLE_LABELS, formatPhone, getRoute } from "./BookingConstants";
+import { BRAND, STATE, FONT, getTheme } from "../AdminDashboard/adminTheme";
+import { getBookingReferenceForBooking } from "../../../../utils/bookingReference";
 
 // Column header component
 function ColHeader({ label, style = {} }) {
   return (
     <div style={{
-      fontSize: 10, fontWeight: 800,
+      fontSize: 10, fontWeight: 800, fontFamily: FONT.body,
       textTransform: "uppercase", letterSpacing: ".07em",
       ...style,
     }}>
@@ -17,37 +19,32 @@ function ColHeader({ label, style = {} }) {
 }
 
 // Route cell — adapts to tour type
-function RouteCell({ booking, tm, ts }) {
+function RouteCell({ booking, t }) {
   const route = getRoute(booking);
   if (route.type === "p2p") {
     return (
       <div>
-        <p style={{ margin: 0, fontSize: 12, color: tm }}>
-          <span style={{ color: "#00b0a5", fontWeight: 700 }}>↑ </span>{route.from}
+        <p style={{ margin: 0, fontSize: 12, fontFamily: FONT.body, color: t.textPrimary }}>
+          <span style={{ color: BRAND.coral, fontWeight: 700 }}>↑ </span>{route.from}
         </p>
-        <p style={{ margin: "3px 0 0", fontSize: 12, color: ts }}>
-          <span style={{ color: "#f59e0b", fontWeight: 700 }}>↓ </span>{route.to}
+        <p style={{ margin: "3px 0 0", fontSize: 12, fontFamily: FONT.body, color: t.textSecondary }}>
+          <span style={{ color: STATE.warning, fontWeight: 700 }}>↓ </span>{route.to}
         </p>
       </div>
     );
   }
-  return <p style={{ margin: 0, fontSize: 12, color: tm, fontStyle: "italic" }}>{route.label}</p>;
+  return <p style={{ margin: 0, fontSize: 12, fontFamily: FONT.body, color: t.textPrimary, fontStyle: "italic" }}>{route.label}</p>;
 }
 
 export default function BookingTable({ bookings, dark, onView }) {
-  const border = dark ? "rgba(255,255,255,0.08)" : "#e2e8f0";
-  const cardBg = dark ? "rgba(255,255,255,0.04)" : "#ffffff";
-  const hdrBg  = dark ? "rgba(255,255,255,0.03)" : "#f8fafc";
-  const tm     = dark ? "#f1f5f9" : "#0f172a";
-  const ts     = dark ? "#64748b" : "#94a3b8";
-  const rowHov = dark ? "rgba(255,255,255,0.03)" : "#f8fafc";
+  const t = getTheme(dark);
 
   if (bookings.length === 0) {
     return (
-      <div style={{ textAlign: "center", padding: "80px 0", color: ts }}>
+      <div style={{ textAlign: "center", padding: "80px 0", color: t.textSecondary }}>
         <p style={{ fontSize: 44, margin: "0 0 10px" }}>📭</p>
-        <p style={{ fontSize: 16, fontWeight: 700, color: tm, margin: "0 0 4px" }}>No bookings found</p>
-        <p style={{ fontSize: 13, margin: 0 }}>Try a different filter or search term</p>
+        <p style={{ fontSize: 16, fontWeight: 700, fontFamily: FONT.heading, color: t.textPrimary, margin: "0 0 4px" }}>No bookings found</p>
+        <p style={{ fontSize: 13, fontFamily: FONT.body, margin: 0 }}>Try a different filter or search term</p>
       </div>
     );
   }
@@ -66,22 +63,13 @@ export default function BookingTable({ bookings, dark, onView }) {
     { key: "action",   label: "",         flex: "0 0 70px"   },
   ];
 
-  const rowStyle = (hovered) => ({
-    display: "flex", alignItems: "center",
-    padding: "14px 20px", gap: 0,
-    borderBottom: `1px solid ${border}`,
-    background: hovered ? rowHov : "transparent",
-    transition: "background .1s",
-    cursor: "default",
-  });
-
   return (
-    <div style={{ background: cardBg, border: `1px solid ${border}`, borderRadius: 20, overflow: "hidden" }}>
+    <div style={{ background: t.cardBg, border: `1px solid ${t.cardBorder}`, borderRadius: 20, overflow: "hidden" }}>
 
       {/* ── Column headers ── */}
-      <div style={{ display: "flex", alignItems: "center", padding: "10px 20px", background: hdrBg, borderBottom: `1px solid ${border}`, gap: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", padding: "10px 20px", background: t.headerBg, borderBottom: `1px solid ${t.divider}`, gap: 0 }}>
         {cols.map(col => (
-          <div key={col.key} style={{ flex: col.flex, color: ts }}>
+          <div key={col.key} style={{ flex: col.flex, color: t.textSecondary }}>
             <ColHeader label={col.label} />
           </div>
         ))}
@@ -93,11 +81,8 @@ export default function BookingTable({ bookings, dark, onView }) {
           key={b.id}
           booking={b}
           cols={cols}
-          dark={dark}
-          tm={tm} ts={ts}
+          t={t}
           isLast={i === bookings.length - 1}
-          border={border}
-          rowHov={rowHov}
           onView={onView}
         />
       ))}
@@ -105,9 +90,7 @@ export default function BookingTable({ bookings, dark, onView }) {
   );
 }
 
-function BookingRow({ booking: b, cols, tm, ts, isLast, border, rowHov, onView }) {
-  const [hovered, setHovered] = [false, () => {}]; // simple hover via onMouse
-
+function BookingRow({ booking: b, cols, t, isLast, onView }) {
   const cellStyle = (flex) => ({ flex, overflow: "hidden" });
 
   return (
@@ -115,16 +98,16 @@ function BookingRow({ booking: b, cols, tm, ts, isLast, border, rowHov, onView }
       style={{
         display: "flex", alignItems: "center",
         padding: "14px 20px", gap: 0,
-        borderBottom: isLast ? "none" : `1px solid ${border}`,
+        borderBottom: isLast ? "none" : `1px solid ${t.divider}`,
         transition: "background .1s",
       }}
-      onMouseEnter={e => e.currentTarget.style.background = rowHov}
+      onMouseEnter={e => e.currentTarget.style.background = t.hoverBg}
       onMouseLeave={e => e.currentTarget.style.background = "transparent"}
     >
       {/* ID */}
       <div style={cellStyle(cols[0].flex)}>
-        <p style={{ margin: 0, fontSize: 11, fontFamily: "monospace", fontWeight: 700, color: "#00b0a5", wordBreak: "break-all" }}>
-          {b.id}
+        <p style={{ margin: 0, fontSize: 11, fontFamily: "monospace", fontWeight: 700, color: BRAND.coral, wordBreak: "break-all" }}>
+          {b.bookingRef || getBookingReferenceForBooking(b)}
         </p>
       </div>
 
@@ -135,28 +118,28 @@ function BookingRow({ booking: b, cols, tm, ts, isLast, border, rowHov, onView }
 
       {/* Customer */}
       <div style={cellStyle(cols[2].flex)}>
-        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: tm, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <p style={{ margin: 0, fontSize: 13, fontFamily: FONT.body, fontWeight: 700, color: t.textPrimary, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {b.customerName || "—"}
         </p>
-        <p style={{ margin: "2px 0 0", fontSize: 11, color: ts }}>{formatPhone(b.customerPhone)}</p>
+        <p style={{ margin: "2px 0 0", fontSize: 11, fontFamily: FONT.body, color: t.textSecondary }}>{formatPhone(b.customerPhone)}</p>
       </div>
 
       {/* Route */}
       <div style={cellStyle(cols[3].flex)}>
-        <RouteCell booking={b} tm={tm} ts={ts} />
+        <RouteCell booking={b} t={t} />
       </div>
 
       {/* Dates */}
       <div style={cellStyle(cols[4].flex)}>
-        <p style={{ margin: 0, fontSize: 12, color: tm }}>{b.startDate || "—"}</p>
+        <p style={{ margin: 0, fontSize: 12, fontFamily: FONT.body, color: t.textPrimary }}>{b.startDate || "—"}</p>
         {b.endDate && b.endDate !== b.startDate && (
-          <p style={{ margin: "2px 0 0", fontSize: 11, color: ts }}>→ {b.endDate}</p>
+          <p style={{ margin: "2px 0 0", fontSize: 11, fontFamily: FONT.body, color: t.textSecondary }}>→ {b.endDate}</p>
         )}
       </div>
 
       {/* Category */}
       <div style={cellStyle(cols[5].flex)}>
-        <p style={{ margin: 0, fontSize: 12, color: ts }}>
+        <p style={{ margin: 0, fontSize: 12, fontFamily: FONT.body, color: t.textSecondary }}>
           {b.categoryName || VEHICLE_LABELS[b.categoryId] || b.categoryId || "—"}
         </p>
       </div>
@@ -165,19 +148,19 @@ function BookingRow({ booking: b, cols, tm, ts, isLast, border, rowHov, onView }
       <div style={cellStyle(cols[6].flex)}>
         {b.assignedVehicle ? (
           <>
-            <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#6366f1", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <p style={{ margin: 0, fontSize: 12, fontFamily: FONT.body, fontWeight: 700, color: STATE.info, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {b.assignedVehicle.name}
             </p>
-            <p style={{ margin: 0, fontSize: 10, color: ts, fontFamily: "monospace" }}>
+            <p style={{ margin: 0, fontSize: 10, color: t.textSecondary, fontFamily: "monospace" }}>
               {b.assignedVehicle.plateNumber}
             </p>
           </>
-        ) : <p style={{ margin: 0, fontSize: 12, color: ts }}>—</p>}
+        ) : <p style={{ margin: 0, fontSize: 12, fontFamily: FONT.body, color: t.textSecondary }}>—</p>}
       </div>
 
       {/* Quoted */}
       <div style={cellStyle(cols[7].flex)}>
-        <p style={{ margin: 0, fontSize: 14, fontWeight: 800, fontFamily: "monospace", color: b.quotedPrice ? "#6366f1" : ts }}>
+        <p style={{ margin: 0, fontSize: 14, fontWeight: 800, fontFamily: "monospace", color: b.quotedPrice ? STATE.info : t.textSecondary }}>
           {b.quotedPrice ? `$${b.quotedPrice}` : "—"}
         </p>
       </div>
@@ -193,9 +176,9 @@ function BookingRow({ booking: b, cols, tm, ts, isLast, border, rowHov, onView }
           onClick={() => onView(b)}
           style={{
             display: "flex", alignItems: "center", gap: 5,
-            background: "rgba(0,176,165,0.1)", color: "#00b0a5",
-            border: "1px solid rgba(0,176,165,0.25)", borderRadius: 8,
-            padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+            background: `${BRAND.coral}18`, color: BRAND.coral,
+            border: `1px solid ${BRAND.coral}40`, borderRadius: 8,
+            padding: "6px 12px", fontSize: 12, fontWeight: 700, fontFamily: FONT.body, cursor: "pointer",
           }}
         >
           <Eye size={13} /> View

@@ -1,13 +1,13 @@
 import { Users, Briefcase, Car, Baby, Info } from "lucide-react";
 const VEHICLE_CATEGORIES = [
-  { id: "mini_car",   label: "Mini Car",   desc: "2 adults, 1 luggage",  icon: "🚗", maxAdults: 2,  maxLuggage: 1 },
-  { id: "normal_car", label: "Normal Car", desc: "3 adults, 2 luggage",  icon: "🚙", maxAdults: 3,  maxLuggage: 2 },
-  { id: "sedan_car",  label: "Sedan Car",  desc: "4 adults, 3 luggage",  icon: "🚘", maxAdults: 4,  maxLuggage: 3 },
-  { id: "mpv",        label: "MPV",        desc: "6 adults, 4 luggage",  icon: "🚐", maxAdults: 6,  maxLuggage: 4 },
-  { id: "suv",        label: "SUV",        desc: "5 adults, 4 luggage",  icon: "🛻", maxAdults: 5,  maxLuggage: 4 },
-  { id: "mini_van",   label: "Mini Van",   desc: "8 adults, 5 luggage",  icon: "🚌", maxAdults: 8,  maxLuggage: 5 },
-  { id: "van",        label: "Van",        desc: "10 adults, 6 luggage", icon: "🚌", maxAdults: 10, maxLuggage: 6 },
-  { id: "large_van",  label: "Large Van",  desc: "14 adults, 8 luggage", icon: "🚌", maxAdults: 14, maxLuggage: 8 },
+  { id: "mini_car",   label: "Mini Car",   desc: "2 adults, 2 luggage",  icon: "🚗", maxAdults: 2,  maxLuggage: 2 },
+  { id: "normal_car", label: "Normal Car", desc: "3 adults, 3 luggage",  icon: "🚙", maxAdults: 3,  maxLuggage: 3 },
+  { id: "sedan_car",  label: "Sedan Car",  desc: "3 adults, 3 luggage",  icon: "🚘", maxAdults: 3,  maxLuggage: 3 },
+  { id: "mpv",        label: "MPV",        desc: "4 adults, 4 luggage",  icon: "🚐", maxAdults: 4,  maxLuggage: 4 },
+  { id: "suv",        label: "SUV",        desc: "3 adults, 3 luggage",  icon: "🛻", maxAdults: 3,  maxLuggage: 3 },
+  { id: "mini_van",   label: "Mini Van",   desc: "4 adults, 5 luggage",  icon: "🚌", maxAdults: 4,  maxLuggage: 5 },
+  { id: "van",        label: "Van",        desc: "6 adults, 6 luggage", icon: "🚌", maxAdults: 6, maxLuggage: 6 },
+  { id: "large_van",  label: "Large Van",  desc: "12 adults, 10 luggage", icon: "🚌", maxAdults: 12, maxLuggage: 10 },
 ];
 
 // Weight categories
@@ -148,7 +148,7 @@ const BookingPassengersStep = ({ data, onChange }) => {
                   <p className="text-sm font-semibold text-[#2C2F3A] flex items-center gap-1">
                     <Baby className="w-4 h-4 text-[#F5820D]" /> {"Baby Seat Required"}
                   </p>
-                  <p className="text-xs text-[#6B7280]/70">{"Tick if any child needs a baby seat"}</p>
+                  <p className="text-xs text-[#6B7280]/70">{"Tick if you needs a baby seat, Kindly note we provide baby seats for children under 5 years old."}</p>
                 </div>
               </label>
             </div>

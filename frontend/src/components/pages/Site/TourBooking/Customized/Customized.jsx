@@ -29,17 +29,8 @@ import CustomizedHeader from "./CustomizedHeader";
 import { updateBooking } from "../../../../../services/bookingService";
 import { getBookingReferenceForBooking } from "../../../../../utils/bookingReference";
 
+import { useEffect } from "react";
 const STEPS = ["Your Plan", "Passengers", "More Info", "Review"];
-
-const PLACE_OPTIONS = [
-  "Colombo", "Kandy", "Galle", "Ella", "Sigiriya", "Trincomalee", 
-  "Nuwara Eliya", "Mirissa", "Arugam Bay", "Hikkaduwa", "Polonnaruwa", "Anuradhapura",
-];
-
-const ACTIVITY_OPTIONS = [
-  "Diving", "Water Rafting", "Kayaking", "Hiking", "Snorkeling Safari", 
-  "Kite Surfing", "Whale Watching",
-];
 
 const initialData = {
   tourType:       "CUSTOM",
@@ -399,9 +390,38 @@ const Customized = () => {
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedActivity, setSelectedActivity] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [bookingRef, setBookingRef] = useState("");
+  const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [bookingRef, setBookingRef] = useState(null);
+  
+  const [placeOptions, setPlaceOptions] = useState([]);
+  const [activityOptions, setActivityOptions] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const [citiesRes, activitiesRes] = await Promise.all([
+          fetch(`${API_URL}/cities`),
+          fetch(`${API_URL}/activities`)
+        ]);
+
+        if (citiesRes.ok) {
+          const citiesData = await citiesRes.json();
+          setPlaceOptions(citiesData.map(city => city.name));
+        }
+
+        if (activitiesRes.ok) {
+          const activitiesData = await activitiesRes.json();
+          setActivityOptions(activitiesData.map(act => act.name));
+        }
+      } catch (err) {
+        console.error("Failed to fetch dynamic data:", err);
+      }
+    };
+    fetchData();
+  }, []);
 
   if (!user) return <GuestGuard navigate={navigate} />;
 
@@ -629,7 +649,7 @@ const Customized = () => {
                                       className="flex-1 px-4 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold"
                                     >
                                       <option value="">{"Select a city..."}</option>
-                                      {PLACE_OPTIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+                                      {placeOptions.map((p) => <option key={p} value={p}>{p}</option>)}
                                     </select>
                                     <button
                                       type="button"
@@ -650,7 +670,7 @@ const Customized = () => {
                                       className="flex-1 px-4 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold"
                                     >
                                       <option value="">{"Select an activity..."}</option>
-                                      {ACTIVITY_OPTIONS.map((a) => <option key={a} value={a}>{a}</option>)}
+                                      {activityOptions.map((a) => <option key={a} value={a}>{a}</option>)}
                                     </select>
                                     <button
                                       type="button"

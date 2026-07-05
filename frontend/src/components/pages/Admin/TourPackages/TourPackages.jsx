@@ -6,6 +6,7 @@ import AdminPackageFormModal from "./AdminPackageFormModal";
 import AdminPackageHero from "./AdminPackageHero";
 import AdminPackageTable from "./AdminPackageTable";
 import { adminFilter, packageStore } from './adminPackagesData';
+import Toast from "../AddGallery/Toast";
 
 function TourPackages() {
 	const dark = useOutletContext()?.dark ?? false;
@@ -16,6 +17,12 @@ function TourPackages() {
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	const [editingPackage, setEditingPackage] = useState(null);
 	const [deletingPackage, setDeletingPackage] = useState(null);
+	const [toast, setToast] = useState({ message: "", visible: false });
+
+	const showToast = (message) => {
+		setToast({ message, visible: true });
+		setTimeout(() => setToast({ message: "", visible: false }), 3000);
+	};
 
 	useEffect(() => {
 		const unsubscribe = packageStore.subscribe((next) => setPackages(next));
@@ -35,17 +42,27 @@ function TourPackages() {
 		setIsFormOpen(true);
 	};
 
-	const handleEdit = (pkg) => {
-		setEditingPackage(pkg);
-		setIsFormOpen(true);
+	const handleEdit = async (pkg) => {
+		try {
+			// The grid list only has a summary (max 2 destinations, no activities).
+			// Fetch the full details from the backend before editing.
+			const fullPkg = await packageStore.get(pkg.id);
+			setEditingPackage(fullPkg);
+			setIsFormOpen(true);
+		} catch (err) {
+			alert('Failed to load full package details. Please try again.');
+			console.error(err);
+		}
 	};
 
 	const handleSave = async (data) => {
 		try {
 			if (editingPackage?.id) {
 				await packageStore.update(editingPackage.id, data);
+				showToast("Package updated successfully!");
 			} else {
 				await packageStore.create(data);
+				showToast("Package created successfully!");
 			}
 			setIsFormOpen(false);
 			setEditingPackage(null);
@@ -59,6 +76,7 @@ function TourPackages() {
 		(async () => {
 			try {
 				await packageStore.delete(id);
+				showToast("Package deleted successfully!");
 			} catch (err) {
 				console.error('Failed to delete package', err);
 				alert(err?.message || 'Failed to delete package');
@@ -103,6 +121,8 @@ function TourPackages() {
 			isOpen={isFormOpen}
 			pkg={editingPackage}
 			onSave={handleSave}
+			existingPackages={packages}
+			editingId={editingPackage?.id}
 			onClose={() => {
 				setIsFormOpen(false);
 				setEditingPackage(null);
@@ -114,6 +134,7 @@ function TourPackages() {
 			onConfirm={handleDeleteConfirm}
 			onCancel={() => setDeletingPackage(null)}
 		/>
+		<Toast message={toast.message} visible={toast.visible} />
 		</div>
 	);
 }

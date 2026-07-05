@@ -25,9 +25,10 @@ const getAllPayments = async (req, res) => {
   try {
     const [rows] = await db.execute(`
       SELECT p.payment_id, p.booking_id, p.installment, p.amount, p.payment_method, p.received_date, p.notes, p.status, p.slip_url,
-             b.tour_type, b.quoted_price, b.start_date, b.end_date, b.customer_name, b.customer_phone,
+             b.tour_type, b.quoted_price, b.additional_charges, b.start_date, b.end_date, b.customer_name, b.contact_number AS customer_phone,
              u.name AS recorded_by_name,
-             c.email AS customer_email
+             c.email AS customer_email,
+             (SELECT COALESCE(SUM(amount), 0) FROM payment WHERE booking_id = b.booking_id AND status = 'APPROVED') AS total_paid
       FROM payment p
       JOIN booking b ON p.booking_id = b.booking_id
       LEFT JOIN user u ON p.recorded_by = u.user_id
@@ -44,8 +45,8 @@ const getAllPayments = async (req, res) => {
       customerName: r.customer_name,
       customerPhone: r.customer_phone,
       customerEmail: r.customer_email,
-      type: r.installment === 'DEPOSIT' ? 'Deposit' : r.installment === 'FINAL' ? 'Final' : 'Full Payment',
-      typePercent: r.installment === 'FULL' ? '100%' : '50%',
+      type: r.installment === 'DEPOSIT' ? 'Deposit' : r.installment === 'FINAL' ? 'Final' : r.installment === 'ADDITIONAL' ? 'Additional Charges' : 'Full Payment',
+      typePercent: r.installment === 'FULL' ? '100%' : r.installment === 'ADDITIONAL' ? 'Extra' : '50%',
       amount: formatLKR(r.amount),
       rawAmount: parseFloat(r.amount),
       method: r.payment_method === 'BANK_TRANSFER' ? 'Bank Transfer' : 'Cash',
@@ -54,8 +55,12 @@ const getAllPayments = async (req, res) => {
       status: r.status.toLowerCase(), // 'pending', 'approved', 'rejected'
       notes: r.notes,
       recordedBy: r.recorded_by_name || 'Customer',
-      totalAmount: formatLKR(r.quoted_price),
+      baseAmount: formatLKR(r.quoted_price || 0),
+      additionalCharges: formatLKR(r.additional_charges || 0),
+      rawAdditionalCharges: parseFloat(r.additional_charges || 0),
+      totalAmount: formatLKR(parseFloat(r.quoted_price || 0) + parseFloat(r.additional_charges || 0)),
       tourDates: `${r.start_date.toISOString().split('T')[0]} to ${r.end_date.toISOString().split('T')[0]}`,
+      isBasePricePaid: parseFloat(r.total_paid || 0) >= parseFloat(r.quoted_price || 0),
       slip: r.slip_url ? {
         filename: r.slip_url.split('/').pop().slice(-20),
         size: 'Cloudinary Upload',
@@ -107,7 +112,9 @@ const getPaymentsForBooking = async (req, res) => {
       ORDER BY p.received_date ASC, p.payment_id ASC
     `, [bookingId]);
 
-    const price = booking.quoted_price ? parseFloat(booking.quoted_price) : 0;
+    const basePrice = booking.quoted_price ? parseFloat(booking.quoted_price) : 0;
+    const additionalCharges = booking.additional_charges ? parseFloat(booking.additional_charges) : 0;
+    const price = basePrice + additionalCharges;
     const tourType = booking.tour_type; // 'P2P', 'PACKAGE', 'CUSTOM'
     const start_date = booking.start_date ? booking.start_date.toISOString().split('T')[0] : null;
     const end_date = booking.end_date ? booking.end_date.toISOString().split('T')[0] : null;
@@ -164,8 +171,8 @@ const getPaymentsForBooking = async (req, res) => {
           nextPaymentNote = 'Fully paid. No outstanding balance.';
         }
       } else {
-        const depositAmt = price * 0.5;
-        const finalAmt = price * 0.5;
+        const depositAmt = basePrice * 0.5;
+        const finalAmt = basePrice * 0.5;
         const depositDueDate = modifyDays(start_date, 2);
         const finalDueDate = modifyDays(end_date, -1);
 
@@ -207,7 +214,7 @@ const getPaymentsForBooking = async (req, res) => {
         let finalStatus = 'PENDING';
         let finalStatusNote = 'Payment pending';
         
-        if (approvedFinal || paidAmount >= price) {
+        if (approvedFinal || paidAmount >= basePrice) {
           finalStatus = 'PAID';
           finalStatusNote = `Paid on ${approvedFinal ? approvedFinal.received_date.toISOString().split('T')[0] : todayStr}`;
         } else if (pendingFinal) {
@@ -231,6 +238,40 @@ const getPaymentsForBooking = async (req, res) => {
           statusNote: finalStatusNote
         });
 
+        // Additional Charges status (3rd Installment)
+        let additionalStatus = 'PENDING';
+        let additionalStatusNote = 'Payment pending';
+        const additionalDueDate = end_date;
+        
+        if (additionalCharges > 0) {
+          const approvedAdditional = paymentRows.find(p => p.installment === 'ADDITIONAL' && p.status === 'APPROVED');
+          const pendingAdditional = paymentRows.find(p => p.installment === 'ADDITIONAL' && p.status === 'PENDING');
+          
+          if (approvedAdditional || paidAmount >= price) {
+            additionalStatus = 'PAID';
+            additionalStatusNote = `Paid on ${approvedAdditional ? approvedAdditional.received_date.toISOString().split('T')[0] : todayStr}`;
+          } else if (pendingAdditional) {
+            additionalStatus = 'PENDING';
+            additionalStatusNote = 'Pending verification';
+          } else if (todayStr > additionalDueDate) {
+            additionalStatus = 'OVERDUE';
+            additionalStatusNote = 'Payment overdue';
+          }
+
+          installments.push({
+            id: 3,
+            number: 3,
+            type: 'Additional Charges',
+            typeLabel: 'Extra Mileage',
+            amount: formatLKR(additionalCharges),
+            rawAmount: additionalCharges,
+            dueDate: additionalDueDate,
+            dueDateNote: 'After the tour ends',
+            status: additionalStatus,
+            statusNote: additionalStatusNote
+          });
+        }
+
         if (depStatus !== 'PAID' && depStatus !== 'PENDING') {
           nextPaymentNote = `Deposit of ${formatLKR(depositAmt)} is due on ${depositDueDate} (Within 2 days of tour start).`;
         } else if (depStatus === 'PENDING') {
@@ -239,6 +280,10 @@ const getPaymentsForBooking = async (req, res) => {
           nextPaymentNote = `Final payment of ${formatLKR(finalAmt)} is due on ${finalDueDate} (Before the last day of the tour).`;
         } else if (finalStatus === 'PENDING') {
           nextPaymentNote = 'Verification in progress for final payment proof.';
+        } else if (additionalCharges > 0 && additionalStatus !== 'PAID' && additionalStatus !== 'PENDING') {
+          nextPaymentNote = `Additional charges of ${formatLKR(additionalCharges)} are due.`;
+        } else if (additionalCharges > 0 && additionalStatus === 'PENDING') {
+          nextPaymentNote = 'Verification in progress for additional charges proof.';
         } else {
           nextPaymentNote = 'Fully paid. No outstanding balance.';
         }
@@ -252,7 +297,7 @@ const getPaymentsForBooking = async (req, res) => {
       id: `TX${String(p.payment_id).padStart(3, '0')}`,
       rawId: p.payment_id,
       date: p.received_date ? p.received_date.toISOString().split('T')[0] : 'Pending',
-      type: p.installment === 'DEPOSIT' ? 'Deposit' : p.installment === 'FINAL' ? 'Final Payment' : 'Full Payment',
+      type: p.installment === 'DEPOSIT' ? 'Deposit' : p.installment === 'FINAL' ? 'Final Payment' : p.installment === 'ADDITIONAL' ? 'Additional Charges' : 'Full Payment',
       amount: formatLKR(p.amount),
       method: p.payment_method === 'BANK_TRANSFER' ? 'Bank Transfer' : 'Cash',
       status: p.status === 'APPROVED' ? 'VERIFIED' : p.status === 'REJECTED' ? 'REJECTED' : 'PENDING VERIFICATION',
@@ -270,6 +315,8 @@ const getPaymentsForBooking = async (req, res) => {
       endLocation: booking.end_location,
       startDate: start_date,
       endDate: end_date,
+      baseAmount: basePrice,
+      additionalCharges: additionalCharges,
       totalAmount: price,
       paidAmount: paidAmount,
       remainingAmount: remainingAmount,

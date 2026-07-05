@@ -6,6 +6,7 @@ import {
   Sun, Moon, Home, User, LogIn,
   LayoutDashboard, CalendarCheck, Wallet, Car,
   PackageSearch, Image as ImageIcon, MessageSquare, BarChart3,
+  Compass,
 } from "lucide-react";
 import logo from "../../../../assets/logo4.png";
 import { useBookings } from "../../../../context/BookingsContext";
@@ -21,9 +22,11 @@ function buildNavItems(pendingCount, unreadCount) {
     { label: "Packages",  path: "/admin/tour-packages",    id: "packages", icon: PackageSearch,    badge: 0 },
     { label: "Gallery",   path: "/admin/add-gallery",      id: "gallery",  icon: ImageIcon,        badge: 0 },
     { label: "Messages",  path: "/admin/messages",         id: "messages", icon: MessageSquare,    badge: unreadCount },
+    { label: "Tour Options", path: "/admin/tour-options",  id: "tour-options", icon: Compass,       badge: 0 },
     { label: "Reports",   path: "/admin/report",           id: "reports",  icon: BarChart3,        badge: 0 },
   ];
 }
+
 
 // Icon button used both for nav items and the bottom rail (theme toggle, home)
 function IconTile({ active, onClick, to, children, tooltip, badge, style = {} }) {

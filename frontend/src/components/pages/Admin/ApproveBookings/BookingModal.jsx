@@ -21,7 +21,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
   const [vehiclesLoading, setVehiclesLoading] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState(booking.vehicleId ? String(booking.vehicleId) : "");
 
-  const { getPaymentsForBooking, recordPayment } = useBookings();
+  const { getPaymentsForBooking, recordPayment, updateAdditionalCharges } = useBookings();
   const [paymentsData, setPaymentsData] = useState(null);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
   const [recInstallment, setRecInstallment] = useState("");
@@ -33,11 +33,14 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
   const [recSuccess, setRecSuccess] = useState("");
   const [recSubmitting, setRecSubmitting] = useState(false);
 
-  const bg     = dark ? "#2D3142" : "#F4F4F6";
-  const card   = dark ? "#383C4E" : "#ffffff";
-  const border = dark ? "rgba(255,255,255,0.08)" : "#E8E8EA";
-  const tm     = dark ? "#f1f5f9" : "#2D3142";
-  const ts     = dark ? "#B7BAC7" : "#4F5D75";
+  const [addlChargeInput, setAddlChargeInput] = useState("");
+  const [addlChargeSaving, setAddlChargeSaving] = useState(false);
+
+  const bg     = dark ? "#0f172a" : "#f8fafc";
+  const card   = dark ? "#1e293b" : "#ffffff";
+  const border = dark ? "rgba(255,255,255,0.08)" : "#e2e8f0";
+  const tm     = dark ? "#f1f5f9" : "#0f172a";
+  const ts     = dark ? "#64748b" : "#94a3b8";
 
   const tourCfg = TOUR_TYPE_CFG[booking.tourType] || {};
 
@@ -189,6 +192,28 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
       setRecError(err.message || "Failed to record payment");
     } finally {
       setRecSubmitting(false);
+    }
+  };
+
+  const handleAddlCharge = async (e) => {
+    e.preventDefault();
+    setRecError("");
+    setRecSuccess("");
+    if (!addlChargeInput || isNaN(Number(addlChargeInput))) {
+      setRecError("Please enter a valid amount.");
+      return;
+    }
+    try {
+      setAddlChargeSaving(true);
+      await updateAdditionalCharges(booking.id, addlChargeInput);
+      setRecSuccess("Additional charges updated successfully!");
+      setAddlChargeInput("");
+      loadPayments();
+    } catch (err) {
+      console.error(err);
+      setRecError(err.message || "Failed to update additional charges");
+    } finally {
+      setAddlChargeSaving(false);
     }
   };
 
@@ -487,6 +512,40 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                 <p style={{ fontSize: 12, color: ts, fontStyle: "italic", marginBottom: 15 }}>No payments recorded yet.</p>
               )}
 
+              {/* Additional Charges Form */}
+              {booking.tourType !== 'P2P' && paymentsData && (
+                <form onSubmit={handleAddlCharge} style={{ borderTop: `1px solid ${border}`, paddingTop: 15, paddingBottom: 15 }}>
+                  <p style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 800, color: tm }}>➕ Add Additional Mileage Charges</p>
+                  
+                  {paymentsData.paidAmount < paymentsData.baseAmount ? (
+                    <div style={{ background: "rgba(245,158,11,0.1)", padding: 10, borderRadius: 8, border: "1px solid rgba(245,158,11,0.2)" }}>
+                      <p style={{ margin: 0, fontSize: 11, color: "#b45309", fontWeight: 600 }}>⚠️ Cannot add additional charges yet. The quoted base price must be fully paid and approved first.</p>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <div style={{ flex: 1 }}>
+                        <input 
+                          type="number" 
+                          value={addlChargeInput} 
+                          onChange={e => setAddlChargeInput(e.target.value)} 
+                          placeholder="Amount in LKR" 
+                          style={inputStyle}
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+                      <button 
+                        type="submit" 
+                        disabled={addlChargeSaving}
+                        style={{ background: "#0d9488", color: "white", border: "none", borderRadius: 8, padding: "0 20px", fontWeight: 700, fontSize: 11, cursor: "pointer", opacity: addlChargeSaving ? 0.7 : 1 }}
+                      >
+                        {addlChargeSaving ? "Saving..." : "Update"}
+                      </button>
+                    </div>
+                  )}
+                </form>
+              )}
+
               {/* Record Form */}
               {paymentsData && paymentsData.remainingAmount > 0 ? (
                 <form onSubmit={handleRecordPayment} style={{ borderTop: `1px solid ${border}`, paddingTop: 15 }}>
@@ -501,6 +560,10 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                           setRecInstallment(e.target.value);
                           if (e.target.value === 'DEPOSIT') setRecAmount(paymentsData.totalAmount * 0.5);
                           else if (e.target.value === 'FINAL') setRecAmount(paymentsData.totalAmount * 0.5);
+                          else if (e.target.value === 'ADDITIONAL') {
+                            const addl = paymentsData.installments?.find(i => i.type === 'Additional Charges');
+                            setRecAmount(addl ? addl.rawAmount : 0);
+                          }
                           else if (e.target.value === 'FULL') setRecAmount(paymentsData.remainingAmount);
                         }} 
                         style={inputStyle}
@@ -508,6 +571,9 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                         <option value="">-- Select --</option>
                         {booking.tourType !== 'P2P' && <option value="DEPOSIT">DEPOSIT (50%)</option>}
                         {booking.tourType !== 'P2P' && <option value="FINAL">FINAL (50%)</option>}
+                        {booking.tourType !== 'P2P' && paymentsData.installments?.some(i => i.type === 'Additional Charges') && (
+                          <option value="ADDITIONAL">ADDITIONAL CHARGES</option>
+                        )}
                         <option value="FULL">FULL PAYMENT</option>
                       </select>
                     </div>

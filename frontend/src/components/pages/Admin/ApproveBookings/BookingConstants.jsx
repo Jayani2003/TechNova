@@ -5,11 +5,11 @@ export const STATUS_CFG = {
   QUOTED:       { label: "Quoted",       color: "#6366f1", bg: "rgba(99,102,241,0.12)"  },
   ACCEPTED:     { label: "Accepted",     color: "#10b981", bg: "rgba(16,185,129,0.12)"  },
   REJECTED:     { label: "Rejected",     color: "#ef4444", bg: "rgba(239,68,68,0.12)"   },
-  CONFIRMED:    { label: "Confirmed",    color: "#00b0a5", bg: "rgba(0,176,165,0.12)"   },
+  CONFIRMED:    { label: "Confirmed",    color: "#2F9E44", bg: "rgba(47,158,68,0.12)"    },
   TOUR_STARTED: { label: "Tour Started", color: "#0891b2", bg: "rgba(8,145,178,0.12)"   },
-  COMPLETED:    { label: "Completed",    color: "#64748b", bg: "rgba(100,116,139,0.12)" },
+  COMPLETED:    { label: "Completed",    color: "#4F5D75", bg: "rgba(79,93,117,0.12)" },
   CANCELLED:    { label: "Cancelled",    color: "#ef4444", bg: "rgba(239,68,68,0.12)"   },
-  CLOSED:       { label: "Closed",       color: "#94a3b8", bg: "rgba(148,163,184,0.12)" },
+  CLOSED:       { label: "Closed",       color: "#4F5D75", bg: "rgba(191,192,192,0.35)" },
 };
 
 export const TOUR_TYPE_CFG = {

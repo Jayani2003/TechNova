@@ -1,19 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Quote, ChevronRight } from 'lucide-react'; // Added ChevronRight
-const reviews = [
-  { id: 1, name: "Michael Chen", date: "2026-03-01", service: "Customized Tour", rating: 5, text: "Outstanding! This was the highlight of our Sri Lanka trip. Highly recommended!" },
-  { id: 2, name: "David Martinez", date: "2026-02-28", service: "Vehicle Rental - Toyota Prius", rating: 5, text: "Amazing experience! Best car rental service in Sri Lanka. Professional drivers and clean vehicles." },
-  { id: 3, name: "Lisa Anderson", date: "2026-02-26", service: "Package Tour - Coastal Paradise", rating: 5, text: "Perfect tour package! Saw all the amazing sights and our guide was incredibly knowledgeable." },
-  { id: 4, name: "Sarah Jay", date: "2026-02-20", service: "Airport Transfer", rating: 5, text: "Punctual and very friendly. The car was spotless and the drive was very smooth." },
-  { id: 5, name: "James Wilson", date: "2026-02-15", service: "Hill Country Tour", rating: 5, text: "The views were breathtaking. Everything was organized perfectly from start to finish." }
+import { fetchPublishedReviews } from '../Reviews/reviewsApi';
+
+const DEFAULT_REVIEWS = [
+  { id: 'def-1', name: "Michael Chen", date: "2026-03-01", service: "Customized Tour", rating: 5, text: "Outstanding! This was the highlight of our Sri Lanka trip. Highly recommended!" },
+  { id: 'def-2', name: "David Martinez", date: "2026-02-28", service: "Vehicle Rental - Toyota Prius", rating: 5, text: "Amazing experience! Best car rental service in Sri Lanka. Professional drivers and clean vehicles." },
+  { id: 'def-3', name: "Lisa Anderson", date: "2026-02-26", service: "Package Tour - Coastal Paradise", rating: 5, text: "Perfect tour package! Saw all the amazing sights and our guide was incredibly knowledgeable." },
+  { id: 'def-4', name: "Sarah Jay", date: "2026-02-20", service: "Airport Transfer", rating: 5, text: "Punctual and very friendly. The car was spotless and the drive was very smooth." },
+  { id: 'def-5', name: "James Wilson", date: "2026-02-15", service: "Hill Country Tour", rating: 5, text: "The views were breathtaking. Everything was organized perfectly from start to finish." }
 ];
 
 const ReviewSliderDark = () => {
-  
+  const [reviewsList, setReviewsList] = useState(DEFAULT_REVIEWS);
   const [index, setIndex] = useState(0);
   const [itemsToShow, setItemsToShow] = useState(3);
   const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const data = await fetchPublishedReviews();
+        if (active && data && data.length > 0) {
+          const mapped = data.map(r => ({
+            id: r.id || r.review_id || `real-${r.bookingId || Math.random()}`,
+            name: r.user?.name || "Traveler",
+            date: r.datePublished ? new Date(r.datePublished).toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            }) : "Recently",
+            service: r.tourTitle || r.tourType || "Tour Booking",
+            rating: Number(r.stars) || 5,
+            text: r.comment || r.title || "",
+          }));
+          setReviewsList(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to load real reviews for home:", err);
+      }
+    };
+    load();
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    setIndex(0);
+  }, [reviewsList.length]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -27,17 +61,18 @@ const ReviewSliderDark = () => {
   }, []);
 
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || reviewsList.length === 0) return;
     const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1 >= reviews.length ? 0 : prev + 1));
+      setIndex((prev) => (prev + 1 >= reviewsList.length ? 0 : prev + 1));
     }, 4000);
     return () => clearInterval(timer);
-  }, [index, isPaused]);
+  }, [index, isPaused, reviewsList.length]);
 
   const getVisibleReviews = () => {
+    if (reviewsList.length === 0) return [];
     const result = [];
     for (let i = 0; i < itemsToShow; i++) {
-      result.push(reviews[(index + i) % reviews.length]);
+      result.push(reviewsList[(index + i) % reviewsList.length]);
     }
     return result;
   };
@@ -85,7 +120,12 @@ const ReviewSliderDark = () => {
                           <div className="flex items-center gap-2 mt-2">
                             <div className="flex text-yellow-400">
                               {[...Array(5)].map((_, starIdx) => (
-                                <Star key={starIdx} size={14} fill="currentColor" />
+                                <Star
+                                  key={starIdx}
+                                  size={14}
+                                  fill={starIdx < review.rating ? "currentColor" : "none"}
+                                  stroke={starIdx < review.rating ? "currentColor" : "rgba(255,255,255,0.2)"}
+                                />
                               ))}
                             </div>
                             <span className="text-[10px] text-white uppercase tracking-widest mt-1">
@@ -115,7 +155,7 @@ const ReviewSliderDark = () => {
 
         {/* Pagination Indicators */}
         <div className="flex justify-center gap-3 mt-12">
-          {reviews.map((_, i) => (
+          {reviewsList.map((_, i) => (
             <button
               key={i}
               onClick={() => setIndex(i)}

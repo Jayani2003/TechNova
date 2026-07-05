@@ -63,8 +63,8 @@ const GuestGuard = ({ navigate }) => {
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center max-w-md w-full"
     >
-      <div className="w-16 h-16 bg-[#00b0a5]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-        <Lock className="w-8 h-8 text-[#00b0a5]" />
+      <div className="w-16 h-16 bg-[#EF8354]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+        <Lock className="w-8 h-8 text-[#EF8354]" />
       </div>
       <h2 className="text-2xl font-extrabold text-slate-800 mb-2">{"Login Required"}</h2>
       <p className="text-slate-500 text-sm mb-6">
@@ -73,7 +73,7 @@ const GuestGuard = ({ navigate }) => {
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button
           onClick={() => navigate("/login")}
-          className="bg-[#00b0a5] hover:bg-[#009b91] text-white px-6 py-3 rounded-xl font-semibold transition-colors cursor-pointer"
+          className="bg-[#EF8354] hover:bg-[#4F5D75] text-white px-6 py-3 rounded-xl font-semibold transition-colors cursor-pointer"
         >
           {"Login"}
         </button>
@@ -99,14 +99,14 @@ const SuccessScreen = ({ bookingRef, navigate }) => {
     transition={{ duration: 0.5 }}
     className="text-center"
   >
-    <div className="w-20 h-20 bg-[#00b0a5]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-      <CheckCircle className="w-10 h-10 text-[#00b0a5]" />
+    <div className="w-20 h-20 bg-[#EF8354]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+      <CheckCircle className="w-10 h-10 text-[#EF8354]" />
     </div>
     <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight mb-3">
       {"Booking Submitted!"}
     </h2>
     <p className="text-slate-500 text-sm mb-2">{"Your booking reference is:"}</p>
-    <p className="text-lg font-bold text-[#00b0a5] mb-8">{bookingRef}</p>
+    <p className="text-lg font-bold text-[#EF8354] mb-8">{bookingRef}</p>
     <div className="bg-slate-50 rounded-2xl p-5 mb-6 text-left space-y-2">
       {[
         "Your booking is now PENDING review",
@@ -114,14 +114,14 @@ const SuccessScreen = ({ bookingRef, navigate }) => {
         "You can track your booking status from your profile",
       ].map((s, i) => (
         <div key={i} className="flex items-start gap-2 text-sm text-slate-600">
-          <span className="text-[#00b0a5] font-bold flex-shrink-0">✓</span>
+          <span className="text-[#EF8354] font-bold flex-shrink-0">✓</span>
           {s}
         </div>
       ))}
     </div>
     <button
       onClick={() => navigate("/user/profile")}
-      className="w-full bg-[#00b0a5] hover:bg-[#009b91] text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 tracking-wide cursor-pointer mb-3"
+      className="w-full bg-[#EF8354] hover:bg-[#4F5D75] text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 tracking-wide cursor-pointer mb-3"
     >
       {"View My Bookings"}
     </button>
@@ -343,7 +343,7 @@ const PackageBookingForm = () => {
                       <button
                         onClick={handleNext}
                         disabled={!canProceed}
-                        className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#00b0a5] hover:bg-[#009b91] text-white font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                        className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#EF8354] hover:bg-[#4F5D75] text-white font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                       >
                         {"Next"} <ChevronRight className="w-4 h-4" />
                       </button>
@@ -351,7 +351,7 @@ const PackageBookingForm = () => {
                       <button
                         onClick={handleSubmit}
                         disabled={submitting}
-                        className="flex items-center gap-2 px-7 py-3 rounded-xl bg-[#00b0a5] hover:bg-[#009b91] text-white font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                        className="flex items-center gap-2 px-7 py-3 rounded-xl bg-[#EF8354] hover:bg-[#4F5D75] text-white font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                       >
                         {submitting ? (
                           <>
@@ -401,7 +401,7 @@ const PackageBookingTripStep = ({ data, onChange, onStartDateChange, packageTitl
   const minDate = `${minYear}-${minMonth}-${minDay}`;
 
   const inputClass =
-    "w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20";
+    "w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#EF8354] focus:ring-2 focus:ring-[#EF8354]/20";
 
   return (
     <div className="space-y-6">
@@ -413,7 +413,7 @@ const PackageBookingTripStep = ({ data, onChange, onStartDateChange, packageTitl
           {"Package tour details and travel dates."}
         </p>
 
-        <div className="bg-[#00b0a5]/5 border border-[#00b0a5]/20 rounded-xl p-4 mb-6">
+        <div className="bg-[#EF8354]/5 border border-[#EF8354]/20 rounded-xl p-4 mb-6">
           <p className="text-xs text-slate-500 mb-1">{"Selected Package"}</p>
           <p className="text-sm font-semibold text-slate-800">{packageTitle}</p>
         </div>
@@ -465,8 +465,8 @@ const PackageBookingTripStep = ({ data, onChange, onStartDateChange, packageTitl
 
         {/* Total days display */}
         {data.totalDays > 0 && (
-          <div className="mt-4 bg-[#00b0a5]/5 border border-[#00b0a5]/20 rounded-xl p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#00b0a5]/10 rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="mt-4 bg-[#EF8354]/5 border border-[#EF8354]/20 rounded-xl p-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#EF8354]/10 rounded-full flex items-center justify-center flex-shrink-0">
               <span className="text-lg">📅</span>
             </div>
             <div>

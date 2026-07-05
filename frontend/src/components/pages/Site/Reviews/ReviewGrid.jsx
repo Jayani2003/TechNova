@@ -57,10 +57,10 @@ const ReviewGrid = ({ reviews, filters = {}, setFilters }) => {
           cursor: pointer;
           transition: all 0.2s ease;
         }
-        .rvg-star-btn:hover { border-color: #00b0a5; color: #00b0a5; }
+        .rvg-star-btn:hover { border-color: #EF8354; color: #EF8354; }
         .rvg-star-btn.active {
-          background: #00b0a5; color: #fff;
-          border-color: #00b0a5;
+          background: #EF8354; color: #fff;
+          border-color: #EF8354;
           box-shadow: 0 4px 14px rgba(0,176,165,0.35);
         }
 
@@ -74,7 +74,7 @@ const ReviewGrid = ({ reviews, filters = {}, setFilters }) => {
           cursor: pointer; outline: none;
           transition: border-color 0.2s ease;
         }
-        .rvg-sort:focus { border-color: #00b0a5; }
+        .rvg-sort:focus { border-color: #EF8354; }
 
         /* Grid */
         .rvg-grid {
@@ -109,7 +109,7 @@ const ReviewGrid = ({ reviews, filters = {}, setFilters }) => {
         .rvg-count {
           font-size: 11px; font-weight: 700;
           letter-spacing: 0.1em; text-transform: uppercase;
-          color: #00b0a5;
+          color: #EF8354;
         }
         .rvg-count span { font-size: 18px; font-weight: 800; color: #0d2b2b; letter-spacing: -0.02em; }
       `}</style>

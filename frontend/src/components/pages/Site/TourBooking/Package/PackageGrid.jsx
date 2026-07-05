@@ -118,7 +118,7 @@ const PackageGrid = ({ packages, onShowMore }) => {
           padding: 6px 10px;
           border-radius: 999px;
           background: rgba(0,176,165,0.08);
-          color: #00b0a5;
+          color: #EF8354;
           border: 1px solid rgba(0,176,165,0.16);
           font-size: 10px;
           font-weight: 800;

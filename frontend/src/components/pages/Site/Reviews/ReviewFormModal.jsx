@@ -32,19 +32,19 @@ const AuthGate = ({ onClose, t }) => (
         font-size: 12px; font-weight: 400; color: #3a6a6a;
         line-height: 1.6; max-width: 380px;
       }
-      .rvm-auth-note strong { font-weight: 700; color: #00b0a5; }
+      .rvm-auth-note strong { font-weight: 700; color: #EF8354; }
       .rvm-auth-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
       .rvm-login-btn {
         display: inline-flex; align-items: center; gap: 8px;
         padding: 13px 28px; border-radius: 10px;
-        background: #00b0a5; color: #fff;
+        background: #EF8354; color: #fff;
         font-size: 13px; font-weight: 700;
         letter-spacing: 0.1em; text-transform: uppercase;
         text-decoration: none;
         box-shadow: 0 6px 24px -4px rgba(0,176,165,0.45);
         transition: all 0.25s ease;
       }
-      .rvm-login-btn:hover { background: #009e94; transform: translateY(-1px); }
+      .rvm-login-btn:hover { background: #4F5D75; transform: translateY(-1px); }
       .rvm-signup-btn {
         display: inline-flex; align-items: center; gap: 8px;
         padding: 13px 24px; border-radius: 10px;
@@ -55,7 +55,7 @@ const AuthGate = ({ onClose, t }) => (
         text-decoration: none;
         transition: all 0.2s ease;
       }
-      .rvm-signup-btn:hover { border-color: #00b0a5; color: #00b0a5; }
+      .rvm-signup-btn:hover { border-color: #EF8354; color: #EF8354; }
     `}</style>
 
     <div className="rvm-auth">
@@ -120,7 +120,7 @@ const ReviewFormModal = ({ isOpen, isLoggedIn, reviewableTours, onClose, onSubmi
       .rvm-header-tag {
         font-size: 9px; font-weight: 800;
         letter-spacing: 0.22em; text-transform: uppercase;
-        color: #00b0a5;
+        color: #EF8354;
       }
       .rvm-header-title {
         font-size: 1.35rem; font-weight: 800;

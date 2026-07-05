@@ -92,7 +92,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
         .pdm-type-badge {
           display: inline-block;
           padding: 4px 14px; border-radius: 100px;
-          background: #00b0a5; color: #fff;
+          background: #EF8354; color: #fff;
           font-size: 9px; font-weight: 800;
           letter-spacing: 0.2em; text-transform: uppercase;
           margin-bottom: 10px;
@@ -143,7 +143,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
           padding: 5px 14px; border-radius: 100px;
           background: rgba(0,176,165,0.08);
           border: 1px solid rgba(0,176,165,0.25);
-          font-size: 11px; font-weight: 600; color: #00b0a5;
+          font-size: 11px; font-weight: 600; color: #EF8354;
           letter-spacing: 0.06em;
         }
 
@@ -218,7 +218,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
         .pdm-activities-label {
           font-size: 9px; font-weight: 700;
           letter-spacing: 0.15em; text-transform: uppercase;
-          color: #00b0a5; margin-bottom: 8px;
+          color: #EF8354; margin-bottom: 8px;
           display: block;
         }
         .pdm-activity-item {
@@ -250,7 +250,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
         }
         .pdm-book-btn {
           display: inline-flex; align-items: center; gap: 10px;
-          background: #00b0a5; color: #fff;
+          background: #EF8354; color: #fff;
           font-size: 13px; font-weight: 700;
           letter-spacing: 0.1em; text-transform: uppercase;
           padding: 14px 28px; border-radius: 10px;
@@ -258,7 +258,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
           box-shadow: 0 6px 24px -4px rgba(0,176,165,0.45);
           transition: all 0.25s ease;
         }
-        .pdm-book-btn:hover { background: #009e94; transform: translateY(-2px); }
+        .pdm-book-btn:hover { background: #4F5D75; transform: translateY(-2px); }
         .pdm-close-btn {
           display: inline-flex; align-items: center; gap: 8px;
           background: transparent; color: #5a8080;
@@ -268,7 +268,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
           cursor: pointer;
           transition: all 0.2s ease;
         }
-        .pdm-close-btn:hover { border-color: #00b0a5; color: #00b0a5; }
+        .pdm-close-btn:hover { border-color: #EF8354; color: #EF8354; }
         /* Recommendations compact layout */
         .pdm-rec-group { margin-bottom: 18px; }
         .pdm-rec-shell {
@@ -291,7 +291,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
           display: inline-flex; align-items: center; gap: 6px;
           padding: 5px 10px; border-radius: 999px;
           background: rgba(0,176,165,0.08);
-          color: #00a79d; font-size: 10px; font-weight: 800;
+          color: #EF8354; font-size: 10px; font-weight: 800;
           letter-spacing: 0.08em; text-transform: uppercase;
           border: 1px solid rgba(0,176,165,0.14);
         }
@@ -331,7 +331,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
           letter-spacing: 0.02em;
         }
         .pdm-guid-toggle input {
-          width: 16px; height: 16px; accent-color: #00b0a5;
+          width: 16px; height: 16px; accent-color: #EF8354;
           flex-shrink: 0;
         }
         .pdm-guid-note {
@@ -437,7 +437,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
                       </div>
                       <div className="pdm-dest-info">
                         <div className="pdm-dest-name">
-                          <span style={{color:'#00b0a5', marginRight:'6px'}}>{i + 1}.</span>
+                          <span style={{color:'#EF8354', marginRight:'6px'}}>{i + 1}.</span>
                           {dest.name}
                         </div>
                         <div className="pdm-dest-desc">{dest.description}</div>

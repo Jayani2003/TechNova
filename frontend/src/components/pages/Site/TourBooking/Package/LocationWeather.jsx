@@ -51,7 +51,7 @@ const LocationWeather = ({ locationName }) => {
   if (loading) {
     return (
       <div className="mt-3 px-3 py-3 border border-slate-100 bg-slate-50/50 rounded-xl flex items-center gap-2">
-        <RefreshCw className="w-3.5 h-3.5 text-[#00b0a5] animate-spin flex-shrink-0" />
+        <RefreshCw className="w-3.5 h-3.5 text-[#EF8354] animate-spin flex-shrink-0" />
         <span className="text-[11px] text-slate-400 font-semibold">Fetching live weather…</span>
       </div>
     );
@@ -70,7 +70,7 @@ const LocationWeather = ({ locationName }) => {
         <p className="text-[10px] text-slate-500 mb-2 pl-5">{error}</p>
         <button
           onClick={() => setRefreshTrigger(v => v + 1)}
-          className="ml-5 inline-flex items-center gap-1 text-[10px] font-bold text-[#00b0a5] hover:text-[#008c83] bg-white border border-slate-200 px-2 py-1 rounded-lg transition-colors cursor-pointer"
+          className="ml-5 inline-flex items-center gap-1 text-[10px] font-bold text-[#EF8354] hover:text-[#4F5D75] bg-white border border-slate-200 px-2 py-1 rounded-lg transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3 h-3" /> Retry
         </button>
@@ -87,7 +87,7 @@ const LocationWeather = ({ locationName }) => {
 
       {/* Resolved city label */}
       {resolvedName && (
-        <p className="text-[9px] font-bold text-[#00b0a5] uppercase tracking-widest mb-2 flex items-center gap-1">
+        <p className="text-[9px] font-bold text-[#EF8354] uppercase tracking-widest mb-2 flex items-center gap-1">
           <span>🌐</span> {resolvedName}
         </p>
       )}
@@ -108,7 +108,7 @@ const LocationWeather = ({ locationName }) => {
 
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-0.5 bg-[#00b0a5] hover:bg-[#009b91] text-white px-1 py-0 rounded text-[7px] font-semibold cursor-pointer"
+          className="flex items-center gap-0.5 bg-[#EF8354] hover:bg-[#4F5D75] text-white px-1 py-0 rounded text-[7px] font-semibold cursor-pointer"
         >
           <Calendar className="w-1.5 h-1.5" />
           Forecast
@@ -127,7 +127,7 @@ const LocationWeather = ({ locationName }) => {
         </span>
         <button
           onClick={() => setRefreshTrigger(v => v + 1)}
-          className="ml-auto p-1 text-slate-300 hover:text-[#00b0a5] rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+          className="ml-auto p-1 text-slate-300 hover:text-[#EF8354] rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
           title="Refresh weather"
         >
           <RefreshCw className="w-3 h-3" />

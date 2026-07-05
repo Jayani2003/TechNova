@@ -11,8 +11,8 @@ const StarPicker = ({ value, onChange }) => {
           <svg
             key={i}
             width="36" height="36" viewBox="0 0 18 18"
-            fill={filled ? '#00b0a5' : 'none'}
-            stroke={filled ? '#00b0a5' : '#c0d8d5'}
+            fill={filled ? '#EF8354' : 'none'}
+            stroke={filled ? '#EF8354' : '#c0d8d5'}
             strokeWidth="1.5"
             style={{ transition: 'all 0.15s ease', transform: hovered === i ? 'scale(1.2)' : 'scale(1)' }}
             onMouseEnter={() => setHovered(i)}
@@ -114,7 +114,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
           style={{
             marginTop: '8px', padding: '12px 28px', borderRadius: '10px',
             border: '1.5px solid rgba(0,176,165,0.3)', background: 'transparent',
-            color: '#00b0a5', fontSize: '13px', fontWeight: 700,
+            color: '#EF8354', fontSize: '13px', fontWeight: 700,
             letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
           }}
         >
@@ -139,7 +139,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
           onClick={onCancel}
           style={{
             marginTop: '8px', padding: '14px 32px', borderRadius: '10px',
-            background: '#00b0a5', border: 'none', color: '#fff',
+            background: '#EF8354', border: 'none', color: '#fff',
             fontSize: '13px', fontWeight: 700,
             letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
             boxShadow: '0 6px 24px -4px rgba(0,176,165,0.45)',
@@ -178,7 +178,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
           transition: border-color 0.2s ease;
           appearance: none;
         }
-        .rvf-select:focus { border-color: #00b0a5; background: #fff; }
+        .rvf-select:focus { border-color: #EF8354; background: #fff; }
         .rvf-select.error { border-color: #cc3344; }
 
         /* Input */
@@ -190,7 +190,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
           outline: none; font-family: inherit;
           transition: border-color 0.2s ease;
         }
-        .rvf-input:focus { border-color: #00b0a5; background: #fff; }
+        .rvf-input:focus { border-color: #EF8354; background: #fff; }
         .rvf-input.error { border-color: #cc3344; }
 
         /* Textarea */
@@ -203,7 +203,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
           font-family: inherit; line-height: 1.7;
           transition: border-color 0.2s ease;
         }
-        .rvf-textarea:focus { border-color: #00b0a5; background: #fff; }
+        .rvf-textarea:focus { border-color: #EF8354; background: #fff; }
         .rvf-textarea.error { border-color: #cc3344; }
         .rvf-char-count {
           font-size: 10px; font-weight: 600; color: #7a9a9a;
@@ -213,7 +213,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
         /* Star label */
         .rvf-star-label {
           font-size: 12px; font-weight: 600;
-          color: #00b0a5; letter-spacing: 0.06em;
+          color: #EF8354; letter-spacing: 0.06em;
           min-height: 18px;
         }
 
@@ -238,11 +238,11 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
           background: rgba(0,176,165,0.04);
           display: flex; flex-direction: column; align-items: center;
           justify-content: center; gap: 4px;
-          cursor: pointer; color: #00b0a5;
+          cursor: pointer; color: #EF8354;
           font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
           transition: all 0.2s ease;
         }
-        .rvf-img-add:hover { background: rgba(0,176,165,0.08); border-color: #00b0a5; }
+        .rvf-img-add:hover { background: rgba(0,176,165,0.08); border-color: #EF8354; }
         .rvf-img-hint {
           font-size: 10px; font-weight: 400; color: #7a9a9a;
           margin-top: 4px;
@@ -258,7 +258,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
         .rvf-actions { display: flex; gap: 10px; }
         .rvf-submit {
           flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-          background: #00b0a5; color: #fff;
+          background: #EF8354; color: #fff;
           font-size: 13px; font-weight: 700;
           letter-spacing: 0.1em; text-transform: uppercase;
           padding: 14px 24px; border-radius: 10px; border: none;
@@ -266,7 +266,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
           box-shadow: 0 6px 24px -4px rgba(0,176,165,0.45);
           transition: all 0.25s ease;
         }
-        .rvf-submit:hover { background: #009e94; transform: translateY(-1px); }
+        .rvf-submit:hover { background: #4F5D75; transform: translateY(-1px); }
         .rvf-clear {
           display: inline-flex; align-items: center; justify-content: center;
           padding: 14px 20px; border-radius: 10px;

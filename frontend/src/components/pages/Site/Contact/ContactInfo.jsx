@@ -20,8 +20,8 @@ const InfoItem = ({ href, target, icon, title, lines, delay }) => (
     transition={{ duration: 0.4, delay }}
     className="flex items-start gap-3 hover:bg-slate-50 p-2 rounded-xl transition-colors"
   >
-    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#00b0a520" }}>
-      <span style={{ color: "#00b0a5" }}>{icon}</span>
+    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#EF835420" }}>
+      <span style={{ color: "#EF8354" }}>{icon}</span>
     </div>
     <div>
       <p className="font-bold text-slate-800 text-sm tracking-tight">{title}</p>
@@ -45,7 +45,7 @@ const ContactInfo = () => {
       className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-2"
     >
       <div className="mb-4">
-        {/* <span className="inline-block px-3 py-1 mb-2 text-xs font-semibold tracking-widest text-white uppercase rounded-full" style={{ backgroundColor: "#00b0a5" }}>
+        {/* <span className="inline-block px-3 py-1 mb-2 text-xs font-semibold tracking-widest text-white uppercase rounded-full" style={{ backgroundColor: "#EF8354" }}>
           {"Contact"}
         </span> */}
         <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">{"Get in Touch"}</h2>
@@ -95,16 +95,16 @@ const ContactInfo = () => {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
       className="rounded-2xl border p-6"
-      style={{ backgroundColor: "#00b0a510", borderColor: "#00b0a530" }}
+      style={{ backgroundColor: "#EF835410", borderColor: "#EF835430" }}
     >
       <h3 className="font-extrabold text-slate-800 tracking-tight mb-1">{"Emergency Assistance"}</h3>
       <p className="text-sm text-slate-600 mb-3">{"24/7 roadside assistance for all our customers."}</p>
       <a
         href="tel:+94778619582"
         className="flex items-center gap-2 font-semibold transition-colors"
-        style={{ color: "#00b0a5" }}
-        onMouseEnter={e => e.currentTarget.style.color = "#009a90"}
-        onMouseLeave={e => e.currentTarget.style.color = "#00b0a5"}
+        style={{ color: "#EF8354" }}
+        onMouseEnter={e => e.currentTarget.style.color = "#4F5D75"}
+        onMouseLeave={e => e.currentTarget.style.color = "#EF8354"}
       >
         <Phone className="w-5 h-5" />
         +94 77 861 9582
@@ -144,9 +144,9 @@ const ContactInfo = () => {
           rel="noopener noreferrer"
           aria-label="Find us on TripAdvisor"
           className="w-10 h-10 text-white rounded-full flex items-center justify-center transition-colors"
-          style={{ backgroundColor: "#00b0a5" }}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = "#009a90"}
-          onMouseLeave={e => e.currentTarget.style.backgroundColor = "#00b0a5"}
+          style={{ backgroundColor: "#EF8354" }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = "#4F5D75"}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = "#EF8354"}
         >
           <FaTripadvisor size={20} />
           

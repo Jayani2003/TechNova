@@ -15,7 +15,7 @@ const DesktopNav = () => {
             
             className={({ isActive }) =>
               `flex items-center gap-1.5 font-bold text-base transition-all duration-300 ${
-                isActive ? 'text-[#1fcfc4]' : 'text-[#00b0a5] hover:text-[#1fcfc4] ' 
+                isActive ? 'text-[#EF8354]' : 'text-[#EF8354] hover:text-[#EF8354] ' 
               }`
             }
           >
@@ -31,7 +31,7 @@ const DesktopNav = () => {
           </NavLink>
 
           {/* Underline animation */}
-          <span className="absolute -bottom-1 left-0 h-[2px] w-0 bg-[#1fcfc4] transition-all duration-300 group-hover:w-full"></span>
+          <span className="absolute -bottom-1 left-0 h-[2px] w-0 bg-[#EF8354] transition-all duration-300 group-hover:w-full"></span>
 
           {/* Dropdown */}
           {link.children && (
@@ -46,7 +46,7 @@ const DesktopNav = () => {
                 <NavLink
                   key={child.label}
                   to={child.path}
-                  className="block px-5 py-3 text-[#00b0a5] hover:bg-[#1fcfc4]/10 transition-all duration-300"
+                  className="block px-5 py-3 text-[#EF8354] hover:bg-[#EF8354]/10 transition-all duration-300"
                 >
                   {child.label}
                 </NavLink>

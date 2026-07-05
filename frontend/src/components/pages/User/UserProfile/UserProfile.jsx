@@ -198,7 +198,7 @@ function UserProfile() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleSave}
-              className="flex items-center gap-2 bg-[#00b0a5] hover:bg-[#009b91] text-white px-6 py-2.5 rounded-full font-semibold shadow-md shadow-[#00b0a5]/20 transition-all cursor-pointer"
+              className="flex items-center gap-2 bg-[#EF8354] hover:bg-[#4F5D75] text-white px-6 py-2.5 rounded-full font-semibold shadow-md shadow-[#EF8354]/20 transition-all cursor-pointer"
             >
               <Check className="w-4 h-4" /> Save Changes
             </motion.button>
@@ -231,7 +231,7 @@ function UserProfile() {
               className="space-y-2"
             >
               <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <field.icon className="w-4 h-4 text-[#00b0a5]" />
+                <field.icon className="w-4 h-4 text-[#EF8354]" />
                 {field.label}
               </label>
               
@@ -246,7 +246,7 @@ function UserProfile() {
                   className={`w-full px-4 py-3 border border-slate-200 rounded-xl text-sm transition-all shadow-sm outline-none ${
                     field.name === 'email'
                       ? 'bg-slate-100 text-slate-500 cursor-not-allowed opacity-80'
-                      : 'bg-white text-slate-800 focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5]'
+                      : 'bg-white text-slate-800 focus:ring-2 focus:ring-[#EF8354]/50 focus:border-[#EF8354]'
                   }`}
                 />
               ) : (
@@ -374,7 +374,7 @@ const BookingsTab = () => <MyBookings userEmail={user?.email} />;
         <div className="flex-1 max-w-2xl">
           <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8">
             <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-              <Lock className="w-5 h-5 text-[#00b0a5]"/> Change Password
+              <Lock className="w-5 h-5 text-[#EF8354]"/> Change Password
             </h3>
             
             {message.text && (
@@ -400,7 +400,7 @@ const BookingsTab = () => <MyBookings userEmail={user?.email} />;
                 <input 
                   type="password" required placeholder="••••••••"
                   value={passwords.current} onChange={(e) => setPasswords({...passwords, current: e.target.value})}
-                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none transition-all"
+                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#EF8354]/50 focus:border-[#EF8354] outline-none transition-all"
                 />
               </div>
               
@@ -410,7 +410,7 @@ const BookingsTab = () => <MyBookings userEmail={user?.email} />;
                   <input 
                     type={showNewPassword ? "text" : "password"} required placeholder="••••••••"
                     value={passwords.new} onChange={(e) => setPasswords({...passwords, new: e.target.value})}
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none transition-all pr-12"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#EF8354]/50 focus:border-[#EF8354] outline-none transition-all pr-12"
                   />
                   <button 
                     type="button"
@@ -429,7 +429,7 @@ const BookingsTab = () => <MyBookings userEmail={user?.email} />;
                   <input 
                     type={showConfirmPassword ? "text" : "password"} required placeholder="••••••••"
                     value={passwords.confirm} onChange={(e) => setPasswords({...passwords, confirm: e.target.value})}
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#00b0a5]/50 focus:border-[#00b0a5] outline-none transition-all pr-12"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:ring-2 focus:ring-[#EF8354]/50 focus:border-[#EF8354] outline-none transition-all pr-12"
                   />
                   <button 
                     type="button"
@@ -442,7 +442,7 @@ const BookingsTab = () => <MyBookings userEmail={user?.email} />;
               </div>
               
               <div className="pt-4">
-                <button type="submit" className="px-6 py-3 bg-[#00b0a5] text-white font-semibold rounded-xl hover:bg-[#009b91] shadow-md shadow-[#00b0a5]/20 transition-all cursor-pointer">
+                <button type="submit" className="px-6 py-3 bg-[#EF8354] text-white font-semibold rounded-xl hover:bg-[#4F5D75] shadow-md shadow-[#EF8354]/20 transition-all cursor-pointer">
                   Update Password
                 </button>
               </div>
@@ -457,7 +457,7 @@ const BookingsTab = () => <MyBookings userEmail={user?.email} />;
   return (
     <div className="min-h-[85vh] py-12 px-4 sm:px-6 lg:px-8 flex justify-center bg-slate-50 relative overflow-hidden">
       {/* Decorative Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-br from-[#00b0a5] to-[#007b73] -z-10 shadow-lg" />
+      <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-br from-[#EF8354] to-[#4F5D75] -z-10 shadow-lg" />
       <div className="absolute -top-40 -right-40 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl z-[-1]" />
       
       <div className="w-full max-w-6xl flex flex-col md:flex-row gap-8 z-10">
@@ -475,7 +475,7 @@ const BookingsTab = () => <MyBookings userEmail={user?.email} />;
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-semibold transition-all whitespace-nowrap cursor-pointer ${
                     activeTab === tab.id 
-                      ? 'bg-[#00b0a5] text-white shadow-md shadow-[#00b0a5]/20' 
+                      ? 'bg-[#EF8354] text-white shadow-md shadow-[#EF8354]/20' 
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >

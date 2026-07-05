@@ -34,12 +34,12 @@ const MyBookingCard = ({ booking, onClick }) => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.01 }}
-      className="w-full text-left bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-[#00b0a5]/40 transition-all cursor-pointer"
+      className="w-full text-left bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-[#EF8354]/40 transition-all cursor-pointer"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#00b0a5]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Icon className="w-5 h-5 text-[#00b0a5]" />
+          <div className="w-10 h-10 bg-[#EF8354]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Icon className="w-5 h-5 text-[#EF8354]" />
           </div>
           <div>
             <p className="font-bold text-slate-800 text-sm">{booking.id}</p>
@@ -80,7 +80,7 @@ const MyBookingCard = ({ booking, onClick }) => {
       {booking.quotedPrice && (
         <div className="mt-2 pt-2 border-t border-slate-100">
           <p className="text-xs text-slate-400">Quoted Price</p>
-          <p className="text-base font-bold text-[#00b0a5]">${booking.quotedPrice}</p>
+          <p className="text-base font-bold text-[#EF8354]">${booking.quotedPrice}</p>
         </div>
       )}
     </motion.button>

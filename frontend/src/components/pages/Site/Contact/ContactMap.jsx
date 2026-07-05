@@ -13,7 +13,7 @@ const ContactMap = () => (
   >
     {/* Header */}
     <div className="px-6 py-4 flex items-center gap-2 border-b border-slate-100">
-      <MapPin className="w-5 h-5" style={{ color: "#00b0a5" }} />
+      <MapPin className="w-5 h-5" style={{ color: "#EF8354" }} />
       <h2 className="font-extrabold text-slate-800 tracking-tight">Our Location</h2>
     </div>
 
@@ -42,9 +42,9 @@ const ContactMap = () => (
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center gap-1 text-sm font-semibold flex-shrink-0 transition-colors"
-        style={{ color: "#00b0a5" }}
-        onMouseEnter={e => e.currentTarget.style.color = "#009a90"}
-        onMouseLeave={e => e.currentTarget.style.color = "#00b0a5"}
+        style={{ color: "#EF8354" }}
+        onMouseEnter={e => e.currentTarget.style.color = "#4F5D75"}
+        onMouseLeave={e => e.currentTarget.style.color = "#EF8354"}
       >
         <MapPin className="w-4 h-4" />
         Open in Google Maps

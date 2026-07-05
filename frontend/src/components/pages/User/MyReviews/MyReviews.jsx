@@ -148,11 +148,11 @@ const MyReviews = ({ isEmbedded = false }) => {
         }
 
         .mr-back-btn {
-          ${isEmbedded ? 'display: none;' : 'padding: 10px 20px; border-radius: 10px; border: 1.5px solid rgba(0,176,165,0.3); background: transparent; color: #00b0a5; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s ease;'}
+          ${isEmbedded ? 'display: none;' : 'padding: 10px 20px; border-radius: 10px; border: 1.5px solid rgba(0,176,165,0.3); background: transparent; color: #EF8354; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s ease;'}
         }
         .mr-back-btn:hover {
           background: rgba(0,176,165,0.08);
-          border-color: #00b0a5;
+          border-color: #EF8354;
         }
 
         /* Notification section */
@@ -182,7 +182,7 @@ const MyReviews = ({ isEmbedded = false }) => {
         }
         .mr-notification-card:hover {
           background: linear-gradient(135deg, rgba(0,176,165,0.1), rgba(0,220,205,0.08));
-          border-color: #00b0a5;
+          border-color: #EF8354;
           box-shadow: 0 4px 16px rgba(0,176,165,0.15);
         }
 
@@ -208,7 +208,7 @@ const MyReviews = ({ isEmbedded = false }) => {
 
         .mr-cta-btn {
           padding: 10px 18px; border-radius: 8px;
-          background: #00b0a5; color: #fff;
+          background: #EF8354; color: #fff;
           border: none;
           font-size: 11px; font-weight: 700;
           letter-spacing: 0.08em; text-transform: uppercase;
@@ -218,7 +218,7 @@ const MyReviews = ({ isEmbedded = false }) => {
           white-space: nowrap;
         }
         .mr-cta-btn:hover {
-          background: #009e94;
+          background: #4F5D75;
           transform: translateY(-1px);
         }
 
@@ -302,7 +302,7 @@ const MyReviews = ({ isEmbedded = false }) => {
           align-self: flex-start;
           background: none;
           border: none;
-          color: #00b0a5;
+          color: #EF8354;
           font-size: 12px;
           font-weight: 700;
           cursor: pointer;
@@ -310,7 +310,7 @@ const MyReviews = ({ isEmbedded = false }) => {
           transition: color 0.2s ease;
         }
         .mr-see-more-btn:hover {
-          color: #009e94;
+          color: #4F5D75;
         }
 
         .mr-review-images {
@@ -336,7 +336,7 @@ const MyReviews = ({ isEmbedded = false }) => {
           border-radius: 10px;
           border: 1.5px solid rgba(0,176,165,0.25);
           background: rgba(0,176,165,0.08);
-          color: #00b0a5;
+          color: #EF8354;
           font-size: 12px;
           font-weight: 700;
           cursor: pointer;
@@ -344,7 +344,7 @@ const MyReviews = ({ isEmbedded = false }) => {
         }
         .mr-image-expand-btn:hover {
           background: rgba(0,176,165,0.15);
-          border-color: #00b0a5;
+          border-color: #EF8354;
           transform: scale(1.05);
         }
 
@@ -366,7 +366,7 @@ const MyReviews = ({ isEmbedded = false }) => {
         .mr-empty-cta {
           margin-top: 16px;
           padding: 12px 28px; border-radius: 10px;
-          background: #00b0a5; color: #fff;
+          background: #EF8354; color: #fff;
           border: none;
           font-size: 12px; font-weight: 700;
           letter-spacing: 0.1em; text-transform: uppercase;
@@ -374,7 +374,7 @@ const MyReviews = ({ isEmbedded = false }) => {
           transition: all 0.2s ease;
         }
         .mr-empty-cta:hover {
-          background: #009e94;
+          background: #4F5D75;
           transform: translateY(-1px);
         }
 
@@ -487,8 +487,8 @@ const MyReviews = ({ isEmbedded = false }) => {
                             key={s}
                             className="mr-review-star"
                             viewBox="0 0 18 18"
-                            fill={s <= review.stars ? '#00b0a5' : 'none'}
-                            stroke={s <= review.stars ? '#00b0a5' : '#c0d8d5'}
+                            fill={s <= review.stars ? '#EF8354' : 'none'}
+                            stroke={s <= review.stars ? '#EF8354' : '#c0d8d5'}
                             strokeWidth="1.5"
                           >
                             <path d="M9 1.5l2.1 4.3 4.7.7-3.4 3.3.8 4.7L9 12.1l-4.2 2.4.8-4.7-3.4-3.3 4.7-.7L9 1.5z" />

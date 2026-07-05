@@ -39,7 +39,7 @@ const Navbar = () => {
       {/* Authentication Section */}
       {user ? (
         <div className="relative group flex items-center gap-3 cursor-pointer p-2 rounded-full hover:bg-gray-50 transition-colors">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#00b0a5] text-white shadow-md">
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#EF8354] text-white shadow-md">
             <User size={18} />
           </div>
           <span className="hidden sm:block font-bold text-[#1a1a1c] text-sm">{user.name}</span>
@@ -52,11 +52,11 @@ const Navbar = () => {
                           transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-50">
             <div className="flex flex-col">
                 {isAdmin ? (
-                 <Link to="/admin/admin-dashboard" className="px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-[#00b0a5]/10 hover:text-[#00b0a5] transition-colors rounded-lg mx-2">
+                 <Link to="/admin/admin-dashboard" className="px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-[#EF8354]/10 hover:text-[#EF8354] transition-colors rounded-lg mx-2">
                     Admin Dashboard
                  </Link>
               ) : (
-                 <Link to="/user/profile" className="px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-[#00b0a5]/10 hover:text-[#00b0a5] transition-colors rounded-lg mx-2">
+                 <Link to="/user/profile" className="px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-[#EF8354]/10 hover:text-[#EF8354] transition-colors rounded-lg mx-2">
                     My Profile
                  </Link>
               )}
@@ -69,7 +69,7 @@ const Navbar = () => {
         </div>
       ) : (
         <Link to="/login" className="relative flex items-center gap-2 bg-[#1a1a1c] text-white px-7 py-3 rounded-full text-sm font-semibold 
-                          overflow-hidden group transition-all duration-300 hover:shadow-lg hover:shadow-[#00b0a5]/20 active:scale-95">
+                          overflow-hidden group transition-all duration-300 hover:shadow-lg hover:shadow-[#EF8354]/20 active:scale-95">
           <LogIn size={16} className="group-hover:-translate-x-1 transition-transform duration-300" />
              <span className="z-10">Login</span>
           {/* Subtle Shine Effect */}

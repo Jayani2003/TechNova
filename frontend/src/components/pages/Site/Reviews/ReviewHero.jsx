@@ -19,11 +19,11 @@ const ReviewHero = ({ onAddReview, isLoggedIn }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
+        <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#EF8354] rounded-full">
           {"Amazing Traveller Experiences"}
         </span>
         <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 tracking-tight">
-          {"Guest"} <span className="text-[#00b0a5]">{"Reviews."}</span>
+          {"Guest"} <span className="text-[#EF8354]">{"Reviews."}</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light mb-3">
           {"Real stories from real travellers who explored Sri Lanka with us."}
@@ -59,8 +59,8 @@ const ReviewHero = ({ onAddReview, isLoggedIn }) => {
           {/* Glowing dot */}
           <span style={{
             width: '7px', height: '7px', borderRadius: '50%',
-            background: '#00ddd0',
-            boxShadow: '0 0 8px #00ddd0',
+            background: '#EF8354',
+            boxShadow: '0 0 8px #EF8354',
             flexShrink: 0,
           }} />
           {isLoggedIn ? "Write a Review" : "Log In to Write a Review"}

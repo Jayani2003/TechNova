@@ -15,23 +15,18 @@ const TYPE_ICONS = {
 };
 
 const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
-  
+
   const [recommendations, setRecommendations] = useState(null);
   const [showGuidDetails, setShowGuidDetails] = useState(false);
+  const [activeRecTab, setActiveRecTab] = useState('duration');
 
   const handleRecommendationShowMore = (recPkg) => {
     if (!onShowMore || !recPkg?.id) return;
-    // Close current modal first, then ask parent to load/show the new package detail.
-    try {
-      onClose && onClose();
-    } catch (e) {
-      // ignore
-    }
+    try { onClose && onClose(); } catch (e) {}
     onShowMore({ id: Number(recPkg.id) || recPkg.id });
   };
 
   useEffect(() => {
-    // prefer recommendations already attached to pkg (from parent), else fetch
     if (pkg?.recommendations) {
       setRecommendations(pkg.recommendations);
       return;
@@ -45,190 +40,217 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
           const data = await res.json();
           setRecommendations(data);
         }
-      } catch (e) {
-        // ignore
-      }
+      } catch (e) {}
     };
     load();
     return () => { cancelled = true; };
   }, [pkg?.id, pkg?.recommendations]);
+
   const destinations = Array.isArray(pkg.destinations) ? pkg.destinations : [];
-  const highlights = Array.isArray(pkg.highlights) ? pkg.highlights : [];
   const guide = pkg.guid || pkg.guide || null;
+
+  const recTabs = [
+    { id: 'duration', label: '⏱ Same Duration', data: recommendations?.similarByDays },
+    { id: 'type',     label: '🏷 Same Type',     data: recommendations?.similarByType },
+    { id: 'rated',    label: '⭐ Top Rated',      data: recommendations?.topRated },
+    { id: 'booked',   label: '🔥 Most Booked',    data: recommendations?.mostBooked },
+  ].filter(t => t.data?.length > 0);
+
+  // Whenever recommendations load, ensure the active tab is valid
+  useEffect(() => {
+    if (!recommendations) return;
+    const tabs = [
+      { id: 'duration', data: recommendations.similarByDays },
+      { id: 'type',     data: recommendations.similarByType },
+      { id: 'rated',    data: recommendations.topRated },
+      { id: 'booked',   data: recommendations.mostBooked },
+    ].filter(t => t.data?.length > 0);
+    if (tabs.length === 0) return;
+    // If current tab has no data, switch to first that does
+    const currentValid = tabs.find(t => t.id === activeRecTab);
+    if (!currentValid) setActiveRecTab(tabs[0].id);
+  }, [recommendations]);
 
   return (
     <>
       <style>{`
+        /* ─── Backdrop ─────────────────────────────── */
         .pdm-backdrop {
           position: fixed; inset: 0; z-index: 100;
-          background: rgba(0,20,18,0.75);
-          backdrop-filter: blur(6px);
+          background: rgba(4, 18, 16, 0.82);
+          backdrop-filter: blur(10px);
           display: flex; align-items: center; justify-content: center;
-          padding: 24px;
-        }
-        .pdm-modal {
-          background: #fff;
-          border-radius: 24px;
-          max-width: 860px; width: 100%;
-          max-height: 90vh;
-          overflow-y: auto;
-          box-shadow: 0 40px 80px rgba(0,60,50,0.3);
-          position: relative;
+          padding: 20px;
         }
 
-        /* Hero */
+        /* ─── Modal shell ──────────────────────────── */
+        .pdm-modal {
+          background: #ffffff;
+          border-radius: 28px;
+          max-width: 900px; width: 100%;
+          max-height: 92vh;
+          overflow-y: auto;
+          box-shadow: 0 48px 96px rgba(0,60,50,0.35), 0 0 0 1px rgba(0,176,165,0.1);
+          position: relative;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(0,176,165,0.25) transparent;
+        }
+        .pdm-modal::-webkit-scrollbar { width: 4px; }
+        .pdm-modal::-webkit-scrollbar-track { background: transparent; }
+        .pdm-modal::-webkit-scrollbar-thumb { background: rgba(0,176,165,0.3); border-radius: 4px; }
+
+        /* ─── Hero ─────────────────────────────────── */
         .pdm-hero {
-          position: relative; height: 280px; flex-shrink: 0;
-          border-radius: 24px 24px 0 0; overflow: hidden;
+          position: relative; height: 320px; flex-shrink: 0;
+          border-radius: 28px 28px 0 0; overflow: hidden;
         }
         .pdm-hero img { width: 100%; height: 100%; object-fit: cover; }
         .pdm-hero-overlay {
           position: absolute; inset: 0;
-          background: linear-gradient(160deg, rgba(0,20,18,0.2) 0%, rgba(0,60,50,0.75) 100%);
+          background: linear-gradient(170deg, rgba(0,10,8,0.15) 0%, rgba(0,40,32,0.85) 100%);
         }
         .pdm-hero-content {
-          position: absolute; bottom: 24px; left: 28px; right: 80px;
+          position: absolute; bottom: 28px; left: 32px; right: 90px;
         }
         .pdm-type-badge {
-          display: inline-block;
-          padding: 4px 14px; border-radius: 100px;
-          background: #00b0a5; color: #fff;
-          font-size: 9px; font-weight: 800;
-          letter-spacing: 0.2em; text-transform: uppercase;
-          margin-bottom: 10px;
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 5px 16px; border-radius: 100px;
+          background: rgba(0,176,165,0.9); backdrop-filter: blur(8px);
+          color: #fff; font-size: 9px; font-weight: 800;
+          letter-spacing: 0.22em; text-transform: uppercase;
+          margin-bottom: 12px;
+          border: 1px solid rgba(255,255,255,0.25);
         }
         .pdm-title {
-          font-size: clamp(1.6rem, 3vw, 2.2rem);
-          font-weight: 800; color: #fff;
-          line-height: 1.1; letter-spacing: -0.03em;
+          font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+          font-weight: 900; color: #fff;
+          line-height: 1.1; letter-spacing: -0.04em;
+          text-shadow: 0 2px 16px rgba(0,0,0,0.3);
         }
-        .pdm-days-badge {
-          display: inline-flex; align-items: center; gap: 6px;
-          margin-top: 10px;
-          background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);
-          border: 1px solid rgba(255,255,255,0.25);
+        .pdm-meta-row {
+          display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;
+        }
+        .pdm-meta-chip {
+          display: inline-flex; align-items: center; gap: 5px;
+          background: rgba(255,255,255,0.14); backdrop-filter: blur(8px);
+          border: 1px solid rgba(255,255,255,0.22);
           border-radius: 100px; padding: 5px 14px;
           color: #fff; font-size: 11px; font-weight: 700;
-          letter-spacing: 0.1em; text-transform: uppercase;
+          letter-spacing: 0.08em;
         }
 
-        /* Close btn */
+        /* ─── Close btn ────────────────────────────── */
         .pdm-close {
-          position: absolute; top: 16px; right: 16px; z-index: 10;
-          width: 38px; height: 38px; border-radius: 50%;
-          background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);
-          border: 1px solid rgba(255,255,255,0.25);
-          color: #fff; font-size: 18px;
+          position: absolute; top: 18px; right: 18px; z-index: 10;
+          width: 40px; height: 40px; border-radius: 50%;
+          background: rgba(0,0,0,0.35); backdrop-filter: blur(10px);
+          border: 1.5px solid rgba(255,255,255,0.2);
+          color: #fff; font-size: 17px;
           display: flex; align-items: center; justify-content: center;
-          cursor: pointer;
-          transition: background 0.2s;
+          cursor: pointer; transition: all 0.2s;
         }
-        .pdm-close:hover { background: rgba(255,255,255,0.3); }
+        .pdm-close:hover { background: rgba(255,70,50,0.75); transform: scale(1.08); }
 
-        /* Body */
-        .pdm-body { padding: 28px 28px 32px; }
+        /* ─── Body ─────────────────────────────────── */
+        .pdm-body { padding: 32px 32px 36px; }
 
+        /* ─── Description ──────────────────────────── */
         .pdm-desc {
-          font-size: 15px; font-weight: 300; color: #3a5a5a;
-          line-height: 1.8; margin-bottom: 20px;
-           overflow-wrap: anywhere;
-          word-break: break-word;
+          font-size: 15px; font-weight: 400; color: #4a6a6a;
+          line-height: 1.85; margin-bottom: 28px;
+          overflow-wrap: anywhere; word-break: break-word;
+          border-left: 3px solid rgba(0,176,165,0.35);
+          padding-left: 16px;
         }
 
-        /* Highlights */
-        .pdm-highlights {
-          display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px;
-        }
-        .pdm-hl {
-          padding: 5px 14px; border-radius: 100px;
-          background: rgba(0,176,165,0.08);
-          border: 1px solid rgba(0,176,165,0.25);
-          font-size: 11px; font-weight: 600; color: #00b0a5;
-          letter-spacing: 0.06em;
-        }
-
-        /* Section heading */
+        /* ─── Section heading ──────────────────────── */
         .pdm-section-heading {
-          font-size: 10px; font-weight: 800;
-          letter-spacing: 0.2em; text-transform: uppercase;
-          color: #3a5a5a; margin-bottom: 16px;
-          display: flex; align-items: center; gap: 10px;
+          font-size: 9px; font-weight: 900;
+          letter-spacing: 0.28em; text-transform: uppercase;
+          color: #00b0a5; margin-bottom: 18px;
+          display: flex; align-items: center; gap: 12px;
         }
         .pdm-section-heading::after {
-          content: ''; flex: 1; height: 1px;
+          content: ''; flex: 1; height: 1.5px;
           background: linear-gradient(90deg, rgba(0,176,165,0.3), transparent);
         }
 
-        /* Destination cards */
+        /* ─── Destination cards ─────────────────────── */
         .pdm-dest-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-          gap: 16px; margin-bottom: 32px;
+          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          gap: 18px; margin-bottom: 36px;
         }
         .pdm-dest-card {
-          border-radius: 16px; overflow: hidden;
+          border-radius: 20px; overflow: hidden;
           border: 1px solid rgba(0,176,165,0.12);
-          box-shadow: 0 4px 16px rgba(0,60,50,0.06);
+          box-shadow: 0 4px 20px rgba(0,60,50,0.07);
           transition: transform 0.3s ease, box-shadow 0.3s ease;
+          background: #fff;
         }
         .pdm-dest-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 12px 32px rgba(0,60,50,0.12);
+          transform: translateY(-4px);
+          box-shadow: 0 16px 40px rgba(0,60,50,0.14);
         }
         .pdm-dest-img {
-          position: relative; height: 140px; overflow: hidden;
-          
+          position: relative; height: 150px; overflow: hidden;
         }
         .pdm-dest-img img {
           width: 100%; height: 100%; object-fit: cover;
           transition: transform 0.6s ease;
-          
         }
-        .pdm-dest-card:hover .pdm-dest-img img { transform: scale(1.06); }
+        .pdm-dest-card:hover .pdm-dest-img img { transform: scale(1.08); }
         .pdm-dest-img-overlay {
           position: absolute; inset: 0;
-          background: linear-gradient(to bottom, transparent 50%, rgba(0,30,25,0.5) 100%);
+          background: linear-gradient(to bottom, transparent 40%, rgba(0,28,22,0.55) 100%);
         }
         .pdm-dest-days {
-          position: absolute; bottom: 10px; right: 10px;
-          background: rgba(0,176,165,0.9); backdrop-filter: blur(6px);
-          color: #fff; font-size: 9px; font-weight: 800;
-          letter-spacing: 0.15em; text-transform: uppercase;
-          padding: 4px 10px; border-radius: 100px;
+          position: absolute; bottom: 12px; right: 12px;
+          background: linear-gradient(135deg, #00b0a5, #007a72);
+          color: #fff; font-size: 10px; font-weight: 800;
+          letter-spacing: 0.12em; text-transform: uppercase;
+          padding: 5px 12px; border-radius: 100px;
+          box-shadow: 0 4px 12px rgba(0,176,165,0.4);
+          border: 1.5px solid rgba(255,255,255,0.25);
         }
-        .pdm-dest-info { padding: 14px; background: #fff; }
+        .pdm-dest-num {
+          position: absolute; top: 12px; left: 12px;
+          width: 28px; height: 28px; border-radius: 50%;
+          background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
+          border: 1.5px solid rgba(255,255,255,0.3);
+          color: #fff; font-size: 11px; font-weight: 800;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .pdm-dest-info { padding: 16px; background: #fff; }
         .pdm-dest-name {
           font-size: 14px; font-weight: 800;
-          color: #0d2b2b; letter-spacing: -0.02em; margin-bottom: 5px;
-           overflow-wrap: anywhere;
-          word-break: break-word;
+          color: #0d2b2b; letter-spacing: -0.02em; margin-bottom: 6px;
+          overflow-wrap: anywhere; word-break: break-word;
         }
         .pdm-dest-desc {
-          font-size: 12px; font-weight: 300;
-          color: #5a8080; line-height: 1.6; margin-bottom: 12px;
-          
+          font-size: 12px; font-weight: 400;
+          color: #6a9090; line-height: 1.65; margin-bottom: 12px;
         }
 
-        /* Activities */
+        /* ─── Activities ────────────────────────────── */
         .pdm-activities {
-          border-top: 1px solid rgba(0,176,165,0.12);
-          padding: 12px 0 0 0;
-          margin-top: 12px;
+          border-top: 1px dashed rgba(0,176,165,0.2);
+          padding: 12px 0 0 0; margin-top: 10px;
         }
         .pdm-activities-label {
-          font-size: 9px; font-weight: 700;
-          letter-spacing: 0.15em; text-transform: uppercase;
-          color: #00b0a5; margin-bottom: 8px;
-          display: block;
+          font-size: 8px; font-weight: 900;
+          letter-spacing: 0.2em; text-transform: uppercase;
+          color: #00b0a5; margin-bottom: 10px; display: block;
         }
         .pdm-activity-item {
           margin-bottom: 10px; padding-bottom: 10px;
-          border-bottom: 1px solid rgba(0,176,165,0.08);
+          border-bottom: 1px solid rgba(0,176,165,0.07);
+          display: flex; gap: 10px; align-items: flex-start;
         }
-        .pdm-activity-item:last-child {
-          margin-bottom: 0;
-          padding-bottom: 0;
-          border-bottom: none;
+        .pdm-activity-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .pdm-activity-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: #00b0a5; flex-shrink: 0; margin-top: 5px;
         }
         .pdm-activity-name {
           font-size: 12px; font-weight: 700;
@@ -236,147 +258,162 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
         }
         .pdm-activity-phone {
           font-size: 10px; color: #7a9a9a;
-          margin-bottom: 4px; display: flex; gap: 4px; align-items: center;
+          display: flex; gap: 4px; align-items: center; margin-bottom: 3px;
         }
         .pdm-activity-desc {
-          font-size: 11px; font-weight: 300;
-          color: #5a8080; line-height: 1.5;
+          font-size: 11px; font-weight: 400;
+          color: #6a9090; line-height: 1.5;
         }
 
-        /* CTA */
+        /* ─── CTA ───────────────────────────────────── */
         .pdm-cta {
           display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
-          padding-top: 8px; border-top: 1px solid rgba(0,176,165,0.1);
+          padding: 20px; margin: 0 -32px -36px -32px;
+          background: linear-gradient(180deg, rgba(0,176,165,0.03) 0%, rgba(0,176,165,0.07) 100%);
+          border-top: 1px solid rgba(0,176,165,0.12);
+          border-radius: 0 0 28px 28px;
         }
         .pdm-book-btn {
           display: inline-flex; align-items: center; gap: 10px;
-          background: #00b0a5; color: #fff;
-          font-size: 13px; font-weight: 700;
+          background: linear-gradient(135deg, #00b0a5, #007a72);
+          color: #fff; font-size: 13px; font-weight: 700;
           letter-spacing: 0.1em; text-transform: uppercase;
-          padding: 14px 28px; border-radius: 10px;
+          padding: 15px 30px; border-radius: 14px;
           text-decoration: none;
-          box-shadow: 0 6px 24px -4px rgba(0,176,165,0.45);
+          box-shadow: 0 8px 28px -4px rgba(0,176,165,0.5);
           transition: all 0.25s ease;
         }
-        .pdm-book-btn:hover { background: #009e94; transform: translateY(-2px); }
+        .pdm-book-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 36px -4px rgba(0,176,165,0.6); }
         .pdm-close-btn {
           display: inline-flex; align-items: center; gap: 8px;
-          background: transparent; color: #5a8080;
-          font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
-          padding: 14px 20px; border-radius: 10px;
+          background: transparent; color: #6a9090;
+          font-size: 13px; font-weight: 600;
+          padding: 15px 22px; border-radius: 14px;
           border: 1.5px solid rgba(0,176,165,0.2);
+          cursor: pointer; transition: all 0.2s ease;
+        }
+        .pdm-close-btn:hover { border-color: #00b0a5; color: #00b0a5; background: rgba(0,176,165,0.05); }
+
+        /* ─── Guide panel ───────────────────────────── */
+        .pdm-guide-panel {
+          margin: 28px 0;
+          border-radius: 20px;
+          overflow: hidden;
+          border: 1.5px solid rgba(0,176,165,0.15);
+        }
+        .pdm-guide-header {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 16px 20px;
+          background: linear-gradient(135deg, rgba(0,176,165,0.06) 0%, rgba(0,120,112,0.04) 100%);
           cursor: pointer;
-          transition: all 0.2s ease;
+          user-select: none;
+          transition: background 0.2s;
         }
-        .pdm-close-btn:hover { border-color: #00b0a5; color: #00b0a5; }
-        /* Recommendations compact layout */
-        .pdm-rec-group { margin-bottom: 18px; }
-        .pdm-rec-shell {
-          border: 1px solid rgba(0,176,165,0.12);
-          background: linear-gradient(180deg, rgba(236,255,253,0.9) 0%, rgba(255,255,255,0.98) 100%);
+        .pdm-guide-header:hover { background: rgba(0,176,165,0.1); }
+        .pdm-guide-header-left { display: flex; align-items: center; gap: 12px; }
+        .pdm-guide-icon {
+          width: 40px; height: 40px; border-radius: 12px;
+          background: linear-gradient(135deg, #00b0a5, #007a72);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 18px; flex-shrink: 0;
+          box-shadow: 0 4px 12px rgba(0,176,165,0.35);
+        }
+        .pdm-guide-label {
+          font-size: 13px; font-weight: 800; color: #0d2b2b;
+          letter-spacing: -0.01em;
+        }
+        .pdm-guide-sub {
+          font-size: 11px; font-weight: 400; color: #7a9a9a; margin-top: 1px;
+        }
+        .pdm-guide-toggle-btn {
+          width: 32px; height: 32px; border-radius: 50%;
+          background: rgba(0,176,165,0.1);
+          border: 1.5px solid rgba(0,176,165,0.2);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 14px; color: #00b0a5;
+          cursor: pointer; transition: all 0.25s;
+          flex-shrink: 0;
+        }
+        .pdm-guide-no {
+          padding: 12px 20px 16px;
+          font-size: 12px; color: #9ababa;
+          background: rgba(0,176,165,0.02);
+          text-align: center;
+        }
+        .pdm-guide-body {
+          padding: 20px;
+          background: #fff;
+          border-top: 1px solid rgba(0,176,165,0.1);
+        }
+        .pdm-guide-grid {
+          display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+        }
+        @media (max-width: 540px) { .pdm-guide-grid { grid-template-columns: 1fr; } }
+        .pdm-guide-field { display: flex; flex-direction: column; gap: 4px; }
+        .pdm-guide-field-label {
+          font-size: 9px; font-weight: 900;
+          letter-spacing: 0.2em; text-transform: uppercase;
+          color: #9ababa;
+        }
+        .pdm-guide-field-value {
+          font-size: 14px; font-weight: 700; color: #0d2b2b;
+          overflow-wrap: anywhere; word-break: break-word;
+        }
+        .pdm-guide-full { grid-column: 1 / -1; }
+
+        /* ─── Recommendations ───────────────────────── */
+        .pdm-rec-panel {
+          margin-top: 4px; padding: 24px;
+          background: linear-gradient(180deg, #f5fffe 0%, #fff 100%);
+          border: 1.5px solid rgba(0,176,165,0.13);
           border-radius: 22px;
-          padding: 14px;
-          box-shadow: 0 10px 28px rgba(0,60,50,0.06);
+          box-shadow: 0 8px 32px rgba(0,60,50,0.05);
         }
-        .pdm-rec-title {
-          display: flex; align-items: center; justify-content: space-between; gap: 12px;
-          margin-bottom: 10px;
+        .pdm-rec-tab-row {
+          display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
         }
-        .pdm-rec-kicker {
-          font-size: 10px; font-weight: 900;
-          letter-spacing: 0.18em; text-transform: uppercase;
-          color: #0b7f78;
+        .pdm-rec-tab {
+          padding: 7px 16px; border-radius: 100px;
+          font-size: 11px; font-weight: 700;
+          border: 1.5px solid rgba(0,176,165,0.18);
+          background: transparent; color: #7a9a9a;
+          cursor: pointer; transition: all 0.2s;
+          letter-spacing: 0.04em;
         }
-        .pdm-rec-pill {
-          display: inline-flex; align-items: center; gap: 6px;
-          padding: 5px 10px; border-radius: 999px;
-          background: rgba(0,176,165,0.08);
-          color: #00a79d; font-size: 10px; font-weight: 800;
-          letter-spacing: 0.08em; text-transform: uppercase;
-          border: 1px solid rgba(0,176,165,0.14);
+        .pdm-rec-tab:hover { border-color: #00b0a5; color: #00b0a5; background: rgba(0,176,165,0.05); }
+        .pdm-rec-tab.active {
+          background: linear-gradient(135deg, #00b0a5, #007a72);
+          border-color: transparent; color: #fff;
+          box-shadow: 0 4px 14px rgba(0,176,165,0.35);
         }
-        .pdm-rec-row {
-          display: flex;
-          gap: 12px;
-          overflow-x: auto;
-          padding-bottom: 6px;
-          align-items: stretch;
+        .pdm-rec-scroll {
+          display: flex; gap: 14px;
+          overflow-x: auto; padding-bottom: 8px;
+          scrollbar-width: thin; scrollbar-color: rgba(0,176,165,0.2) transparent;
         }
+        .pdm-rec-scroll::-webkit-scrollbar { height: 3px; }
+        .pdm-rec-scroll::-webkit-scrollbar-thumb { background: rgba(0,176,165,0.25); border-radius: 3px; }
         .pdm-rec-item {
-          flex: 0 0 auto;
-          min-width: 240px;
+          flex: 0 0 auto; min-width: 230px;
           transition: transform 0.22s ease;
         }
         .pdm-rec-item .pkc-card {
           transform: scale(0.92);
           transform-origin: top center;
-          transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+          transition: transform 0.22s ease;
         }
-        .pdm-rec-item:hover .pkc-card {
-          transform: scale(1);
-          box-shadow: 0 18px 48px rgba(0,60,50,0.16);
-          border-color: rgba(0,176,165,0.22);
-        }
-        .pdm-guid-panel {
-          margin-top: 18px;
-          border: 1px solid rgba(0,176,165,0.12);
-          border-radius: 18px;
-          background: linear-gradient(180deg, rgba(247,255,254,0.92), rgba(255,255,255,0.98));
-          padding: 16px 18px;
-          box-shadow: 0 8px 28px rgba(0,60,50,0.05);
-        }
-        .pdm-guid-toggle {
-          display: flex; align-items: center; gap: 10px;
-          font-size: 13px; font-weight: 800; color: #0d2b2b;
-          letter-spacing: 0.02em;
-        }
-        .pdm-guid-toggle input {
-          width: 16px; height: 16px; accent-color: #00b0a5;
-          flex-shrink: 0;
-        }
-        .pdm-guid-note {
-          margin-top: 8px;
-          font-size: 12px;
-          color: #5a8080;
-        }
-        .pdm-guid-card {
-          margin-top: 14px;
-          display: grid;
-          gap: 12px;
-          border-radius: 16px;
-          padding: 14px;
-          background: #fff;
-          border: 1px solid rgba(0,176,165,0.12);
-        }
-        .pdm-guid-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 12px;
-        }
+        .pdm-rec-item:hover .pkc-card { transform: scale(1); }
+
+        /* ─── Rating stars ──────────────────────────── */
+        .pdm-stars { display: flex; gap: 3px; align-items: center; }
+        .pdm-star { font-size: 13px; }
+
         @media (max-width: 640px) {
-          .pdm-guid-grid { grid-template-columns: 1fr; }
-        }
-        .pdm-guid-field {
-          display: flex; flex-direction: column; gap: 4px;
-        }
-        .pdm-guid-label {
-          font-size: 9px; font-weight: 900;
-          letter-spacing: 0.18em; text-transform: uppercase;
-          color: #7a9a9a;
-        }
-        .pdm-guid-value {
-          font-size: 14px; font-weight: 600;
-          color: #0d2b2b;
-          overflow-wrap: anywhere;
-          word-break: break-word;
-        }
-        @media (min-width: 900px) {
-          .pdm-rec-shell { padding: 16px 18px; }
-          .pdm-rec-row { gap: 18px; }
-          .pdm-rec-item { min-width: 0; }
-          .pdm-rec-item { min-width: 220px; }
-          .pdm-rec-item .pkc-card { transform: scale(0.84); }
-          .pdm-rec-item:hover .pkc-card { transform: scale(0.92); }
+          .pdm-hero { height: 240px; }
+          .pdm-body { padding: 20px 18px 24px; }
+          .pdm-cta { margin: 0 -18px -24px -18px; padding: 16px 18px; }
+          .pdm-dest-grid { grid-template-columns: 1fr; }
+          .pdm-guide-grid { grid-template-columns: 1fr; }
         }
       `}</style>
 
@@ -390,13 +427,13 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
         >
           <motion.div
             className="pdm-modal"
-            initial={{ opacity: 0, y: 40, scale: 0.97 }}
+            initial={{ opacity: 0, y: 50, scale: 0.96 }}
             animate={{ opacity: 1, y: 0,  scale: 1 }}
-            exit={{ opacity: 0, y: 40, scale: 0.97 }}
-            transition={{ duration: 0.35, ease: [0.22,1,0.36,1] }}
+            exit={{ opacity: 0, y: 40, scale: 0.96 }}
+            transition={{ duration: 0.38, ease: [0.22,1,0.36,1] }}
             onClick={e => e.stopPropagation()}
           >
-            {/* Hero */}
+            {/* ─── Hero ─── */}
             <div className="pdm-hero">
               <img src={pkg.image} alt={pkg.title} />
               <div className="pdm-hero-overlay" />
@@ -406,58 +443,62 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
                   {TYPE_ICONS[pkg.type]} {pkg.type}
                 </div>
                 <div className="pdm-title">{pkg.title}</div>
-                <div className="pdm-days-badge">
-                  📅 {pkg.days} {"days"} · {destinations.length} {"Destinations"}
+                <div className="pdm-meta-row">
+                  <div className="pdm-meta-chip">📅 {pkg.days} Days</div>
+                  <div className="pdm-meta-chip">📍 {destinations.length} Destinations</div>
+                  {pkg.avg_rating > 0 && (
+                    <div className="pdm-meta-chip">⭐ {Number(pkg.avg_rating).toFixed(1)}</div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Body */}
+            {/* ─── Body ─── */}
             <div className="pdm-body">
-              <p className="pdm-desc">{pkg.description}</p>
+              {pkg.description && (
+                <p className="pdm-desc">{pkg.description}</p>
+              )}
 
-              {/* Highlights */}
-              {/* <div className="pdm-highlights">
-                {highlights.map(h => (
-                  <span key={h} className="pdm-hl">✦ {h}</span>
-                ))}
-              </div> */}
-
-              {/* Destinations */}
-              <div className="pdm-section-heading">{"Destinations & Itinerary"}</div>
+              {/* ─── Destinations ─── */}
+              <div className="pdm-section-heading">Destinations &amp; Itinerary</div>
               <div className="pdm-dest-grid">
                 {destinations.map((dest, i) => {
                   const activities = Array.isArray(dest.activities) ? dest.activities : [];
+                  const stayDays = dest.days || dest.dayNumber || 1;
                   return (
                     <div key={i} className="pdm-dest-card">
                       <div className="pdm-dest-img">
                         <img src={dest.image} alt={dest.name} />
                         <div className="pdm-dest-img-overlay" />
-                        <span className="pdm-dest-days">{dest.days} {dest.days === 1 ? "day" : "days"}</span>
+                        <div className="pdm-dest-num">{i + 1}</div>
+                        <span className="pdm-dest-days">
+                          {stayDays} {stayDays === 1 ? "Day" : "Days"}
+                        </span>
                       </div>
                       <div className="pdm-dest-info">
-                        <div className="pdm-dest-name">
-                          <span style={{color:'#00b0a5', marginRight:'6px'}}>{i + 1}.</span>
-                          {dest.name}
-                        </div>
-                        <div className="pdm-dest-desc">{dest.description}</div>
+                        <div className="pdm-dest-name">{dest.name}</div>
+                        {dest.description && (
+                          <div className="pdm-dest-desc">{dest.description}</div>
+                        )}
                         <LocationWeather locationName={dest.name} />
 
-                        {/* Activities */}
                         {activities.length > 0 && (
                           <div className="pdm-activities">
-                            <span className="pdm-activities-label">📍 {"Activities"}</span>
+                            <span className="pdm-activities-label">🗺 Activities</span>
                             {activities.map((act, ai) => (
                               <div key={ai} className="pdm-activity-item">
-                                <div className="pdm-activity-name">{act.name}</div>
-                                {act.phone && (
-                                  <div className="pdm-activity-phone">
-                                    <span>📞</span> {act.phone}
-                                  </div>
-                                )}
-                                {act.description && (
-                                  <div className="pdm-activity-desc">{act.description}</div>
-                                )}
+                                <div className="pdm-activity-dot" />
+                                <div>
+                                  <div className="pdm-activity-name">{act.name}</div>
+                                  {act.phone && (
+                                    <div className="pdm-activity-phone">
+                                      <span>📞</span> {act.phone}
+                                    </div>
+                                  )}
+                                  {act.description && (
+                                    <div className="pdm-activity-desc">{act.description}</div>
+                                  )}
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -468,120 +509,166 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
                 })}
               </div>
 
-              {/* CTA */}
+              {/* ─── Guide Panel ─── */}
+              <div className="pdm-guide-panel">
+                <div
+                  className="pdm-guide-header"
+                  onClick={() => guide && setShowGuidDetails(v => !v)}
+                  style={{ cursor: guide ? 'pointer' : 'default' }}
+                >
+                  <div className="pdm-guide-header-left">
+                    <div className="pdm-guide-icon">🧭</div>
+                    <div>
+                      <div className="pdm-guide-label">
+                        {guide ? guide.name : "Tour Guide"}
+                      </div>
+                      <div className="pdm-guide-sub">
+                        {guide ? "Certified guide assigned to this package" : "No guide assigned to this package"}
+                      </div>
+                    </div>
+                  </div>
+                  {guide && (
+                    <motion.div
+                      className="pdm-guide-toggle-btn"
+                      animate={{ rotate: showGuidDetails ? 180 : 0 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      ▾
+                    </motion.div>
+                  )}
+                </div>
+
+                {!guide && (
+                  <div className="pdm-guide-no">No guide is linked to this package.</div>
+                )}
+
+                <AnimatePresence>
+                  {showGuidDetails && guide && (
+                    <motion.div
+                      className="pdm-guide-body"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.28, ease: [0.22,1,0.36,1] }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <div className="pdm-guide-grid">
+                        <div className="pdm-guide-field">
+                          <span className="pdm-guide-field-label">Guide Name</span>
+                          <span className="pdm-guide-field-value">{guide.name}</span>
+                        </div>
+                        <div className="pdm-guide-field">
+                          <span className="pdm-guide-field-label">NIC Number</span>
+                          <span className="pdm-guide-field-value">{guide.nic}</span>
+                        </div>
+                        {guide.phone && (
+                          <div className="pdm-guide-field">
+                            <span className="pdm-guide-field-label">Phone</span>
+                            <span className="pdm-guide-field-value">{guide.phone}</span>
+                          </div>
+                        )}
+                        {guide.contactDetails && (
+                          <div className="pdm-guide-field pdm-guide-full">
+                            <span className="pdm-guide-field-label">Contact Details</span>
+                            <span className="pdm-guide-field-value">{guide.contactDetails}</span>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* ─── CTA ─── */}
               <div className="pdm-cta">
                 <Link
                   to={`/tour-booking/package/book?packageId=${pkg.id}&packageTitle=${encodeURIComponent(pkg.title || "Package Tour")}&packageDays=${encodeURIComponent(pkg.days || "")}`}
                   className="pdm-book-btn"
                 >
-                  <span>{"Book This Package"}</span>
+                  <span>Book This Package</span>
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </Link>
                 <button className="pdm-close-btn" onClick={onClose}>
-                  {"← Back to packages"}
+                  ← Back to packages
                 </button>
               </div>
 
-              <div className="pdm-guid-panel">
-                <label className="pdm-guid-toggle">
-                  <input
-                    type="checkbox"
-                    checked={showGuidDetails}
-                    onChange={e => setShowGuidDetails(e.target.checked)}
-                    disabled={!guide}
-                  />
-                  <span>{"See guide"}</span>
-                </label>
-                {!guide && <div className="pdm-guid-note">{"No guide is linked to this package."}</div>}
-                {showGuidDetails && guide && (
-                  <motion.div
-                    className="pdm-guid-card"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="pdm-guid-grid">
-                      <div className="pdm-guid-field">
-                        <span className="pdm-guid-label">{"Guide Name"}</span>
-                        <span className="pdm-guid-value">{guide.name}</span>
-                      </div>
-                      <div className="pdm-guid-field">
-                        <span className="pdm-guid-label">{"NIC"}</span>
-                        <span className="pdm-guid-value">{guide.nic}</span>
-                      </div>
-                    </div>
-                    <div className="pdm-guid-field">
-                      <span className="pdm-guid-label">{"Contact Details"}</span>
-                      <span className="pdm-guid-value">{guide.contactDetails}</span>
-                    </div>
-                  </motion.div>
-                )}
-              </div>
-
-              {/* Recommendations */}
-              {recommendations && (
-                <>
-                  <div className="pdm-section-heading">{"Recommended For You"}</div>
-
-                  <div className="pdm-rec-shell mb-5">
-                    <div className="pdm-rec-title">
-                      <div className="pdm-rec-kicker">{"Personalized picks"}</div>
-                      <div className="pdm-rec-pill">{"Tailored recommendations"}</div>
+              {recommendations && recTabs.length > 0 && (
+                <div style={{ marginTop: 36 }}>
+                  <div className="pdm-section-heading">Recommended For You</div>
+                  <div className="pdm-rec-panel">
+                    {/* Tab bar */}
+                    <div className="pdm-rec-tab-row">
+                      {recTabs.map(tab => (
+                        <button
+                          key={tab.id}
+                          className={`pdm-rec-tab${activeRecTab === tab.id ? ' active' : ''}`}
+                          onClick={() => setActiveRecTab(tab.id)}
+                        >
+                          {tab.label}
+                          <span style={{
+                            marginLeft: 6,
+                            fontSize: 9,
+                            fontWeight: 800,
+                            background: activeRecTab === tab.id ? 'rgba(255,255,255,0.25)' : 'rgba(0,176,165,0.12)',
+                            color: activeRecTab === tab.id ? '#fff' : '#00b0a5',
+                            borderRadius: 100,
+                            padding: '1px 6px',
+                          }}>{tab.data.length}</span>
+                        </button>
+                      ))}
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 mb-5">
-                    {/* Same Duration */}
-                    <div>
-                      <div className="text-xs font-extrabold mb-2">{"Same duration"}</div>
-                      <div className="pdm-rec-row">
-                        {(recommendations.similarByDays || []).slice(0,6).map((r, i) => (
-                          <div key={`sd-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
-                            <PackageCard pkg={r} onShowMore={handleRecommendationShowMore} index={i} showBookButton={false} showDestinationsAction={false} />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Same Type */}
-                    <div>
-                      <div className="text-xs font-extrabold mb-2">{"Same type"}</div>
-                      <div className="pdm-rec-row">
-                        {(recommendations.similarByType || []).slice(0,6).map((r, i) => (
-                          <div key={`st-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
-                            <PackageCard pkg={r} onShowMore={handleRecommendationShowMore} index={i} showBookButton={false} showDestinationsAction={false} />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Top Rated */}
-                    <div>
-                      <div className="text-xs font-extrabold mb-2">{"Top rated"}</div>
-                      <div className="pdm-rec-row">
-                        {(recommendations.topRated || []).slice(0,6).map((r, i) => (
-                          <div key={`tr-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
-                            <PackageCard pkg={r} onShowMore={handleRecommendationShowMore} index={i} showBookButton={false} showDestinationsAction={false} />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Most Booked */}
-                    <div>
-                      <div className="text-xs font-extrabold mb-2">{"Most booked"}</div>
-                      <div className="pdm-rec-row">
-                        {(recommendations.mostBooked || []).slice(0,6).map((r, i) => (
-                          <div key={`mb-${r.id}`} className="pdm-rec-item min-w-[240px] md:min-w-[220px]">
-                            <PackageCard pkg={r} onShowMore={handleRecommendationShowMore} index={i} showBookButton={false} showDestinationsAction={false} />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    </div>
+                    {/* Cards scroll row */}
+                    <AnimatePresence mode="wait">
+                      {recTabs.map(tab => tab.id === activeRecTab && (
+                        <motion.div
+                          key={tab.id}
+                          className="pdm-rec-scroll"
+                          initial={{ opacity: 0, x: 12 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -12 }}
+                          transition={{ duration: 0.22 }}
+                        >
+                          {(tab.data || []).slice(0, 6).map((r, i) => (
+                            <div key={`${tab.id}-${r.id}`} className="pdm-rec-item">
+                              {/* Mini badge for rating or bookings */}
+                              {tab.id === 'rated' && r.avg_rating > 0 && (
+                                <div style={{
+                                  textAlign: 'center',
+                                  marginBottom: 4,
+                                  fontSize: 10,
+                                  fontWeight: 800,
+                                  color: '#00b0a5',
+                                  letterSpacing: '0.04em',
+                                }}>⭐ {Number(r.avg_rating).toFixed(1)} avg</div>
+                              )}
+                              {tab.id === 'booked' && r.bookings_count > 0 && (
+                                <div style={{
+                                  textAlign: 'center',
+                                  marginBottom: 4,
+                                  fontSize: 10,
+                                  fontWeight: 800,
+                                  color: '#e05c00',
+                                  letterSpacing: '0.04em',
+                                }}>🔥 {r.bookings_count} bookings</div>
+                              )}
+                              <PackageCard
+                                pkg={r}
+                                onShowMore={handleRecommendationShowMore}
+                                index={i}
+                                showBookButton={false}
+                                showDestinationsAction={false}
+                              />
+                            </div>
+                          ))}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </div>
-                </>
+                </div>
               )}
             </div>
           </motion.div>

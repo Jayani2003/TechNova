@@ -21,7 +21,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
   const [vehiclesLoading, setVehiclesLoading] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState(booking.vehicleId ? String(booking.vehicleId) : "");
 
-  const { getPaymentsForBooking, recordPayment, updateAdditionalCharges } = useBookings();
+  const { getPaymentsForBooking, recordPayment, updateAdditionalCharges, updateCustomItinerary } = useBookings();
   const [paymentsData, setPaymentsData] = useState(null);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
   const [recInstallment, setRecInstallment] = useState("");
@@ -35,6 +35,12 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
 
   const [addlChargeInput, setAddlChargeInput] = useState("");
   const [addlChargeSaving, setAddlChargeSaving] = useState(false);
+
+  // Custom Itinerary State
+  const [itinerary, setItinerary] = useState(booking.itinerary || []);
+  const [itinerarySaving, setItinerarySaving] = useState(false);
+  const [itinerarySuccess, setItinerarySuccess] = useState("");
+  const [itineraryError, setItineraryError] = useState("");
 
   const bg     = dark ? "#0f172a" : "#f8fafc";
   const card   = dark ? "#1e293b" : "#ffffff";
@@ -214,6 +220,31 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
       setRecError(err.message || "Failed to update additional charges");
     } finally {
       setAddlChargeSaving(false);
+    }
+  };
+
+  const handleSaveItinerary = async () => {
+    setItineraryError("");
+    setItinerarySuccess("");
+    if (!itinerary || itinerary.length === 0) {
+      setItineraryError("Itinerary cannot be empty.");
+      return;
+    }
+    for (let i = 0; i < itinerary.length; i++) {
+      if (!itinerary[i].city_name?.trim()) {
+        setItineraryError(`City name is required for Day ${itinerary[i].day_number}`);
+        return;
+      }
+    }
+    try {
+      setItinerarySaving(true);
+      await updateCustomItinerary(booking.id, itinerary);
+      setItinerarySuccess("Itinerary saved successfully!");
+    } catch (err) {
+      console.error(err);
+      setItineraryError(err.message || "Failed to save itinerary.");
+    } finally {
+      setItinerarySaving(false);
     }
   };
 
@@ -632,6 +663,81 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                   </p>
                 )
               )}
+            </div>
+          )}
+
+          {/* Custom Tour Itinerary Builder */}
+          {booking.tourType === "CUSTOM" && (
+            <div style={{ background: card, border: `1px solid ${border}`, borderRadius: 16, padding: 20, marginBottom: 20 }}>
+              <SectionTitle color="#EF8354">🗺️ Custom Itinerary Builder</SectionTitle>
+              <p style={{ margin: "0 0 16px", fontSize: 12, color: ts }}>Define the daily stops and activities for this custom booking.</p>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
+                {(itinerary || []).map((day, idx) => (
+                  <div key={idx} style={{ background: bg, padding: 12, borderRadius: 12, border: `1px solid ${border}`, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                    <div style={{ width: '40px', flexShrink: 0, textAlign: 'center', fontWeight: 'bold', color: tm, paddingTop: '8px' }}>
+                      D{day.day_number}
+                    </div>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <input 
+                        type="text" 
+                        value={day.city_name} 
+                        onChange={(e) => {
+                          const newItin = [...itinerary];
+                          newItin[idx].city_name = e.target.value;
+                          setItinerary(newItin);
+                        }} 
+                        placeholder="City / Location Name (e.g., Kandy)" 
+                        style={inputStyle} 
+                      />
+                      <input 
+                        type="text" 
+                        value={Array.isArray(day.activities) ? day.activities.join(', ') : day.activities || ''} 
+                        onChange={(e) => {
+                          const newItin = [...itinerary];
+                          newItin[idx].activities = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                          setItinerary(newItin);
+                        }} 
+                        placeholder="Activities (comma separated, e.g., Temple of Tooth, Botanical Garden)" 
+                        style={inputStyle} 
+                      />
+                    </div>
+                    <button 
+                      onClick={() => {
+                        const newItin = itinerary.filter((_, i) => i !== idx);
+                        // Re-number days
+                        newItin.forEach((d, i) => d.day_number = i + 1);
+                        setItinerary(newItin);
+                      }}
+                      style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', borderRadius: 8, padding: '8px', cursor: 'pointer', flexShrink: 0 }}
+                      title="Remove Day"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <button 
+                  onClick={() => {
+                    setItinerary([...itinerary, { day_number: itinerary.length + 1, city_name: '', activities: [] }]);
+                  }}
+                  style={{ background: bg, color: tm, border: `1px solid ${border}`, borderRadius: 10, padding: "10px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer", flex: 1 }}
+                >
+                  + Add Day
+                </button>
+                <button 
+                  onClick={handleSaveItinerary}
+                  disabled={itinerarySaving}
+                  style={{ background: "#4F5D75", color: "white", border: "none", borderRadius: 10, padding: "10px 24px", fontWeight: 700, fontSize: 13, cursor: itinerarySaving ? "not-allowed" : "pointer", flex: 1 }}
+                >
+                  {itinerarySaving ? "Saving..." : "💾 Save Itinerary"}
+                </button>
+              </div>
+
+              {itineraryError && <p style={{ margin: "10px 0 0", fontSize: 12, color: "#ef4444", fontWeight: 600 }}>{itineraryError}</p>}
+              {itinerarySuccess && <p style={{ margin: "10px 0 0", fontSize: 12, color: "#2F9E44", fontWeight: 600 }}>{itinerarySuccess}</p>}
             </div>
           )}
 

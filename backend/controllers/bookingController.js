@@ -348,7 +348,30 @@ const getAllBookings = async (req, res) => {
        LEFT JOIN vehicle v ON v.vehicle_id = b.vehicle_id
        ORDER BY b.booking_date DESC, b.booking_id DESC`
     );
-    res.json({ bookings: rows.map(mapBooking) });
+
+    const bookingIds = rows.map(r => r.booking_id);
+    let itineraries = [];
+    if (bookingIds.length > 0) {
+      const [itRows] = await db.query(
+        'SELECT * FROM booking_custom_itinerary WHERE booking_id IN (?) ORDER BY day_number ASC',
+        [bookingIds]
+      );
+      itineraries = itRows;
+    }
+
+    const mappedBookings = rows.map(row => {
+      const booking = mapBooking(row);
+      booking.itinerary = itineraries
+        .filter(it => it.booking_id === booking.id)
+        .map(it => ({
+          day_number: it.day_number,
+          city_name: it.city_name,
+          activities: it.activities ? JSON.parse(it.activities) : []
+        }));
+      return booking;
+    });
+
+    res.json({ bookings: mappedBookings });
   } catch (err) {
     console.error('getAllBookings error:', err);
     res.status(500).json({ message: 'Failed to load bookings.' });

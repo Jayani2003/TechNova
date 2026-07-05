@@ -581,18 +581,13 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
                         </span>
                       </div>
                       <div className="pdm-dest-info">
-<<<<<<< HEAD
-                        <div className="pdm-dest-name">{dest.name}</div>
-                        {dest.description && (
-                          <div className="pdm-dest-desc">{dest.description}</div>
-                        )}
-=======
                         <div className="pdm-dest-name">
                           <span style={{color:'#EF8354', marginRight:'6px'}}>{i + 1}.</span>
                           {dest.name}
                         </div>
-                        <div className="pdm-dest-desc">{dest.description}</div>
->>>>>>> Kolitha
+                        {dest.description && (
+                          <div className="pdm-dest-desc">{dest.description}</div>
+                        )}
                         <LocationWeather locationName={dest.name} />
 
                         {activities.length > 0 && (

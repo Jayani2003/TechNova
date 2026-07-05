@@ -38,6 +38,13 @@ export const BookingsProvider = ({ children }) => {
     return res;
   }, [getAllBookings]);
 
+  // ── Admin: update custom itinerary ─────────────────────────────────────────
+  const updateCustomItinerary = useCallback(async (bookingId, itinerary, adminNote = null) => {
+    const res = await api.put(`/bookings/${bookingId}/itinerary`, { itinerary, adminNote });
+    await getAllBookings();
+    return res;
+  }, [getAllBookings]);
+
   // ── Update booking status ──────────────────────────────────────────────────
   const updateBookingStatus = useCallback(async (bookingId, status, adminNote = undefined) => {
     await api.patch(`/bookings/${bookingId}/status`, { status, adminNote });
@@ -112,6 +119,7 @@ export const BookingsProvider = ({ children }) => {
         getAllBookings,
         setQuotedPrice,
         updateAdditionalCharges,
+        updateCustomItinerary,
         updateBookingStatus,
         acceptQuote,
         rejectQuote,

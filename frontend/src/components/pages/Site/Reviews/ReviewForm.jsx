@@ -126,8 +126,6 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
     );
   }
 
-<<<<<<< HEAD
-=======
   // ── Success state ────────────────────────────────────────
   if (submitted) {
     return (
@@ -155,7 +153,6 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
     );
   }
 
->>>>>>> Kolitha
   return (
     <>
       <style>{`

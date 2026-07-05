@@ -70,16 +70,16 @@ export default function ApproveBookings() {
   });
 
   // Modal handlers — async, re-sync selected booking after mutations
-  const handleSetQuote = async (id, price, vehicleInfo) => {
-    await setQuotedPrice(id, price, vehicleInfo);
+  const handleSetQuote = async (id, price, vehicleInfo, adminNote) => {
+    await setQuotedPrice(id, price, vehicleInfo, adminNote);
     const updated = bookings.find(b => b.id === id);
-    if (updated) setSelected({ ...updated, status: "QUOTED", quotedPrice: price, assignedVehicle: vehicleInfo });
+    if (updated) setSelected({ ...updated, status: "QUOTED", quotedPrice: price, assignedVehicle: vehicleInfo, adminNote });
   };
 
-  const handleUpdateStatus = async (id, status) => {
-    await updateBookingStatus(id, status);
+  const handleUpdateStatus = async (id, status, adminNote = undefined) => {
+    await updateBookingStatus(id, status, adminNote);
     const updated = bookings.find(b => b.id === id);
-    if (updated) setSelected({ ...updated, status });
+    if (updated) setSelected({ ...updated, status, adminNote: adminNote !== undefined ? adminNote : updated.adminNote });
     else setSelected(null);
   };
 

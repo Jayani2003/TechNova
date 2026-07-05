@@ -157,10 +157,22 @@ const SuccessScreen = ({ bookingRef, navigate }) => {
   );
 };
 
+const areChildAgesValid = (noOfChildren, agesOfChildren) => {
+  if (!noOfChildren || Number(noOfChildren) <= 0) return true;
+  const ages = String(agesOfChildren || "").split(",").map((age) => age.trim());
+  if (ages.length !== Number(noOfChildren)) return { valid: false, msg: "Please enter ages for all children." };
+  const allValid = ages.every((age) => {
+    if (age === "") return false;
+    const num = Number(age);
+    return Number.isInteger(num) && num >= 0 && num <= 17;
+  });
+  return allValid ? { valid: true } : { valid: false, msg: "Child ages must be numbers between 0 and 17." };
+};
+
 const validateStep = (step, data, user) => {
   switch (step) {
     case 0:
-      if (data.selectedCities.length === 0) return { valid: false, msg: "Please select at least one destination." };
+      if (!data.tourThoughts?.trim()) return { valid: false, msg: "Please share your Dream Itinerary with us." };
       if (data.selectedCities.length > 7) return { valid: false, msg: "Maximum 7 destinations allowed." };
       if (data.activities.length > 7) return { valid: false, msg: "Maximum 7 activities allowed." };
       if (!data.startDate || !data.endDate || !data.pickupTime) return { valid: false, msg: "Please select travel dates and pickup time." };
@@ -168,7 +180,7 @@ const validateStep = (step, data, user) => {
     case 1:
       if (data.noOfAdults < 1) return { valid: false, msg: "At least 1 adult is required." };
       if (!data.categoryId) return { valid: false, msg: "Please select a vehicle category." };
-      return { valid: true };
+      return areChildAgesValid(data.noOfChildren, data.agesOfChildren);
     case 2:
       const finalName = data.customerName?.trim() || user?.name?.trim();
       if (!finalName) return { valid: false, msg: "Please enter your full name." };
@@ -360,6 +372,10 @@ const Customized = () => {
         ...initialData,
         ...editBooking,
         customerName: editBooking.customerName || user?.name || "",
+        contactNumber: editBooking.contactNumber || user?.contact_number || "",
+        emergencyName: editBooking.emergencyName || user?.emergency_name || "",
+        emergencyPhone: editBooking.emergencyPhone || user?.emergency_phone || "",
+        emergencyRelationship: editBooking.emergencyRelationship || user?.emergency_relationship || "",
         selectedCities: citiesMatch ? citiesMatch[1].split(', ') : [],
         activities: activitiesMatch ? activitiesMatch[1].split(', ') : [],
         pickupTime: pickupTimeMatch ? pickupTimeMatch[1].trim() : "",
@@ -370,7 +386,14 @@ const Customized = () => {
         babySeatNeeded: editBooking.noOfLuggages?.includes("Baby seat needed") || false,
       };
     }
-    return { ...initialData, customerName: user?.name || "" };
+    return { 
+      ...initialData, 
+      customerName: user?.name || "",
+      contactNumber: user?.contact_number || "",
+      emergencyName: user?.emergency_name || "",
+      emergencyPhone: user?.emergency_phone || "",
+      emergencyRelationship: user?.emergency_relationship || "",
+    };
   });
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedActivity, setSelectedActivity] = useState("");
@@ -559,11 +582,39 @@ const Customized = () => {
                             <section>
                               <div className="flex items-center gap-3 mb-6">
                                 <div className="w-12 h-12 bg-[#00b0a5]/10 rounded-2xl flex items-center justify-center text-[#00b0a5]">
+                                  <FileText className="w-6 h-6" />
+                                </div>
+                                <div>
+                                  <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">{"Your Dream Itinerary"}</h3>
+                                  <p className="text-sm text-slate-500">
+                                    {"Tell us everything! Where do you want to go? What did your friends recommend? Just share your ideas, and our experts will craft the perfect route for you."}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 mb-10">
+                                <textarea
+                                  value={data.tourThoughts}
+                                  onChange={(e) => handleChange("tourThoughts", e.target.value)}
+                                  placeholder={"E.g. I heard from a friend that Mirissa is amazing for surfing... I also really want to try hiking in Ella..."}
+                                  rows={4}
+                                  className="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-medium resize-none"
+                                />
+                                <p className="text-xs text-slate-400 mt-3 italic">
+                                  {"Your input here is incredibly valuable for our team to design your ideal journey."}
+                                </p>
+                              </div>
+                            </section>
+
+                            <section>
+                              <div className="flex items-center gap-3 mb-6">
+                                <div className="w-12 h-12 bg-[#00b0a5]/10 rounded-2xl flex items-center justify-center text-[#00b0a5]">
                                   <MapPin className="w-6 h-6" />
                                 </div>
                                 <div>
                                   <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">{"Pick Your Stops"}</h3>
-                                  <p className="text-sm text-slate-500">{"Add cities and landmarks to your personal route."}</p>
+                                  <p className="text-sm text-slate-500">
+                                    {"Below is a list of the most loved destinations and activities from our past travelers. Add the ones you're excited about, and our admins will organize them logically!"}
+                                  </p>
                                 </div>
                               </div>
 
@@ -719,29 +770,6 @@ const Customized = () => {
                                     </div>
                                   </motion.div>
                                 )}
-                              </div>
-                            </section>
-                            <section>
-                              <div className="flex items-center gap-3 mb-6">
-                                <div className="w-12 h-12 bg-[#00b0a5]/10 rounded-2xl flex items-center justify-center text-[#00b0a5]">
-                                  <FileText className="w-6 h-6" />
-                                </div>
-                                <div>
-                                  <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">{"Your Dream Itinerary"}</h3>
-                                  <p className="text-sm text-slate-500">{"Share your thoughts, experiences, or specific ideas for this tour."}</p>
-                                </div>
-                              </div>
-                              <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
-                                <textarea
-                                  value={data.tourThoughts}
-                                  onChange={(e) => handleChange("tourThoughts", e.target.value)}
-                                  placeholder={"E.g. I saw a video about the Nine Arch Bridge and would love to experience it at sunrise... I'm a big fan of Ceylon tea and want to visit a factory..."}
-                                  rows={4}
-                                  className="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-medium resize-none"
-                                />
-                                <p className="text-xs text-slate-400 mt-3 italic">
-                                  {"Don't worry about the specifics - just tell us what you're dreaming of!"}
-                                </p>
                               </div>
                             </section>
                           </div>

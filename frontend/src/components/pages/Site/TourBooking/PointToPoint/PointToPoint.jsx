@@ -120,11 +120,22 @@ const SuccessScreen = ({ bookingId, navigate }) => {
   );
 };
  
+const areChildAgesValid = (noOfChildren, agesOfChildren) => {
+  if (!noOfChildren || Number(noOfChildren) <= 0) return true;
+  const ages = String(agesOfChildren || "").split(",").map((age) => age.trim());
+  if (ages.length !== Number(noOfChildren)) return false;
+  return ages.every((age) => {
+    if (age === "") return false;
+    const num = Number(age);
+    return Number.isInteger(num) && num >= 0 && num <= 17;
+  });
+};
+
 // ─── Validation ───────────────────────────────────────────────────────────────
 const validateStep = (step, data) => {
   switch (step) {
     case 0: return data.startLocation.trim() && data.endLocation.trim() && data.startDate && data.endDate && data.pickupTime;
-    case 1: return data.noOfAdults >= 1 && data.categoryId;
+    case 1: return data.noOfAdults >= 1 && data.categoryId && areChildAgesValid(data.noOfChildren, data.agesOfChildren);
     case 2: return data.customerName.trim() && (data.contactNumber || '').trim();
     case 3: return true;
     default: return false;
@@ -143,14 +154,21 @@ const PointToPoint = () => {
   const [maxReachedStep, setMaxReachedStep] = useState(0);
   const [data, setData] = useState(() => {
     if (!editBooking) {
-      return { ...initialData, customerName: user?.name || "" };
+      return { 
+        ...initialData, 
+        customerName: user?.name || "",
+        contactNumber: user?.contact_number || "",
+        emergencyName: user?.emergency_name || "",
+        emergencyPhone: user?.emergency_phone || "",
+        emergencyRelationship: user?.emergency_relationship || "",
+      };
     }
     return {
       ...initialData,
       ...editBooking,
       customerName: editBooking.customerName || user?.name || "",
       contactPlatform: editBooking.contactPlatform || "mobile",
-      contactNumber: editBooking.contactNumber || editBooking.customerPhone || "",
+      contactNumber: editBooking.contactNumber || editBooking.customerPhone || user?.contact_number || "",
       contactPlatform2: editBooking.contactPlatform2 || "",
       contactNumber2: editBooking.contactNumber2 || "",
       totalDays: editBooking.totalDays || 0,
@@ -165,9 +183,9 @@ const PointToPoint = () => {
       luggage35kg: editBooking.luggage35kg || 0,
       luggageCustomCount: editBooking.luggageCustomCount || 0,
       luggageCustomItems: editBooking.luggageCustomItems || [],
-      emergencyName: editBooking.emergencyName || "",
-      emergencyPhone: editBooking.emergencyPhone || "",
-      emergencyRelationship: editBooking.emergencyRelationship || "",
+      emergencyName: editBooking.emergencyName || user?.emergency_name || "",
+      emergencyPhone: editBooking.emergencyPhone || user?.emergency_phone || "",
+      emergencyRelationship: editBooking.emergencyRelationship || user?.emergency_relationship || "",
       notes: editBooking.notes || "",
     };
   });

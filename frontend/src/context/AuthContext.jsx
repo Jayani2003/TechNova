@@ -100,9 +100,8 @@ export function AuthProvider({ children }) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.message || 'Failed to update profile.');
     
-    // Update local user session context
-    const updatedUser = { ...user, ...profileData };
-    _saveSession(getToken(), updatedUser);
+    // Update local user session context with the backend's returned user
+    _saveSession(getToken(), data.user);
     
     return data;
   };

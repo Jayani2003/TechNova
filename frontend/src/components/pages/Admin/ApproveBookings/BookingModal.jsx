@@ -20,11 +20,14 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
   const [vehicles, setVehicles] = useState([]);
   const [vehiclesLoading, setVehiclesLoading] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState(booking.vehicleId ? String(booking.vehicleId) : "");
+  const [adminNote, setAdminNote] = useState(booking.adminNote || "");
 
   // Itinerary state
   const [itinerary, setItinerary] = useState([]);
   const [allowedCities, setAllowedCities] = useState([]);
   const [allowedActivities, setAllowedActivities] = useState([]);
+  const [customCityInput, setCustomCityInput] = useState("");
+  const [customActivityInput, setCustomActivityInput] = useState("");
   const [itinerarySaving, setItinerarySaving] = useState(false);
   const [itineraryErr, setItineraryErr] = useState("");
   const [itinerarySuccess, setItinerarySuccess] = useState("");
@@ -248,7 +251,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
     if (!selectedVehicle) { setErr("Selected vehicle not found"); return; }
     if (!vPlate.trim()) { setErr("Enter plate number"); return; }
     const vehicleName = selectedVehicle.vehicle_name || selectedVehicle.name || "";
-    onSetQuote(booking.id, p, { id: selectedVehicle.id, name: vehicleName, plateNumber: vPlate.trim(), type: vType.trim() });
+    onSetQuote(booking.id, p, { id: selectedVehicle.id, name: vehicleName, plateNumber: vPlate.trim(), type: vType.trim() }, adminNote.trim() || null);
     setErr("");
   };
 
@@ -257,7 +260,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
     setItineraryErr("");
     setItinerarySuccess("");
     try {
-      await api.put(`/bookings/${booking.id}/itinerary`, { itinerary });
+      await api.put(`/bookings/${booking.id}/itinerary`, { itinerary, adminNote: adminNote.trim() || undefined });
       setItinerarySuccess("Itinerary saved successfully!");
       if (typeof window !== "undefined") {
         setTimeout(() => setItinerarySuccess(""), 3000);
@@ -276,8 +279,22 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
     setItinerary(newIt);
   };
   
+  const handleAddCustomCity = () => {
+    if (customCityInput.trim() && !allowedCities.includes(customCityInput.trim())) {
+      setAllowedCities([...allowedCities, customCityInput.trim()]);
+    }
+    setCustomCityInput("");
+  };
+
+  const handleAddCustomActivity = () => {
+    if (customActivityInput.trim() && !allowedActivities.includes(customActivityInput.trim())) {
+      setAllowedActivities([...allowedActivities, customActivityInput.trim()]);
+    }
+    setCustomActivityInput("");
+  };
+
   const addItineraryDay = () => {
-    setItinerary([...itinerary, { day_number: itinerary.length + 1, city_name: allowedCities[0] || "", activities: [] }]);
+    setItinerary([...itinerary, { day_number: itinerary.length + 1, city_name: "", activities: [] }]);
   };
   
   const removeItineraryDay = (index) => {
@@ -435,31 +452,66 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
             <div style={{ background: dark ? "rgba(236,72,153,0.05)" : "rgba(236,72,153,0.03)", border: "1px solid rgba(236,72,153,0.2)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
               <SectionTitle color="#ec4899">🗺️ Custom Tour Itinerary Builder</SectionTitle>
               <p style={{ fontSize: 12, color: ts, marginBottom: 14 }}>
-                Construct the final path for this custom tour using the customer's requested destinations.
+                Construct the final path for this custom tour using the customer's requested destinations and their dream itinerary.
               </p>
 
-              {itinerary.map((day, index) => (
-                <div key={index} style={{ background: card, border: `1px solid ${border}`, borderRadius: 12, padding: 12, marginBottom: 10 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: tm }}>Stop {day.day_number}</span>
-                    <button onClick={() => removeItineraryDay(index)} style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", display: "flex" }}>
-                      <X size={16} />
-                    </button>
+              {booking.tourThoughts && (
+                <div style={{ background: dark ? "rgba(236,72,153,0.1)" : "#fdf2f8", border: "1px solid rgba(236,72,153,0.3)", borderRadius: 12, padding: 12, marginBottom: 16 }}>
+                  <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 800, color: "#ec4899", textTransform: "uppercase" }}>Customer's Dream Itinerary</p>
+                  <p style={{ margin: 0, fontSize: 13, color: tm, whiteSpace: "pre-wrap", fontStyle: "italic" }}>"{booking.tourThoughts.split(' | ').join('\n')}"</p>
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 10, marginBottom: 16, background: card, padding: 12, borderRadius: 12, border: `1px dashed rgba(236,72,153,0.4)` }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                  <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Add Custom City</label>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <input type="text" value={customCityInput} onChange={e => setCustomCityInput(e.target.value)} placeholder="Type a city..." style={{ ...inputStyle, padding: "6px 10px", flex: 1 }} />
+                    <button onClick={handleAddCustomCity} style={{ background: "#ec4899", color: "white", border: "none", borderRadius: 8, padding: "0 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Add</button>
                   </div>
-                  
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    <div>
-                      <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Destination</label>
-                      <select value={day.city_name} onChange={(e) => updateItineraryDay(index, 'city_name', e.target.value)} style={{ ...inputStyle, padding: "6px 10px" }}>
-                        <option value="">Select a city</option>
-                        {allowedCities.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
+                </div>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                  <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Add Custom Activity</label>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <input type="text" value={customActivityInput} onChange={e => setCustomActivityInput(e.target.value)} placeholder="Type an activity..." style={{ ...inputStyle, padding: "6px 10px", flex: 1 }} />
+                    <button onClick={handleAddCustomActivity} style={{ background: "#ec4899", color: "white", border: "none", borderRadius: 8, padding: "0 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Add</button>
+                  </div>
+                </div>
+              </div>
+
+              {itinerary.map((day, index) => {
+                const selectedCitiesSet = new Set(itinerary.map(it => it.city_name).filter(Boolean));
+                const otherSelectedActivitiesSet = new Set(
+                  itinerary.filter((_, i) => i !== index).flatMap(it => it.activities)
+                );
+                return (
+                  <div key={index} style={{ background: card, border: `1px solid ${border}`, borderRadius: 12, padding: 12, marginBottom: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: tm }}>Stop {day.day_number}</span>
+                      <button onClick={() => removeItineraryDay(index)} style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", display: "flex" }}>
+                        <X size={16} />
+                      </button>
                     </div>
+                    
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      <div>
+                        <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Destination</label>
+                        <select value={day.city_name} onChange={(e) => updateItineraryDay(index, 'city_name', e.target.value)} style={{ ...inputStyle, padding: "6px 10px" }}>
+                          <option value="">Select a city</option>
+                          {allowedCities.map(c => {
+                            const isAvailable = !selectedCitiesSet.has(c) || c === day.city_name;
+                            if (!isAvailable) return null;
+                            return <option key={c} value={c}>{c}</option>;
+                          })}
+                        </select>
+                      </div>
                     
                     <div>
                       <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Activities</label>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
                         {allowedActivities.map(act => {
+                          const isAvailable = !otherSelectedActivitiesSet.has(act);
+                          if (!isAvailable) return null;
                           const isSelected = day.activities.includes(act);
                           return (
                             <button key={act}
@@ -483,7 +535,8 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+            })}
 
               <button onClick={addItineraryDay} style={{ background: "transparent", color: "#ec4899", border: "1px dashed #ec4899", borderRadius: 10, padding: "8px 0", width: "100%", fontSize: 12, fontWeight: 700, cursor: "pointer", marginBottom: 12 }}>
                 + Add Stop
@@ -492,6 +545,16 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
               {itineraryErr && <p style={{ fontSize: 12, color: "#ef4444", margin: "0 0 10px" }}>{itineraryErr}</p>}
               {itinerarySuccess && <p style={{ fontSize: 12, color: "#10b981", margin: "0 0 10px" }}>{itinerarySuccess}</p>}
               
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Special Note to Customer (Optional)</label>
+                <textarea 
+                  value={adminNote} 
+                  onChange={e => setAdminNote(e.target.value)} 
+                  placeholder="e.g. We have upgraded your vehicle for free..." 
+                  style={{ ...inputStyle, height: 60, resize: "none" }} 
+                />
+              </div>
+
               <button onClick={handleSaveItinerary} disabled={itinerarySaving} style={{ background: "#ec4899", color: "white", border: "none", borderRadius: 10, width: "100%", padding: 10, fontSize: 13, fontWeight: 700, cursor: itinerarySaving ? "not-allowed" : "pointer", opacity: itinerarySaving ? 0.7 : 1 }}>
                 {itinerarySaving ? "Saving..." : "Save Itinerary"}
               </button>
@@ -580,7 +643,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
               <p style={{ margin: "0 0 14px", fontSize: 12, color: ts }}>
                 Confirm to lock this booking.{booking.assignedVehicle ? ` Vehicle: ${booking.assignedVehicle.name} (${booking.assignedVehicle.plateNumber})` : ""}
               </p>
-              <button onClick={() => onUpdateStatus(booking.id, "CONFIRMED")}
+              <button onClick={() => onUpdateStatus(booking.id, "CONFIRMED", adminNote.trim() || undefined)}
                 style={{ background: "#10b981", color: "white", border: "none", borderRadius: 12, padding: "10px 28px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
                 <CheckCircle2 size={15} /> Confirm Booking
               </button>

@@ -35,9 +35,17 @@ function TourPackages() {
 		setIsFormOpen(true);
 	};
 
-	const handleEdit = (pkg) => {
-		setEditingPackage(pkg);
-		setIsFormOpen(true);
+	const handleEdit = async (pkg) => {
+		try {
+			// The grid list only has a summary (max 2 destinations, no activities).
+			// Fetch the full details from the backend before editing.
+			const fullPkg = await packageStore.get(pkg.id);
+			setEditingPackage(fullPkg);
+			setIsFormOpen(true);
+		} catch (err) {
+			alert('Failed to load full package details. Please try again.');
+			console.error(err);
+		}
 	};
 
 	const handleSave = async (data) => {
@@ -103,6 +111,8 @@ function TourPackages() {
 			isOpen={isFormOpen}
 			pkg={editingPackage}
 			onSave={handleSave}
+			existingPackages={packages}
+			editingId={editingPackage?.id}
 			onClose={() => {
 				setIsFormOpen(false);
 				setEditingPackage(null);

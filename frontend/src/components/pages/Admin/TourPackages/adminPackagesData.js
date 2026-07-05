@@ -37,11 +37,20 @@ const mapBackendPackage = (p) => ({
   days: Number(p.days) || (p.days ? Number(p.days) : 0),
   description: p.description,
   image: p.image_url || p.image || '',
-  destinations: Array.isArray(p.destinations) ? p.destinations : [],
+  destinations: Array.isArray(p.destinations) ? p.destinations.map(d => ({
+    ...d,
+    days: d.dayNumber || d.days || 1,
+    activities: (d.activities || []).map(a => ({
+      name: a.activity_name || a.name || '',
+      phone: a.phone || '',
+      description: a.description || ''
+    }))
+  })) : [],
   guid: p.guid ? {
     id: p.guid.id,
     name: p.guid.name,
     nic: p.guid.nic,
+    phone: p.guid.phone || '',
     contactDetails: p.guid.contactDetails,
   } : null,
   availability: normalizeAvailability(p.availability || { status: p.availability_status }),
@@ -103,6 +112,7 @@ export const packageStore = {
       form.append('withGuid', String(Boolean(data.withGuid)));
       form.append('guideName', data.guideName || '');
       form.append('guideNic', data.guideNic || '');
+      form.append('guidePhone', data.guidePhone || '');
       form.append('guideContactDetails', data.guideContactDetails || '');
 
       if (data.packageImageFile) {
@@ -170,6 +180,26 @@ export const packageStore = {
     }
   },
 
+  // ── GET FULL DETAIL ───────────────────────────────────────
+  get: async (id) => {
+    try {
+      const m = String(id).match(/(\d+)/);
+      if (!m) throw new Error('Invalid package id');
+      const pkgId = m[1];
+      const res = await fetch(buildApiUrl(`/packages/${pkgId}`));
+      if (!res.ok) throw new Error('Failed to load package details');
+      const data = await res.json();
+      // data from getPackageDetail maps directly to our needed structure
+      return mapBackendPackage({
+        ...data,
+        package_id: data.id,
+      });
+    } catch (err) {
+      console.error('package get failed', err);
+      throw err;
+    }
+  },
+
   // ── UPDATE ──────────────────────────────────────────────
   update: async (id, data) => {
     try {
@@ -186,6 +216,7 @@ export const packageStore = {
       form.append('withGuid', String(Boolean(data.withGuid)));
       form.append('guideName', data.guideName || '');
       form.append('guideNic', data.guideNic || '');
+      form.append('guidePhone', data.guidePhone || '');
       form.append('guideContactDetails', data.guideContactDetails || '');
       if (data.packageImageFile) form.append('packageImage', data.packageImageFile);
 
@@ -313,6 +344,7 @@ export const emptyPackage = () => ({
   withGuid:     false,
   guideName:    '',
   guideNic:     '',
+  guidePhone:   '',
   guideContactDetails: '',
   destinations: [
     { name: '', days: 1, description: '', image: '', imageFile: null, activities: [] },

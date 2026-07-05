@@ -20,17 +20,6 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
   const [vehicles, setVehicles] = useState([]);
   const [vehiclesLoading, setVehiclesLoading] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState(booking.vehicleId ? String(booking.vehicleId) : "");
-  const [adminNote, setAdminNote] = useState(booking.adminNote || "");
-
-  // Itinerary state
-  const [itinerary, setItinerary] = useState([]);
-  const [allowedCities, setAllowedCities] = useState([]);
-  const [allowedActivities, setAllowedActivities] = useState([]);
-  const [customCityInput, setCustomCityInput] = useState("");
-  const [customActivityInput, setCustomActivityInput] = useState("");
-  const [itinerarySaving, setItinerarySaving] = useState(false);
-  const [itineraryErr, setItineraryErr] = useState("");
-  const [itinerarySuccess, setItinerarySuccess] = useState("");
 
   const { getPaymentsForBooking, recordPayment, updateAdditionalCharges } = useBookings();
   const [paymentsData, setPaymentsData] = useState(null);
@@ -136,21 +125,6 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
     setRecNotes("");
     setRecError("");
     setRecSuccess("");
-
-    if (booking.tourType === "CUSTOM") {
-      setItinerary(booking.itinerary || []);
-      let cities = [];
-      let acts = [];
-      if (booking.tourThoughts) {
-        const parts = booking.tourThoughts.split(' | ');
-        parts.forEach(p => {
-          if (p.startsWith('Cities: ')) cities = p.replace('Cities: ', '').split(', ');
-          if (p.startsWith('Activities: ')) acts = p.replace('Activities: ', '').split(', ');
-        });
-      }
-      setAllowedCities(cities);
-      setAllowedActivities(acts);
-    }
   }, [booking]);
 
   useEffect(() => {
@@ -251,64 +225,14 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
     if (!selectedVehicle) { setErr("Selected vehicle not found"); return; }
     if (!vPlate.trim()) { setErr("Enter plate number"); return; }
     const vehicleName = selectedVehicle.vehicle_name || selectedVehicle.name || "";
-    onSetQuote(booking.id, p, { id: selectedVehicle.id, name: vehicleName, plateNumber: vPlate.trim(), type: vType.trim() }, adminNote.trim() || null);
+    onSetQuote(booking.id, p, { id: selectedVehicle.id, name: vehicleName, plateNumber: vPlate.trim(), type: vType.trim() });
     setErr("");
-  };
-
-  const handleSaveItinerary = async () => {
-    setItinerarySaving(true);
-    setItineraryErr("");
-    setItinerarySuccess("");
-    try {
-      await api.put(`/bookings/${booking.id}/itinerary`, { itinerary, adminNote: adminNote.trim() || undefined });
-      setItinerarySuccess("Itinerary saved successfully!");
-      if (typeof window !== "undefined") {
-        setTimeout(() => setItinerarySuccess(""), 3000);
-      }
-    } catch (err) {
-      console.error(err);
-      setItineraryErr(err.message || "Failed to save itinerary");
-    } finally {
-      setItinerarySaving(false);
-    }
-  };
-
-  const updateItineraryDay = (index, field, value) => {
-    const newIt = [...itinerary];
-    newIt[index][field] = value;
-    setItinerary(newIt);
-  };
-  
-  const handleAddCustomCity = () => {
-    if (customCityInput.trim() && !allowedCities.includes(customCityInput.trim())) {
-      setAllowedCities([...allowedCities, customCityInput.trim()]);
-    }
-    setCustomCityInput("");
-  };
-
-  const handleAddCustomActivity = () => {
-    if (customActivityInput.trim() && !allowedActivities.includes(customActivityInput.trim())) {
-      setAllowedActivities([...allowedActivities, customActivityInput.trim()]);
-    }
-    setCustomActivityInput("");
-  };
-
-  const addItineraryDay = () => {
-    setItinerary([...itinerary, { day_number: itinerary.length + 1, city_name: "", activities: [] }]);
-  };
-  
-  const removeItineraryDay = (index) => {
-    const newIt = [...itinerary];
-    newIt.splice(index, 1);
-    // Re-number
-    newIt.forEach((item, i) => item.day_number = i + 1);
-    setItinerary(newIt);
   };
 
   // Shared detail row
   const Row = ({ icon: Icon, label, value }) => !value ? null : (
     <div style={{ display: "flex", gap: 12, padding: "9px 0", borderBottom: `1px solid ${border}` }}>
-      {Icon && <Icon size={15} color="#00b0a5" style={{ flexShrink: 0, marginTop: 2 }} />}
+      {Icon && <Icon size={15} color="#EF8354" style={{ flexShrink: 0, marginTop: 2 }} />}
       <div>
         <p style={{ margin: 0, fontSize: 10, color: ts, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em" }}>{label}</p>
         <p style={{ margin: "2px 0 0", fontSize: 13, color: tm, fontWeight: 500 }}>{value}</p>
@@ -316,7 +240,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
     </div>
   );
 
-  const SectionTitle = ({ children, color = "#00b0a5" }) => (
+  const SectionTitle = ({ children, color = "#EF8354" }) => (
     <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 800, color, textTransform: "uppercase", letterSpacing: ".08em" }}>
       {children}
     </p>
@@ -340,7 +264,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
       >
 
         {/* ── Header ── */}
-        <div style={{ padding: "18px 24px", background: "linear-gradient(120deg,#009e94,#0891b2)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <div style={{ padding: "18px 24px", background: "linear-gradient(120deg,#2D3142,#4F5D75)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div>
             <p style={{ margin: 0, color: "rgba(255,255,255,0.65)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em" }}>Booking</p>
             <h2 style={{ margin: "2px 0 6px", color: "white", fontWeight: 900, fontSize: 20 }}>{booking.id}</h2>
@@ -350,7 +274,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
             <StatusChip status={booking.status} />
             <button
               onClick={onClose}
-              style={{ background: "white", border: "none", borderRadius: 10, width: 36, height: 36, cursor: "pointer", color: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", flexShrink: 0 }}
+              style={{ background: "white", border: "none", borderRadius: 10, width: 36, height: 36, cursor: "pointer", color: "#2D3142", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", flexShrink: 0 }}
             >
               <X size={18} strokeWidth={2.5} />
             </button>
@@ -362,7 +286,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
 
           {/* Tour type banner */}
           {tourCfg.label && (
-            <div style={{ background: tourCfg.bg || "rgba(0,176,165,0.08)", border: `1px solid ${tourCfg.color || "#00b0a5"}40`, borderRadius: 12, padding: "10px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ background: tourCfg.bg || "rgba(239,131,84,0.08)", border: `1px solid ${tourCfg.color || "#EF8354"}40`, borderRadius: 12, padding: "10px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
               <div>
                 <p style={{ margin: 0, fontSize: 11, color: ts, fontWeight: 600 }}>Booking Type</p>
                 <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: tourCfg.color }}>{tourCfg.label}</p>
@@ -447,120 +371,6 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
             </>
           )}
 
-          {/* ── Custom Tour Itinerary Builder ── */}
-          {booking.tourType === "CUSTOM" && (
-            <div style={{ background: dark ? "rgba(236,72,153,0.05)" : "rgba(236,72,153,0.03)", border: "1px solid rgba(236,72,153,0.2)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
-              <SectionTitle color="#ec4899">🗺️ Custom Tour Itinerary Builder</SectionTitle>
-              <p style={{ fontSize: 12, color: ts, marginBottom: 14 }}>
-                Construct the final path for this custom tour using the customer's requested destinations and their dream itinerary.
-              </p>
-
-              {booking.tourThoughts && (
-                <div style={{ background: dark ? "rgba(236,72,153,0.1)" : "#fdf2f8", border: "1px solid rgba(236,72,153,0.3)", borderRadius: 12, padding: 12, marginBottom: 16 }}>
-                  <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 800, color: "#ec4899", textTransform: "uppercase" }}>Customer's Dream Itinerary</p>
-                  <p style={{ margin: 0, fontSize: 13, color: tm, whiteSpace: "pre-wrap", fontStyle: "italic" }}>"{booking.tourThoughts.split(' | ').join('\n')}"</p>
-                </div>
-              )}
-
-              <div style={{ display: "flex", gap: 10, marginBottom: 16, background: card, padding: 12, borderRadius: 12, border: `1px dashed rgba(236,72,153,0.4)` }}>
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
-                  <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Add Custom City</label>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <input type="text" value={customCityInput} onChange={e => setCustomCityInput(e.target.value)} placeholder="Type a city..." style={{ ...inputStyle, padding: "6px 10px", flex: 1 }} />
-                    <button onClick={handleAddCustomCity} style={{ background: "#ec4899", color: "white", border: "none", borderRadius: 8, padding: "0 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Add</button>
-                  </div>
-                </div>
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
-                  <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Add Custom Activity</label>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <input type="text" value={customActivityInput} onChange={e => setCustomActivityInput(e.target.value)} placeholder="Type an activity..." style={{ ...inputStyle, padding: "6px 10px", flex: 1 }} />
-                    <button onClick={handleAddCustomActivity} style={{ background: "#ec4899", color: "white", border: "none", borderRadius: 8, padding: "0 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Add</button>
-                  </div>
-                </div>
-              </div>
-
-              {itinerary.map((day, index) => {
-                const selectedCitiesSet = new Set(itinerary.map(it => it.city_name).filter(Boolean));
-                const otherSelectedActivitiesSet = new Set(
-                  itinerary.filter((_, i) => i !== index).flatMap(it => it.activities)
-                );
-                return (
-                  <div key={index} style={{ background: card, border: `1px solid ${border}`, borderRadius: 12, padding: 12, marginBottom: 10 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                      <span style={{ fontSize: 13, fontWeight: 800, color: tm }}>Stop {day.day_number}</span>
-                      <button onClick={() => removeItineraryDay(index)} style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", display: "flex" }}>
-                        <X size={16} />
-                      </button>
-                    </div>
-                    
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                      <div>
-                        <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Destination</label>
-                        <select value={day.city_name} onChange={(e) => updateItineraryDay(index, 'city_name', e.target.value)} style={{ ...inputStyle, padding: "6px 10px" }}>
-                          <option value="">Select a city</option>
-                          {allowedCities.map(c => {
-                            const isAvailable = !selectedCitiesSet.has(c) || c === day.city_name;
-                            if (!isAvailable) return null;
-                            return <option key={c} value={c}>{c}</option>;
-                          })}
-                        </select>
-                      </div>
-                    
-                    <div>
-                      <label style={{ fontSize: 10, fontWeight: 700, color: ts, textTransform: "uppercase" }}>Activities</label>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
-                        {allowedActivities.map(act => {
-                          const isAvailable = !otherSelectedActivitiesSet.has(act);
-                          if (!isAvailable) return null;
-                          const isSelected = day.activities.includes(act);
-                          return (
-                            <button key={act}
-                              onClick={() => {
-                                const newActs = isSelected ? day.activities.filter(a => a !== act) : [...day.activities, act];
-                                updateItineraryDay(index, 'activities', newActs);
-                              }}
-                              style={{ 
-                                background: isSelected ? "#ec4899" : "transparent",
-                                color: isSelected ? "white" : ts,
-                                border: `1px solid ${isSelected ? "#ec4899" : border}`,
-                                borderRadius: 20, padding: "4px 10px", fontSize: 11, cursor: "pointer"
-                              }}
-                            >
-                              {act}
-                            </button>
-                          );
-                        })}
-                        {allowedActivities.length === 0 && <span style={{ fontSize: 11, color: ts }}>No activities requested.</span>}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-              <button onClick={addItineraryDay} style={{ background: "transparent", color: "#ec4899", border: "1px dashed #ec4899", borderRadius: 10, padding: "8px 0", width: "100%", fontSize: 12, fontWeight: 700, cursor: "pointer", marginBottom: 12 }}>
-                + Add Stop
-              </button>
-
-              {itineraryErr && <p style={{ fontSize: 12, color: "#ef4444", margin: "0 0 10px" }}>{itineraryErr}</p>}
-              {itinerarySuccess && <p style={{ fontSize: 12, color: "#10b981", margin: "0 0 10px" }}>{itinerarySuccess}</p>}
-              
-              <div style={{ marginBottom: 12 }}>
-                <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Special Note to Customer (Optional)</label>
-                <textarea 
-                  value={adminNote} 
-                  onChange={e => setAdminNote(e.target.value)} 
-                  placeholder="e.g. We have upgraded your vehicle for free..." 
-                  style={{ ...inputStyle, height: 60, resize: "none" }} 
-                />
-              </div>
-
-              <button onClick={handleSaveItinerary} disabled={itinerarySaving} style={{ background: "#ec4899", color: "white", border: "none", borderRadius: 10, width: "100%", padding: 10, fontSize: 13, fontWeight: 700, cursor: itinerarySaving ? "not-allowed" : "pointer", opacity: itinerarySaving ? 0.7 : 1 }}>
-                {itinerarySaving ? "Saving..." : "Save Itinerary"}
-              </button>
-            </div>
-          )}
-
           {/* ── Quote + vehicle assignment (PENDING or QUOTED) ── */}
           {(booking.status === "PENDING" || booking.status === "QUOTED") && (
             <div style={{ background: dark ? "rgba(99,102,241,0.07)" : "rgba(99,102,241,0.04)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
@@ -569,7 +379,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                 <div>
                   <label style={{ fontSize: 11, fontWeight: 700, color: ts, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 4 }}>Price (USD) *</label>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, background: card, border: `1px solid ${border}`, borderRadius: 10, padding: "9px 12px" }}>
-                    <Banknote size={14} color="#00b0a5" />
+                    <Banknote size={14} color="#EF8354" />
                     <input type="number" value={price} onChange={e => { setPrice(e.target.value); setErr(""); }} placeholder="0.00"
                       style={{ border: "none", outline: "none", background: "transparent", fontSize: 13, color: tm, width: "100%", fontWeight: 600 }} />
                   </div>
@@ -637,14 +447,14 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
           {/* ACCEPTED → confirm */}
           {booking.status === "ACCEPTED" && (
             <div style={{ background: dark ? "rgba(16,185,129,0.07)" : "rgba(16,185,129,0.05)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
-              <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 800, color: "#10b981" }}>
+              <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 800, color: "#2F9E44" }}>
                 ✅ Customer accepted — ${booking.quotedPrice}
               </p>
               <p style={{ margin: "0 0 14px", fontSize: 12, color: ts }}>
                 Confirm to lock this booking.{booking.assignedVehicle ? ` Vehicle: ${booking.assignedVehicle.name} (${booking.assignedVehicle.plateNumber})` : ""}
               </p>
-              <button onClick={() => onUpdateStatus(booking.id, "CONFIRMED", adminNote.trim() || undefined)}
-                style={{ background: "#10b981", color: "white", border: "none", borderRadius: 12, padding: "10px 28px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+              <button onClick={() => onUpdateStatus(booking.id, "CONFIRMED")}
+                style={{ background: "#2F9E44", color: "white", border: "none", borderRadius: 12, padding: "10px 28px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
                 <CheckCircle2 size={15} /> Confirm Booking
               </button>
             </div>
@@ -653,7 +463,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
           {/* ── Payments Section (Admins) ── */}
           {booking.quotedPrice && (
             <div style={{ background: card, borderRadius: 16, border: `1px solid ${border}`, padding: 20, marginBottom: 16 }}>
-              <SectionTitle color="#0d9488">💳 Payment History & Record</SectionTitle>
+              <SectionTitle color="#EF8354">💳 Payment History & Record</SectionTitle>
               
               {/* Payment Summary Indicators */}
               {paymentsData && (
@@ -666,13 +476,13 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                   </div>
                   <div>
                     <p style={{ margin: 0, fontSize: 9, color: ts, fontWeight: 700, textTransform: "uppercase" }}>Paid Amount</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 13, fontWeight: 800, color: "#10b981" }}>
+                    <p style={{ margin: "2px 0 0", fontSize: 13, fontWeight: 800, color: "#2F9E44" }}>
                       LKR {paymentsData.paidAmount.toLocaleString('en-LK')}
                     </p>
                   </div>
                   <div>
                     <p style={{ margin: 0, fontSize: 9, color: ts, fontWeight: 700, textTransform: "uppercase" }}>Remaining</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 13, fontWeight: 800, color: paymentsData.remainingAmount > 0 ? "#f59e0b" : "#10b981" }}>
+                    <p style={{ margin: "2px 0 0", fontSize: 13, fontWeight: 800, color: paymentsData.remainingAmount > 0 ? "#f59e0b" : "#2F9E44" }}>
                       LKR {paymentsData.remainingAmount.toLocaleString('en-LK')}
                     </p>
                   </div>
@@ -693,7 +503,7 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                           <p style={{ margin: 0, fontSize: 10, color: ts }}>Received {tx.date} · Rec: {tx.recordedBy}</p>
                           {tx.notes && <p style={{ margin: "2px 0 0", fontSize: 10, color: ts, fontStyle: "italic" }}>"{tx.notes}"</p>}
                         </div>
-                        <span style={{ fontWeight: 700, color: "#10b981" }}>{tx.amount}</span>
+                        <span style={{ fontWeight: 700, color: "#2F9E44" }}>{tx.amount}</span>
                       </div>
                     ))}
                   </div>
@@ -805,19 +615,19 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
                   </div>
 
                   {recError && <p style={{ margin: "0 0 10px", fontSize: 12, color: "#ef4444", fontWeight: 600 }}>{recError}</p>}
-                  {recSuccess && <p style={{ margin: "0 0 10px", fontSize: 12, color: "#10b981", fontWeight: 600 }}>{recSuccess}</p>}
+                  {recSuccess && <p style={{ margin: "0 0 10px", fontSize: 12, color: "#2F9E44", fontWeight: 600 }}>{recSuccess}</p>}
 
                   <button 
                     type="submit" 
                     disabled={recSubmitting}
-                    style={{ width: "100%", background: "#0d9488", color: "white", border: "none", borderRadius: 10, padding: 10, fontWeight: 700, fontSize: 13, cursor: "pointer" }}
+                    style={{ width: "100%", background: "#EF8354", color: "white", border: "none", borderRadius: 10, padding: 10, fontWeight: 700, fontSize: 13, cursor: "pointer" }}
                   >
                     {recSubmitting ? "Recording..." : "💾 Record Payment"}
                   </button>
                 </form>
               ) : (
                 paymentsData && paymentsData.remainingAmount <= 0 && (
-                  <p style={{ margin: 0, fontSize: 12, color: "#10b981", fontWeight: 700, textAlign: "center" }}>
+                  <p style={{ margin: 0, fontSize: 12, color: "#2F9E44", fontWeight: 700, textAlign: "center" }}>
                     🎉 Booking is fully paid.
                   </p>
                 )
@@ -829,19 +639,19 @@ export default function BookingModal({ booking, dark, onClose, onSetQuote, onUpd
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
             {booking.status === "CONFIRMED" && (
               <button onClick={() => onUpdateStatus(booking.id, "TOUR_STARTED")}
-                style={{ background: "#0891b2", color: "white", border: "none", borderRadius: 12, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                style={{ background: "#4F5D75", color: "white", border: "none", borderRadius: 12, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
                 <Truck size={14} /> Mark Tour Started
               </button>
             )}
             {booking.status === "TOUR_STARTED" && (
               <button onClick={() => onUpdateStatus(booking.id, "COMPLETED")}
-                style={{ background: "#64748b", color: "white", border: "none", borderRadius: 12, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                style={{ background: "#4F5D75", color: "white", border: "none", borderRadius: 12, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
                 <Flag size={14} /> Mark Completed
               </button>
             )}
             {booking.status === "COMPLETED" && (
               <button onClick={() => onUpdateStatus(booking.id, "CLOSED")}
-                style={{ background: "rgba(148,163,184,0.15)", color: "#64748b", border: "1px solid rgba(148,163,184,0.3)", borderRadius: 12, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                style={{ background: "rgba(191,192,192,0.25)", color: "#4F5D75", border: "1px solid rgba(148,163,184,0.3)", borderRadius: 12, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
                 <Archive size={14} /> Archive (Close)
               </button>
             )}

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ChevronRight, MapPin, Package, Compass } from "lucide-react";
+import { getBookingReferenceForBooking } from "../../../../utils/bookingReference";
  
 export const STATUS_STYLES = {
   PENDING:      "bg-yellow-100 text-yellow-800",
@@ -42,7 +43,7 @@ const MyBookingCard = ({ booking, onClick }) => {
             <Icon className="w-5 h-5 text-[#00b0a5]" />
           </div>
           <div>
-            <p className="font-bold text-slate-800 text-sm">{booking.id}</p>
+            <p className="font-bold text-slate-800 text-sm">{booking.bookingRef || getBookingReferenceForBooking(booking)}</p>
             <p className="text-xs text-slate-500">{TOUR_TYPE_LABEL[booking.tourType] || booking.tourType}</p>
           </div>
         </div>

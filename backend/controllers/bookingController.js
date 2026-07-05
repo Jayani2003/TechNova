@@ -108,6 +108,7 @@ const mapBooking = (row) => ({
   tourStartedAt:      row.tour_started_at,
   completedAt:        row.completed_at,
   closedAt:           row.closed_at,
+  bookingRef:         getBookingReference(row.tour_type, row.booking_id),
   itinerary:          row.itinerary || [],
 });
 
@@ -274,7 +275,7 @@ const createP2PBooking = async (req, res) => {
       message: 'Booking submitted successfully.',
       bookingId,
       booking: { id: bookingId },
-      bookingRef: `CBT-${isPackageBooking ? 'PKG' : isCustomBooking ? 'CUS' : 'P2P'}-${bookingId}`,
+      bookingRef: getBookingReference(isPackageBooking ? 'PACKAGE' : isCustomBooking ? 'CUSTOM' : 'P2P', bookingId),
     });
 
   } catch (err) {

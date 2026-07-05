@@ -62,10 +62,10 @@ const GuestGuard = ({ navigate }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-3xl border border-[#00b0a5]/10 shadow-xl p-10 text-center max-w-md w-full"
+      className="bg-white rounded-3xl border border-[#EF8354]/10 shadow-xl p-10 text-center max-w-md w-full"
     >
-      <div className="w-20 h-20 bg-[#00b0a5]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-        <Lock className="w-10 h-10 text-[#00b0a5]" />
+      <div className="w-20 h-20 bg-[#EF8354]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+        <Lock className="w-10 h-10 text-[#EF8354]" />
       </div>
       <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tighter uppercase">{"Login Required"}</h2>
       <p className="text-slate-500 text-base mb-8">
@@ -74,13 +74,13 @@ const GuestGuard = ({ navigate }) => {
       <div className="flex flex-col gap-3">
         <button
           onClick={() => navigate("/login")}
-          className="bg-[#00b0a5] hover:bg-[#008f86] text-white px-8 py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#00b0a5]/20 cursor-pointer"
+          className="bg-[#EF8354] hover:bg-[#4F5D75] text-white px-8 py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#EF8354]/20 cursor-pointer"
         >
           {"Sign In"}
         </button>
         <button
           onClick={() => navigate("/register")}
-          className="border-2 border-[#00b0a5]/20 text-slate-700 px-8 py-4 rounded-xl font-bold hover:bg-[#00b0a5]/5 transition-all cursor-pointer"
+          className="border-2 border-[#EF8354]/20 text-slate-700 px-8 py-4 rounded-xl font-bold hover:bg-[#EF8354]/5 transition-all cursor-pointer"
         >
           {"Create Account"}
         </button>
@@ -100,21 +100,21 @@ const SuccessScreen = ({ bookingRef, navigate }) => {
     transition={{ duration: 0.5 }}
     className="text-center py-8"
   >
-    <div className="w-24 h-24 bg-[#00b0a5]/10 rounded-full flex items-center justify-center mx-auto mb-8 relative">
-      <CheckCircle className="w-12 h-12 text-[#00b0a5]" />
+    <div className="w-24 h-24 bg-[#EF8354]/10 rounded-full flex items-center justify-center mx-auto mb-8 relative">
+      <CheckCircle className="w-12 h-12 text-[#EF8354]" />
       <motion.div 
         animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
         transition={{ duration: 2, repeat: Infinity }}
-        className="absolute inset-0 bg-[#00b0a5]/20 rounded-full"
+        className="absolute inset-0 bg-[#EF8354]/20 rounded-full"
       />
     </div>
     <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter mb-4 uppercase">
       {"Your Journey Awaits!"}
     </h2>
     <p className="text-slate-500 text-lg mb-2 font-medium">{"Booking Reference:"}</p>
-    <p className="text-2xl font-black text-[#00b0a5] mb-10 tracking-widest bg-[#00b0a5]/5 inline-block px-6 py-2 rounded-full border border-[#00b0a5]/20">{bookingRef}</p>
+    <p className="text-2xl font-black text-[#EF8354] mb-10 tracking-widest bg-[#EF8354]/5 inline-block px-6 py-2 rounded-full border border-[#EF8354]/20">{bookingRef}</p>
     
-    <div className="bg-[#f7fffe] rounded-3xl p-8 mb-10 text-left border border-[#00b0a5]/10 shadow-sm space-y-4 max-w-lg mx-auto">
+    <div className="bg-[#f7fffe] rounded-3xl p-8 mb-10 text-left border border-[#EF8354]/10 shadow-sm space-y-4 max-w-lg mx-auto">
       <h4 className="font-bold text-slate-800 uppercase tracking-widest text-xs mb-2">{"Next Steps:"}</h4>
       {[
         "Our travel experts will review your custom itinerary",
@@ -123,7 +123,7 @@ const SuccessScreen = ({ bookingRef, navigate }) => {
         "Accept the quote to finalize your dream vacation"
       ].map((s, i) => (
         <div key={i} className="flex items-start gap-4">
-          <div className="w-6 h-6 bg-[#00b0a5] rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
+          <div className="w-6 h-6 bg-[#EF8354] rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
             {i + 1}
           </div>
           <p className="text-slate-600 font-medium">{s}</p>
@@ -134,7 +134,7 @@ const SuccessScreen = ({ bookingRef, navigate }) => {
     <div className="flex flex-col sm:flex-row gap-4 justify-center">
       <button
         onClick={() => navigate("/user/profile")}
-        className="bg-[#00b0a5] hover:bg-[#008f86] text-white px-10 py-4 rounded-2xl font-black transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#00b0a5]/20 flex items-center justify-center gap-2 tracking-widest cursor-pointer uppercase text-sm"
+        className="bg-[#EF8354] hover:bg-[#4F5D75] text-white px-10 py-4 rounded-2xl font-black transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#EF8354]/20 flex items-center justify-center gap-2 tracking-widest cursor-pointer uppercase text-sm"
       >
         {"View My Bookings"}
       </button>
@@ -201,8 +201,8 @@ const CustomReviewStep = ({ data, user }) => {
   const ReviewRow = ({ icon: Icon, label, value }) =>
     value ? (
       <div className="flex items-start gap-4 py-4 border-b border-slate-50 last:border-0">
-        <div className="w-10 h-10 bg-[#00b0a5]/10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
-          <Icon className="w-5 h-5 text-[#00b0a5]" />
+        <div className="w-10 h-10 bg-[#EF8354]/10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+          <Icon className="w-5 h-5 text-[#EF8354]" />
         </div>
         <div>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{label}</p>
@@ -214,7 +214,7 @@ const CustomReviewStep = ({ data, user }) => {
   return (
     <div className="space-y-8">
       <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-[#00b0a5]/10 text-[#00b0a5] px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-4">
+        <div className="inline-flex items-center gap-2 bg-[#EF8354]/10 text-[#EF8354] px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-4">
           <Compass className="w-4 h-4" /> {"Customized Itinerary"}
         </div>
         <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">{"Review Your Plan"}</h3>
@@ -225,7 +225,7 @@ const CustomReviewStep = ({ data, user }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 hover:shadow-md transition-shadow">
-          <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-6 border-b border-[#00b0a5]/10 pb-4">{"Destinations & Dates"}</p>
+          <p className="text-xs font-black text-[#EF8354] uppercase tracking-widest mb-6 border-b border-[#EF8354]/10 pb-4">{"Destinations & Dates"}</p>
           <ReviewRow icon={MapPin} label={"Route"} value={data.selectedCities.join(" → ")} />
           <ReviewRow icon={Zap} label={"Activities"} value={data.activities.length > 0 ? data.activities.join(", ") : "Sightseeing"} />
           <ReviewRow icon={Calendar} label={"Travel Period"} value={`${data.startDate} to ${data.endDate}`} />
@@ -233,7 +233,7 @@ const CustomReviewStep = ({ data, user }) => {
         </div>
 
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 hover:shadow-md transition-shadow">
-          <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-6 border-b border-[#00b0a5]/10 pb-4">{"Passengers & Vehicle"}</p>
+          <p className="text-xs font-black text-[#EF8354] uppercase tracking-widest mb-6 border-b border-[#EF8354]/10 pb-4">{"Passengers & Vehicle"}</p>
           <ReviewRow icon={Users} label={"Travelers"} value={`${data.noOfAdults} Adults${data.noOfChildren > 0 ? `, ${data.noOfChildren} Children` : ""}`} />
           <ReviewRow icon={Car} label={"Vehicle Type"} value={VEHICLE_LABELS[data.categoryId] || "Not Selected"} />
           <ReviewRow icon={Briefcase} label={"Luggage"} value={`${data.smallLuggages || 0} Small, ${data.largeLuggages || 0} Large`} />
@@ -244,11 +244,11 @@ const CustomReviewStep = ({ data, user }) => {
 
       {data.tourThoughts && (
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
-           <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-4">{"Traveler's Thoughts"}</p>
+           <p className="text-xs font-black text-[#EF8354] uppercase tracking-widest mb-4">{"Traveler's Thoughts"}</p>
            <p className="text-slate-600 font-medium italic leading-relaxed mb-4">"{data.tourThoughts}"</p>
-           <div className="bg-[#f7fffe] p-4 rounded-2xl border border-[#00b0a5]/10 flex items-center gap-3">
-             <div className="w-8 h-8 bg-[#00b0a5]/10 rounded-full flex items-center justify-center flex-shrink-0">
-               <Zap className="w-4 h-4 text-[#00b0a5]" />
+           <div className="bg-[#f7fffe] p-4 rounded-2xl border border-[#EF8354]/10 flex items-center gap-3">
+             <div className="w-8 h-8 bg-[#EF8354]/10 rounded-full flex items-center justify-center flex-shrink-0">
+               <Zap className="w-4 h-4 text-[#EF8354]" />
              </div>
              <p className="text-xs text-slate-500 font-medium italic" dangerouslySetInnerHTML={{ __html: "Note: These details will be carefully reviewed by the Ceylon Best Tour team. We will plan the most efficient route and handle all necessary arrangements (hotels, permits, etc.) based on your ideas." }}>
              </p>
@@ -258,12 +258,12 @@ const CustomReviewStep = ({ data, user }) => {
 
       {data.notes && (
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
-           <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-4">{"Special Requests"}</p>
+           <p className="text-xs font-black text-[#EF8354] uppercase tracking-widest mb-4">{"Special Requests"}</p>
            <p className="text-slate-600 font-medium italic">"{data.notes}"</p>
         </div>
       )}
 
-      <div className="bg-[#00b0a5]/5 rounded-3xl p-8 border border-[#00b0a5]/10">
+      <div className="bg-[#EF8354]/5 rounded-3xl p-8 border border-[#EF8354]/10">
         <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4">{"Submission Notice"}</h4>
         <p className="text-sm text-slate-600 leading-relaxed">
           {"By clicking \"Submit Booking\", your request will be sent to our team for manual review. We will calculate the best possible price based on your route and requirements. No payment is required at this stage."}
@@ -292,7 +292,7 @@ const CustomSidePanel = () => {
         ].map(({ title, desc, icon }, idx) => (
           <div key={title} className="flex gap-5 relative">
             {idx < 2 && <div className="absolute left-6 top-10 bottom-[-32px] w-0.5 bg-slate-100" />}
-            <div className="w-12 h-12 bg-[#f7fffe] border border-[#00b0a5]/20 rounded-2xl flex items-center justify-center text-[#00b0a5] flex-shrink-0 z-10 font-black shadow-sm">
+            <div className="w-12 h-12 bg-[#f7fffe] border border-[#EF8354]/20 rounded-2xl flex items-center justify-center text-[#EF8354] flex-shrink-0 z-10 font-black shadow-sm">
               {icon}
             </div>
             <div>
@@ -304,7 +304,7 @@ const CustomSidePanel = () => {
       </div>
     </div>
 
-    <div className="bg-gradient-to-br from-[#00b0a5] to-[#007a72] rounded-3xl p-8 text-white shadow-xl shadow-[#00b0a5]/20 relative overflow-hidden">
+    <div className="bg-gradient-to-br from-[#EF8354] to-[#4F5D75] rounded-3xl p-8 text-white shadow-xl shadow-[#EF8354]/20 relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4 opacity-10">
         <Phone className="w-24 h-24 rotate-12" />
       </div>
@@ -314,7 +314,7 @@ const CustomSidePanel = () => {
       </p>
       <a
         href="tel:+94778619582"
-        className="inline-flex items-center gap-3 bg-white text-[#00b0a5] px-6 py-3 rounded-xl font-black hover:bg-slate-50 transition-all text-sm tracking-widest uppercase shadow-lg shadow-black/10"
+        className="inline-flex items-center gap-3 bg-white text-[#EF8354] px-6 py-3 rounded-xl font-black hover:bg-slate-50 transition-all text-sm tracking-widest uppercase shadow-lg shadow-black/10"
       >
         <Phone className="w-4 h-4" /> {"Call Experts"}
       </a>
@@ -322,8 +322,8 @@ const CustomSidePanel = () => {
 
     <div className="bg-slate-900 rounded-3xl p-8 text-white">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-2 h-2 bg-[#00b0a5] rounded-full animate-pulse" />
-        <p className="text-xs font-black uppercase tracking-widest text-[#00b0a5]">{"Booking Policy"}</p>
+        <div className="w-2 h-2 bg-[#EF8354] rounded-full animate-pulse" />
+        <p className="text-xs font-black uppercase tracking-widest text-[#EF8354]">{"Booking Policy"}</p>
       </div>
       <p className="text-xs text-white/60 leading-relaxed font-medium">
         {"Custom tours require manual quotation. Quotes are typically ready within 24 hours. No upfront payment required to submit."}
@@ -556,7 +556,7 @@ const Customized = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="bg-white rounded-[2rem] border border-[#00b0a5]/10 shadow-2xl shadow-[#00b0a5]/5 overflow-hidden"
+              className="bg-white rounded-[2rem] border border-[#EF8354]/10 shadow-2xl shadow-[#EF8354]/5 overflow-hidden"
             >
               <div className="p-8 md:p-12">
                 {submitted ? (
@@ -602,7 +602,7 @@ const Customized = () => {
                           <div className="space-y-10">
                             <section>
                               <div className="flex items-center gap-3 mb-6">
-                                <div className="w-12 h-12 bg-[#00b0a5]/10 rounded-2xl flex items-center justify-center text-[#00b0a5]">
+                                <div className="w-12 h-12 bg-[#EF8354]/10 rounded-2xl flex items-center justify-center text-[#EF8354]">
                                   <FileText className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -618,7 +618,7 @@ const Customized = () => {
                                   onChange={(e) => handleChange("tourThoughts", e.target.value)}
                                   placeholder={"E.g. I heard from a friend that Mirissa is amazing for surfing... I also really want to try hiking in Ella..."}
                                   rows={4}
-                                  className="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-medium resize-none"
+                                  className="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#EF8354] font-medium resize-none"
                                 />
                                 <p className="text-xs text-slate-400 mt-3 italic">
                                   {"Your input here is incredibly valuable for our team to design your ideal journey."}
@@ -628,7 +628,7 @@ const Customized = () => {
 
                             <section>
                               <div className="flex items-center gap-3 mb-6">
-                                <div className="w-12 h-12 bg-[#00b0a5]/10 rounded-2xl flex items-center justify-center text-[#00b0a5]">
+                                <div className="w-12 h-12 bg-[#EF8354]/10 rounded-2xl flex items-center justify-center text-[#EF8354]">
                                   <MapPin className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -641,12 +641,12 @@ const Customized = () => {
 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
                                 <div className="space-y-2">
-                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">{"Add Destination"} <span className="text-[#00b0a5]">{"(Max 7)"}</span></label>
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">{"Add Destination"} <span className="text-[#EF8354]">{"(Max 7)"}</span></label>
                                   <div className="flex gap-2">
                                     <select
                                       value={selectedCity}
                                       onChange={(e) => setSelectedCity(e.target.value)}
-                                      className="flex-1 px-4 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold"
+                                      className="flex-1 px-4 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#EF8354] font-semibold"
                                     >
                                       <option value="">{"Select a city..."}</option>
                                       {placeOptions.map((p) => <option key={p} value={p}>{p}</option>)}
@@ -654,7 +654,7 @@ const Customized = () => {
                                     <button
                                       type="button"
                                       onClick={handleAddCity}
-                                      className="bg-[#00b0a5] text-white px-6 rounded-2xl font-black hover:bg-[#008f86] transition-all hover:scale-105 active:scale-95 text-xs uppercase tracking-widest shadow-lg shadow-[#00b0a5]/20"
+                                      className="bg-[#EF8354] text-white px-6 rounded-2xl font-black hover:bg-[#4F5D75] transition-all hover:scale-105 active:scale-95 text-xs uppercase tracking-widest shadow-lg shadow-[#EF8354]/20"
                                     >
                                       {"Add"}
                                     </button>
@@ -662,12 +662,12 @@ const Customized = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">{"Add Activity"} <span className="text-[#00b0a5]">{"(Max 7)"}</span></label>
+                                  <label className="block text-xs font-black text-slate-700 uppercase tracking-widest ml-1">{"Add Activity"} <span className="text-[#EF8354]">{"(Max 7)"}</span></label>
                                   <div className="flex gap-2">
                                     <select
                                       value={selectedActivity}
                                       onChange={(e) => setSelectedActivity(e.target.value)}
-                                      className="flex-1 px-4 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold"
+                                      className="flex-1 px-4 py-4 bg-white border-2 border-slate-100 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#EF8354] font-semibold"
                                     >
                                       <option value="">{"Select an activity..."}</option>
                                       {activityOptions.map((a) => <option key={a} value={a}>{a}</option>)}
@@ -675,7 +675,7 @@ const Customized = () => {
                                     <button
                                       type="button"
                                       onClick={handleAddActivity}
-                                      className="bg-[#00b0a5] text-white px-6 rounded-2xl font-black hover:bg-[#008f86] transition-all hover:scale-105 active:scale-95 text-xs uppercase tracking-widest shadow-lg shadow-[#00b0a5]/20"
+                                      className="bg-[#EF8354] text-white px-6 rounded-2xl font-black hover:bg-[#4F5D75] transition-all hover:scale-105 active:scale-95 text-xs uppercase tracking-widest shadow-lg shadow-[#EF8354]/20"
                                     >
                                       {"Add"}
                                     </button>
@@ -684,7 +684,7 @@ const Customized = () => {
 
                                 <div className="md:col-span-2 space-y-6 mt-4">
                                   <div>
-                                    <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-3 ml-1">{"Route Itinerary"}</p>
+                                    <p className="text-xs font-black text-[#EF8354] uppercase tracking-widest mb-3 ml-1">{"Route Itinerary"}</p>
                                     <div className="flex flex-wrap gap-2">
                                       {data.selectedCities.length > 0 ? (
                                         data.selectedCities.map((city) => (
@@ -693,7 +693,7 @@ const Customized = () => {
                                             initial={{ scale: 0.8, opacity: 0 }}
                                             animate={{ scale: 1, opacity: 1 }}
                                             key={city} 
-                                            className="inline-flex items-center gap-2 bg-white border-2 border-[#00b0a5]/20 text-[#008f86] rounded-xl px-4 py-2 text-sm font-bold shadow-sm"
+                                            className="inline-flex items-center gap-2 bg-white border-2 border-[#EF8354]/20 text-[#4F5D75] rounded-xl px-4 py-2 text-sm font-bold shadow-sm"
                                           >
                                             {city}
                                             <button onClick={() => handleRemoveCity(city)} className="text-red-400 hover:text-red-600 transition-colors ml-1">×</button>
@@ -706,7 +706,7 @@ const Customized = () => {
                                   </div>
 
                                   <div>
-                                    <p className="text-xs font-black text-[#00b0a5] uppercase tracking-widest mb-3 ml-1">{"Selected Activities"}</p>
+                                    <p className="text-xs font-black text-[#EF8354] uppercase tracking-widest mb-3 ml-1">{"Selected Activities"}</p>
                                     <div className="flex flex-wrap gap-2">
                                       {data.activities.length > 0 ? (
                                         data.activities.map((act) => (
@@ -715,7 +715,7 @@ const Customized = () => {
                                             initial={{ scale: 0.8, opacity: 0 }}
                                             animate={{ scale: 1, opacity: 1 }}
                                             key={act} 
-                                            className="inline-flex items-center gap-2 bg-[#00b0a5] text-white rounded-xl px-4 py-2 text-sm font-bold shadow-md shadow-[#00b0a5]/10"
+                                            className="inline-flex items-center gap-2 bg-[#EF8354] text-white rounded-xl px-4 py-2 text-sm font-bold shadow-md shadow-[#EF8354]/10"
                                           >
                                             {act}
                                             <button onClick={() => handleRemoveActivity(act)} className="text-white/70 hover:text-white transition-colors ml-1">×</button>
@@ -732,7 +732,7 @@ const Customized = () => {
 
                             <section>
                               <div className="flex items-center gap-3 mb-6">
-                                <div className="w-12 h-12 bg-[#00b0a5]/10 rounded-2xl flex items-center justify-center text-[#00b0a5]">
+                                <div className="w-12 h-12 bg-[#EF8354]/10 rounded-2xl flex items-center justify-center text-[#EF8354]">
                                   <Calendar className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -749,7 +749,7 @@ const Customized = () => {
                                     min={today}
                                     value={data.startDate}
                                     onChange={(e) => handleStartDate(e.target.value)}
-                                    className="w-full px-5 py-4 bg-white border-2 border-slate-200 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold [color-scheme:light]"
+                                    className="w-full px-5 py-4 bg-white border-2 border-slate-200 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#EF8354] font-semibold [color-scheme:light]"
                                   />
                                 </div>
                                 <div className="space-y-2">
@@ -759,7 +759,7 @@ const Customized = () => {
                                     min={data.startDate || today}
                                     value={data.endDate}
                                     onChange={(e) => handleEndDate(e.target.value)}
-                                    className="w-full px-5 py-4 bg-white border-2 border-slate-200 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold [color-scheme:light]"
+                                    className="w-full px-5 py-4 bg-white border-2 border-slate-200 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#EF8354] font-semibold [color-scheme:light]"
                                   />
                                 </div>
                                 <div className="md:col-span-2 space-y-2">
@@ -770,7 +770,7 @@ const Customized = () => {
                                       type="time"
                                       value={data.pickupTime}
                                       onChange={(e) => handleChange("pickupTime", e.target.value)}
-                                      className="w-full pl-12 pr-5 py-4 bg-white border-2 border-slate-200 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] font-semibold [color-scheme:light]"
+                                      className="w-full pl-12 pr-5 py-4 bg-white border-2 border-slate-200 rounded-2xl text-slate-800 text-sm outline-none transition-all focus:border-[#EF8354] font-semibold [color-scheme:light]"
                                     />
                                   </div>
                                 </div>
@@ -779,7 +779,7 @@ const Customized = () => {
                                   <motion.div 
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="md:col-span-2 bg-[#00b0a5] rounded-2xl p-6 text-white flex items-center justify-between shadow-xl shadow-[#00b0a5]/20"
+                                    className="md:col-span-2 bg-[#EF8354] rounded-2xl p-6 text-white flex items-center justify-between shadow-xl shadow-[#EF8354]/20"
                                   >
                                     <div>
                                       <p className="text-xs font-black uppercase tracking-widest opacity-80">{"Total Duration"}</p>
@@ -824,7 +824,7 @@ const Customized = () => {
                         <button
                           onClick={handleNext}
                           disabled={!canProceed}
-                          className="flex items-center gap-2 px-10 py-4 rounded-xl bg-[#00b0a5] hover:bg-[#008f86] text-white font-black uppercase tracking-widest text-xs transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-[#00b0a5]/20"
+                          className="flex items-center gap-2 px-10 py-4 rounded-xl bg-[#EF8354] hover:bg-[#4F5D75] text-white font-black uppercase tracking-widest text-xs transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-[#EF8354]/20"
                         >
                           {"Next Step"} <ChevronRight className="w-4 h-4" />
                         </button>
@@ -832,7 +832,7 @@ const Customized = () => {
                         <button
                           onClick={handleSubmit}
                           disabled={submitting}
-                          className="flex items-center gap-2 px-10 py-4 rounded-xl bg-[#00b0a5] hover:bg-[#008f86] text-white font-black uppercase tracking-widest text-xs transition-all hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer shadow-xl shadow-[#00b0a5]/30"
+                          className="flex items-center gap-2 px-10 py-4 rounded-xl bg-[#EF8354] hover:bg-[#4F5D75] text-white font-black uppercase tracking-widest text-xs transition-all hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer shadow-xl shadow-[#EF8354]/30"
                         >
                           {submitting ? (
                             <>

@@ -102,13 +102,13 @@ export default function Intro() {
           {/* Content inside same wrapper — fades together with image */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="relative z-10 text-center px-4">
-              <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
+              <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#EF8354] rounded-full">
                 {slide.tag}
               </span>
 
               <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight">
                 {slide.headlineWhite}{" "}
-                <span className="text-[#00b0a5]">{slide.headlineTeal}</span>
+                <span className="text-[#EF8354]">{slide.headlineTeal}</span>
               </h1>
 
               <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light mb-6">
@@ -121,7 +121,7 @@ export default function Intro() {
                   {slide.labels.map((label) => (
                     <span
                       key={label}
-                      className="px-4 py-1 rounded-full text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5]/20 border border-[#00b0a5]/50 cursor-pointer hover:bg-[#00b0a5]/40 hover:border-[#00b0a5] transition-all duration-200"
+                      className="px-4 py-1 rounded-full text-xs font-semibold tracking-widest text-white uppercase bg-[#EF8354]/20 border border-[#EF8354]/50 cursor-pointer hover:bg-[#EF8354]/40 hover:border-[#EF8354] transition-all duration-200"
                     >
                       {label}
                     </span>
@@ -149,9 +149,9 @@ export default function Intro() {
               aria-label={`Go to slide ${i + 1}`}
               className="py-1.5 flex items-center focus:outline-none"
             >
-              <div className={`h-0.5 rounded-full overflow-hidden bg-[#00b0a5]/20 transition-all duration-300 ${i === current ? "w-12" : "w-8"}`}>
+              <div className={`h-0.5 rounded-full overflow-hidden bg-[#EF8354]/20 transition-all duration-300 ${i === current ? "w-12" : "w-8"}`}>
                 <div
-                  className="h-full bg-[#00b0a5] rounded-full transition-[width] duration-[30ms] ease-linear"
+                  className="h-full bg-[#EF8354] rounded-full transition-[width] duration-[30ms] ease-linear"
                   style={{
                     width: i === current ? `${progress}%` : i < current ? "100%" : "0%",
                   }}
@@ -170,7 +170,7 @@ export default function Intro() {
               key={label}
               onClick={fn}
               aria-label={label}
-              className="w-10 h-10 rounded-full border border-[#00b0a5]/30 bg-[#00b0a5]/10 backdrop-blur-sm text-white text-base flex items-center justify-center hover:bg-[#00b0a5]/25 hover:border-[#00b0a5]/60 transition-all duration-200"
+              className="w-10 h-10 rounded-full border border-[#EF8354]/30 bg-[#EF8354]/10 backdrop-blur-sm text-white text-base flex items-center justify-center hover:bg-[#EF8354]/25 hover:border-[#EF8354]/60 transition-all duration-200"
             >
               {icon}
             </button>

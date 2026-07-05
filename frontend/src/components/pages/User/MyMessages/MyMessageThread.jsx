@@ -70,7 +70,7 @@ const MyMessageThread = ({ message, onSendFollowUp }) => {
           <div className="flex gap-2">
             <textarea value={followUp} onChange={e => setFollowUp(e.target.value)}
               placeholder="Type your follow-up message..." rows={2}
-              className="flex-1 p-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-[#F5820D] outline-none text-sm resize-none" />
+              className="flex-1 p-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-[#EF8354] outline-none text-sm resize-none" />
             <button onClick={handleSend} disabled={!followUp.trim()}
               className="self-end flex items-center gap-2 bg-slate-900 text-white px-4 py-3 rounded-xl font-semibold hover:bg-slate-800 transition-colors disabled:opacity-40">
               <Send className="w-4 h-4" />

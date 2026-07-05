@@ -12,8 +12,8 @@ const SuccessScreen = ({ user, navigate }) => (
     transition={{ duration: 0.5 }}
     className="bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center"
   >
-    <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-[#F5820D]/10">
-      <CheckCircle className="w-10 h-10 text-[#F5820D]" />
+    <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-[#EF8354]/10">
+      <CheckCircle className="w-10 h-10 text-[#EF8354]" />
     </div>
     <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight mb-3">
       Message Sent Successfully!
@@ -26,7 +26,7 @@ const SuccessScreen = ({ user, navigate }) => (
     <div className="flex flex-col sm:flex-row gap-3 justify-center">
       <button
         onClick={() => navigate("/")}
-        className="bg-[#F5820D] hover:bg-[#C85A00] text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+        className="bg-[#EF8354] hover:bg-[#4F5D75] text-white px-6 py-3 rounded-xl font-semibold transition-colors"
       >
         Return to Home
       </button>
@@ -42,7 +42,7 @@ const SuccessScreen = ({ user, navigate }) => (
   </motion.div>
 );
 
-const inputStyle = "w-full p-3 rounded-xl border border-slate-200 bg-white outline-none text-sm text-slate-800 transition-all focus:border-[#F5820D] focus:ring-2 focus:ring-[#F5820D]/20";
+const inputStyle = "w-full p-3 rounded-xl border border-slate-200 bg-white outline-none text-sm text-slate-800 transition-all focus:border-[#EF8354] focus:ring-2 focus:ring-[#EF8354]/20";
 
 const ContactForm = () => {
   const { user } = useContext(AuthContext);
@@ -88,7 +88,7 @@ const ContactForm = () => {
       className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8"
     >
       <h2 className="text-xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2 mb-6">
-        <Send className="w-5 h-5 text-[#F5820D]" />
+        <Send className="w-5 h-5 text-[#EF8354]" />
         Send Us a Message
       </h2>
 
@@ -127,7 +127,7 @@ const ContactForm = () => {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-[#F5820D] hover:bg-[#C85A00] disabled:opacity-60 text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
+          className="w-full bg-[#EF8354] hover:bg-[#4F5D75] disabled:opacity-60 text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
         >
           {submitting
             ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>

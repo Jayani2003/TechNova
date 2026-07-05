@@ -33,7 +33,7 @@ export default function AutoSlidingDestinations() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="center mb-12 flex flex-col items-center gap-4">
           <div className="text-center">
-            <h4 className="text-[#00b0a5] font-bold tracking-widest uppercase text-sm mb-2">{"Explore Sri Lanka"}</h4>
+            <h4 className="text-[#EF8354] font-bold tracking-widest uppercase text-sm mb-2">{"Explore Sri Lanka"}</h4>
             <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">{"Popular Destinations"}</h2>
           </div>
           
@@ -42,7 +42,7 @@ export default function AutoSlidingDestinations() {
             {destinations.map((_, i) => (
               <div 
                 key={i} 
-                className={`h-1.5 rounded-full transition-all duration-500 ${index === i ? 'w-8 bg-[#00b0a5]' : 'w-2 bg-gray-300'}`} 
+                className={`h-1.5 rounded-full transition-all duration-500 ${index === i ? 'w-8 bg-[#EF8354]' : 'w-2 bg-gray-300'}`} 
               />
             ))}
           </div>
@@ -68,7 +68,7 @@ export default function AutoSlidingDestinations() {
 
                   {/* Content */}
                   <div className="absolute bottom-0 p-8 w-full">
-                    <span className="px-3 py-1 bg-[#00b0a5] text-white text-[10px] font-bold uppercase rounded-full mb-3 inline-block">
+                    <span className="px-3 py-1 bg-[#EF8354] text-white text-[10px] font-bold uppercase rounded-full mb-3 inline-block">
                       {dest.badge}
                     </span>
                     <h3 className="text-2xl font-bold text-white mb-1">{dest.title}</h3>

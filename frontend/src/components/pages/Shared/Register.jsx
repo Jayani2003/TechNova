@@ -105,7 +105,7 @@ function Register() {
 
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50 dark:bg-[#1a1a1a]">
+    <div className="flex min-h-screen w-full bg-slate-50 dark:bg-[#2D3142]">
       {/* Left side - Image */}
       <div className="hidden lg:flex w-1/2 relative bg-black">
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
@@ -126,7 +126,7 @@ function Register() {
         </div>
         <div className="absolute top-8 left-12 z-20">
           <Link to="/" className="text-3xl font-bold text-white tracking-tighter flex items-center">
-            <span className="text-[#00b0a5]">Ceylone </span> Best Tours.
+            <span className="text-[#EF8354]">Ceylone </span> Best Tours.
           </Link>
         </div>
       </div>
@@ -142,7 +142,7 @@ function Register() {
           {/* Mobile Logo */}
           <div className="lg:hidden mb-10 text-center flex justify-center">
             <Link to="/" className="text-3xl font-bold text-slate-900 dark:text-white tracking-tighter">
-              <span className="text-[#00b0a5]">Ceylone</span> Best Tours.
+              <span className="text-[#EF8354]">Ceylone</span> Best Tours.
             </Link>
           </div>
 
@@ -164,7 +164,7 @@ function Register() {
                   required
                   value={formData.fullName}
                   onChange={handleChange}
-                  className="block w-full pl-10 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#242424] text-slate-900 dark:text-white focus:ring-2 focus:ring-[#00b0a5] focus:border-transparent transition-all outline-none placeholder:text-slate-400"
+                  className="block w-full pl-10 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#2D3142] text-slate-900 dark:text-white focus:ring-2 focus:ring-[#EF8354] focus:border-transparent transition-all outline-none placeholder:text-slate-400"
                   placeholder="John Doe"
                 />
               </div>
@@ -182,7 +182,7 @@ function Register() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="block w-full pl-10 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#242424] text-slate-900 dark:text-white focus:ring-2 focus:ring-[#00b0a5] focus:border-transparent transition-all outline-none placeholder:text-slate-400"
+                  className="block w-full pl-10 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#2D3142] text-slate-900 dark:text-white focus:ring-2 focus:ring-[#EF8354] focus:border-transparent transition-all outline-none placeholder:text-slate-400"
                   placeholder="name@example.com"
                 />
               </div>
@@ -200,7 +200,7 @@ function Register() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="block w-full pl-10 pr-10 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#242424] text-slate-900 dark:text-white focus:ring-2 focus:ring-[#00b0a5] focus:border-transparent transition-all outline-none placeholder:text-slate-400"
+                  className="block w-full pl-10 pr-10 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#2D3142] text-slate-900 dark:text-white focus:ring-2 focus:ring-[#EF8354] focus:border-transparent transition-all outline-none placeholder:text-slate-400"
                   placeholder="••••••••"
                 />
                 <button
@@ -225,7 +225,7 @@ function Register() {
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="block w-full pl-10 pr-10 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#242424] text-slate-900 dark:text-white focus:ring-2 focus:ring-[#00b0a5] focus:border-transparent transition-all outline-none placeholder:text-slate-400"
+                  className="block w-full pl-10 pr-10 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#2D3142] text-slate-900 dark:text-white focus:ring-2 focus:ring-[#EF8354] focus:border-transparent transition-all outline-none placeholder:text-slate-400"
                   placeholder="••••••••"
                 />
                 <button
@@ -244,7 +244,7 @@ function Register() {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               type="submit"
-              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-slate-900 dark:bg-[#00b0a5] hover:bg-slate-800 dark:hover:bg-[#008f86] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00b0a5] transition-all cursor-pointer mt-4"
+              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-slate-900 dark:bg-[#EF8354] hover:bg-slate-800 dark:hover:bg-[#4F5D75] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#EF8354] transition-all cursor-pointer mt-4"
             >
               {loading ? "Creating account..." : "Create Account"}
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -262,7 +262,7 @@ function Register() {
                 <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-slate-50 dark:bg-[#1a1a1a] text-slate-500">Or continue with</span>
+                <span className="px-2 bg-slate-50 dark:bg-[#2D3142] text-slate-500">Or continue with</span>
               </div>
             </div>
             <div className="mt-6">
@@ -270,7 +270,7 @@ function Register() {
                 type="button"
                 onClick={() => handleGoogleLogin()}
                 disabled={loading}
-                className="w-full flex justify-center items-center py-3 px-4 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm text-base font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-[#242424] hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00b0a5] transition-all cursor-pointer"
+                className="w-full flex justify-center items-center py-3 px-4 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm text-base font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-[#2D3142] hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#EF8354] transition-all cursor-pointer"
               >
                 <FcGoogle className="h-5 w-5 mr-2" />
                 Google
@@ -280,7 +280,7 @@ function Register() {
 
           <p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
             {"Already have an account?"}{' '}
-            <Link to="/login" className="font-semibold text-[#00b0a5] hover:text-[#008f86] transition-colors">
+            <Link to="/login" className="font-semibold text-[#EF8354] hover:text-[#4F5D75] transition-colors">
               {"Sign in"}
             </Link>
           </p>

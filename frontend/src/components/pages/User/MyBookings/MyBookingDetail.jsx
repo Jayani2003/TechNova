@@ -15,8 +15,8 @@ const VEHICLE_LABELS = {
 const DetailRow = ({ icon: Icon, label, value }) =>
   value !== undefined && value !== "" && value !== null ? (
     <div className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
-      <div className="w-8 h-8 bg-[#00b0a5]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-        <Icon className="w-4 h-4 text-[#00b0a5]" />
+      <div className="w-8 h-8 bg-[#EF8354]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+        <Icon className="w-4 h-4 text-[#EF8354]" />
       </div>
       <div>
         <p className="text-xs text-slate-400 font-medium">{label}</p>
@@ -26,8 +26,8 @@ const DetailRow = ({ icon: Icon, label, value }) =>
   ) : null;
 
 const Section = ({ title, children, accent }) => (
-  <div className={`bg-white rounded-2xl border shadow-sm p-5 mb-4 ${accent ? "border-[#00b0a5]/20" : "border-slate-100"}`}>
-    <p className={`text-xs font-bold uppercase tracking-wider mb-2 ${accent ? "text-[#00b0a5]" : "text-slate-400"}`}>{title}</p>
+  <div className={`bg-white rounded-2xl border shadow-sm p-5 mb-4 ${accent ? "border-[#EF8354]/20" : "border-slate-100"}`}>
+    <p className={`text-xs font-bold uppercase tracking-wider mb-2 ${accent ? "text-[#EF8354]" : "text-slate-400"}`}>{title}</p>
     {children}
   </div>
 );
@@ -66,7 +66,7 @@ const MyBookingDetail = ({ booking, onBack }) => {
       <div className="flex items-center gap-3 mb-6">
         <button 
           onClick={onBack} 
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm hover:border-[#00b0a5] hover:text-[#00b0a5] hover:bg-[#00b0a5]/5 transition-all cursor-pointer group shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm hover:border-[#EF8354] hover:text-[#EF8354] hover:bg-[#EF8354]/5 transition-all cursor-pointer group shadow-sm"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span>Back to List</span>
@@ -89,7 +89,7 @@ const MyBookingDetail = ({ booking, onBack }) => {
                   : "/tour-booking/point";
               navigate(path, { state: { editBooking: booking } });
             }}
-            className="ml-auto flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#00b0a5] text-white font-bold text-sm hover:bg-[#008f86] transition-all cursor-pointer group shadow-lg shadow-[#00b0a5]/20"
+            className="ml-auto flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#EF8354] text-white font-bold text-sm hover:bg-[#4F5D75] transition-all cursor-pointer group shadow-lg shadow-[#EF8354]/20"
           >
             <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
             <span>Modify Request</span>
@@ -119,13 +119,13 @@ const MyBookingDetail = ({ booking, onBack }) => {
               return (
                 <div key={step} className="flex items-center gap-1">
                   <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold transition-all ${
-                    isCurrent ? "bg-[#00b0a5] text-white" : isDone ? "bg-[#00b0a5]/20 text-[#00b0a5]" : "bg-slate-100 text-slate-400"
+                    isCurrent ? "bg-[#EF8354] text-white" : isDone ? "bg-[#EF8354]/20 text-[#EF8354]" : "bg-slate-100 text-slate-400"
                   }`}>
                     {isDone && !isCurrent && <Check className="w-2.5 h-2.5" />}
                     {step.replace("_", " ")}
                   </div>
                   {i < statusSteps.length - 1 && (
-                    <div className={`w-3 h-0.5 ${i < currentStepIndex ? "bg-[#00b0a5]" : "bg-slate-200"}`} />
+                    <div className={`w-3 h-0.5 ${i < currentStepIndex ? "bg-[#EF8354]" : "bg-slate-200"}`} />
                   )}
                 </div>
               );
@@ -144,7 +144,7 @@ const MyBookingDetail = ({ booking, onBack }) => {
           {canDownloadPdf && (
             <button
               onClick={handleDownloadPdf}
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#00b0a5]/30 text-[#008f86] font-semibold text-sm hover:bg-[#00b0a5]/10 transition-all cursor-pointer"
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#EF8354]/30 text-[#4F5D75] font-semibold text-sm hover:bg-[#EF8354]/10 transition-all cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span>Download PDF</span>
@@ -156,7 +156,7 @@ const MyBookingDetail = ({ booking, onBack }) => {
         {booking.status === "QUOTED" && (
           <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-4">
             <p className="text-sm font-bold text-slate-800 mb-1">Price Quote Received!</p>
-            <p className="text-2xl font-bold text-[#00b0a5] mb-1">${booking.quotedPrice}</p>
+            <p className="text-2xl font-bold text-[#EF8354] mb-1">${booking.quotedPrice}</p>
 
             {booking.adminNote && (
               <div className="bg-white rounded-xl border border-blue-100 px-4 py-3 mb-3">
@@ -183,7 +183,7 @@ const MyBookingDetail = ({ booking, onBack }) => {
               <button onClick={async () => {
                   await acceptQuote(booking.id);
                 }}
-                className="flex-1 flex items-center justify-center gap-2 bg-[#00b0a5] text-white py-2.5 rounded-xl font-semibold hover:bg-[#009b91] transition-colors cursor-pointer">
+                className="flex-1 flex items-center justify-center gap-2 bg-[#EF8354] text-white py-2.5 rounded-xl font-semibold hover:bg-[#4F5D75] transition-colors cursor-pointer">
                 <Check className="w-4 h-4" /> Accept Quote
               </button>
               <button onClick={() => rejectQuote(booking.id)}
@@ -196,7 +196,7 @@ const MyBookingDetail = ({ booking, onBack }) => {
 
         {booking.adminNote && ["CONFIRMED", "TOUR_STARTED", "COMPLETED", "CLOSED"].includes(booking.status) && (
           <Section title="Admin's Note" accent>
-            <div className="bg-[#00b0a5]/5 border border-[#00b0a5]/10 rounded-xl p-4 mt-1">
+            <div className="bg-[#EF8354]/5 border border-[#EF8354]/10 rounded-xl p-4 mt-1">
               <p className="text-sm font-medium text-slate-700 italic">"{booking.adminNote}"</p>
             </div>
           </Section>
@@ -206,8 +206,8 @@ const MyBookingDetail = ({ booking, onBack }) => {
         {["CONFIRMED", "TOUR_STARTED", "COMPLETED", "CLOSED"].includes(booking.status) && booking.assignedVehicle && (
           <Section title="Your Assigned Vehicle" accent>
             <div className="flex items-center gap-3 mt-1">
-              <div className="w-10 h-10 bg-[#00b0a5]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Car className="w-5 h-5 text-[#00b0a5]" />
+              <div className="w-10 h-10 bg-[#EF8354]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Car className="w-5 h-5 text-[#EF8354]" />
               </div>
               <div>
                 <p className="text-sm font-bold text-slate-800">{booking.assignedVehicle.name}</p>
@@ -215,7 +215,7 @@ const MyBookingDetail = ({ booking, onBack }) => {
               </div>
               <div className="ml-auto text-right">
                 <p className="text-xs text-slate-400">Price Paid</p>
-                <p className="text-lg font-extrabold text-[#00b0a5]">${booking.quotedPrice}</p>
+                <p className="text-lg font-extrabold text-[#EF8354]">${booking.quotedPrice}</p>
               </div>
             </div>
           </Section>

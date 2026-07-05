@@ -24,12 +24,12 @@ const CategoryHero = () => {
 					transition={{ duration: 0.8 }}
 				>
 					{/* Badge styled to match your contact page */}
-					<span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
+					<span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#EF8354] rounded-full">
 						{"Our Fleet"}
 					</span>
 
 					<h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 tracking-tight">
-						{"Vehicle "} <span className="text-[#00b0a5]">{"Categories."}</span>
+						{"Vehicle "} <span className="text-[#EF8354]">{"Categories."}</span>
 					</h1>
 
 					<p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto font-light">

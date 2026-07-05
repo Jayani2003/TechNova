@@ -55,11 +55,11 @@ const WeatherModal = ({ locationName, forecastHourly, onClose }) => {
         }}>
           <div>
             <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 800,
-                         color: "#0f172a", display: "flex", alignItems: "center", gap: "8px" }}>
+                         color: "#2D3142", display: "flex", alignItems: "center", gap: "8px" }}>
               📍 {locationName}
             </h2>
             <p style={{ margin: "4px 0 0", fontSize: "11px", fontWeight: 700,
-                        color: "#00b0a5", textTransform: "uppercase", letterSpacing: "0.12em" }}>
+                        color: "#EF8354", textTransform: "uppercase", letterSpacing: "0.12em" }}>
               7-Day Hourly Weather Forecast
             </p>
           </div>
@@ -101,7 +101,7 @@ const WeatherModal = ({ locationName, forecastHourly, onClose }) => {
                   border: "none",
                   cursor: "pointer",
                   display: "flex", flexDirection: "column", alignItems: "center", gap: "4px",
-                  background: isActive ? "#00b0a5" : "#fff",
+                  background: isActive ? "#EF8354" : "#fff",
                   color:      isActive ? "#fff"    : "#475569",
                   boxShadow:  isActive ? "0 4px 14px rgba(0,176,165,0.30)" : "0 1px 4px rgba(0,0,0,0.08)",
                   transition: "all 0.18s",
@@ -157,13 +157,13 @@ const WeatherModal = ({ locationName, forecastHourly, onClose }) => {
                         </td>
                         <td style={{ padding: "12px 16px" }}>
                           <span style={{ display: "flex", alignItems: "center", gap: "8px",
-                                         fontSize: "13px", fontWeight: 700, color: "#0f172a" }}>
+                                         fontSize: "13px", fontWeight: 700, color: "#2D3142" }}>
                             <span style={{ fontSize: "18px" }}>{wInfo.icon}</span>
                             {wInfo.label}
                           </span>
                         </td>
                         <td style={{ padding: "12px 16px", textAlign: "left" }}>
-                          <span style={{ fontSize: "15px", fontWeight: 900, color: "#0f172a" }}>
+                          <span style={{ fontSize: "15px", fontWeight: 900, color: "#2D3142" }}>
                             {Math.round(hour.temp)}°C
                           </span>
                         </td>
@@ -211,14 +211,14 @@ const WeatherModal = ({ locationName, forecastHourly, onClose }) => {
           <button
             onClick={onClose}
             style={{
-              padding: "10px 24px", background: "#0f172a",
+              padding: "10px 24px", background: "#2D3142",
               color: "#fff", border: "none", borderRadius: "12px",
               fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em",
               textTransform: "uppercase", cursor: "pointer",
               transition: "background 0.15s",
             }}
             onMouseEnter={(e) => e.currentTarget.style.background = "#1e293b"}
-            onMouseLeave={(e) => e.currentTarget.style.background = "#0f172a"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "#2D3142"}
           >
             Close
           </button>

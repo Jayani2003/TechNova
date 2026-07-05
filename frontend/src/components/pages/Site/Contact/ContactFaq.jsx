@@ -29,7 +29,7 @@ const ContactFaq = () => {
       className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8"
     >
       <div className="mb-6">
-        {/*<span className="inline-block px-3 py-1 mb-2 text-xs font-semibold tracking-widest text-white uppercase rounded-full" style={{ backgroundColor: "#00b0a5" }}>
+        {/*<span className="inline-block px-3 py-1 mb-2 text-xs font-semibold tracking-widest text-white uppercase rounded-full" style={{ backgroundColor: "#EF8354" }}>
           {"FAQ"}
         </span>*/}
         <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">
@@ -45,7 +45,7 @@ const ContactFaq = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: i * 0.1 }}
         >
-          <div className="rounded-t-xl px-5 py-3" style={{ backgroundColor: "#00b0a5" }}>
+          <div className="rounded-t-xl px-5 py-3" style={{ backgroundColor: "#EF8354" }}>
             <p className="text-white font-semibold text-sm tracking-wide">{faq.question}</p>
           </div>
           <div className="bg-slate-50 border border-slate-100 rounded-b-xl px-5 py-3">

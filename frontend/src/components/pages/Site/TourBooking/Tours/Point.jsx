@@ -126,17 +126,17 @@ const Point = () => {
           background: rgba(0,176,165,0.12); border: 1px solid rgba(0,176,165,0.38);
           border-radius: 100px; font-size: 10px; font-weight: 700;
           letter-spacing: 0.2em; text-transform: uppercase;
-          color: #00b0a5; width: fit-content;
+          color: #EF8354; width: fit-content;
         }
         .ptp-title {
           font-size: clamp(2.4rem, 4.5vw, 3.2rem);
           font-weight: 800; color: #0d2b2b;
           line-height: 1.05; letter-spacing: -0.03em;
         }
-        .ptp-title .teal { color: #00b0a5; }
+        .ptp-title .teal { color: #EF8354; }
         .ptp-rule {
           width: 44px; height: 2px;
-          background: linear-gradient(90deg, #00b0a5, rgba(0,176,165,0));
+          background: linear-gradient(90deg, #EF8354, rgba(0,176,165,0));
           border-radius: 2px;
         }
         .ptp-desc { font-size: 16px; font-weight: 300; color: #3a5a5a; line-height: 1.82; max-width: 440px; }
@@ -150,14 +150,14 @@ const Point = () => {
         }
         .ptp-btn {
           display: inline-flex; align-items: center; gap: 10px;
-          background: #00b0a5; color: #fff; font-size: 13px; font-weight: 700;
+          background: #EF8354; color: #fff; font-size: 13px; font-weight: 700;
           letter-spacing: 0.1em; text-transform: uppercase;
           padding: 14px 28px; border-radius: 10px; border: none;
           cursor: pointer; text-decoration: none; width: fit-content;
           box-shadow: 0 6px 24px -4px rgba(0,176,165,0.45);
           transition: all 0.25s cubic-bezier(0.22,1,0.36,1);
         }
-        .ptp-btn:hover { background: #009e94; transform: translateY(-2px); box-shadow: 0 14px 36px -4px rgba(0,176,165,0.5); }
+        .ptp-btn:hover { background: #4F5D75; transform: translateY(-2px); box-shadow: 0 14px 36px -4px rgba(0,176,165,0.5); }
         .ptp-arrow { transition: transform 0.25s ease; }
         .ptp-btn:hover .ptp-arrow { transform: translateX(4px); }
       `}</style>

@@ -87,7 +87,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
   const uniqueLocations = [...new Set(galleryPhotos.map((p) => p.loc))];
 
   return (
-    <div className="min-h-screen bg-[#00b0a5]/5 pb-16">
+    <div className="min-h-screen bg-[#EF8354]/5 pb-16">
       {/* Hero Header */}
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <motion.img
@@ -105,7 +105,7 @@ export default function Gallery({ photos, onPhotoClick = () => { } }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="inline-flex items-center gap-2 px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#00b0a5] rounded-full">
+            <span className="inline-flex items-center gap-2 px-4 py-1 mb-4 text-xs font-semibold tracking-widest text-white uppercase bg-[#EF8354] rounded-full">
               <Camera className="w-3.5 h-3.5" />
               {"Traveler's Gallery"}
             </span>

@@ -337,3 +337,15 @@ CREATE TABLE chat_message (
     FOREIGN KEY (topic_id) REFERENCES chat_topic(topic_id),
     FOREIGN KEY (sender_id) REFERENCES user(user_id)
 );
+
+CREATE TABLE city (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE custom_activity (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

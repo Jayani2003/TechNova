@@ -238,19 +238,7 @@ function Register() {
               </div>
             </div>
 
-            <div className="flex items-center pt-2">
-              <input
-                id="terms"
-                name="terms"
-                type="checkbox"
-                required
-                className="h-4 w-4 text-[#00b0a5] focus:ring-[#00b0a5] border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-[#242424] cursor-pointer"
-              />
-              <label htmlFor="terms" className="ml-2 block text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
-                {"I agree to the"} <a href="#" className="text-[#00b0a5] hover:underline">{"Terms of Service"}</a> {"and"} <a href="#" className="text-[#00b0a5] hover:underline">{"Privacy Policy"}</a>
-              </label>
-              {/*----------add terms when get the call--------------------*/}
-            </div>
+
 
             <motion.button
               whileHover={{ scale: 1.01 }}

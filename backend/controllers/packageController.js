@@ -758,43 +758,88 @@ exports.getRecommendations = async (req, res) => {
     const pkgDays = schemaMeta.hasDays ? pkgRow.days : null;
 
     // Helper queries
+    const avgRatingSubquery = `(SELECT AVG(r2.rating) FROM review r2 INNER JOIN booking_package bp2 ON bp2.booking_id = r2.booking_id WHERE bp2.package_id = package_id)`;
+
     const similarByType = pkgType ? await db.execute(
-      `SELECT package_id AS id, title, ${schemaMeta.hasType ? 'type' : 'NULL AS type'}, ${schemaMeta.hasDays ? 'days' : 'NULL AS days'}, image_url AS image FROM package WHERE package_id != ? AND type = ? ORDER BY package_id DESC LIMIT ${Number(limit)}`,
+      `SELECT package_id AS id, title,
+              ${schemaMeta.hasType ? 'type' : 'NULL AS type'},
+              ${schemaMeta.hasDays ? 'days' : 'NULL AS days'},
+              image_url AS image,
+              description,
+              (SELECT AVG(r2.rating) FROM review r2 INNER JOIN booking_package bp2 ON bp2.booking_id = r2.booking_id WHERE bp2.package_id = p.package_id) AS avg_rating
+         FROM package p
+        WHERE package_id != ? AND type = ?
+        ORDER BY package_id DESC
+        LIMIT ${Number(limit)}`,
       [id, pkgType]
     ) : [[],];
 
     const similarByDays = pkgDays ? await db.execute(
-      `SELECT package_id AS id, title, ${schemaMeta.hasType ? 'type' : 'NULL AS type'}, ${schemaMeta.hasDays ? 'days' : 'NULL AS days'}, image_url AS image FROM package WHERE package_id != ? AND days = ? ORDER BY package_id DESC LIMIT ${Number(limit)}`,
+      `SELECT package_id AS id, title,
+              ${schemaMeta.hasType ? 'type' : 'NULL AS type'},
+              ${schemaMeta.hasDays ? 'days' : 'NULL AS days'},
+              image_url AS image,
+              description,
+              (SELECT AVG(r2.rating) FROM review r2 INNER JOIN booking_package bp2 ON bp2.booking_id = r2.booking_id WHERE bp2.package_id = p.package_id) AS avg_rating
+         FROM package p
+        WHERE package_id != ? AND days = ?
+        ORDER BY package_id DESC
+        LIMIT ${Number(limit)}`,
       [id, pkgDays]
     ) : [[],];
 
-    // Top rated packages (average rating via reviews -> booking_package)
+    // Top rated packages — LEFT JOIN so all packages appear even with no reviews
     const [topRated] = await db.execute(
-      `SELECT bp.package_id AS id, p.title, p.image_url AS image, AVG(r.rating) AS avg_rating, COUNT(r.review_id) AS reviews_count
-       FROM review r
-       INNER JOIN booking_package bp ON bp.booking_id = r.booking_id
-       INNER JOIN package p ON p.package_id = bp.package_id
-       WHERE bp.package_id != ?
-       GROUP BY bp.package_id
-       ORDER BY avg_rating DESC, reviews_count DESC
-       LIMIT ${Number(limit)}`,
+      `SELECT p.package_id AS id, p.title,
+              ${schemaMeta.hasType ? 'p.type' : 'NULL AS type'},
+              ${schemaMeta.hasDays ? 'p.days' : 'NULL AS days'},
+              p.image_url AS image,
+              p.description,
+              AVG(r.rating)          AS avg_rating,
+              COUNT(DISTINCT r.review_id) AS reviews_count
+         FROM package p
+         LEFT JOIN booking_package bp ON bp.package_id = p.package_id
+         LEFT JOIN review r           ON r.booking_id  = bp.booking_id
+        WHERE p.package_id != ?
+        GROUP BY p.package_id, p.title, p.type, p.days, p.image_url, p.description
+        ORDER BY avg_rating DESC, reviews_count DESC, p.package_id DESC
+        LIMIT ${Number(limit)}`,
       [id]
     );
 
-    // Most booked packages
+    // Most booked packages — LEFT JOIN so all packages appear even with no bookings
     const [mostBooked] = await db.execute(
-      `SELECT bp.package_id AS id, p.title, p.image_url AS image, COUNT(bp.booking_id) AS bookings_count
-       FROM booking_package bp
-       INNER JOIN package p ON p.package_id = bp.package_id
-       WHERE bp.package_id != ?
-       GROUP BY bp.package_id
-       ORDER BY bookings_count DESC
-       LIMIT ${Number(limit)}`,
+      `SELECT p.package_id AS id, p.title,
+              ${schemaMeta.hasType ? 'p.type' : 'NULL AS type'},
+              ${schemaMeta.hasDays ? 'p.days' : 'NULL AS days'},
+              p.image_url AS image,
+              p.description,
+              COUNT(DISTINCT bp.booking_id) AS bookings_count,
+              AVG(r.rating)                 AS avg_rating
+         FROM package p
+         LEFT JOIN booking_package bp ON bp.package_id = p.package_id
+         LEFT JOIN review r           ON r.booking_id  = bp.booking_id
+        WHERE p.package_id != ?
+        GROUP BY p.package_id, p.title, p.type, p.days, p.image_url, p.description
+        ORDER BY bookings_count DESC, p.package_id DESC
+        LIMIT ${Number(limit)}`,
       [id]
     );
 
     // Normalize results
-    const normalize = (rows) => (Array.isArray(rows) ? rows.map(r => ({ id: r.id, title: r.title, type: r.type || null, days: r.days || null, image: r.image || r.image_url || null, avg_rating: r.avg_rating != null ? Number(r.avg_rating) : undefined, reviews_count: r.reviews_count != null ? Number(r.reviews_count) : undefined, bookings_count: r.bookings_count != null ? Number(r.bookings_count) : undefined })) : []);
+    const normalize = (rows) => (Array.isArray(rows) ? rows.map(r => ({
+      id: r.id,
+      title: r.title,
+      type: r.type ? toPackageTypeLabel(r.type) : null,
+      days: r.days ? toPackageDaysNumber(r.days) : null,
+      image: r.image || r.image_url || null,
+      description: r.description ? decodeDescriptionWithTypeMeta(r.description).description : null,
+      avg_rating: r.avg_rating != null ? Number(r.avg_rating) : null,
+      reviews_count: r.reviews_count != null ? Number(r.reviews_count) : undefined,
+      bookings_count: r.bookings_count != null ? Number(r.bookings_count) : undefined,
+      destinations: [],
+      availability: { status: 'AVAILABLE' },
+    })) : []);
 
     res.json({
       similarByType: normalize(similarByType[0] || similarByType),

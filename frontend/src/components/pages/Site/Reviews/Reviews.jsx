@@ -1,4 +1,52 @@
 import { useEffect, useMemo, useState } from 'react';
+
+/* ── Success toast (lives in Reviews so it survives modal unmount) ── */
+const SuccessToast = ({ visible }) => (
+  <div
+    role="status"
+    aria-live="polite"
+    style={{
+      position: 'fixed',
+      bottom: 32,
+      right: 32,
+      zIndex: 9999,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      padding: '14px 22px',
+      borderRadius: 14,
+      background: 'linear-gradient(135deg, #003d38 0%, #005a52 100%)',
+      border: '1.5px solid rgba(0,176,165,0.45)',
+      boxShadow: '0 20px 60px -8px rgba(0,40,35,0.55), 0 0 0 1px rgba(0,176,165,0.12)',
+      color: '#fff',
+      fontSize: 13,
+      fontWeight: 600,
+      letterSpacing: '0.02em',
+      pointerEvents: visible ? 'auto' : 'none',
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
+      transition: 'opacity 0.35s ease, transform 0.35s cubic-bezier(0.22,1,0.36,1)',
+      minWidth: 260,
+      userSelect: 'none',
+    }}
+  >
+    <div style={{
+      width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
+      background: 'linear-gradient(135deg, #00b0a5, #007a72)',
+      boxShadow: '0 4px 14px rgba(0,176,165,0.5)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+        <path d="M2.5 8.5l3.5 3.5 7.5-7.5" stroke="#fff" strokeWidth="2.2"
+          strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </div>
+    <div>
+      <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 2 }}>Review added successfully!</div>
+      <div style={{ fontSize: 11, opacity: 0.75, fontWeight: 400 }}>Thank you for sharing your experience ✨</div>
+    </div>
+  </div>
+);
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import { useBookings } from '../../../../context/BookingsContext';
@@ -24,6 +72,7 @@ const Reviews = () => {
   const [userBookings, setUserBookings] = useState([]);
   const [serverReviewableTours, setServerReviewableTours] = useState([]);
   const [modalOpen, setModalOpen]   = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const isLoggedIn = Boolean(user);
 
@@ -207,6 +256,11 @@ const Reviews = () => {
       const tours = user?.email ? await fetchReviewableTours(user.email) : [];
       setServerReviewableTours(tours);
       setModalOpen(false);
+      // Show success notification (brief delay so modal exit animation clears first)
+      setTimeout(() => {
+        setShowSuccessToast(true);
+        setTimeout(() => setShowSuccessToast(false), 3500);
+      }, 200);
       // Notify other parts of the app that reviews updated
       try { window.dispatchEvent(new Event('reviews:updated')); } catch (e) { /* ignore */ }
       return true;
@@ -216,6 +270,10 @@ const Reviews = () => {
       setReviews(prev => [newReview, ...prev]);
       setStats(null);
       setModalOpen(false);
+      setTimeout(() => {
+        setShowSuccessToast(true);
+        setTimeout(() => setShowSuccessToast(false), 3500);
+      }, 200);
       try { window.dispatchEvent(new Event('reviews:updated')); } catch (err) { /* ignore */ }
       return true;
     }
@@ -244,6 +302,9 @@ const Reviews = () => {
         onClose={() => setModalOpen(false)}
         onSubmit={handleSubmit}
       />
+
+      {/* Success notification — lives outside modal so it survives unmount */}
+      <SuccessToast visible={showSuccessToast} />
 
     </div>
   );

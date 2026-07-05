@@ -38,31 +38,18 @@ const PackageGrid = ({ packages, onShowMore }) => {
   const seen = new Set();
   const sectionSize = Math.max(1, Math.ceil(packages.length / 3));
 
-  const sections = [
-    {
-      key: 'highest',
-      title: 'Highest Rated Packages',
-      items: highestRated.slice(0, sectionSize),
-    },
-    {
-      key: 'booked',
-      title: 'Most Booked Packages',
-      items: mostBooked.slice(0, sectionSize),
-    },
-    {
-      key: 'new',
-      title: 'New Package',
-      items: newest,
-    },
-  ].map((section) => ({
-    ...section,
-    items: section.items.filter((pkg) => {
+  const sortedPackages = [
+    { items: highestRated.slice(0, sectionSize) },
+    { items: mostBooked.slice(0, sectionSize) },
+    { items: newest },
+  ]
+    .flatMap((section) => section.items)
+    .filter((pkg) => {
       const key = String(pkg.id);
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
-    }),
-  })).filter((section) => section.items.length > 0);
+    });
 
   if (packages.length === 0) {
     return (
@@ -135,39 +122,22 @@ const PackageGrid = ({ packages, onShowMore }) => {
       `}</style>
 
       <div className="pkg-grid-wrap">
-        <AnimatePresence mode="popLayout">
-          {sections.map((section, sectionIndex) => (
-              <motion.section
-                key={section.key}
-                className="pkg-section"
+        <div className="pkg-grid">
+          <AnimatePresence mode="popLayout">
+            {sortedPackages.map((pkg, i) => (
+              <motion.div
+                key={pkg.id}
                 layout
-                initial={{ opacity: 0, y: 18 }}
+                initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 12 }}
-                transition={{ duration: 0.3, delay: sectionIndex * 0.06, ease: [0.22,1,0.36,1] }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.35, delay: i * 0.05, ease: [0.22,1,0.36,1] }}
               >
-                <div className="pkg-section-head">
-                  <div className="pkg-section-title">{section.title}</div>
-                  <div className="pkg-section-label">{section.items.length} items</div>
-                </div>
-
-                <div className="pkg-grid">
-                  {section.items.map((pkg, i) => (
-                    <motion.div
-                      key={pkg.id}
-                      layout
-                      initial={{ opacity: 0, y: 24 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.35, delay: i * 0.05, ease: [0.22,1,0.36,1] }}
-                    >
-                      <PackageCard pkg={pkg} onShowMore={onShowMore} index={i} />
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.section>
+                <PackageCard pkg={pkg} onShowMore={onShowMore} index={i} />
+              </motion.div>
             ))}
-        </AnimatePresence>
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );

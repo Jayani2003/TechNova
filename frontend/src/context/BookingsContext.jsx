@@ -31,6 +31,13 @@ export const BookingsProvider = ({ children }) => {
     await getAllBookings();
   }, [getAllBookings]);
 
+  // ── Admin: set additional charges ──────────────────────────────────────────
+  const updateAdditionalCharges = useCallback(async (bookingId, additionalCharges) => {
+    const res = await api.patch(`/bookings/${bookingId}/additional-charges`, { additionalCharges });
+    await getAllBookings();
+    return res;
+  }, [getAllBookings]);
+
   // ── Update booking status ──────────────────────────────────────────────────
   const updateBookingStatus = useCallback(async (bookingId, status, adminNote = undefined) => {
     await api.patch(`/bookings/${bookingId}/status`, { status, adminNote });
@@ -104,6 +111,7 @@ export const BookingsProvider = ({ children }) => {
         getCustomerBookings,
         getAllBookings,
         setQuotedPrice,
+        updateAdditionalCharges,
         updateBookingStatus,
         acceptQuote,
         rejectQuote,

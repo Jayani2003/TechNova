@@ -43,6 +43,8 @@ const SummaryCard = ({ label, value, subtext, highlight }) => (
 
 const PaymentSummary = ({
   totalAmount = "LKR 50,000.00",
+  baseAmount,
+  additionalCharges,
   paidAmount = "LKR 25,000.00",
   remainingAmount = "LKR 25,000.00",
   paymentStatus = "PENDING PAYMENT",
@@ -58,12 +60,18 @@ const PaymentSummary = ({
         Payment Summary
       </p>
       <div className="flex gap-6 divide-x divide-gray-100">
-        <SummaryCard
-          label="Total Amount"
-          value={totalAmount}
-          subtext="For this booking"
-          highlight="green"
-        />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-gray-500 font-medium mb-2">Total Amount</p>
+            <p className="text-xl font-bold truncate text-teal-600">{totalAmount}</p>
+            {baseAmount && additionalCharges > 0 ? (
+              <div className="mt-1 flex flex-col gap-0.5">
+                <p className="text-xs text-gray-400">Base: LKR {baseAmount.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</p>
+                <p className="text-xs text-gray-400">Additional: LKR {additionalCharges.toLocaleString('en-LK', { minimumFractionDigits: 2 })}</p>
+              </div>
+            ) : (
+              <p className="text-xs text-gray-400 mt-1">For this booking</p>
+            )}
+          </div>
         <div className="pl-6 flex-1 min-w-0">
           <SummaryCard
             label="Paid Amount"

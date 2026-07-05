@@ -181,7 +181,6 @@ const MyBookingDetail = ({ booking, onBack }) => {
             <div className="flex gap-3">
               <button onClick={async () => {
                   await acceptQuote(booking.id);
-                  handleDownloadPdf();
                 }}
                 className="flex-1 flex items-center justify-center gap-2 bg-[#00b0a5] text-white py-2.5 rounded-xl font-semibold hover:bg-[#009b91] transition-colors cursor-pointer">
                 <Check className="w-4 h-4" /> Accept Quote

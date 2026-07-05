@@ -1,5 +1,12 @@
 const db = require('../db/connection');
 
+const normalizeTourType = (value) => String(value || 'P2P').toUpperCase();
+const getBookingReference = (tourType, bookingId) => {
+  const type = normalizeTourType(tourType);
+  const typeCode = type === 'PACKAGE' ? 'PKG' : type === 'CUSTOM' ? 'CUS' : 'P2P';
+  return `CBT-${typeCode}-${bookingId}`;
+};
+
 // Helper to add or subtract days to a date string
 const modifyDays = (dateStr, days) => {
   if (!dateStr) return null;
@@ -32,7 +39,7 @@ const getAllPayments = async (req, res) => {
     const payments = rows.map((r) => ({
       id: `PAY${String(r.payment_id).padStart(3, '0')}`,
       rawId: r.payment_id,
-      bookingId: r.tour_type === 'PACKAGE' ? `CBT-PKG-${r.booking_id}` : r.tour_type === 'CUSTOM' ? `CBT-CUS-${r.booking_id}` : `CBT-P2P-${r.booking_id}`,
+      bookingId: getBookingReference(r.tour_type, r.booking_id),
       booking_id: r.booking_id,
       tourType: r.tour_type === 'PACKAGE' ? 'Package Tour' : r.tour_type === 'CUSTOM' ? 'Customized' : 'P2P Tour',
       customerName: r.customer_name,
@@ -297,12 +304,12 @@ const getPaymentsForBooking = async (req, res) => {
       recordedBy: p.recorded_by_name || 'Customer',
       notes: p.notes,
       slipUrl: p.slip_url,
-      tourId: booking.tour_type === 'PACKAGE' ? `CBT-PKG-${booking.booking_id}` : booking.tour_type === 'CUSTOM' ? `CBT-CUS-${booking.booking_id}` : `CBT-P2P-${booking.booking_id}`
+      tourId: getBookingReference(booking.tour_type, booking.booking_id),
     }));
 
     res.json({
       bookingId: bookingId,
-      bookingReference: booking.tour_type === 'PACKAGE' ? `CBT-PKG-${booking.booking_id}` : booking.tour_type === 'CUSTOM' ? `CBT-CUS-${booking.booking_id}` : `CBT-P2P-${booking.booking_id}`,
+      bookingReference: getBookingReference(booking.tour_type, booking.booking_id),
       tourType: booking.tour_type,
       startLocation: booking.start_location,
       endLocation: booking.end_location,

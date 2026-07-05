@@ -86,7 +86,9 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
     setSubmitting(true);
     try {
       const ok = await onSubmit({ ...form, images });
-      if (ok !== false) setSubmitted(true);
+      if (ok !== false) {
+        setTimeout(() => setSubmitted(true), 400);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -119,33 +121,6 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
           }}
         >
           {"Close"}
-        </button>
-      </div>
-    );
-  }
-
-  // ── Success state ────────────────────────────────────────
-  if (submitted) {
-    return (
-      <div style={{ textAlign: 'center', padding: '48px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-        <div style={{ fontSize: '56px' }}>🎉</div>
-        <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0d2b2b', letterSpacing: '-0.03em' }}>
-          {"Thank you for your review!"}
-        </h3>
-        <p style={{ fontSize: '15px', fontWeight: 300, color: '#5a8080', maxWidth: '360px', lineHeight: 1.7 }}>
-          {"Your review has been published and can be found on the reviews page and in"} <strong>{"My Reviews"}</strong> {"in your dashboard."}
-        </p>
-        <button
-          onClick={onCancel}
-          style={{
-            marginTop: '8px', padding: '14px 32px', borderRadius: '10px',
-            background: '#00b0a5', border: 'none', color: '#fff',
-            fontSize: '13px', fontWeight: 700,
-            letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
-            boxShadow: '0 6px 24px -4px rgba(0,176,165,0.45)',
-          }}
-        >
-          {"Done"}
         </button>
       </div>
     );
@@ -280,6 +255,29 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
         .rvf-clear:hover { border-color: #cc3344; color: #cc3344; }
       `}</style>
 
+      {submitted ? (
+        <div style={{ textAlign: 'center', padding: '48px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+          <div style={{ fontSize: '56px' }}>🎉</div>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0d2b2b', letterSpacing: '-0.03em' }}>
+            {"Thank you for your review!"}
+          </h3>
+          <p style={{ fontSize: '15px', fontWeight: 300, color: '#5a8080', maxWidth: '360px', lineHeight: 1.7 }}>
+            {"Your review has been published and can be found on the reviews page and in"} <strong>{"My Reviews"}</strong> {"in your dashboard."}
+          </p>
+          <button
+            onClick={onCancel}
+            style={{
+              marginTop: '8px', padding: '14px 32px', borderRadius: '10px',
+              background: '#00b0a5', border: 'none', color: '#fff',
+              fontSize: '13px', fontWeight: 700,
+              letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
+              boxShadow: '0 6px 24px -4px rgba(0,176,165,0.45)',
+            }}
+          >
+            {"Done"}
+          </button>
+        </div>
+      ) : (
       <div className="rvf-wrap">
 
         {/* Tour selector */}
@@ -437,6 +435,7 @@ const ReviewForm = ({ reviewableTours = [], onSubmit, onCancel }) => {
         </div>
 
       </div>
+      )}
     </>
   );
 };

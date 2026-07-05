@@ -1,19 +1,16 @@
 import { useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { MessageCircle, RefreshCw } from "lucide-react";
 import { useMessages } from "../../../../context/useMessages.js";
+import { BRAND, FONT, getTheme } from "../AdminDashboard/adminTheme";
 import MessageList from "./MessageList";
 import MessageThread from "./MessageThread";
 
-const getStatusColor = (status) => {
-  switch (status) {
-    case "replied": return "bg-blue-100 text-blue-800";
-    case "read":    return "bg-green-100 text-green-800";
-    case "new":     return "bg-yellow-100 text-yellow-800";
-    default:        return "bg-gray-100 text-gray-800";
-  }
-};
-
 const Messages = () => {
+  const context = useOutletContext();
+  const dark = context?.dark ?? false;
+  const t = getTheme(dark);
+
   const { messages, loading, addReply, markMessageAsReadByAdmin, getAdminNotificationCount, refetch } = useMessages();
   const [selectedId, setSelectedId] = useState(null);
 
@@ -26,33 +23,45 @@ const Messages = () => {
   };
 
   if (loading) return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center py-20">
-      <RefreshCw className="w-6 h-6 text-slate-400 animate-spin" />
+    <div className="max-w-[1320px] mx-auto px-6 py-8">
+      <div className="rounded-2xl border flex items-center justify-center py-20" style={{ background: t.cardBg, borderColor: t.cardBorder }}>
+        <RefreshCw className="w-6 h-6 animate-spin" style={{ color: BRAND.coral }} />
+      </div>
     </div>
   );
 
   if (messages.length === 0) return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm text-center py-16">
-      <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-      <h3 className="text-xl font-semibold mb-2">No Messages Yet</h3>
-      <p className="text-gray-600 text-sm">Customer messages from the Contact Us form will appear here.</p>
+    <div className="max-w-[1320px] mx-auto px-6 py-8">
+      <div className="rounded-2xl border text-center py-16" style={{ background: t.cardBg, borderColor: t.cardBorder }}>
+        <MessageCircle className="w-16 h-16 mx-auto mb-4" style={{ color: t.dark ? "rgba(255,255,255,0.15)" : "#E8E8EA" }} />
+        <h3 style={{ fontFamily: FONT.heading, color: t.textPrimary }} className="text-xl font-bold mb-2">No Messages Yet</h3>
+        <p style={{ fontFamily: FONT.body, color: t.textSecondary }} className="text-sm">Customer messages from the Contact Us form will appear here.</p>
+      </div>
     </div>
   );
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-      <div className="grid grid-cols-1 lg:grid-cols-3 divide-x h-[600px]">
+    <div className="max-w-[1320px] mx-auto px-6 py-8">
+      <p style={{ fontFamily: FONT.body, color: t.textSecondary, fontSize: 13, margin: "0 0 20px" }}>
+        {messages.length} conversation{messages.length !== 1 ? "s" : ""}
+        {adminNotificationCount > 0 && ` · ${adminNotificationCount} need${adminNotificationCount === 1 ? "s" : ""} your attention`}
+      </p>
+
+      <div
+        className="rounded-2xl border grid grid-cols-1 lg:grid-cols-3 h-[600px] overflow-hidden"
+        style={{ background: t.cardBg, borderColor: t.cardBorder }}
+      >
         <MessageList
+          t={t}
           messages={messages}
           selectedId={selectedId}
           adminNotificationCount={adminNotificationCount}
-          getStatusColor={getStatusColor}
           onSelect={handleSelect}
           onRefresh={refetch}
         />
         <MessageThread
+          t={t}
           message={selectedMessage}
-          getStatusColor={getStatusColor}
           onReply={addReply}
         />
       </div>

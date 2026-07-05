@@ -27,6 +27,7 @@ import BookingPassengersStep from "../Booking/BookingPassengersStep";
 import BookingNotesStep from "../Booking/BookingNotesStep";
 import CustomizedHeader from "./CustomizedHeader";
 import { updateBooking } from "../../../../../services/bookingService";
+import { getBookingReferenceForBooking } from "../../../../../utils/bookingReference";
 
 const STEPS = ["Your Plan", "Passengers", "More Info", "Review"];
 
@@ -492,7 +493,7 @@ const Customized = () => {
           customerName: data.customerName || user?.name || "Not Specified",
           customerEmail: user.email,
         });
-        setBookingRef(editBooking.bookingRef || editBooking.id);
+        setBookingRef(editBooking.bookingRef || getBookingReferenceForBooking(editBooking));
         setSubmitted(true);
         window.scrollTo({ top: 200, behavior: "smooth" });
       } else {

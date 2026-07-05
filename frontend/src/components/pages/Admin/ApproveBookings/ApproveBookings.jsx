@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useOutletContext, useLocation } from "react-router-dom";
 import { useBookings } from "../../../../context/BookingsContext";
 import { STATUS_CFG } from "./BookingConstants";
+import { BRAND, FONT, getTheme } from "../AdminDashboard/adminTheme";
 import BookingFilters from "./BookingFilters";
 import BookingTable   from "./BookingTable";
 import BookingModal   from "./BookingModal";
@@ -10,6 +11,7 @@ import BookingModal   from "./BookingModal";
 export default function ApproveBookings() {
   const context = useOutletContext();
   const dark = context?.dark ?? false;
+  const t = getTheme(dark);
   const location = useLocation();
 
   const { bookings, getAllBookings, setQuotedPrice, updateBookingStatus } = useBookings();
@@ -35,9 +37,6 @@ export default function ApproveBookings() {
   const [statusFilter, setStatus]      = useState("ALL");
   const [typeFilter,   setTypeFilter]  = useState("ALL");
   const [selected,     setSelected]    = useState(null);
-
-  const tm = dark ? "#f1f5f9" : "#0f172a";
-  const ts = dark ? "#64748b" : "#94a3b8";
 
   // Status counts for filter badges
   const counts = Object.keys(STATUS_CFG).reduce((acc, s) => {
@@ -70,16 +69,16 @@ export default function ApproveBookings() {
   });
 
   // Modal handlers — async, re-sync selected booking after mutations
-  const handleSetQuote = async (id, price, vehicleInfo, adminNote) => {
-    await setQuotedPrice(id, price, vehicleInfo, adminNote);
+  const handleSetQuote = async (id, price, vehicleInfo) => {
+    await setQuotedPrice(id, price, vehicleInfo);
     const updated = bookings.find(b => b.id === id);
-    if (updated) setSelected({ ...updated, status: "QUOTED", quotedPrice: price, assignedVehicle: vehicleInfo, adminNote });
+    if (updated) setSelected({ ...updated, status: "QUOTED", quotedPrice: price, assignedVehicle: vehicleInfo });
   };
 
-  const handleUpdateStatus = async (id, status, adminNote = undefined) => {
-    await updateBookingStatus(id, status, adminNote);
+  const handleUpdateStatus = async (id, status) => {
+    await updateBookingStatus(id, status);
     const updated = bookings.find(b => b.id === id);
-    if (updated) setSelected({ ...updated, status, adminNote: adminNote !== undefined ? adminNote : updated.adminNote });
+    if (updated) setSelected({ ...updated, status });
     else setSelected(null);
   };
 
@@ -87,24 +86,19 @@ export default function ApproveBookings() {
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 300 }}>
       <svg style={{ animation: "spin 1s linear infinite", width: 32, height: 32 }} viewBox="0 0 24 24" fill="none">
         <style>{"@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}"}</style>
-        <circle cx="12" cy="12" r="10" stroke="#00b0a5" strokeWidth="4" opacity=".25"/>
-        <path fill="#00b0a5" d="M4 12a8 8 0 018-8v8z" opacity=".75"/>
+        <circle cx="12" cy="12" r="10" stroke={BRAND.coral} strokeWidth="4" opacity=".25"/>
+        <path fill={BRAND.coral} d="M4 12a8 8 0 018-8v8z" opacity=".75"/>
       </svg>
     </div>
   );
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 24px" }}>
+    <div className="max-w-[1320px] mx-auto px-6 py-8">
 
-      {/* Page header */}
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 900, color: tm, letterSpacing: "-.4px" }}>
-          Manage Bookings
-        </h1>
-        <p style={{ margin: "4px 0 0", fontSize: 14, color: ts }}>
-          {bookings.length} total · {counts.PENDING || 0} pending · {counts.ACCEPTED || 0} awaiting confirmation
-        </p>
-      </div>
+      {/* Contextual summary — page title itself now lives in the layout header */}
+      <p style={{ fontFamily: FONT.body, color: t.textSecondary, fontSize: 13, margin: "0 0 20px" }}>
+        {bookings.length} total · {counts.PENDING || 0} pending · {counts.ACCEPTED || 0} awaiting confirmation
+      </p>
 
       {/* Filters */}
       <BookingFilters

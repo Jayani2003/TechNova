@@ -1,20 +1,30 @@
 import { useState } from "react";
 import { MessageCircle, Send } from "lucide-react";
+import { BRAND, STATE, FONT } from "../AdminDashboard/adminTheme";
 
-const EmptyThread = () => (
+function statusStyle(status) {
+  switch (status) {
+    case "replied": return { bg: `${STATE.success}18`, color: STATE.success };
+    case "read":    return { bg: `${BRAND.payneGray}18`, color: BRAND.payneGray };
+    case "new":     return { bg: `${STATE.warning}20`, color: "#9A6A1E" };
+    default:        return { bg: `${BRAND.silver}30`, color: BRAND.payneGray };
+  }
+}
+
+const EmptyThread = ({ t }) => (
   <div className="lg:col-span-2 flex-1 flex items-center justify-center text-center p-8">
     <div>
-      <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-      <h3 className="text-xl font-semibold mb-2 text-gray-700">Select a Customer</h3>
-      <p className="text-gray-600">Choose a customer from the list to view and reply to their messages</p>
+      <MessageCircle className="w-16 h-16 mx-auto mb-4" style={{ color: t.dark ? "rgba(255,255,255,0.15)" : "#E8E8EA" }} />
+      <h3 style={{ fontFamily: FONT.heading, color: t.textPrimary }} className="text-xl font-bold mb-2">Select a Customer</h3>
+      <p style={{ fontFamily: FONT.body, color: t.textSecondary }}>Choose a customer from the list to view and reply to their messages</p>
     </div>
   </div>
 );
 
-const MessageThread = ({ message, getStatusColor, onReply }) => {
+const MessageThread = ({ t, message, onReply }) => {
   const [replyText, setReplyText] = useState("");
 
-  if (!message) return <EmptyThread />;
+  if (!message) return <EmptyThread t={t} />;
 
   const handleSend = () => {
     if (!replyText.trim()) return;
@@ -22,78 +32,110 @@ const MessageThread = ({ message, getStatusColor, onReply }) => {
     setReplyText("");
   };
 
+  const status = statusStyle(message.status);
+
   return (
     <div className="lg:col-span-2 flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b bg-gray-50">
+      <div className="p-4 border-b" style={{ background: t.headerBg, borderColor: t.divider }}>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-lg">{message.customerName}</h3>
-            <p className="text-sm text-gray-600">{message.customerEmail}</p>
+            <h3 style={{ fontFamily: FONT.heading, color: t.textPrimary }} className="font-bold text-lg">{message.customerName}</h3>
+            <p style={{ fontFamily: FONT.body, color: t.textSecondary }} className="text-sm">{message.customerEmail}</p>
           </div>
-          <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusColor(message.status)}`}>
-            {message.status?.charAt(0).toUpperCase() + message.status?.slice(1)}
+          <span
+            className="text-xs px-2 py-1 rounded-full font-semibold capitalize"
+            style={{ background: status.bg, color: status.color, fontFamily: FONT.body }}
+          >
+            {message.status}
           </span>
         </div>
-        {/* header timestamp removed - individual messages show timestamps */}
       </div>
 
       {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ background: t.headerBg }}>
         {/* Original message first */}
         <div className="flex justify-start">
-          <div className="max-w-[80%] bg-white border rounded-lg shadow p-4">
+          <div className="max-w-[80%] rounded-2xl shadow-sm p-4 border" style={{ background: t.cardBg, borderColor: t.cardBorder }}>
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                style={{ background: BRAND.payneGray, fontFamily: FONT.heading }}
+              >
                 {message.customerName?.charAt(0)}
               </div>
               <div>
-                <p className="text-sm font-semibold">{message.customerName}</p>
-                <p className="text-xs text-gray-500">{new Date(message.createdAt).toLocaleString()}</p>
+                <p style={{ fontFamily: FONT.heading, color: t.textPrimary }} className="text-sm font-bold">{message.customerName}</p>
+                <p style={{ fontFamily: FONT.body, color: t.textSecondary }} className="text-xs">{new Date(message.createdAt).toLocaleString()}</p>
               </div>
             </div>
-                <p className="text-sm text-gray-700">{message.message}</p>
+            <p style={{ fontFamily: FONT.body, color: t.textPrimary }} className="text-sm">{message.message}</p>
           </div>
         </div>
 
         {/* Replies */}
-        {(message.replies || []).map((reply) => (
-          <div key={reply.id} className={`flex ${reply.from === "admin" ? "justify-end" : "justify-start"}`}>
-            <div className="max-w-[80%]">
-              <div className={`rounded-lg shadow p-4 ${reply.from === "admin" ? "bg-blue-600 text-white" : "bg-white border"}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${reply.from === "admin" ? "bg-blue-800 text-white" : "bg-blue-600 text-white"}`}>
-                    {reply.fromName?.charAt(0)}
+        {(message.replies || []).map((reply) => {
+          const isAdmin = reply.from === "admin";
+          return (
+            <div key={reply.id} className={`flex ${isAdmin ? "justify-end" : "justify-start"}`}>
+              <div className="max-w-[80%]">
+                <div
+                  className="rounded-2xl shadow-sm p-4 border"
+                  style={{
+                    background: isAdmin ? BRAND.coral : t.cardBg,
+                    borderColor: isAdmin ? BRAND.coral : t.cardBorder,
+                  }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                      style={{
+                        background: isAdmin ? "rgba(255,255,255,0.25)" : BRAND.payneGray,
+                        color: "#fff",
+                        fontFamily: FONT.heading,
+                      }}
+                    >
+                      {reply.fromName?.charAt(0)}
+                    </div>
+                    <div>
+                      <p style={{ fontFamily: FONT.heading, color: isAdmin ? "#fff" : t.textPrimary }} className="text-sm font-bold">{reply.fromName}</p>
+                      <p style={{ fontFamily: FONT.body, color: isAdmin ? "rgba(255,255,255,0.75)" : t.textSecondary }} className="text-xs">
+                        {new Date(reply.timestamp).toLocaleString()}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className={`text-sm font-semibold ${reply.from === "admin" ? "text-white" : ""}`}>{reply.fromName}</p>
-                    <p className={`text-xs ${reply.from === "admin" ? "text-blue-100" : "text-gray-500"}`}>
-                      {new Date(reply.timestamp).toLocaleString()}
-                    </p>
-                  </div>
+                  <p style={{ fontFamily: FONT.body, color: isAdmin ? "#fff" : t.textPrimary }} className="text-sm">{reply.message}</p>
                 </div>
-                <p className={`text-sm ${reply.from === "admin" ? "text-white" : "text-gray-700"}`}>{reply.message}</p>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Reply input */}
-      <div className="p-4 border-t bg-white">
-        <label className="text-sm font-semibold mb-2 block">Send Reply:</label>
+      <div className="p-4 border-t" style={{ background: t.cardBg, borderColor: t.divider }}>
+        <label style={{ fontFamily: FONT.body, color: t.textPrimary }} className="text-sm font-semibold mb-2 block">Send Reply:</label>
         <div className="flex gap-2">
           <textarea
             placeholder="Type your reply here..."
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
             rows={3}
-            className="flex-1 p-3 rounded-lg border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none"
+            style={{
+              fontFamily: FONT.body,
+              background: t.headerBg,
+              borderColor: t.cardBorder,
+              color: t.textPrimary,
+            }}
+            className="flex-1 p-3 rounded-lg border outline-none text-sm resize-none"
+            onFocus={e => e.currentTarget.style.boxShadow = `0 0 0 2px ${BRAND.coral}55`}
+            onBlur={e => e.currentTarget.style.boxShadow = "none"}
           />
           <button
             onClick={handleSend}
             disabled={!replyText.trim()}
-            className="self-end flex items-center gap-2 bg-gray-900 text-white px-4 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors disabled:opacity-40"
+            className="self-end flex items-center gap-2 px-4 py-3 rounded-lg font-bold transition-colors disabled:opacity-40"
+            style={{ fontFamily: FONT.body, background: BRAND.coral, color: "#fff" }}
           >
             <Send className="w-4 h-4" /> Send
           </button>

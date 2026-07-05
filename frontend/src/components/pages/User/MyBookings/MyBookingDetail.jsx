@@ -5,6 +5,7 @@ import { ArrowLeft, MapPin, Calendar, Users, Car, Phone, FileText, Clock, Baby, 
 import { STATUS_STYLES, TOUR_TYPE_LABEL } from "./MyBookingCard";
 import { useBookings } from "../../../../context/BookingsContext.jsx";
 import BookingWeatherPanel from "./BookingWeatherPanel";
+import { getBookingReferenceForBooking } from "../../../../utils/bookingReference";
 
 const VEHICLE_LABELS = {
   mini_car: "Mini Car", normal_car: "Normal Car", sedan_car: "Sedan Car",
@@ -71,7 +72,7 @@ const MyBookingDetail = ({ booking, onBack }) => {
           <span>Back to List</span>
         </button>
         <div className="flex-1">
-          <h2 className="text-lg font-bold text-slate-800">{booking.id}</h2>
+          <h2 className="text-lg font-bold text-slate-800">{booking.bookingRef || getBookingReferenceForBooking(booking)}</h2>
           <p className="text-xs text-slate-500">{TOUR_TYPE_LABEL[booking.tourType] || booking.tourType}</p>
         </div>
         <span className={`text-xs px-3 py-1.5 rounded-full font-bold ${STATUS_STYLES[booking.status] || "bg-slate-100 text-slate-600"}`}>
@@ -322,7 +323,7 @@ const MyBookingDetail = ({ booking, onBack }) => {
         {/* Booking info */}
         <Section title="Booking Info">
           <DetailRow icon={Calendar}  label="Submitted On"        value={booking.bookingDate} />
-          <DetailRow icon={FileText}  label="Booking Reference"   value={`CBT-${booking.tourType === "PACKAGE" ? "PKG" : booking.tourType === "CUSTOM" ? "CUS" : "P2P"}-${booking.id}`} />
+          <DetailRow icon={FileText}  label="Booking Reference"   value={booking.bookingRef || getBookingReferenceForBooking(booking)} />
           {booking.tourType === "PACKAGE" && booking.packageName && (
             <DetailRow icon={FileText} label="Package" value={booking.packageName} />
           )}

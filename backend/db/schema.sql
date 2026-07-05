@@ -156,6 +156,7 @@ CREATE TABLE booking (
 
     -- pricing (admin sets, customer accepts or rejects)
     quoted_price     DECIMAL(10,2) NULL,
+    additional_charges DECIMAL(10,2) DEFAULT 0.00,
 
     notes          TEXT,
     tour_thoughts  TEXT,
@@ -221,7 +222,7 @@ CREATE TABLE payment (
     payment_id     INT AUTO_INCREMENT PRIMARY KEY,
     booking_id     INT NOT NULL,
 
-    installment    ENUM('DEPOSIT','FINAL','FULL') NOT NULL,
+    installment    ENUM('DEPOSIT', 'FINAL', 'ADDITIONAL', 'FULL') NOT NULL,
     amount         DECIMAL(10,2) NOT NULL,
     payment_method ENUM('CASH','BANK_TRANSFER') NOT NULL,
     received_date  DATE NOT NULL,

@@ -102,12 +102,13 @@ const PaymentPage = ({ bookingId = null, onRequestOpenTab }) => {
 
     const currentPendingInstallment = paymentData.installments.find(i => i.status === 'PENDING' || i.status === 'OVERDUE');
     const installmentType = currentPendingInstallment 
-      ? (currentPendingInstallment.type === 'Deposit' ? 'DEPOSIT' : currentPendingInstallment.type === 'Final Payment' ? 'FINAL' : 'FULL')
+      ? (currentPendingInstallment.type === 'Deposit' ? 'DEPOSIT' : currentPendingInstallment.type === 'Final Payment' ? 'FINAL' : currentPendingInstallment.type === 'Additional Charges' ? 'ADDITIONAL' : 'FULL')
       : 'FULL';
     
-    const installmentAmount = currentPendingInstallment 
-      ? currentPendingInstallment.rawAmount 
-      : remaining;
+    const installmentAmount = Math.min(
+      currentPendingInstallment ? currentPendingInstallment.rawAmount : remaining,
+      remaining
+    );
 
     const formData = new FormData();
     formData.append('booking_id', bookingId);

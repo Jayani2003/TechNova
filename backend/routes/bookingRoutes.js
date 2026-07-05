@@ -9,6 +9,7 @@ const {
   updateBooking,
   downloadBookingConfirmationPdf,
   updateCustomItinerary,
+  updateAdditionalCharges,
 } = require('../controllers/bookingController');
 const { verifyToken } = require('../middleware/authMiddleware');
 const { adminOnly } = require('../middleware/adminMiddleware');
@@ -22,6 +23,7 @@ router.put('/:id', verifyToken, updateBooking);
 // ── Admin routes ──────────────────────────────────────────────────────────────
 router.get('/', verifyToken, adminOnly, getAllBookings);
 router.patch('/:id/quote', verifyToken, adminOnly, setQuote);
+router.patch('/:id/additional-charges', verifyToken, adminOnly, updateAdditionalCharges);
 router.patch('/:id/status', verifyToken, updateStatus); // customer can also ACCEPT/REJECT
 router.put('/:id/itinerary', verifyToken, adminOnly, updateCustomItinerary);
 

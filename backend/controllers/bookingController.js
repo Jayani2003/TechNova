@@ -93,6 +93,7 @@ const mapBooking = (row) => ({
   noOfChildren:       row.no_of_children,
   agesOfChildren:     row.ages_of_children || null,
   quotedPrice:        row.quoted_price ? parseFloat(row.quoted_price) : null,
+  additionalCharges:  row.additional_charges ? parseFloat(row.additional_charges) : 0,
   notes:              row.notes        || null,
   tourThoughts:       row.tour_thoughts || null,
   status:             row.booking_status,
@@ -695,6 +696,53 @@ const updateCustomItinerary = async (req, res) => {
   }
 };
 
+// ── PUT /api/bookings/:id/additional-charges ─────────────────────────────────
+const updateAdditionalCharges = async (req, res) => {
+  const { id } = req.params;
+  const { additionalCharges } = req.body;
+  const isAdmin = ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(req.user?.role);
+  if (!isAdmin) return res.status(403).json({ message: 'Unauthorized.' });
+
+  if (additionalCharges === undefined || additionalCharges === null || isNaN(Number(additionalCharges))) {
+    return res.status(400).json({ message: 'additionalCharges is required and must be a valid number.' });
+  }
+
+  try {
+    // Check if the base quoted price is fully paid before allowing additional charges
+    const [rows] = await db.execute(`
+      SELECT b.quoted_price, 
+             COALESCE((SELECT SUM(amount) FROM payment WHERE booking_id = b.booking_id AND status = 'APPROVED'), 0) AS total_paid
+      FROM booking b
+      WHERE b.booking_id = ?
+    `, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    const { quoted_price, total_paid } = rows[0];
+    const basePrice = quoted_price ? parseFloat(quoted_price) : 0;
+    const totalPaid = parseFloat(total_paid);
+
+    if (totalPaid < basePrice) {
+      return res.status(400).json({ message: 'Cannot add additional charges until the quoted base price is fully paid and approved.' });
+    }
+
+    const [result] = await db.execute(
+      `UPDATE booking SET additional_charges = ? WHERE booking_id = ?`,
+      [Number(additionalCharges), id]
+    );
+
+    if (result.affectedRows === 0)
+      return res.status(404).json({ message: 'Booking not found.' });
+
+    res.json({ message: 'Additional charges updated successfully.' });
+  } catch (err) {
+    console.error('updateAdditionalCharges error:', err);
+    res.status(500).json({ message: 'Failed to update additional charges.' });
+  }
+};
+
 module.exports = {
   createP2PBooking,
   getMyBookings,
@@ -704,4 +752,5 @@ module.exports = {
   updateBooking,
   downloadBookingConfirmationPdf,
   updateCustomItinerary,
+  updateAdditionalCharges,
 };

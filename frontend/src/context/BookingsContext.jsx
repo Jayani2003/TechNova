@@ -21,13 +21,19 @@ export const BookingsProvider = ({ children }) => {
     return data.bookings;
   }, []);
 
-  // ── Admin: set quoted price + vehicle ──────────────────────────────────────
   const setQuotedPrice = useCallback(async (bookingId, price, vehicleInfo = null) => {
     await api.patch(`/bookings/${bookingId}/quote`, {
       quotedPrice: price,
       vehicleId: vehicleInfo?.id || null,
     });
     await getAllBookings();
+  }, [getAllBookings]);
+
+  // ── Admin: set additional charges ──────────────────────────────────────────
+  const updateAdditionalCharges = useCallback(async (bookingId, additionalCharges) => {
+    const res = await api.patch(`/bookings/${bookingId}/additional-charges`, { additionalCharges });
+    await getAllBookings();
+    return res;
   }, [getAllBookings]);
 
   // ── Update booking status ──────────────────────────────────────────────────
@@ -103,6 +109,7 @@ export const BookingsProvider = ({ children }) => {
         getCustomerBookings,
         getAllBookings,
         setQuotedPrice,
+        updateAdditionalCharges,
         updateBookingStatus,
         acceptQuote,
         rejectQuote,

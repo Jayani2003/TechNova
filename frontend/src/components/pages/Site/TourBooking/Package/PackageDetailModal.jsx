@@ -165,7 +165,7 @@ const PackageDetailModal = ({ pkg, onClose, onShowMore }) => {
 
         /* ─── Section heading ──────────────────────── */
         .pdm-section-heading {
-          font-size: 9px; font-weight: 900;
+          font-size: 14px; font-weight: 900;
           letter-spacing: 0.28em; text-transform: uppercase;
           color: #00b0a5; margin-bottom: 18px;
           display: flex; align-items: center; gap: 12px;

@@ -14,16 +14,20 @@ export const getTodayDateStr = () => {
 
 export const parseDateOnly = (dateStr) => {
   if (!dateStr) return null;
-  const [y, m, d] = dateStr.split("-").map(Number);
-  return new Date(y, m - 1, d);
+  const match = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return null;
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
 };
 
-export const isDateInTourRange = (startDate, endDate, today = new Date()) => {
+export const isTourActiveToday = (startDate, today = new Date()) => {
   const start = parseDateOnly(startDate);
-  const end = parseDateOnly(endDate);
-  if (!start || !end) return false;
+  if (!start) return false;
   const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  return t >= start && t <= end;
+  return t >= start;
 };
 
 export const getTourDayNumber = (startDate, today = new Date()) => {
@@ -39,7 +43,19 @@ export const getNotificationId = (bookingId, dateStr = getTodayDateStr()) =>
 
 export const getReadNotificationIds = () => {
   try {
-    return JSON.parse(localStorage.getItem(READ_STORAGE_KEY) || "{}");
+    const raw = JSON.parse(localStorage.getItem(READ_STORAGE_KEY) || "{}");
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000; // 24 hours
+    const pruned = {};
+    let changed = false;
+    for (const [id, ts] of Object.entries(raw)) {
+      if (ts > cutoff) {
+        pruned[id] = ts;
+      } else {
+        changed = true; // this entry has expired
+      }
+    }
+    if (changed) localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(pruned));
+    return pruned;
   } catch {
     return {};
   }
@@ -60,9 +76,9 @@ export const markNotificationsRead = (notificationIds) => {
 
 export const isActivePackageTour = (booking) =>
   booking?.tourType === "PACKAGE"
-  && booking?.status === "TOUR_STARTED"
+  && (booking?.status === "TOUR_STARTED" || booking?.status === "CONFIRMED")
   && booking?.packageId
-  && isDateInTourRange(booking.startDate, booking.endDate);
+  && isTourActiveToday(booking.startDate);
 
 export const buildDailyWeatherNotification = async (booking) => {
   const dateStr = getTodayDateStr();

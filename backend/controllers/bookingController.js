@@ -6,7 +6,12 @@ const formatDate = (val) => {
   if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
   const dt = new Date(val);
   if (Number.isNaN(dt.getTime())) return null;
-  return dt.toISOString().split('T')[0];
+  
+  // Extract local date parts to prevent timezone shifts when converting DB Date objects to strings
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth() + 1).padStart(2, '0');
+  const d = String(dt.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 };
 
 const normalizeTourType = (value) => String(value || 'P2P').toUpperCase();

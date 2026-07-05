@@ -149,7 +149,7 @@ const SuccessScreen = ({ bookingRef, navigate }) => {
 };
 
 const areChildAgesValid = (noOfChildren, agesOfChildren) => {
-  if (!noOfChildren || Number(noOfChildren) <= 0) return true;
+  if (!noOfChildren || Number(noOfChildren) <= 0) return { valid: true };
   const ages = String(agesOfChildren || "").split(",").map((age) => age.trim());
   if (ages.length !== Number(noOfChildren)) return { valid: false, msg: "Please enter ages for all children." };
   const allValid = ages.every((age) => {

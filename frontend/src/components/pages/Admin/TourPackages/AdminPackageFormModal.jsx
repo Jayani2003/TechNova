@@ -29,7 +29,7 @@ const taStyle = (error, dark = false) => ({
 });
 
 // ── Destination row ──────────────────────────────────────────
-const DestRow = ({ dest, index, onChange, onRemove, canRemove, dark = false }) => (
+const DestRow = ({ dest, index, onChange, onRemove, canRemove, dark = false, errors = {} }) => (
   <div style={{
     background: dark ? '#0b1220' : '#f7fffe', border: dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,176,165,0.15)',
     borderRadius: '12px', padding: '16px', display:'flex', flexDirection:'column', gap:'10px',
@@ -51,20 +51,26 @@ const DestRow = ({ dest, index, onChange, onRemove, canRemove, dark = false }) =
       )}
     </div>
     <div style={{ display:'grid', gridTemplateColumns:'1fr auto', gap:'10px' }}>
-        <input
-          style={inputStyle(false, dark)}
-        placeholder="Destination name"
-        value={dest.name}
-        onChange={e => onChange(index, 'name', e.target.value)}
-      />
-      <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
-        <input
-          type="number" min="1" max="30"
-          style={{ ...inputStyle(false, dark), width:'60px', textAlign:'center' }}
-          value={dest.days}
-          onChange={e => onChange(index, 'days', Number(e.target.value))}
+        <div style={{ display:'flex', flexDirection:'column', gap:'4px' }}>
+          <input
+            style={inputStyle(!!errors.name, dark)}
+          placeholder="Destination name"
+          value={dest.name}
+          onChange={e => onChange(index, 'name', e.target.value)}
         />
-        <span style={{ fontSize:'11px', color: dark ? '#94a3b8' : '#7a9a9a', whiteSpace:'nowrap', fontWeight:600 }}>days</span>
+        {errors.name && <span style={{ fontSize:'11px', color:'#cc3344', fontWeight:600 }}>{errors.name}</span>}
+      </div>
+      <div style={{ display:'flex', flexDirection:'column', gap:'4px' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+          <input
+            type="number" min="1" max="30"
+            style={{ ...inputStyle(!!errors.days, dark), width:'60px', textAlign:'center' }}
+            value={dest.days}
+            onChange={e => onChange(index, 'days', Number(e.target.value))}
+          />
+          <span style={{ fontSize:'11px', color: dark ? '#94a3b8' : '#7a9a9a', whiteSpace:'nowrap', fontWeight:600 }}>days</span>
+        </div>
+        {errors.days && <span style={{ fontSize:'11px', color:'#cc3344', fontWeight:600 }}>{errors.days}</span>}
       </div>
     </div>
     <textarea
@@ -93,25 +99,37 @@ const DestRow = ({ dest, index, onChange, onRemove, canRemove, dark = false }) =
     )}
     <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
       {(dest.activities || []).map((a, ai) => (
-        <div key={ai} style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: 8 }}>
-          <input
-            style={inputStyle(false, dark)}
-            placeholder="Activity name"
-            value={a.name}
-            onChange={e => {
-              const next = (dest.activities || []).map((act, idx) => idx === ai ? { ...act, name: e.target.value } : act);
-              onChange(index, 'activities', next);
-            }}
-          />
-          <input
-            style={{ ...inputStyle(false, dark), width: '120px' }}
-            placeholder="Phone"
-            value={a.phone}
-            onChange={e => {
-              const next = (dest.activities || []).map((act, idx) => idx === ai ? { ...act, phone: e.target.value } : act);
-              onChange(index, 'activities', next);
-            }}
-          />
+        <div key={ai} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: 8 }}>
+            <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
+              <input
+                style={inputStyle(!!errors[`act_${ai}_name`], dark)}
+                placeholder="Activity name"
+                value={a.name}
+                onChange={e => {
+                  const next = (dest.activities || []).map((act, idx) => idx === ai ? { ...act, name: e.target.value } : act);
+                  onChange(index, 'activities', next);
+                }}
+              />
+              {errors[`act_${ai}_name`] && (
+                <span style={{ fontSize:'11px', color:'#cc3344', fontWeight:600 }}>{errors[`act_${ai}_name`]}</span>
+              )}
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
+              <input
+                style={{ ...inputStyle(!!errors[`act_${ai}_phone`], dark), width: '120px' }}
+                placeholder="Phone"
+                value={a.phone}
+                onChange={e => {
+                  const next = (dest.activities || []).map((act, idx) => idx === ai ? { ...act, phone: e.target.value } : act);
+                  onChange(index, 'activities', next);
+                }}
+              />
+              {errors[`act_${ai}_phone`] && (
+                <span style={{ fontSize:'11px', color:'#cc3344', fontWeight:600 }}>{errors[`act_${ai}_phone`]}</span>
+              )}
+            </div>
+          </div>
           <textarea
             style={{ ...taStyle(false, dark), gridColumn: '1 / -1' }}
             placeholder="Activity description"
@@ -133,7 +151,7 @@ const DestRow = ({ dest, index, onChange, onRemove, canRemove, dark = false }) =
 );
 
 // ── Main form modal ──────────────────────────────────────────
-const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false }) => {
+const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false, existingPackages = [], editingId = null }) => {
   const isEdit = !!pkg?.id;
   const [form,   setForm]   = useState(emptyPackage());
   const [errors, setErrors] = useState({});
@@ -146,6 +164,7 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false }) =
         withGuid: Boolean(pkg.guid),
         guideName: pkg.guid?.name || '',
         guideNic: pkg.guid?.nic || '',
+        guidePhone: pkg.guid?.phone || '',
         guideContactDetails: pkg.guid?.contactDetails || '',
         highlights: [...(pkg.highlights || ['','','',''])],
         destinations: (pkg.destinations || []).map(d => ({ ...d })),
@@ -192,19 +211,98 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false }) =
 
   const validate = () => {
     const e = {};
+
+    // ── Basic fields ─────────────────────────────────────────
     if (!form.title.trim())       e.title       = 'Title is required.';
     if (!form.description.trim()) e.description = 'Description is required.';
     if (!form.type)               e.type        = 'Type is required.';
     if (!form.days)               e.days        = 'Duration is required.';
-      // require either image URL or uploaded file
-      if (!form.image.trim() && !form.packageImageFile) e.image = 'Cover image is required (URL or file).';
+    if (!form.image.trim() && !form.packageImageFile) e.image = 'Cover image is required (URL or file).';
+
+    // ── Duplicate title check ────────────────────────────────
+    if (form.title.trim() && existingPackages.length) {
+      const titleLower = form.title.trim().toLowerCase();
+      const duplicate = existingPackages.find(
+        (p) => p.title?.toLowerCase() === titleLower && p.id !== editingId
+      );
+      if (duplicate) e.title = 'A package with this title already exists. Please use a different title.';
+    }
+
+    // ── Guide fields ─────────────────────────────────────────
     if (form.withGuid) {
       if (!form.guideName.trim()) e.guideName = 'Guide name is required.';
-      if (!form.guideNic.trim()) e.guideNic = 'NIC is required.';
+
+      // NIC: old format 9 digits + V/X, or new format 12 digits
+      if (!form.guideNic.trim()) {
+        e.guideNic = 'NIC is required.';
+      } else if (!/^(\d{9}[VvXx]|\d{12})$/.test(form.guideNic.trim())) {
+        e.guideNic = 'NIC must be 9 digits + V or X (old format, e.g. 990012345V) or 12 digits (new format).';
+      }
+
+      // Guide phone: exactly 10 digits
+      if (!form.guidePhone?.trim()) {
+        e.guidePhone = 'Guide phone number is required.';
+      } else if (!/^\d{10}$/.test(form.guidePhone.trim())) {
+        e.guidePhone = 'Phone number must be exactly 10 digits.';
+      }
+
       if (!form.guideContactDetails.trim()) e.guideContactDetails = 'Contact details are required.';
     }
-    if (form.destinations.length === 0) e.destinations = 'Add at least one destination.';
-    if (form.destinations.some(d => !d.name.trim())) e.destinations = 'All destination names are required.';
+
+    // ── Destination validations ──────────────────────────────
+    if (form.destinations.length === 0) {
+      e.destinations = 'Add at least one destination.';
+    }
+
+    const seenDestNames = [];
+    let totalDestDays   = 0;
+
+    form.destinations.forEach((dest, i) => {
+      // Name required + uniqueness
+      if (!dest.name.trim()) {
+        e[`dest_${i}_name`] = 'Destination name is required.';
+      } else {
+        const nameLower = dest.name.trim().toLowerCase();
+        if (seenDestNames.includes(nameLower)) {
+          e[`dest_${i}_name`] = 'Destination names must be unique within a package.';
+        }
+        seenDestNames.push(nameLower);
+      }
+
+      // Days required
+      const destDays = Number(dest.days);
+      if (!dest.days || destDays < 1) {
+        e[`dest_${i}_days`] = 'Number of days at this destination is required (minimum 1).';
+      } else {
+        totalDestDays += destDays;
+      }
+
+      // Activity validations
+      const seenActNames = [];
+      (dest.activities || []).forEach((act, ai) => {
+        // Duplicate activity names within the same destination
+        if (act.name.trim()) {
+          const actLower = act.name.trim().toLowerCase();
+          if (seenActNames.includes(actLower)) {
+            e[`dest_${i}_act_${ai}_name`] = 'Activity names must be unique within a destination.';
+          }
+          seenActNames.push(actLower);
+        }
+        // Phone: exactly 10 digits if provided
+        if (act.phone && act.phone.trim() && !/^\d{10}$/.test(act.phone.trim())) {
+          e[`dest_${i}_act_${ai}_phone`] = 'Phone must be exactly 10 digits.';
+        }
+      });
+    });
+
+    // ── Days sum must equal package duration ─────────────────
+    if (form.days && form.destinations.length > 0) {
+      const allDaysSet = form.destinations.every(d => Number(d.days) >= 1);
+      if (allDaysSet && totalDestDays !== Number(form.days)) {
+        e.daysTotal = `Total destination days must add up to exactly ${form.days} day(s), but currently they sum to ${totalDestDays} day(s). Please adjust the days per destination.`;
+      }
+    }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -511,21 +609,31 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false }) =
                             <Field label="NIC *" error={errors.guideNic} dark={dark}>
                               <input
                                 style={inputStyle(errors.guideNic, dark)}
-                                placeholder="e.g. 199912345V"
+                                placeholder="e.g. 199912345V or 199901234567"
                                 value={form.guideNic}
                                 onChange={e => set('guideNic', e.target.value)}
                               />
                             </Field>
 
-                            <Field label="Contact Details *" error={errors.guideContactDetails} dark={dark}>
-                              <textarea
-                                style={taStyle(errors.guideContactDetails, dark)}
-                                placeholder="Phone, email, or other contact details"
-                                value={form.guideContactDetails}
-                                onChange={e => set('guideContactDetails', e.target.value)}
+                            <Field label="Phone Number *" error={errors.guidePhone} dark={dark}>
+                              <input
+                                style={inputStyle(errors.guidePhone, dark)}
+                                placeholder="10-digit phone, e.g. 0771234567"
+                                maxLength={10}
+                                value={form.guidePhone || ''}
+                                onChange={e => set('guidePhone', e.target.value.replace(/\D/g, ''))}
                               />
                             </Field>
                           </div>
+
+                          <Field label="Other Contact Details *" error={errors.guideContactDetails} dark={dark}>
+                            <textarea
+                              style={taStyle(errors.guideContactDetails, dark)}
+                              placeholder="Email, WhatsApp, or other contact info"
+                              value={form.guideContactDetails}
+                              onChange={e => set('guideContactDetails', e.target.value)}
+                            />
+                          </Field>
                         </div>
                       </motion.div>
                     )}
@@ -539,17 +647,32 @@ const AdminPackageFormModal = ({ isOpen, pkg, onSave, onClose, dark = false }) =
                 {errors.destinations && (
                   <span style={{ fontSize:'11px', color:'#cc3344', fontWeight:600 }}>{errors.destinations}</span>
                 )}
-                {form.destinations.map((dest, i) => (
-                  <DestRow
-                    key={i}
-                    dest={dest}
-                    index={i}
-                    onChange={setDest}
-                    onRemove={removeDest}
-                    canRemove={form.destinations.length > 1}
-                    dark={dark}
-                  />
-                ))}
+                {errors.daysTotal && (
+                  <span style={{ fontSize:'11px', color:'#cc3344', fontWeight:600 }}>{errors.daysTotal}</span>
+                )}
+                {form.destinations.map((dest, i) => {
+                  // Collect per-destination and per-activity errors for this row
+                  const destRowErrors = {};
+                  if (errors[`dest_${i}_name`]) destRowErrors.name = errors[`dest_${i}_name`];
+                  if (errors[`dest_${i}_days`]) destRowErrors.days = errors[`dest_${i}_days`];
+                  // Collect activity errors
+                  (dest.activities || []).forEach((_, ai) => {
+                    if (errors[`dest_${i}_act_${ai}_name`])  destRowErrors[`act_${ai}_name`]  = errors[`dest_${i}_act_${ai}_name`];
+                    if (errors[`dest_${i}_act_${ai}_phone`]) destRowErrors[`act_${ai}_phone`] = errors[`dest_${i}_act_${ai}_phone`];
+                  });
+                  return (
+                    <DestRow
+                      key={i}
+                      dest={dest}
+                      index={i}
+                      onChange={setDest}
+                      onRemove={removeDest}
+                      canRemove={form.destinations.length > 1}
+                      dark={dark}
+                      errors={destRowErrors}
+                    />
+                  );
+                })}
                 <button className="apfm-add-btn" onClick={addDest}>
                   <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
                   Add Destination

@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Send, Lock, CheckCircle, AlertCircle } from "lucide-react";
 import { AuthContext } from "../../../../../context/AuthContext";
-import { submitPackageBooking } from "../../../../../services/bookingService";
+import { submitPackageBooking, fetchMyBookings } from "../../../../../services/bookingService";
 import BookingStepIndicator from "./BookingStepIndicator";
 import BookingPassengersStep from "./BookingPassengersStep";
 import BookingNotesStep from "./BookingNotesStep";
@@ -21,8 +21,8 @@ const parsePackageDays = (value) => {
 
 const addDaysToDate = (dateString, daysToAdd) => {
   if (!dateString) return "";
-  const date = new Date(`${dateString}T12:00:00`);
-  date.setDate(date.getDate() + daysToAdd);
+  const date = new Date(`${dateString}T12:00:00Z`); // use UTC
+  date.setUTCDate(date.getUTCDate() + daysToAdd);
   return date.toISOString().split("T")[0];
 };
 
@@ -206,6 +206,28 @@ const PackageBookingForm = () => {
     setSubmitting(true);
     setError("");
     try {
+      // ── Duplicate booking guard ──────────────────────────────
+      // Prevent same customer from booking the same package on the same start date
+      try {
+        const myBookings = await fetchMyBookings();
+        const duplicate = (myBookings || []).some(
+          (b) =>
+            b.tourType === "PACKAGE" &&
+            String(b.packageId) === String(packageId) &&
+            b.startDate?.slice(0, 10) === data.startDate &&
+            ["PENDING", "QUOTED", "CONFIRMED", "TOUR_STARTED"].includes(b.status)
+        );
+        if (duplicate) {
+          setError(
+            "You already have an active booking for this package starting on the selected date. Please choose a different start date."
+          );
+          setSubmitting(false);
+          return;
+        }
+      } catch {
+        // If the pre-check fails, let the backend handle it
+      }
+
       const result = await submitPackageBooking({
         ...data,
         customerEmail: user.email,
@@ -370,8 +392,13 @@ const PackageBookingForm = () => {
 
 // ─── Package Trip Step (simplified - no location inputs) ──────────────────────
 const PackageBookingTripStep = ({ data, onChange, onStartDateChange, packageTitle, packageDays }) => {
-  
-  const today = new Date().toISOString().split("T")[0];
+  // Package tours must be booked at least 2 days in advance
+  const minStartDateObj = new Date();
+  minStartDateObj.setDate(minStartDateObj.getDate() + 2);
+  const minYear = minStartDateObj.getFullYear();
+  const minMonth = String(minStartDateObj.getMonth() + 1).padStart(2, '0');
+  const minDay = String(minStartDateObj.getDate()).padStart(2, '0');
+  const minDate = `${minYear}-${minMonth}-${minDay}`;
 
   const inputClass =
     "w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none transition-all focus:border-[#00b0a5] focus:ring-2 focus:ring-[#00b0a5]/20";
@@ -408,7 +435,7 @@ const PackageBookingTripStep = ({ data, onChange, onStartDateChange, packageTitl
             </label>
             <input
               type="date"
-              min={today}
+              min={minDate}
               value={data.startDate}
               onChange={(e) => onStartDateChange(e.target.value)}
               className={inputClass}

@@ -5,6 +5,7 @@ import {
   fetchActiveTourNotifications,
   getReadNotificationIds,
   markNotificationsRead,
+  isActivePackageTour,
 } from "../utils/tourWeatherNotifications";
 
 const WeatherNotificationContext = createContext(null);
@@ -14,6 +15,7 @@ export const WeatherNotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hasActiveTour, setHasActiveTour] = useState(false);
   const intervalRef = useRef(null);
 
   const isCustomer = Boolean(
@@ -30,19 +32,25 @@ export const WeatherNotificationProvider = ({ children }) => {
     if (!isCustomer) {
       setNotifications([]);
       setUnreadCount(0);
+      setHasActiveTour(false);
       return;
     }
 
     setLoading(true);
     try {
       const data = await api.get("/bookings/my");
-      const items = await fetchActiveTourNotifications(data.bookings || []);
+      const bookings = data.bookings || [];
+      // Determine if any tour is currently active (started and in date range)
+      const active = bookings.filter(isActivePackageTour);
+      setHasActiveTour(active.length > 0);
+      const items = await fetchActiveTourNotifications(bookings);
       setNotifications(items);
       syncUnreadCount(items);
     } catch (err) {
       console.error("[WeatherNotifications]", err);
       setNotifications([]);
       setUnreadCount(0);
+      setHasActiveTour(false);
     } finally {
       setLoading(false);
     }
@@ -52,6 +60,7 @@ export const WeatherNotificationProvider = ({ children }) => {
     if (!isCustomer) {
       setNotifications([]);
       setUnreadCount(0);
+      setHasActiveTour(false);
       return;
     }
 
@@ -78,6 +87,7 @@ export const WeatherNotificationProvider = ({ children }) => {
         refreshNotifications,
         markAllRead,
         isCustomer,
+        hasActiveTour,
       }}
     >
       {children}
